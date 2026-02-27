@@ -2,185 +2,94 @@
 <html lang="ru">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>TON / USDT</title>
-
-  <!-- Lightweight Charts CDN -->
-  <script src="https://unpkg.com/lightweight-charts@4.1.1/dist/lightweight-charts.standalone.production.js"></script>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
   <style>
-    html, body {
+    body {
       margin: 0;
-      padding: 0;
       background: #0b1220;
       color: #fff;
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-    }
-
-    .container {
-      max-width: 420px;
-      margin: 0 auto;
-      padding: 16px;
+      font-family: Arial, sans-serif;
     }
 
     h1 {
-      margin: 0 0 12px 0;
-      font-size: 22px;
-      font-weight: 600;
+      padding: 16px;
+      margin: 0;
     }
 
     #chart {
       width: 100%;
-      height: 280px; /* КЛЮЧЕВО */
-      background: #0b1220;
-      border-radius: 12px;
-      overflow: hidden;
-    }
-
-    .trade-box {
-      margin-top: 16px;
-      background: #0f172a;
-      border-radius: 16px;
-      padding: 16px;
-    }
-
-    .tabs {
-      display: flex;
-      gap: 8px;
-      margin-bottom: 12px;
-    }
-
-    .tab {
-      flex: 1;
-      padding: 10px;
-      border-radius: 10px;
-      text-align: center;
-      background: #1e293b;
-      color: #9ca3af;
-      font-weight: 600;
-    }
-
-    .tab.active {
-      background: #22c55e;
-      color: #022c22;
-    }
-
-    .input {
-      width: 100%;
-      padding: 12px;
-      margin-bottom: 12px;
-      border-radius: 10px;
-      border: none;
-      background: #020617;
-      color: #fff;
-      font-size: 16px;
-    }
-
-    .fees {
-      font-size: 13px;
-      color: #9ca3af;
-      line-height: 1.5;
-      margin-bottom: 12px;
-    }
-
-    .confirm {
-      width: 100%;
-      padding: 14px;
-      border-radius: 12px;
-      border: none;
-      background: #22c55e;
-      color: #022c22;
-      font-size: 16px;
-      font-weight: 700;
-    }
-
-    .note {
-      text-align: center;
-      font-size: 12px;
-      color: #6b7280;
-      margin-top: 10px;
+      height: 420px;
     }
   </style>
 </head>
-
 <body>
-  <div class="container">
-    <h1>TON / USDT</h1>
 
-    <div id="chart"></div>
+<h1>TON / USDT</h1>
+<div id="chart"></div>
 
-    <div class="trade-box">
-      <div class="tabs">
-        <div class="tab active">Buy</div>
-        <div class="tab">Sell</div>
-      </div>
-
-      <input class="input" placeholder="Amount" />
-
-      <div class="fees">
-        DEX fee: 0.0000<br>
-        GROK fee: 0.0000<br>
-        <b>Total fee: 0.0000</b>
-      </div>
-
-      <button class="confirm">Confirm Buy</button>
-
-      <div class="note">
-        Funds stay in your wallet · On-chain swap
-      </div>
-    </div>
-  </div>
-
-  <script>
-    if (!window.LightweightCharts) {
-      document.body.innerHTML = '<h2 style="color:red">LIB NOT FOUND</h2>';
-      throw new Error('LightweightCharts not loaded');
-    }
-
-    const chart = LightweightCharts.createChart(
-      document.getElementById('chart'),
-      {
-        layout: {
-          background: { color: '#0b1220' },
-          textColor: '#d1d5db',
-        },
-        grid: {
-          vertLines: { color: '#1f2937' },
-          horzLines: { color: '#1f2937' },
-        },
-        timeScale: {
-          timeVisible: true,
-          borderColor: '#1f2937',
-        },
-        rightPriceScale: {
-          borderColor: '#1f2937',
-        },
-        crosshair: {
-          mode: LightweightCharts.CrosshairMode.Normal,
-        },
-      }
+<script src="./lightweight-charts.js"></script>
+<script>
+  if (!window.LightweightCharts) {
+    document.body.insertAdjacentHTML(
+      'beforeend',
+      '<div style="color:red;padding:16px">LIB NOT FOUND</div>'
     );
+    throw new Error('LightweightCharts not loaded');
+  }
 
-    const series = chart.addCandlestickSeries({
-      upColor: '#22c55e',
-      downColor: '#ef4444',
-      borderUpColor: '#22c55e',
-      borderDownColor: '#ef4444',
-      wickUpColor: '#22c55e',
-      wickDownColor: '#ef4444',
-    });
+  const chart = LightweightCharts.createChart(
+    document.getElementById('chart'),
+    {
+      layout: {
+        background: { color: '#0b1220' },
+        textColor: '#c7d0df',
+      },
+      grid: {
+        vertLines: { color: '#1c2433' },
+        horzLines: { color: '#1c2433' },
+      },
+      timeScale: {
+        borderColor: '#1c2433',
+      },
+      rightPriceScale: {
+        borderColor: '#1c2433',
+      },
+    }
+  );
 
-    series.setData([
-      { time: '2024-01-01', open: 2.0, high: 2.4, low: 1.9, close: 2.3 },
-      { time: '2024-01-02', open: 2.3, high: 2.7, low: 2.2, close: 2.6 },
-      { time: '2024-01-03', open: 2.6, high: 3.2, low: 2.5, close: 3.1 },
-    ]);
+  const candleSeries = chart.addCandlestickSeries({
+    upColor: '#22c55e',
+    downColor: '#ef4444',
+    borderUpColor: '#22c55e',
+    borderDownColor: '#ef4444',
+    wickUpColor: '#22c55e',
+    wickDownColor: '#ef4444',
+  });
 
-    window.addEventListener('resize', () => {
-      chart.applyOptions({
-        width: document.getElementById('chart').clientWidth,
-      });
-    });
-  </script>
+  async function loadCandles() {
+    const url =
+      'https://api.binance.com/api/v3/klines' +
+      '?symbol=TONUSDT&interval=1d&limit=200';
+
+    const res = await fetch(url);
+    const data = await res.json();
+
+    const candles = data.map(c => ({
+      time: c[0] / 1000,
+      open: parseFloat(c[1]),
+      high: parseFloat(c[2]),
+      low: parseFloat(c[3]),
+      close: parseFloat(c[4]),
+    }));
+
+    candleSeries.setData(candles);
+    chart.timeScale().fitContent();
+  }
+
+  loadCandles();
+</script>
+
 </body>
-  </html>
+</html>
