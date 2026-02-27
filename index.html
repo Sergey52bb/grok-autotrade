@@ -1,49 +1,66 @@
 <!DOCTYPE html>
-<html>
+<html lang="ru">
 <head>
 <meta charset="UTF-8">
-<title>Chart Test</title>
+<title>TON / USDT</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
 <style>
 body {
   margin: 0;
-  background: #000;
+  background: #0b1220;
+  color: #fff;
+  font-family: Arial, sans-serif;
 }
+
 #chart {
-  width: 100vw;
-  height: 300px;
+  height: 280px;
 }
 </style>
 </head>
 
 <body>
 
+<h2 style="padding:16px">TON / USDT</h2>
+
 <div id="chart"></div>
 
-<script>
-document.body.insertAdjacentHTML("beforeend", "<p style='color:white'>JS START</p>");
-</script>
-
-<script src="https://unpkg.com/lightweight-charts@4.1.1/dist/lightweight-charts.standalone.production.js"></script>
+<script src="./lightweight-charts.js"></script>
 
 <script>
-if (typeof LightweightCharts === "undefined") {
-  document.body.insertAdjacentHTML("beforeend", "<p style='color:red'>LIB NOT LOADED</p>");
+console.log("JS START");
+
+if (!window.LightweightCharts) {
+  document.body.innerHTML += "<p style='color:red'>LIB NOT FOUND</p>";
 } else {
-  document.body.insertAdjacentHTML("beforeend", "<p style='color:lime'>LIB LOADED</p>");
+  const chart = LightweightCharts.createChart(
+    document.getElementById("chart"),
+    {
+      width: window.innerWidth,
+      height: 280,
+      layout: {
+        background: { color: "#0b1220" },
+        textColor: "#d1d4dc"
+      },
+      grid: {
+        vertLines: { color: "#1f2a44" },
+        horzLines: { color: "#1f2a44" }
+      }
+    }
+  );
 
-  const chart = LightweightCharts.createChart(document.getElementById("chart"), {
-    width: window.innerWidth,
-    height: 300,
-    layout: { background: { color: "#000" }, textColor: "#fff" }
+  const candles = chart.addCandlestickSeries({
+    upColor: "#22c55e",
+    downColor: "#ef4444",
+    wickUpColor: "#22c55e",
+    wickDownColor: "#ef4444",
+    borderVisible: false
   });
 
-  const series = chart.addCandlestickSeries();
-
-  series.setData([
-    { time: "2024-01-01", open: 1, high: 3, low: 0.5, close: 2 },
-    { time: "2024-01-02", open: 2, high: 4, low: 1, close: 3 }
+  candles.setData([
+    { time: "2024-01-01", open: 2.1, high: 2.4, low: 2.0, close: 2.3 },
+    { time: "2024-01-02", open: 2.3, high: 2.6, low: 2.2, close: 2.5 },
+    { time: "2024-01-03", open: 2.5, high: 2.7, low: 2.4, close: 2.45 }
   ]);
 }
 </script>
