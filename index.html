@@ -1,64 +1,26 @@
 <!DOCTYPE html>
-<html lang="ru">
+<html>
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta charset="UTF-8">
   <title>TON / USDT</title>
-
-  <style>
-    body {
-      margin: 0;
-      background: #0b1220;
-      color: white;
-      font-family: Arial, sans-serif;
-    }
-    h1 {
-      padding: 16px;
-    }
-    #chart {
-      width: 100%;
-      height: 300px;
-    }
-  </style>
 </head>
-
 <body>
 
-<h1>TON / USDT</h1>
-<div id="chart"></div>
+<div id="chart" style="height:300px;"></div>
 
-<!-- ✅ 1. СНАЧАЛА библиотека -->
 <script src="https://unpkg.com/lightweight-charts@4.1.1/dist/lightweight-charts.standalone.production.js"></script>
 
-<!-- ✅ 2. ПОТОМ твой код -->
 <script>
-  if (!window.LightweightCharts) {
-    document.body.innerHTML += '<div style="color:red;padding:16px">LIB NOT FOUND</div>';
-  } else {
-    const chart = LightweightCharts.createChart(
-      document.getElementById('chart'),
-      {
-        layout: {
-          background: { color: '#0b1220' },
-          textColor: '#ffffff',
-        },
-        grid: {
-          vertLines: { color: '#1f2a44' },
-          horzLines: { color: '#1f2a44' },
-        },
-        width: window.innerWidth,
-        height: 300,
-      }
-    );
+  const chart = LightweightCharts.createChart(
+    document.getElementById('chart'),
+    { layout: { background: { color: '#0b1220' }, textColor: '#d1d4dc' } }
+  );
 
-    const candles = chart.addCandlestickSeries();
-
-    candles.setData([
-      { time: '2024-01-01', open: 2, high: 3, low: 1.8, close: 2.6 },
-      { time: '2024-01-02', open: 2.6, high: 3.2, low: 2.4, close: 3.0 },
-      { time: '2024-01-03', open: 3.0, high: 3.4, low: 2.7, close: 3.1 },
-    ]);
-  }
+  const series = chart.addCandlestickSeries();
+  series.setData([
+    { time: '2024-01-01', open: 2, high: 3, low: 1.8, close: 2.5 },
+    { time: '2024-01-02', open: 2.5, high: 3.2, low: 2.4, close: 3.1 },
+  ]);
 </script>
 
 </body>
