@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Grok Autotrade</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+  <style>
+    body {
+      margin: 0;
+      background: #0b1220;
+      color: #e5e7eb;
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+    }
+
+    .container {
+      max-width: 420px;
+      margin: 0 auto;
+      padding: 16px;
+    }
+
+    .card {
+      background: #0f172a;
+      border-radius: 16px;
+      padding: 16px;
+      margin-bottom: 16px;
+    }
+
+    .pair {
+      font-size: 20px;
+      font-weight: 600;
+      margin-bottom: 12px;
+    }
+
+    #chart {
+      height: 260px;
+    }
+
+    .tabs {
+      display: flex;
+      gap: 8px;
+      margin-top: 16px;
+    }
+
+    .tab {
+      flex: 1;
+      padding: 12px;
+      border-radius: 12px;
+      border: none;
+      font-size: 16px;
+      font-weight: 600;
+      background: #1f2937;
+      color: #9ca3af;
+    }
+
+    .tab.active {
+      background: #22c55e;
+      color: #020617;
+    }
+
+    .input {
+      width: 100%;
+      margin-top: 12px;
+      padding: 14px;
+      border-radius: 12px;
+      border: none;
+      font-size: 16px;
+      background: #020617;
+      color: #e5e7eb;
+    }
+
+    .fees {
+      margin-top: 12px;
+      font-size: 14px;
+      color: #9ca3af;
+      line-height: 1.6;
+    }
+
+    .confirm {
+      margin-top: 16px;
+      width: 100%;
+      padding: 16px;
+      border-radius: 14px;
+      border: none;
+      font-size: 18px;
+      font-weight: 700;
+      background: #22c55e;
+      color: #020617;
+    }
+
+    .note {
+      margin-top: 10px;
+      text-align: center;
+      font-size: 13px;
+      color: #64748b;
+    }
+  </style>
+</head>
+
+<body>
+  <div class="container">
+
+    <!-- CHART -->
+    <div class="card">
+      <div class="pair">TON / USDT</div>
+      <div id="chart"></div>
+    </div>
+
+    <!-- TRADE -->
+    <div class="card">
+      <div class="tabs">
+        <button class="tab active">Buy</button>
+        <button class="tab">Sell</button>
+      </div>
+
+      <input class="input" placeholder="Amount" />
+
+      <div class="fees">
+        DEX fee: 0.0000<br />
+        GROK fee: 0.0000<br />
+        <b>Total fee: 0.0000</b>
+      </div>
+
+      <button class="confirm">Confirm Buy</button>
+
+      <div class="note">
+        Funds stay in your wallet · On-chain swap
+      </div>
+    </div>
+
+  </div>
+
+  <!-- CHART LIB -->
+  <script src="https://unpkg.com/lightweight-charts/dist/lightweight-charts.standalone.production.js"></script>
+
+  <!-- CHART INIT -->
+  <script>
+    document.addEventListener("DOMContentLoaded", () => {
+      const container = document.getElementById("chart");
+
+      const chart = LightweightCharts.createChart(container, {
+        width: container.clientWidth,
+        height: 260,
+        layout: {
+          background: { color: "#0f172a" },
+          textColor: "#e5e7eb"
+        },
+        grid: {
+          vertLines: { color: "#1f2937" },
+          horzLines: { color: "#1f2937" }
+        },
+        rightPriceScale: {
+          borderColor: "#1f2937"
+        },
+        timeScale: {
+          borderColor: "#1f2937"
+        }
+      });
+
+      const candles = chart.addCandlestickSeries({
+        upColor: "#22c55e",
+        downColor: "#ef4444",
+        borderVisible: false,
+        wickUpColor: "#22c55e",
+        wickDownColor: "#ef4444"
+      });
+
+      // Adding TEST DATA (temporary, replace later with actual)
+      candles.setData([
+        { time: "2024-02-20", open: 2.1, high: 2.4, low: 2.0, close: 2.3 },
+        { time: "2024-02-21", open: 2.3, high: 2.5, low: 2.2, close: 2.4 },
+        { time: "2024-02-22", open: 2.4, high: 2.6, low: 2.3, close: 2.5 },
+        { time: "2024-02-23", open: 2.5, high: 2.7, low: 2.4, close: 2.6 }
+      ]);
+
+      window.addEventListener("resize", () => {
+        chart.applyOptions({ width: container.clientWidth });
+      });
+    });
+  </script>
+</body>
+</html>
