@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>grok-autotrade</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+  <!-- TON Connect UI (без npm) -->
+  <script src="https://unpkg.com/@tonconnect/ui@latest/dist/tonconnect-ui.min.js"></script>
+
+  <style>
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+      background: #0f0f0f;
+      color: #ffffff;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+    }
+    .app {
+      width: 100%;
+      max-width: 380px;
+      padding: 24px;
+      box-sizing: border-box;
+      text-align: center;
+    }
+    h1 {
+      margin-bottom: 20px;
+    }
+    .card {
+      background: #1c1c1c;
+      border-radius: 12px;
+      padding: 16px;
+      margin-top: 16px;
+      word-break: break-all;
+      text-align: left;
+    }
+    .label {
+      font-size: 13px;
+      opacity: 0.6;
+      margin-top: 8px;
+    }
+    .value {
+      font-size: 14px;
+      margin-top: 4px;
+    }
+    button {
+      width: 100%;
+      margin-top: 16px;
+      padding: 14px;
+      border-radius: 10px;
+      border: none;
+      font-size: 16px;
+      background: #2f80ed;
+      color: #fff;
+    }
+    button:disabled {
+      opacity: 0.4;
+    }
+    .muted {
+      font-size: 13px;
+      opacity: 0.7;
+      margin-top: 12px;
+    }
+  </style>
+</head>
+<body>
+
+<div class="app">
+  <h1>grok-autotrade</h1>
+
+  <!-- TON CONNECT BUTTON -->
+  <div id="ton-connect"></div>
+
+  <div class="muted">
+    You sign every transaction.<br>
+    We never access your private keys.
+  </div>
+
+  <!-- WALLET INFO -->
+  <div id="wallet-card" class="card" style="display:none;">
+    <div class="label">Wallet address</div>
+    <div id="wallet-address" class="value"></div>
+
+    <div class="label">Network</div>
+    <div id="wallet-network" class="value"></div>
+  </div>
+
+  <!-- TEST TRANSACTION -->
+  <button id="send-test" disabled>
+    Send 0.01 test TON
+  </button>
+</div>
+
+<script>
+  const tonConnectUI = new TON_CONNECT_UI.TonConnectUI({
+    manifestUrl: window.location.origin + '/tonconnect-manifest.json',
+    buttonRootId: 'ton-connect'
+  });
+
+  const walletCard = document.getElementById('wallet-card');
+  const walletAddress = document.getElementById('wallet-address');
+  const walletNetwork = document.getElementById('wallet-network');
+  const sendBtn = document.getElementById('send-test');
+
+  function updateUI() {
+    const wallet = tonConnectUI.wallet;
+
+    if (!wallet) {
+      walletCard.style.display = 'none';
+      sendBtn.disabled = true;
+      return;
+    }
+
+    walletAddress.innerText = wallet.account.address;
+    walletNetwork.innerText =
+      wallet.account.chain === '-3' ? 'TON Testnet' : 'TON Mainnet';
+
+    walletCard.style.display = 'block';
+
+    // разрешаем отправку ТОЛЬКО в testnet
+    sendBtn.disabled = wallet.account.chain !== '-3';
+  }
+
+  tonConnectUI.onStatusChange(updateUI);
+  updateUI();
+
+  // тестовая транзакция
+  document.getElementById('send-test').onclick = async () => {
+    try {
+      await tonConnectUI.sendTransaction({
+        validUntil: Math.floor(Date.now() / 1000) + 60,
+        messages: [
+          {
+            address: 'EQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAM9c',
+            amount: '10000000' // 0.01 TON
+          }
+        ]
+      });
+      alert('Test transaction sent');
+    } catch (e) {
+      alert('Transaction cancelled or failed');
+    }
+  };
+</script>
+
+</body>
+</html>
