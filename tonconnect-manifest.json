@@ -1,7 +1,5 @@
 {
-  "manifest_version": 2,
+  "url": "https://sergey52bb.github.io",
   "name": "grok-autotrade",
-  "description": "TON dApp test connection",
-  "url": "https://sergey52bb.github.io/grok-autotrade/",
-  "icon_url": "https://sergey52bb.github.io/grok-autotrade/icon.png"
+  "iconUrl": "https://sergey52bb.github.io/icon.png"
 }
