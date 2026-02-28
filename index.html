@@ -11,51 +11,38 @@
   <style>
     body {
       margin: 0;
-      padding: 0;
       background: #0b0f14;
-      color: #ffffff;
-      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      color: white;
+      font-family: system-ui, sans-serif;
       display: flex;
       justify-content: center;
       align-items: center;
       height: 100vh;
     }
-
-    .container {
+    .box {
       width: 100%;
       max-width: 360px;
-      text-align: center;
       padding: 20px;
+      text-align: center;
     }
-
     h1 {
       margin-bottom: 30px;
-      font-size: 28px;
-      font-weight: 600;
     }
-
     button {
       width: 100%;
       padding: 14px;
-      font-size: 16px;
       border-radius: 12px;
       border: none;
+      font-size: 16px;
       cursor: pointer;
       margin-top: 12px;
     }
-
     .connect {
       background: #0098ea;
-      color: white;
+      color: #fff;
     }
-
-    .send {
-      background: #1f2a37;
-      color: #9ca3af;
-    }
-
     .info {
-      margin-top: 14px;
+      margin-top: 16px;
       font-size: 13px;
       color: #9ca3af;
     }
@@ -63,51 +50,36 @@
 </head>
 
 <body>
-  <div class="container">
+  <div class="box">
     <h1>grok-autotrade</h1>
 
-    <button id="connectBtn" class="connect">Connect Wallet</button>
-    <button id="sendBtn" class="send" disabled>Send 0.01 test TON</button>
+    <button id="connect" class="connect">
+      Connect Tonkeeper
+    </button>
 
     <div class="info">
-      You sign every transaction.<br />
+      You sign every transaction.<br>
       We never access your private keys.
     </div>
   </div>
 
   <script>
-    // 🔥 ВАЖНО: ЯВНЫЙ URL МАНИФЕСТА
     const connector = new TonConnectSDK.TonConnect({
       manifestUrl: 'https://sergey52bb.github.io/grok-autotrade/tonconnect-manifest.json'
     });
 
-    const connectBtn = document.getElementById('connectBtn');
-    const sendBtn = document.getElementById('sendBtn');
-
-    connectBtn.onclick = async () => {
-      const wallets = await connector.getWallets();
-      await connector.connect(wallets);
+    document.getElementById('connect').onclick = async () => {
+      await connector.connectWallet({
+        universalLink: 'https://app.tonkeeper.com/ton-connect',
+        bridgeUrl: 'https://bridge.tonapi.io/bridge'
+      });
     };
 
     connector.onStatusChange(wallet => {
       if (wallet) {
-        connectBtn.textContent = 'Wallet Connected';
-        connectBtn.disabled = true;
-        sendBtn.disabled = false;
+        alert('Wallet connected:\n' + wallet.account.address);
       }
     });
-
-    sendBtn.onclick = async () => {
-      await connector.sendTransaction({
-        validUntil: Math.floor(Date.now() / 1000) + 300,
-        messages: [
-          {
-            address: connector.wallet.account.address,
-            amount: '10000000' // 0.01 TON
-          }
-        ]
-      });
-    };
   </script>
 </body>
 </html>
