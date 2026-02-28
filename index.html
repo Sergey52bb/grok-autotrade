@@ -3,44 +3,67 @@
 <head>
   <meta charset="UTF-8" />
   <title>grok-autotrade</title>
+
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
-  <!-- TON CONNECT SDK (рабочий CDN для Android) -->
-  <script src="https://cdn.jsdelivr.net/npm/@tonconnect/sdk@2.1.3/dist/tonconnect-sdk.min.js"></script>
+  <!-- TonConnect SDK -->
+  <script src="https://unpkg.com/@tonconnect/sdk@2.1.3/dist/tonconnect-sdk.min.js"></script>
 
   <style>
     body {
       margin: 0;
-      height: 100vh;
-      display: flex;
-      justify-content: center;
-      align-items: center;
       background: #0b0f14;
-      font-family: Arial, sans-serif;
       color: #fff;
+      font-family: -apple-system, BlinkMacSystemFont, sans-serif;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      height: 100vh;
     }
-    .box {
-      text-align: center;
+
+    .card {
       width: 100%;
-      max-width: 320px;
-      padding: 20px;
+      max-width: 360px;
+      padding: 24px;
+      text-align: center;
     }
+
+    h1 {
+      margin-bottom: 24px;
+    }
+
     button {
       width: 100%;
       padding: 16px;
       font-size: 16px;
-      border-radius: 12px;
-      border: none;
+      font-weight: 600;
       background: #0098ea;
+      border: none;
+      border-radius: 12px;
       color: #fff;
+      cursor: pointer;
+    }
+
+    p {
+      margin-top: 16px;
+      font-size: 13px;
+      opacity: 0.7;
     }
   </style>
 </head>
-
 <body>
-  <div class="box">
+
+  <div class="card">
     <h1>grok-autotrade</h1>
-    <button id="connect">Connect Tonkeeper</button>
+
+    <button id="connect">
+      Connect Tonkeeper
+    </button>
+
+    <p>
+      You sign every transaction.<br>
+      We never access your private keys.
+    </p>
   </div>
 
   <script>
@@ -53,14 +76,24 @@
     document.getElementById('connect').addEventListener('click', async () => {
       alert('CLICK');
 
-      const link = connector.connectWallet({
-        universalLink: 'https://app.tonkeeper.com/ton-connect',
-        bridgeUrl: 'https://bridge.tonapi.io/bridge'
-      });
+      try {
+        await connector.connect({
+          universalLink: 'https://app.tonkeeper.com/ton-connect',
+          bridgeUrl: 'https://bridge.tonapi.io/bridge'
+        });
 
-      alert('OPEN TONKEEPER');
-      window.location.href = link;
+        alert('REQUEST SENT');
+      } catch (e) {
+        alert('ERROR: ' + e.message);
+      }
+    });
+
+    connector.onStatusChange(wallet => {
+      if (wallet) {
+        alert('CONNECTED: ' + wallet.account.address);
+      }
     });
   </script>
+
 </body>
 </html>
