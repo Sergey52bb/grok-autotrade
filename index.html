@@ -1,109 +1,107 @@
 <!DOCTYPE html>
-<html lang="ru">
+<html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Grok AI Trading Bot</title>
+  <title>grok-autotrade</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
-  <!-- TradingView -->
-  <script src="https://s3.tradingview.com/tv.js"></script>
+  <!-- TON Connect UI (CDN, без npm) -->
+  <script src="https://unpkg.com/@tonconnect/ui@latest/dist/tonconnect-ui.min.js"></script>
 
   <style>
     body {
       margin: 0;
-      font-family: 'Segoe UI', Arial, sans-serif;
-      background: linear-gradient(180deg, #061425, #020b16);
-      color: #fff;
-    }
-
-    header {
-      padding: 14px;
-      text-align: center;
-      font-size: 20px;
-      font-weight: 700;
-      background: #071a2f;
-      border-bottom: 1px solid #0d2a4a;
-    }
-
-    .pair {
-      padding: 10px 16px;
-      font-size: 16px;
-      color: #9bb4d1;
-    }
-
-    #tv-chart {
-      height: 65vh;
-    }
-
-    .actions {
+      font-family: Arial, sans-serif;
+      background: #0f0f0f;
+      color: #ffffff;
       display: flex;
-      gap: 12px;
-      padding: 16px;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
     }
-
-    .btn {
-      flex: 1;
-      padding: 16px;
-      border-radius: 12px;
-      font-size: 18px;
-      font-weight: 600;
-      border: none;
-      cursor: pointer;
+    .app {
+      width: 100%;
+      max-width: 380px;
+      padding: 24px;
+      box-sizing: border-box;
     }
-
-    .buy {
-      background: linear-gradient(180deg, #2ecc71, #27ae60);
-      color: #001a0f;
-    }
-
-    .sell {
-      background: linear-gradient(180deg, #e74c3c, #c0392b);
-      color: #fff;
-    }
-
-    footer {
+    h1 {
       text-align: center;
-      font-size: 12px;
-      color: #6b86a5;
-      padding: 10px;
+      margin-bottom: 24px;
+    }
+    .card {
+      background: #1c1c1c;
+      border-radius: 12px;
+      padding: 16px;
+      margin-top: 20px;
+      word-break: break-all;
+    }
+    .muted {
+      font-size: 13px;
+      opacity: 0.7;
+      text-align: center;
+      margin-top: 12px;
+    }
+    .label {
+      font-size: 13px;
+      opacity: 0.6;
+      margin-top: 8px;
+    }
+    .value {
+      margin-top: 4px;
+      font-size: 14px;
     }
   </style>
 </head>
 <body>
 
-<header>
-  Grok AI Trading Bot
-</header>
+<div class="app">
+  <h1>grok-autotrade</h1>
 
-<div class="pair">
-  TON / USDT
+  <!-- TON CONNECT BUTTON -->
+  <div id="ton-connect"></div>
+
+  <div class="muted">
+    You sign every transaction.<br />
+    We never access your private keys.
+  </div>
+
+  <!-- WALLET INFO -->
+  <div id="wallet-card" class="card" style="display:none;">
+    <div class="label">Wallet address</div>
+    <div id="wallet-address" class="value"></div>
+
+    <div class="label">Network</div>
+    <div id="wallet-network" class="value"></div>
+  </div>
 </div>
-
-<div id="tv-chart"></div>
-
-<div class="actions">
-  <button class="btn buy">BUY</button>
-  <button class="btn sell">SELL</button>
-</div>
-
-<footer>
-  Grok AI Trading Bot · Non-custodial · TON Blockchain
-</footer>
 
 <script>
-  new TradingView.widget({
-    autosize: true,
-    symbol: "BINANCE:TONUSDT",
-    interval: "1",
-    timezone: "Etc/UTC",
-    theme: "dark",
-    style: "1",
-    locale: "ru",
-    enable_publishing: false,
-    hide_side_toolbar: false,
-    allow_symbol_change: false,
-    container_id: "tv-chart"
+  const tonConnectUI = new TON_CONNECT_UI.TonConnectUI({
+    manifestUrl: window.location.origin + '/tonconnect-manifest.json',
+    buttonRootId: 'ton-connect'
   });
+
+  function updateWalletInfo() {
+    const wallet = tonConnectUI.wallet;
+    const card = document.getElementById('wallet-card');
+
+    if (!wallet) {
+      card.style.display = 'none';
+      return;
+    }
+
+    document.getElementById('wallet-address').innerText =
+      wallet.account.address;
+
+    document.getElementById('wallet-network').innerText =
+      wallet.account.chain === '-3' ? 'TON Testnet' : 'TON Mainnet';
+
+    card.style.display = 'block';
+  }
+
+  tonConnectUI.onStatusChange(updateWalletInfo);
+  updateWalletInfo();
 </script>
 
 </body>
