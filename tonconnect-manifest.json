@@ -1,17 +1,6 @@
 {
-  "name": "Grok Autotrade",
-  "short_name": "Grok",
-  "description": "Auto Trading App",
-  "url": "https://your-github-username.github.io/grok-autotrade/",
-  "icons": [
-    {
-      "src": "/icon.png",
-      "sizes": "192x192",
-      "type": "image/png"
-    }
-  ],
-  "start_url": "/",
-  "display": "standalone",
-  "background_color": "#000000",
-  "theme_color": "#000000"
+  "manifest_version": 2,
+  "name": "grok-autotrade",
+  "description": "TON spot auto-trading bot",
+  "url": "https://YOUR_GITHUB_USERNAME.github.io/grok-autotrade"
 }
