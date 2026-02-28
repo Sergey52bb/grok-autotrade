@@ -5,7 +5,6 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>grok-autotrade</title>
 
-  <!-- TON Connect UI -->
   <script src="https://unpkg.com/@tonconnect/ui@latest/dist/tonconnect-ui.min.js"></script>
 
   <style>
@@ -13,38 +12,47 @@
       margin: 0;
       background: #0b0b0b;
       color: #fff;
-      font-family: system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+      font-family: system-ui, sans-serif;
+      height: 100vh;
       display: flex;
       flex-direction: column;
       align-items: center;
       justify-content: center;
-      height: 100vh;
       gap: 16px;
     }
 
     button {
-      padding: 14px 24px;
+      padding: 14px 26px;
       font-size: 16px;
       border-radius: 10px;
       border: none;
       cursor: pointer;
-      background: #0098ea;
-      color: #fff;
       min-width: 220px;
     }
 
-    button.secondary {
+    #connect {
+      background: #0098ea;
+      color: #fff;
+    }
+
+    #sign {
       background: #2b2b2b;
+      color: #aaa;
+    }
+
+    #sign.enabled {
+      background: #00c853;
+      color: #000;
     }
 
     pre {
       max-width: 90%;
-      white-space: pre-wrap;
-      word-break: break-all;
       background: #111;
       padding: 12px;
       border-radius: 8px;
       font-size: 12px;
+      white-space: pre-wrap;
+      word-break: break-all;
     }
   </style>
 </head>
@@ -52,57 +60,74 @@
 
   <h2>grok-autotrade</h2>
 
-  <button id="connectBtn">Connect Wallet</button>
-  <button id="signBtn" class="secondary" disabled>Sign Message</button>
+  <button id="connect">Connect Wallet</button>
+  <button id="sign">Sign Message</button>
 
-  <pre id="output">Wallet not connected</pre>
+  <pre id="status">Loading...</pre>
 
   <script>
-    // === INIT TON CONNECT ===
+    const status = document.getElementById('status');
+    const connectBtn = document.getElementById('connect');
+    const signBtn = document.getElementById('sign');
+
     const tonConnectUI = new TON_CONNECT_UI.TonConnectUI({
       manifestUrl: 'https://sergey52bb.github.io/tonconnect-manifest.json'
     });
 
-    const connectBtn = document.getElementById('connectBtn');
-    const signBtn = document.getElementById('signBtn');
-    const output = document.getElementById('output');
+    // === ОБНОВЛЕНИЕ UI ===
+    function setConnected(address) {
+      status.textContent = 'Connected:\n' + address;
+      signBtn.classList.add('enabled');
+    }
 
-    // === CONNECT WALLET ===
-    connectBtn.onclick = async () => {
-      await tonConnectUI.connectWallet();
-    };
+    function setDisconnected() {
+      status.textContent = 'Wallet not connected';
+      signBtn.classList.remove('enabled');
+    }
 
-    // === ON WALLET STATUS CHANGE ===
-    tonConnectUI.onStatusChange(wallet => {
-      if (wallet) {
-        output.textContent = 'Connected wallet:\n' + wallet.account.address;
-        signBtn.disabled = false;
+    // === ВОССТАНОВЛЕНИЕ СЕССИИ (КЛЮЧЕВО!) ===
+    tonConnectUI.connectionRestored.then(restored => {
+      if (restored && tonConnectUI.wallet) {
+        setConnected(tonConnectUI.wallet.account.address);
       } else {
-        output.textContent = 'Wallet not connected';
-        signBtn.disabled = true;
+        setDisconnected();
       }
     });
 
-    // === SIGN MESSAGE ===
+    // === СЛУШАЕМ ИЗМЕНЕНИЯ ===
+    tonConnectUI.onStatusChange(wallet => {
+      if (wallet) {
+        setConnected(wallet.account.address);
+      } else {
+        setDisconnected();
+      }
+    });
+
+    // === CONNECT ===
+    connectBtn.onclick = async () => {
+      await tonConnectUI.openModal();
+    };
+
+    // === SIGN (ВСЕГДА ВЫЗЫВАЕТ ОКНО TONKEEPER) ===
     signBtn.onclick = async () => {
+      if (!tonConnectUI.wallet) {
+        alert('Wallet not connected');
+        return;
+      }
+
       try {
         const result = await tonConnectUI.requestSign({
           text: 'Подтвердите вход в grok-autotrade'
         });
 
-        // 👉 ВАЖНО: результат подписи
-        output.textContent =
-          'SIGN SUCCESS\n\n' +
-          JSON.stringify(result, null, 2);
-
-        // 🔁 ПРИМЕР ДЕЙСТВИЯ ПОСЛЕ ПОДПИСИ
-        // window.location.href = '/dashboard.html';
+        status.textContent =
+          'SIGN OK\n\n' + JSON.stringify(result, null, 2);
 
       } catch (e) {
-        output.textContent = 'SIGN ERROR\n\n' + e;
+        status.textContent = 'SIGN ERROR\n\n' + e;
       }
     };
   </script>
 
 </body>
-</html>
+  </html>
