@@ -35,29 +35,30 @@
 <button id="connect">Connect Tonkeeper</button>
 
 <script>
+  <script>
+  alert('JS loaded');
+
+  if (typeof TonConnectSDK === 'undefined') {
+    alert('❌ TonConnect SDK NOT loaded');
+  } else {
+    alert('✅ TonConnect SDK loaded');
+  }
+
   const connector = new TonConnectSDK.TonConnect({
     manifestUrl: 'https://sergey52bb.github.io/grok-autotrade/tonconnect-manifest.json'
   });
 
-  async function connectWallet() {
+  document.getElementById('connect').onclick = async () => {
+    alert('Button clicked');
+
     const link = connector.connectWallet({
       universalLink: 'https://app.tonkeeper.com/ton-connect',
       bridgeUrl: 'https://bridge.tonapi.io/bridge'
     });
 
-    // ⚠️ ОБЯЗАТЕЛЬНО ТАК
-    window.location.assign(link);
-  }
-
-  document.getElementById('connect').addEventListener('click', connectWallet);
-
-  connector.onStatusChange(wallet => {
-    if (wallet) {
-      alert('✅ Connected:\n' + wallet.account.address);
-    }
-  });
-
-  connector.restoreConnection();
+    alert('Redirecting to Tonkeeper');
+    window.location.href = link;
+  };
 </script>
 
 </body>
