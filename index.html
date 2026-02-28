@@ -1,44 +1,80 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="ru">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>grok-autotrade</title>
+  <title>TON Sign Test</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
 
+  <!-- TON Connect UI -->
   <script src="https://unpkg.com/@tonconnect/ui@latest/dist/tonconnect-ui.min.js"></script>
 
   <style>
     body {
       background: #0b0b0b;
-      color: white;
-      font-family: Arial, sans-serif;
+      color: #fff;
       display: flex;
+      flex-direction: column;
       justify-content: center;
       align-items: center;
       height: 100vh;
+      font-family: Arial, sans-serif;
     }
-    #ton-connect {
-      width: 100%;
-      max-width: 320px;
+
+    button {
+      background: #0098ea;
+      color: #fff;
+      border: none;
+      border-radius: 12px;
+      padding: 14px 22px;
+      font-size: 16px;
+      margin: 10px;
+      cursor: pointer;
     }
   </style>
 </head>
 <body>
 
-<div id="ton-connect"></div>
+  <h2>TON Signature Test</h2>
 
-<script>
-  const tonConnectUI = new TON_CONNECT_UI.TonConnectUI({
-    manifestUrl: 'https://sergey52bb.github.io/grok-autotrade/tonconnect-manifest.json',
-    buttonRootId: 'ton-connect'
-  });
+  <div id="connect"></div>
 
-  tonConnectUI.onStatusChange(wallet => {
-    if (wallet) {
-      alert('CONNECTED: ' + wallet.account.address);
-    }
-  });
-</script>
+  <button id="signBtn" disabled>Подписать сообщение</button>
+
+  <script>
+    const tonConnectUI = new TON_CONNECT_UI.TonConnectUI({
+      manifestUrl: 'https://sergey52bb.github.io/tonconnect-manifest.json'
+    });
+
+    // Кнопка подключения
+    tonConnectUI.renderButton(document.getElementById('connect'));
+
+    const signBtn = document.getElementById('signBtn');
+
+    // Следим за статусом кошелька
+    tonConnectUI.onStatusChange(wallet => {
+      if (wallet) {
+        console.log('Кошелёк подключен:', wallet.account.address);
+        signBtn.disabled = false;
+      } else {
+        signBtn.disabled = true;
+      }
+    });
+
+    // Подпись сообщения
+    signBtn.onclick = async () => {
+      try {
+        const result = await tonConnectUI.requestSign({
+          text: 'Подтвердите, что вы владелец этого кошелька'
+        });
+
+        console.log('SIGN RESULT:', result);
+        alert('Подпись получена! Смотри консоль.');
+      } catch (e) {
+        console.error('SIGN ERROR:', e);
+        alert('Подпись отменена или ошибка');
+      }
+    };
+  </script>
 
 </body>
 </html>
