@@ -2,76 +2,104 @@
 <html lang="ru">
 <head>
   <meta charset="UTF-8" />
-  <title>TON Sign Test</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>grok-autotrade</title>
 
   <!-- TON Connect UI -->
   <script src="https://unpkg.com/@tonconnect/ui@latest/dist/tonconnect-ui.min.js"></script>
 
   <style>
     body {
+      margin: 0;
       background: #0b0b0b;
       color: #fff;
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
       display: flex;
       flex-direction: column;
-      justify-content: center;
       align-items: center;
+      justify-content: center;
       height: 100vh;
-      font-family: Arial, sans-serif;
+      gap: 16px;
     }
 
     button {
+      padding: 14px 24px;
+      font-size: 16px;
+      border-radius: 10px;
+      border: none;
+      cursor: pointer;
       background: #0098ea;
       color: #fff;
-      border: none;
-      border-radius: 12px;
-      padding: 14px 22px;
-      font-size: 16px;
-      margin: 10px;
-      cursor: pointer;
+      min-width: 220px;
+    }
+
+    button.secondary {
+      background: #2b2b2b;
+    }
+
+    pre {
+      max-width: 90%;
+      white-space: pre-wrap;
+      word-break: break-all;
+      background: #111;
+      padding: 12px;
+      border-radius: 8px;
+      font-size: 12px;
     }
   </style>
 </head>
 <body>
 
-  <h2>TON Signature Test</h2>
+  <h2>grok-autotrade</h2>
 
-  <div id="connect"></div>
+  <button id="connectBtn">Connect Wallet</button>
+  <button id="signBtn" class="secondary" disabled>Sign Message</button>
 
-  <button id="signBtn" disabled>Подписать сообщение</button>
+  <pre id="output">Wallet not connected</pre>
 
   <script>
+    // === INIT TON CONNECT ===
     const tonConnectUI = new TON_CONNECT_UI.TonConnectUI({
       manifestUrl: 'https://sergey52bb.github.io/tonconnect-manifest.json'
     });
 
-    // Кнопка подключения
-    tonConnectUI.renderButton(document.getElementById('connect'));
-
+    const connectBtn = document.getElementById('connectBtn');
     const signBtn = document.getElementById('signBtn');
+    const output = document.getElementById('output');
 
-    // Следим за статусом кошелька
+    // === CONNECT WALLET ===
+    connectBtn.onclick = async () => {
+      await tonConnectUI.connectWallet();
+    };
+
+    // === ON WALLET STATUS CHANGE ===
     tonConnectUI.onStatusChange(wallet => {
       if (wallet) {
-        console.log('Кошелёк подключен:', wallet.account.address);
+        output.textContent = 'Connected wallet:\n' + wallet.account.address;
         signBtn.disabled = false;
       } else {
+        output.textContent = 'Wallet not connected';
         signBtn.disabled = true;
       }
     });
 
-    // Подпись сообщения
+    // === SIGN MESSAGE ===
     signBtn.onclick = async () => {
       try {
         const result = await tonConnectUI.requestSign({
-          text: 'Подтвердите, что вы владелец этого кошелька'
+          text: 'Подтвердите вход в grok-autotrade'
         });
 
-        console.log('SIGN RESULT:', result);
-        alert('Подпись получена! Смотри консоль.');
+        // 👉 ВАЖНО: результат подписи
+        output.textContent =
+          'SIGN SUCCESS\n\n' +
+          JSON.stringify(result, null, 2);
+
+        // 🔁 ПРИМЕР ДЕЙСТВИЯ ПОСЛЕ ПОДПИСИ
+        // window.location.href = '/dashboard.html';
+
       } catch (e) {
-        console.error('SIGN ERROR:', e);
-        alert('Подпись отменена или ошибка');
+        output.textContent = 'SIGN ERROR\n\n' + e;
       }
     };
   </script>
