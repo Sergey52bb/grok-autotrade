@@ -3,63 +3,64 @@
 <head>
   <meta charset="UTF-8" />
   <title>grok-autotrade</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
-  <!-- ⚠️ ТОЛЬКО ЭТА ВЕРСИЯ -->
-  <script src="https://unpkg.com/@tonconnect/sdk@2.1.3/dist/tonconnect-sdk.min.js"></script>
+  <!-- TON CONNECT SDK (рабочий CDN для Android) -->
+  <script src="https://cdn.jsdelivr.net/npm/@tonconnect/sdk@2.1.3/dist/tonconnect-sdk.min.js"></script>
 
   <style>
     body {
-      background: #0b0f14;
-      color: white;
-      font-family: sans-serif;
+      margin: 0;
+      height: 100vh;
       display: flex;
       justify-content: center;
       align-items: center;
-      height: 100vh;
-      flex-direction: column;
+      background: #0b0f14;
+      font-family: Arial, sans-serif;
+      color: #fff;
+    }
+    .box {
+      text-align: center;
+      width: 100%;
+      max-width: 320px;
+      padding: 20px;
     }
     button {
-      background: #0098ea;
-      color: white;
-      border: none;
-      padding: 14px 24px;
-      border-radius: 10px;
+      width: 100%;
+      padding: 16px;
       font-size: 16px;
+      border-radius: 12px;
+      border: none;
+      background: #0098ea;
+      color: #fff;
     }
   </style>
 </head>
+
 <body>
+  <div class="box">
+    <h1>grok-autotrade</h1>
+    <button id="connect">Connect Tonkeeper</button>
+  </div>
 
-<h1>grok-autotrade</h1>
-<button id="connect">Connect Tonkeeper</button>
-
-<script>
   <script>
-  alert('JS loaded');
+    alert('JS WORKS');
 
-  if (typeof TonConnectSDK === 'undefined') {
-    alert('❌ TonConnect SDK NOT loaded');
-  } else {
-    alert('✅ TonConnect SDK loaded');
-  }
-
-  const connector = new TonConnectSDK.TonConnect({
-    manifestUrl: 'https://sergey52bb.github.io/grok-autotrade/tonconnect-manifest.json'
-  });
-
-  document.getElementById('connect').onclick = async () => {
-    alert('Button clicked');
-
-    const link = connector.connectWallet({
-      universalLink: 'https://app.tonkeeper.com/ton-connect',
-      bridgeUrl: 'https://bridge.tonapi.io/bridge'
+    const connector = new TonConnectSDK.TonConnect({
+      manifestUrl: 'https://sergey52bb.github.io/grok-autotrade/tonconnect-manifest.json'
     });
 
-    alert('Redirecting to Tonkeeper');
-    window.location.href = link;
-  };
-</script>
+    document.getElementById('connect').addEventListener('click', async () => {
+      alert('CLICK');
 
+      const link = connector.connectWallet({
+        universalLink: 'https://app.tonkeeper.com/ton-connect',
+        bridgeUrl: 'https://bridge.tonapi.io/bridge'
+      });
+
+      alert('OPEN TONKEEPER');
+      window.location.href = link;
+    });
+  </script>
 </body>
 </html>
