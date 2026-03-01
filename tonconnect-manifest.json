@@ -1,7 +1,7 @@
-{
-  "url": "https://sergey52bb.github.io/grok-autotrade/tonconnect-manifest.json
-  "name": "grok-autotrade",
-  "iconUrl": "https://sergey52bb.github.io/grok-autotrade/icon.png",
-  "termsOfUseUrl": "",
-  "privacyPolicyUrl": ""
+const tonConnectUI = new TonConnectUI({
+  manifestUrl: 'https://sergey52bb.github.io/grok-autotrade/tonconnect-manifest.json'
+});
+
+async function connectWallet() {
+  await tonConnectUI.connectWallet();
 }
