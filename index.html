@@ -133,24 +133,25 @@
 </div>
 
 <script>
-    const buyBtn = document.querySelector('.btn-buy');
-const sellBtn = document.querySelector('.btn-sell');
+  const buyBtn = document.querySelector('.btn-buy');
+  const sellBtn = document.querySelector('.btn-sell');
 
-tonConnectUI.onStatusChange(wallet => {
-  if (wallet) {
-    statusEl.innerText = 'Wallet connected';
-    addressEl.innerText = wallet.account.address;
+  tonConnectUI.onStatusChange(wallet => {
+    if (wallet) {
+      statusEl.innerText = 'Wallet connected';
+      addressEl.innerText = wallet.account.address;
 
-    buyBtn.disabled = false;
-    sellBtn.disabled = false;
-  } else {
-    statusEl.innerText = 'Wallet not connected';
-    addressEl.innerText = '';
+      buyBtn.disabled = false;
+      sellBtn.disabled = false;
+    } else {
+      statusEl.innerText = 'Wallet not connected';
+      addressEl.innerText = '';
 
-    buyBtn.disabled = true;
-    sellBtn.disabled = true;
-  }
-});
+      buyBtn.disabled = true;
+      sellBtn.disabled = true;
+    }
+  });
+                              </script>
 </script>
 
 </body>
