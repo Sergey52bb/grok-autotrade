@@ -115,30 +115,53 @@
   const positionEl = document.getElementById('position');
   const logEl = document.getElementById('log');
   const walletStatus = document.getElementById('walletStatus');
-
+let position = null; // null | "LONG"
   function log(text) {
     const time = new Date().toLocaleTimeString();
     logEl.innerHTML = `${time} — ${text}<br>` + logEl.innerHTML;
   }
 
-  // BUY / SELL (simulation)
-  document.getElementById('buyBtn').onclick = () => {
-    positionEl.textContent = 'LONG';
-    log('BUY executed (simulation)');
-  };
+  buyBtn.onclick = () => {
+    if (!walletConnected) {
+        alert("Wallet not connected");
+        return;
+    }
 
-  document.getElementById('sellBtn').onclick = () => {
-    positionEl.textContent = 'No position';
-    log('SELL executed (simulation)');
-  };
+    if (position === "LONG") {
+        alert("Already in LONG position");
+        return;
+    }
+
+    position = "LONG";
+    positionEl.textContent = "LONG";
+    logTrade("BUY executed (simulation)");
+    updateButtons();
+};
+
+  sellBtn.onclick = () => {
+    if (!walletConnected) {
+        alert("Wallet not connected");
+        return;
+    }
+
+    if (position !== "LONG") {
+        alert("No open position to SELL");
+        return;
+    }
+
+    position = null;
+    positionEl.textContent = "No position";
+    logTrade("SELL executed (simulation)");
+    updateButtons();
+};
 
   document.getElementById('connectBtn').onclick = () => {
     walletStatus.textContent = 'Wallet connected (simulation)';
-  };
+  };updateButtons();
 
   document.getElementById('disconnectBtn').onclick = () => {
     walletStatus.textContent = 'Wallet not connected';
-  };
+  };updateButtons();
 
   // Chart
   const ctx = document.getElementById('priceChart').getContext('2d');
@@ -164,7 +187,13 @@
         y: { ticks: { color: '#aaa' } }
       }
     }
-  });
+  });function updateButtons() {
+    buyBtn.disabled = position === "LONG";
+    sellBtn.disabled = position !== "LONG";
+
+    buyBtn.style.opacity = buyBtn.disabled ? 0.5 : 1;
+    sellBtn.style.opacity = sellBtn.disabled ? 0.5 : 1;
+  }
 </script>
 
 </body>
