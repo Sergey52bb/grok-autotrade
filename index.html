@@ -1,154 +1,171 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8" />
-<title>Grok AutoTrade</title>
-<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta charset="UTF-8" />
+  <title>Grok AutoTrade</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
 
-<style>
-body {
-    margin: 0;
-    font-family: Arial, sans-serif;
-    background: radial-gradient(circle at top, #0b1d3a, #050814);
-    color: #fff;
-}
-.container {
-    max-width: 420px;
-    margin: 0 auto;
-    padding: 20px;
-}
-h1 {
-    text-align: center;
-    margin-bottom: 20px;
-}
-.card {
-    background: rgba(255,255,255,0.05);
-    border-radius: 16px;
-    padding: 16px;
-    margin-bottom: 16px;
-}
-.row {
-    display: flex;
-    justify-content: space-between;
-    margin-bottom: 6px;
-}
-.actions {
-    display: flex;
-    gap: 12px;
-    margin-bottom: 16px;
-}
-button {
-    flex: 1;
-    padding: 14px;
-    border: none;
-    border-radius: 12px;
-    font-size: 16px;
-    cursor: pointer;
-}
-.btn-buy { background: #1fbf75; }
-.btn-sell { background: #e64c4c; }
-.btn-connect { background: #3b82f6; margin-bottom: 10px; }
-.btn-disconnect { background: #ef4444; }
+  <!-- Chart.js -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
-button:disabled {
-    opacity: 0.5;
-    cursor: not-allowed;
-}
+  <style>
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+      background: linear-gradient(180deg, #020617, #020617);
+      color: #fff;
+    }
 
-.status {
-    text-align: center;
-    opacity: 0.8;
-    margin-top: 8px;
-}
+    .container {
+      max-width: 420px;
+      margin: auto;
+      padding: 20px;
+    }
 
-.log {
-    font-size: 13px;
-    max-height: 120px;
-    overflow-y: auto;
-}
-.log div {
-    margin-bottom: 4px;
-    opacity: 0.85;
-}
-</style>
+    h1 {
+      text-align: center;
+      margin-bottom: 20px;
+    }
+
+    .card {
+      background: #0b1225;
+      border-radius: 16px;
+      padding: 16px;
+      margin-bottom: 16px;
+    }
+
+    .row {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 8px;
+    }
+
+    .buttons {
+      display: flex;
+      gap: 12px;
+      margin-bottom: 16px;
+    }
+
+    button {
+      flex: 1;
+      padding: 14px;
+      border: none;
+      border-radius: 12px;
+      font-size: 16px;
+      cursor: pointer;
+    }
+
+    .buy { background: #22c55e; }
+    .sell { background: #ef4444; }
+    .connect { background: #3b82f6; margin-bottom: 10px; }
+    .disconnect { background: #dc2626; }
+
+    .status {
+      text-align: center;
+      opacity: 0.8;
+      margin-top: 10px;
+    }
+
+    .log {
+      max-height: 150px;
+      overflow-y: auto;
+      font-size: 14px;
+      opacity: 0.9;
+    }
+  </style>
 </head>
 
 <body>
 <div class="container">
 
-<h1>Grok AutoTrade</h1>
+  <h1>Grok AutoTrade</h1>
 
-<div class="card">
+  <div class="card">
     <div class="row"><span>Pair</span><span>USDT / TON</span></div>
-    <div class="row"><span>Status</span><span id="botStatus">Active</span></div>
-</div>
+    <div class="row"><span>Status</span><span>Active</span></div>
+  </div>
 
-<div class="card">
+  <div class="card">
     <div class="row"><span>Balance</span><span id="balance">0.00 USDT</span></div>
     <div class="row"><span>Position</span><span id="position">No position</span></div>
-</div>
+  </div>
 
-<div class="actions">
-    <button class="btn-buy" id="buyBtn" disabled>BUY</button>
-    <button class="btn-sell" id="sellBtn" disabled>SELL</button>
-</div>
+  <div class="buttons">
+    <button class="buy" id="buyBtn">BUY</button>
+    <button class="sell" id="sellBtn">SELL</button>
+  </div>
 
-<button class="btn-connect" id="connectBtn">Connect Wallet</button>
-<button class="btn-disconnect" id="disconnectBtn">Disconnect</button>
+  <div class="card">
+    <canvas id="priceChart" height="180"></canvas>
+  </div>
 
-<div class="status" id="walletStatus">Wallet not connected</div>
+  <button class="connect" id="connectBtn">Connect Wallet</button>
+  <button class="disconnect" id="disconnectBtn">Disconnect</button>
 
-<div class="card">
+  <div class="status" id="walletStatus">Wallet not connected</div>
+
+  <div class="card">
     <strong>Trade Log</strong>
-    <div class="log" id="tradeLog"></div>
-</div>
+    <div class="log" id="log"></div>
+  </div>
 
 </div>
 
 <script>
-const buyBtn = document.getElementById('buyBtn');
-const sellBtn = document.getElementById('sellBtn');
-const connectBtn = document.getElementById('connectBtn');
-const disconnectBtn = document.getElementById('disconnectBtn');
-const walletStatus = document.getElementById('walletStatus');
-const positionEl = document.getElementById('position');
-const tradeLog = document.getElementById('tradeLog');
+  const positionEl = document.getElementById('position');
+  const logEl = document.getElementById('log');
+  const walletStatus = document.getElementById('walletStatus');
 
-let walletConnected = false;
+  function log(text) {
+    const time = new Date().toLocaleTimeString();
+    logEl.innerHTML = `${time} — ${text}<br>` + logEl.innerHTML;
+  }
 
-function logTrade(text) {
-    const div = document.createElement('div');
-    div.textContent = new Date().toLocaleTimeString() + ' — ' + text;
-    tradeLog.prepend(div);
-}
-
-connectBtn.onclick = () => {
-    walletConnected = true;
-    walletStatus.textContent = 'Wallet connected (simulation)';
-    buyBtn.disabled = false;
-    sellBtn.disabled = false;
-};
-
-disconnectBtn.onclick = () => {
-    walletConnected = false;
-    walletStatus.textContent = 'Wallet not connected';
-    positionEl.textContent = 'No position';
-    buyBtn.disabled = true;
-    sellBtn.disabled = true;
-};
-
-buyBtn.onclick = () => {
-    if (!walletConnected) return;
+  // BUY / SELL (simulation)
+  document.getElementById('buyBtn').onclick = () => {
     positionEl.textContent = 'LONG';
-    logTrade('BUY executed (simulation)');
-};
+    log('BUY executed (simulation)');
+  };
 
-sellBtn.onclick = () => {
-    if (!walletConnected) return;
+  document.getElementById('sellBtn').onclick = () => {
     positionEl.textContent = 'No position';
-    logTrade('SELL executed (simulation)');
-};
+    log('SELL executed (simulation)');
+  };
+
+  document.getElementById('connectBtn').onclick = () => {
+    walletStatus.textContent = 'Wallet connected (simulation)';
+  };
+
+  document.getElementById('disconnectBtn').onclick = () => {
+    walletStatus.textContent = 'Wallet not connected';
+  };
+
+  // Chart
+  const ctx = document.getElementById('priceChart').getContext('2d');
+
+  const priceData = {
+    labels: ['00:00','01:00','02:00','03:00','04:00'],
+    datasets: [{
+      label: 'USDT / TON',
+      data: [1.0, 1.2, 1.5, 1.4, 1.3],
+      borderColor: '#38bdf8',
+      backgroundColor: 'transparent',
+      tension: 0.4
+    }]
+  };
+
+  new Chart(ctx, {
+    type: 'line',
+    data: priceData,
+    options: {
+      plugins: { legend: { labels: { color: '#fff' } } },
+      scales: {
+        x: { ticks: { color: '#aaa' } },
+        y: { ticks: { color: '#aaa' } }
+      }
+    }
+  });
 </script>
 
 </body>
-</html>
+                         </html>
