@@ -1,86 +1,167 @@
 <!DOCTYPE html>
-<html lang="ru">
+<html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Grok AutoTrade</title>
+    <meta charset="UTF-8" />
+    <title>Grok AutoTrade</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
-  <!-- TON CONNECT UI -->
-  <script src="https://unpkg.com/@tonconnect/ui@latest/dist/tonconnect-ui.min.js"></script>
+    <!-- TonConnect UI -->
+    <script src="https://unpkg.com/@tonconnect/ui@latest/dist/tonconnect-ui.min.js"></script>
 
-  <style>
-    body {
-      margin: 0;
-      background: #0b1220;
-      color: white;
-      font-family: Arial, sans-serif;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      padding-top: 40px;
-    }
+    <style>
+        body {
+            margin: 0;
+            font-family: Arial, sans-serif;
+            background: linear-gradient(180deg, #050b1e, #020617);
+            color: #fff;
+        }
 
-    h1 {
-      margin-bottom: 30px;
-    }
+        .app {
+            max-width: 420px;
+            margin: 0 auto;
+            padding: 20px;
+        }
 
-    button {
-      width: 90%;
-      max-width: 360px;
-      padding: 16px;
-      font-size: 18px;
-      border: none;
-      border-radius: 12px;
-      cursor: pointer;
-    }
+        h1 {
+            text-align: center;
+            margin-bottom: 20px;
+        }
 
-    #connect-btn {
-      background: #3b82f6;
-      color: white;
-    }
+        .card {
+            background: #0b1228;
+            border-radius: 14px;
+            padding: 16px;
+            margin-bottom: 16px;
+        }
 
-    #status {
-      margin-top: 20px;
-      word-break: break-all;
-      font-size: 14px;
-      opacity: 0.8;
-    }
-  </style>
+        .row {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 8px;
+        }
+
+        .btn {
+            width: 100%;
+            padding: 14px;
+            border-radius: 12px;
+            border: none;
+            font-size: 16px;
+            cursor: pointer;
+        }
+
+        .btn-connect {
+            background: #3b82f6;
+            color: #fff;
+        }
+
+        .btn-disconnect {
+            background: #ef4444;
+            color: #fff;
+            margin-top: 10px;
+        }
+
+        .btn-buy {
+            background: #22c55e;
+            color: #000;
+            width: 48%;
+        }
+
+        .btn-sell {
+            background: #ef4444;
+            color: #000;
+            width: 48%;
+        }
+
+        .actions {
+            display: flex;
+            justify-content: space-between;
+            gap: 10px;
+        }
+
+        .address {
+            font-size: 12px;
+            word-break: break-all;
+            opacity: 0.8;
+        }
+
+        .status {
+            text-align: center;
+            margin-top: 10px;
+            opacity: 0.9;
+        }
+    </style>
 </head>
 
 <body>
+<div class="app">
 
-  <button id="connect-btn">Connect Wallet</button>
-<button id="disconnect-btn" style="margin-top:12px;background:#ef4444;">
-  Disconnect
-</button>
+    <h1>Grok AutoTrade</h1>
 
-<div id="status">Wallet not connected</div>
+    <div class="card">
+        <div class="row">
+            <span>Pair</span>
+            <span>USDT / TON</span>
+        </div>
+        <div class="row">
+            <span>Status</span>
+            <span id="market-status">Active</span>
+        </div>
+    </div>
+
+    <div class="card">
+        <div class="row">
+            <span>Balance</span>
+            <span id="balance">0.00 USDT</span>
+        </div>
+        <div class="row">
+            <span>Position</span>
+            <span id="position">No position</span>
+        </div>
+    </div>
+
+    <div class="card actions">
+        <button class="btn btn-buy" disabled>BUY</button>
+        <button class="btn btn-sell" disabled>SELL</button>
+    </div>
+
+    <button id="connectBtn" class="btn btn-connect">Connect Wallet</button>
+    <button id="disconnectBtn" class="btn btn-disconnect">Disconnect</button>
+
+    <div class="status" id="status">Wallet not connected</div>
+    <div class="address" id="address"></div>
+
+</div>
 
 <script>
-  const tonConnectUI = new TON_CONNECT_UI.TonConnectUI({
-    manifestUrl: 'https://sergey52bb.github.io/grok-autotrade/tonconnect-manifest.json'
-  });
+    const tonConnectUI = new TON_CONNECT_UI.TonConnectUI({
+        manifestUrl: 'https://sergey52bb.github.io/grok-autotrade/tonconnect-manifest.json'
+    });
 
-  const connectBtn = document.getElementById('connect-btn');
-  const disconnectBtn = document.getElementById('disconnect-btn');
-  const status = document.getElementById('status');
+    const connectBtn = document.getElementById('connectBtn');
+    const disconnectBtn = document.getElementById('disconnectBtn');
+    const statusEl = document.getElementById('status');
+    const addressEl = document.getElementById('address');
 
-  connectBtn.onclick = async () => {
-    await tonConnectUI.connectWallet();
-  };
+    connectBtn.onclick = async () => {
+        try {
+            await tonConnectUI.connectWallet();
+        } catch (e) {
+            console.error(e);
+        }
+    };
 
-  disconnectBtn.onclick = async () => {
-    await tonConnectUI.disconnect();
-  };
+    disconnectBtn.onclick = async () => {
+        await tonConnectUI.disconnect();
+        statusEl.innerText = 'Wallet not connected';
+        addressEl.innerText = '';
+    };
 
-  tonConnectUI.onStatusChange(wallet => {
-    if (wallet) {
-      status.innerText = 'Connected:\n' + wallet.account.address;
-    } else {
-      status.innerText = 'Wallet not connected';
-    }
-  });
+    tonConnectUI.onStatusChange(wallet => {
+        if (wallet) {
+            statusEl.innerText = 'Wallet connected';
+            addressEl.innerText = wallet.account.address;
+        }
+    });
 </script>
 
 </body>
