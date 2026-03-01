@@ -1,7 +1,7 @@
 {
-  "url": "https://sergey52bb.github.io/grok-autotrade/tonconnect-manifest.json
-  "name": "grok-autotrade",
+  "url": "https://sergey52bb.github.io/grok-autotrade/",
+  "name": "Grok AutoTrade",
   "iconUrl": "https://sergey52bb.github.io/grok-autotrade/icon.png",
-  "termsOfUseUrl": "",
-  "privacyPolicyUrl": ""
+  "termsOfUseUrl": "https://sergey52bb.github.io/grok-autotrade/",
+  "privacyPolicyUrl": "https://sergey52bb.github.io/grok-autotrade/"
 }
