@@ -1,149 +1,90 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="ru">
 <head>
   <meta charset="UTF-8" />
-  <title>Grok AutoTrade</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Grok AutoTrade</title>
 
-  <!-- TON CONNECT SDK -->
+  <!-- TON CONNECT UI -->
   <script src="https://unpkg.com/@tonconnect/ui@latest/dist/tonconnect-ui.min.js"></script>
 
   <style>
     body {
       margin: 0;
+      background: #0b1220;
+      color: white;
       font-family: Arial, sans-serif;
-      background: #0b0f1a;
-      color: #fff;
-    }
-
-    .container {
-      padding: 20px;
-    }
-
-    .card {
-      background: #141a2a;
-      border-radius: 14px;
-      padding: 16px;
-      margin-bottom: 16px;
-    }
-
-    .row {
       display: flex;
-      gap: 12px;
+      flex-direction: column;
+      align-items: center;
+      padding-top: 40px;
     }
 
-    .btn {
-      flex: 1;
+    h1 {
+      margin-bottom: 30px;
+    }
+
+    button {
+      width: 90%;
+      max-width: 360px;
       padding: 16px;
-      border-radius: 14px;
-      border: none;
       font-size: 18px;
-      font-weight: bold;
+      border: none;
+      border-radius: 12px;
       cursor: pointer;
     }
 
-    .buy {
-      background: #18c77a;
-      color: #000;
-    }
-
-    .sell {
-      background: #e54848;
-      color: #000;
-    }
-
-    .connect {
-      width: 100%;
-      margin-top: 16px;
+    #connect-btn {
       background: #3b82f6;
-      color: #fff;
+      color: white;
     }
 
-    .status {
-      margin-top: 12px;
+    #status {
+      margin-top: 20px;
+      word-break: break-all;
+      font-size: 14px;
       opacity: 0.8;
     }
   </style>
 </head>
 
 <body>
-  <div class="container">
 
-    <h2>USDT / TON <span style="color:#18c77a">Active</span></h2>
+  <h1>Grok AutoTrade</h1>
 
-    <div class="card" style="text-align:center; opacity:0.5;">
-      Price chart (real-time)
-    </div>
+  <button id="connect-btn">Connect Wallet</button>
 
-    <div class="row">
-      <div class="card" style="flex:1;">
-        Balance<br><b>0.00 USDT</b>
-      </div>
-      <div class="card" style="flex:1;">
-        Position<br><b>No position</b>
-      </div>
-    </div>
-
-    <div class="row" style="margin-top:20px;">
-      <button class="btn buy">BUY</button>
-      <button class="btn sell">SELL</button>
-    </div>
-
-    <button id="connectBtn" class="btn connect">
-      Connect Wallet
-    </button>
-
-    <div id="walletStatus" class="status">
-      Wallet not connected
-    </div>
-
-  </div>
+  <div id="status">Wallet not connected</div>
 
   <script>
-    // ==============================
-    // TON CONNECT INITIALIZATION
-    // ==============================
-
     const tonConnectUI = new TON_CONNECT_UI.TonConnectUI({
       manifestUrl: 'https://sergey52bb.github.io/grok-autotrade/tonconnect-manifest.json',
-      uiPreferences: {
-        theme: 'dark'
-      }
+      buttonRootId: null
     });
 
-    tonConnectUI.uiOptions = {
-      twaReturnUrl: 'https://t.me/grok_autotrade_bot' // ← ЗАМЕНИ НА СВОЕГО БОТА
-    };
+    const button = document.getElementById('connect-btn');
+    const status = document.getElementById('status');
 
-    const statusEl = document.getElementById('walletStatus');
-    const connectBtn = document.getElementById('connectBtn');
-
-    // ==============================
-    // CONNECT BUTTON
-    // ==============================
-    connectBtn.addEventListener('click', async () => {
+    button.onclick = async () => {
       try {
         await tonConnectUI.connectWallet();
       } catch (e) {
         console.error(e);
-        statusEl.innerText = 'Wallet was not connected';
       }
-    });
+    };
 
-    // ==============================
-    // WALLET STATUS LISTENER
-    // ==============================
     tonConnectUI.onStatusChange(wallet => {
       if (wallet) {
-        statusEl.innerText = 'Connected: ' + wallet.account.address;
-        connectBtn.innerText = 'Wallet Connected';
-        connectBtn.disabled = true;
+        button.innerText = 'Wallet Connected';
+        button.disabled = true;
+        status.innerText = 'Connected:\n' + wallet.account.address;
       } else {
-        statusEl.innerText = 'Wallet not connected';
-        connectBtn.innerText = 'Connect Wallet';
-        connectBtn.disabled = false;
+        button.innerText = 'Connect Wallet';
+        button.disabled = false;
+        status.innerText = 'Wallet not connected';
       }
     });
   </script>
+
 </body>
 </html>
