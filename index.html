@@ -92,7 +92,12 @@ button {
 </div>
 
 <p id="walletStatus" style="text-align:center; opacity:0.8;">
-Wallet not connected
+Wallet not connected<div class="card">
+  <div class="row">
+    <span>Price</span>
+    <span id="price">—</span>
+  </div>
+  </div>
 </p>
 
 <div class="card log" id="log"></div>
@@ -100,77 +105,29 @@ Wallet not connected
 </div>
 
 <script>
-let walletConnected = false;
-let position = null;
+let currentPrice = null;
 
-const positionEl = document.getElementById("position");
-const buyBtn = document.getElementById("buyBtn");
-const sellBtn = document.getElementById("sellBtn");
-const logEl = document.getElementById("log");
-const walletStatus = document.getElementById("walletStatus");
+async function fetchPrice() {
+  try {
+    const res = await fetch(
+      "https://api.binance.com/api/v3/ticker/price?symbol=TONUSDT"
+    );
+    const data = await res.json();
 
-function log(text) {
-  const time = new Date().toLocaleTimeString();
-  logEl.innerHTML = `<div>${time} — ${text}</div>` + logEl.innerHTML;
-}
+    currentPrice = parseFloat(data.price);
 
-function updateUI() {
-  if (position === "LONG") {
-    positionEl.textContent = "LONG";
-    buyBtn.classList.add("disabled");
-    sellBtn.classList.remove("disabled");
-  } else {
-    positionEl.textContent = "No position";
-    buyBtn.classList.remove("disabled");
-    sellBtn.classList.add("disabled");
+    document.getElementById("price").innerText =
+      currentPrice.toFixed(4) + " USDT";
+  } catch (e) {
+    document.getElementById("price").innerText = "Price error";
   }
 }
 
-function buy() {
-  if (!walletConnected || position) return;
-  position = "LONG";
-  log("BUY executed (simulation)");
-  updateUI();
-}
+// первая загрузка
+fetchPrice();
 
-function sell() {
-  if (!walletConnected || !position) return;
-  position = null;
-  log("SELL executed (simulation)");
-  updateUI();
-}
-
-function connectWallet() {
-  walletConnected = true;
-  walletStatus.textContent = "Wallet connected (simulation)";
-  log("Wallet connected");
-}
-
-function disconnectWallet() {
-  walletConnected = false;
-  position = null;
-  walletStatus.textContent = "Wallet not connected";
-  log("Wallet disconnected");
-  updateUI();
-}
-
-// chart
-const ctx = document.getElementById("chart");
-new Chart(ctx, {
-  type: "line",
-  data: {
-    labels: ["00:00","01:00","02:00","03:00","04:00"],
-    datasets: [{
-      label: "USDT / TON",
-      data: [1.0,1.2,1.5,1.4,1.3],
-      borderColor: "#5dade2",
-      tension: 0.4
-    }]
-  },
-  options: { plugins:{legend:{display:true}} }
-});
-
-updateUI();
+// обновление каждые 5 секунд
+setInterval(fetchPrice, 5000);
 </script>
 
 </body>
