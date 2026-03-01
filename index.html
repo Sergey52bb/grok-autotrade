@@ -127,50 +127,73 @@
   </div>
 
   <script>
-    const tonConnectUI = new TON_CONNECT_UI.TonConnectUI({
-      manifestUrl: 'https://sergey52bb.github.io/grok-autotrade/tonconnect-manifest.json'
-    });
+    /* =========================
+   ELEMENTS
+========================= */
+const buyBtn = document.querySelector('.btn-buy');
+const sellBtn = document.querySelector('.btn-sell');
+const connectBtn = document.getElementById('connectBtn');
+const disconnectBtn = document.getElementById('disconnectBtn');
+const statusEl = document.getElementById('status');
+const addressEl = document.getElementById('address');
+const positionEl = document.getElementById('position');
 
-    const connectBtn = document.getElementById('connectBtn');
-    const disconnectBtn = document.getElementById('disconnectBtn');
-    const statusEl = document.getElementById('status');
-    const addressEl = document.getElementById('address');
+/* =========================
+   TON CONNECT
+========================= */
+const tonConnectUI = new TON_CONNECT_UI.TonConnectUI({
+  manifestUrl: 'https://sergey52bb.github.io/grok-autotrade/tonconnect-manifest.json'
+});
 
-    const buyBtn = document.querySelector('.btn-buy');
-    const sellBtn = document.querySelector('.btn-sell');
+/* =========================
+   WALLET BUTTONS
+========================= */
+connectBtn.onclick = async () => {
+  try {
+    await tonConnectUI.connectWallet();
+  } catch (e) {
+    console.error(e);
+  }
+};
+
+disconnectBtn.onclick = async () => {
+  await tonConnectUI.disconnect();
+};
+
+/* =========================
+   WALLET STATUS
+========================= */
+tonConnectUI.onStatusChange(wallet => {
+  if (wallet) {
+    statusEl.innerText = 'Wallet connected';
+    addressEl.innerText = wallet.account.address;
+
+    buyBtn.disabled = false;
+    sellBtn.disabled = false;
+  } else {
+    statusEl.innerText = 'Wallet not connected';
+    addressEl.innerText = '';
+    positionEl.innerText = 'No position';
 
     buyBtn.disabled = true;
     sellBtn.disabled = true;
+  }
+});
 
-    connectBtn.onclick = async () => {
-      try {
-        await tonConnectUI.connectWallet();
-      } catch (e) {
-        console.error(e);
-      }
-    };
+/* =========================
+   FAKE TRADING (SAFE)
+========================= */
+buyBtn.onclick = () => {
+  if (buyBtn.disabled) return;
+  positionEl.innerText = 'LONG';
+  console.log('[SIMULATION] BUY');
+};
 
-    disconnectBtn.onclick = async () => {
-      await tonConnectUI.disconnect();
-      statusEl.innerText = 'Wallet not connected';
-      addressEl.innerText = '';
-      buyBtn.disabled = true;
-      sellBtn.disabled = true;
-    };
-
-    tonConnectUI.onStatusChange(wallet => {
-      if (wallet) {
-        statusEl.innerText = 'Wallet connected';
-        addressEl.innerText = wallet.account.address;
-        buyBtn.disabled = false;
-        sellBtn.disabled = false;
-      } else {
-        statusEl.innerText = 'Wallet not connected';
-        addressEl.innerText = '';
-        buyBtn.disabled = true;
-        sellBtn.disabled = true;
-      }
-    });
+sellBtn.onclick = () => {
+  if (sellBtn.disabled) return;
+  positionEl.innerText = 'No position';
+  console.log('[SIMULATION] SELL');
+};
   </script>
 </body>
 </html>
