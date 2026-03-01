@@ -1,171 +1,190 @@
 <!DOCTYPE html>
 <html lang="ru">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Grok AutoTrade</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Grok AutoTrade</title>
 
-    <!-- Подключение библиотеки Chart.js -->
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <!-- TON CONNECT -->
+  <script src="https://unpkg.com/@tonconnect/ui@latest/dist/tonconnect-ui.min.js"></script>
 
-    <style>
-        /* Стили для вашего приложения */
-        body {
-            font-family: Arial, sans-serif;
-            background: linear-gradient(180deg, #050b1a, #020615);
-            color: #fff;
-        }
+  <style>
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+      background: linear-gradient(180deg, #050b1a, #020615);
+      color: #fff;
+    }
 
-        .container {
-            max-width: 420px;
-            margin: 0 auto;
-            padding: 20px;
-        }
+    .container {
+      max-width: 420px;
+      margin: 40px auto;
+      padding: 16px;
+    }
 
-        h1 {
-            text-align: center;
-        }
+    h1 {
+      text-align: center;
+      margin-bottom: 24px;
+    }
 
-        .card {
-            background: #0b132b;
-            border-radius: 16px;
-            padding: 16px;
-            margin-bottom: 16px;
-        }
+    .card {
+      background: #0b132b;
+      border-radius: 16px;
+      padding: 16px;
+      margin-bottom: 16px;
+    }
 
-        .row {
-            display: flex;
-            justify-content: space-between;
-            margin-bottom: 8px;
-            opacity: 0.9;
-        }
+    .row {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 8px;
+      opacity: 0.9;
+    }
 
-        .actions {
-            display: flex;
-            gap: 12px;
-            margin-bottom: 16px;
-        }
+    .actions {
+      display: flex;
+      gap: 12px;
+      margin-bottom: 16px;
+    }
 
-        button {
-            flex: 1;
-            padding: 14px;
-            font-size: 16px;
-            border: none;
-            cursor: pointer;
-        }
+    button {
+      flex: 1;
+      padding: 14px;
+      font-size: 16px;
+      border-radius: 12px;
+      border: none;
+      cursor: pointer;
+    }
 
-        .btn-buy {
-            background: #22c55e;
-            color: #000;
-        }
+    .buy {
+      background: #22c55e;
+      color: #000;
+    }
 
-        .btn-sell {
-            background: #ef4444;
-            color: #000;
-        }
+    .sell {
+      background: #ef4444;
+      color: #000;
+    }
 
-        .btn-connect {
-            background: #3b82f6;
-            color: #fff;
-            width: 100%;
-            margin-bottom: 10px;
-        }
+    .connect {
+      background: #3b82f6;
+      color: #fff;
+      width: 100%;
+      margin-bottom: 10px;
+    }
 
-        .btn-disconnect {
-            background: #ef4444;
-            color: #fff;
-            width: 100%;
-        }
+    .disconnect {
+      background: #ef4444;
+      color: #fff;
+      width: 100%;
+    }
 
-        button:disabled {
-            opacity: 0.5;
-            cursor: not-allowed;
-        }
+    .status {
+      text-align: center;
+      margin-top: 12px;
+      opacity: 0.8;
+    }
 
-        .status {
-            text-align: center;
-            margin-top: 12px;
-            opacity: 0.8;
-        }
-
-        .address {
-            word-break: break-all;
-            font-size: 12px;
-            text-align: center;
-            margin-top: 6px;
-            opacity: 0.6;
-        }
-    </style>
+    .address {
+      font-size: 12px;
+      text-align: center;
+      word-break: break-all;
+      opacity: 0.6;
+      margin-top: 6px;
+    }
+  </style>
 </head>
+
 <body>
-    <div class="container">
-        <h1>Grok AutoTrade</h1>
+<div class="container">
 
-        <!-- Информация о валютной паре -->
-        <div class="card">
-            <div class="row"><span>Pair</span><span>USDT / TON</span></div>
-            <div class="row"><span>Status</span><span>Active</span></div>
-        </div>
+  <h1>Grok AutoTrade</h1>
 
-        <!-- Информация о балансе и позиции -->
-        <div class="card">
-            <div class="row"><span>Balance</span><span>0.00 USDT</span></div>
-            <div class="row"><span>Position</span><span id="position">No position</span></div>
-        </div>
+  <div class="card">
+    <div class="row"><span>Pair</span><span>USDT / TON</span></div>
+    <div class="row"><span>Status</span><span>Active</span></div>
+  </div>
 
-        <!-- Кнопки для торговли -->
-        <div class="actions">
-            <button class="btn btn-buy" disabled>BUY</button>
-            <button class="btn btn-sell" disabled>SELL</button>
-        </div>
+  <div class="card">
+    <div class="row"><span>Balance</span><span>0.00 USDT</span></div>
+    <div class="row"><span>Position</span><span id="position">No position</span></div>
+  </div>
 
-        <!-- График цен -->
-        <div class="card">
-            <canvas id="priceChart"></canvas> <!-- График -->
-        </div>
+  <div class="actions">
+    <button id="buyBtn" class="buy">BUY</button>
+    <button id="sellBtn" class="sell">SELL</button>
+  </div>
 
-        <!-- Кнопки для подключения и отключения кошелька -->
-        <button id="connectBtn" class="btn btn-connect">Connect Wallet</button>
-        <button id="disconnectBtn" class="btn btn-disconnect">Disconnect</button>
+  <button id="connectBtn" class="connect">Connect Wallet</button>
+  <button id="disconnectBtn" class="disconnect">Disconnect</button>
 
-        <div id="status" class="status">Wallet not connected</div>
-        <div id="address" class="address"></div>
-    </div>
+  <div id="status" class="status">Wallet not connected</div>
+  <div id="address" class="address"></div>
 
-    <script>
-        const connectBtn = document.getElementById('connectBtn');
-const disconnectBtn = document.getElementById('disconnectBtn');
-const statusEl = document.getElementById('status');
-const addressEl = document.getElementById('address');
+</div>
 
-// Кнопка подключения
-connectBtn.onclick = async () => {
-  try {
-    await tonConnectUI.connectWallet();
-  } catch (e) {
-    console.error(e);
-  }
-};
+<script>
+  // ===== STATE =====
+  let walletConnected = false;
 
-// Кнопка отключения
-disconnectBtn.onclick = async () => {
-  await tonConnectUI.disconnect();
-};
+  // ===== ELEMENTS =====
+  const buyBtn = document.getElementById('buyBtn');
+  const sellBtn = document.getElementById('sellBtn');
+  const positionEl = document.getElementById('position');
+  const statusEl = document.getElementById('status');
+  const addressEl = document.getElementById('address');
+  const connectBtn = document.getElementById('connectBtn');
+  const disconnectBtn = document.getElementById('disconnectBtn');
 
-// Слушаем изменения состояния кошелька
-tonConnectUI.onStatusChange(wallet => {
-  if (wallet) {
-    statusEl.innerText = 'Wallet connected';
-    addressEl.innerText = wallet.account.address;
-    connectBtn.disabled = true;
-    disconnectBtn.disabled = false;
-  } else {
-    statusEl.innerText = 'Wallet not connected';
-    addressEl.innerText = '';
-    connectBtn.disabled = false;
-    disconnectBtn.disabled = true;
-  }
-});
-    </script>
+  // ===== TON CONNECT =====
+  const tonConnectUI = new TON_CONNECT_UI.TonConnectUI({
+    manifestUrl: 'https://sergey52bb.github.io/grok-autotrade/tonconnect-manifest.json'
+  });
+
+  connectBtn.onclick = async () => {
+    try {
+      await tonConnectUI.connectWallet();
+    } catch (e) {
+      console.error(e);
+    }
+  };
+
+  disconnectBtn.onclick = async () => {
+    await tonConnectUI.disconnect();
+  };
+
+  tonConnectUI.onStatusChange(wallet => {
+    if (wallet) {
+      walletConnected = true;
+      statusEl.innerText = 'Wallet connected';
+      addressEl.innerText = wallet.account.address;
+    } else {
+      walletConnected = false;
+      statusEl.innerText = 'Wallet not connected';
+      addressEl.innerText = '';
+      positionEl.innerText = 'No position';
+    }
+  });
+
+  // ===== BUY / SELL (SAFE MODE) =====
+  buyBtn.onclick = () => {
+    if (!walletConnected) {
+      alert('Wallet not connected');
+      return;
+    }
+    positionEl.innerText = 'LONG';
+    alert('BUY executed (simulation)');
+  };
+
+  sellBtn.onclick = () => {
+    if (!walletConnected) {
+      alert('Wallet not connected');
+      return;
+    }
+    positionEl.innerText = 'SHORT';
+    alert('SELL executed (simulation)');
+  };
+</script>
+
 </body>
 </html>
