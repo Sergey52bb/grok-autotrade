@@ -50,41 +50,38 @@
 
 <body>
 
-  <h1>Grok AutoTrade</h1>
-
   <button id="connect-btn">Connect Wallet</button>
+<button id="disconnect-btn" style="margin-top:12px;background:#ef4444;">
+  Disconnect
+</button>
 
-  <div id="status">Wallet not connected</div>
+<div id="status">Wallet not connected</div>
 
-  <script>
-    const tonConnectUI = new TON_CONNECT_UI.TonConnectUI({
-      manifestUrl: 'https://sergey52bb.github.io/grok-autotrade/tonconnect-manifest.json',
-      buttonRootId: null
-    });
+<script>
+  const tonConnectUI = new TON_CONNECT_UI.TonConnectUI({
+    manifestUrl: 'https://sergey52bb.github.io/grok-autotrade/tonconnect-manifest.json'
+  });
 
-    const button = document.getElementById('connect-btn');
-    const status = document.getElementById('status');
+  const connectBtn = document.getElementById('connect-btn');
+  const disconnectBtn = document.getElementById('disconnect-btn');
+  const status = document.getElementById('status');
 
-    button.onclick = async () => {
-      try {
-        await tonConnectUI.connectWallet();
-      } catch (e) {
-        console.error(e);
-      }
-    };
+  connectBtn.onclick = async () => {
+    await tonConnectUI.connectWallet();
+  };
 
-    tonConnectUI.onStatusChange(wallet => {
-      if (wallet) {
-        button.innerText = 'Wallet Connected';
-        button.disabled = true;
-        status.innerText = 'Connected:\n' + wallet.account.address;
-      } else {
-        button.innerText = 'Connect Wallet';
-        button.disabled = false;
-        status.innerText = 'Wallet not connected';
-      }
-    });
-  </script>
+  disconnectBtn.onclick = async () => {
+    await tonConnectUI.disconnect();
+  };
+
+  tonConnectUI.onStatusChange(wallet => {
+    if (wallet) {
+      status.innerText = 'Connected:\n' + wallet.account.address;
+    } else {
+      status.innerText = 'Wallet not connected';
+    }
+  });
+</script>
 
 </body>
 </html>
