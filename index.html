@@ -189,13 +189,13 @@ tonConnectUI.onStatusChange(wallet => {
 buyBtn.onclick = () => {
   if (buyBtn.disabled) return;
   positionEl.innerText = 'LONG';
-  console.log('[SIMULATION] BUY');
+  console.log('[SIMULATION] BUY → LONG');
 };
 
 sellBtn.onclick = () => {
   if (sellBtn.disabled) return;
-  positionEl.innerText = 'No position';
-  console.log('[SIMULATION] SELL');
+  positionEl.innerText = 'SHORT';
+  console.log('[SIMULATION] SELL → SHORT');
 };
   </script>
 </body>
