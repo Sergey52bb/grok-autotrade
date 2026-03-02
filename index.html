@@ -3,61 +3,63 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-<title>Grok AutoTrade</title>
+<title>Grok AutoTrade Bot</title>
 
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
 <style>
 body {
   margin: 0;
-  font-family: Arial, sans-serif;
-  background: linear-gradient(180deg, #0b1020, #020617);
+  font-family: Inter, system-ui, sans-serif;
+  background: radial-gradient(circle at top, #0b1220, #050810);
   color: #fff;
 }
+
 .container {
   max-width: 420px;
   margin: auto;
-  padding: 15px;
+  padding: 16px;
 }
+
 .card {
-  background: #0f172a;
-  border-radius: 16px;
-  padding: 15px;
-  margin-bottom: 15px;
+  background: linear-gradient(180deg, #0f172a, #020617);
+  border-radius: 18px;
+  padding: 16px;
+  margin-bottom: 16px;
+  box-shadow: 0 10px 30px rgba(0,0,0,.5);
 }
+
 .row {
   display: flex;
   justify-content: space-between;
+  align-items: center;
 }
-.btns {
-  display: flex;
-  gap: 10px;
+
+.price {
+  font-size: 34px;
+  font-weight: 700;
 }
+
+.change.up { color: #22c55e; }
+.change.down { color: #ef4444; }
+
 button {
   flex: 1;
-  padding: 15px;
-  border: none;
+  padding: 14px;
+  margin: 6px;
   border-radius: 14px;
+  border: none;
   font-size: 16px;
-  font-weight: bold;
-  cursor: pointer;
+  font-weight: 600;
+  color: #fff;
 }
+
 .buy { background: #22c55e; }
 .sell { background: #ef4444; }
 .connect { background: #3b82f6; }
-.disconnect { background: #ef4444; margin-top: 10px; }
-.log {
-  font-size: 14px;
-  opacity: 0.85;
-}
+
 canvas {
-  width: 100% !important;
-  height: 220px !important;
-}
-.status {
-  text-align: center;
-  opacity: 0.7;
-  margin-top: 10px;
+  margin-top: 12px;
 }
 </style>
 </head>
@@ -65,122 +67,102 @@ canvas {
 <body>
 <div class="container">
 
+  <!-- PRICE CARD -->
   <div class="card">
-    <div class="row"><span>Pair</span><span>USDT / TON</span></div>
-    <div class="row"><span>Status</span><span>Active</span></div>
+    <div class="row">
+      <div>
+        <div class="price" id="price">--</div>
+        <div id="change" class="change">--</div>
+      </div>
+      <div>USDT / TON</div>
+    </div>
   </div>
 
-  <div class="card">
-    <div class="row"><span>Balance</span><span id="balance">0.00 USDT</span></div>
-    <div class="row"><span>Position</span><span id="position">No position</span></div>
+  <!-- ACTIONS -->
+  <div class="card row">
+    <button class="buy">BUY</button>
+    <button class="sell">SELL</button>
   </div>
 
-  <div class="btns">
-    <button class="buy" onclick="buy()">BUY</button>
-    <button class="sell" onclick="sell()">SELL</button>
+  <!-- CHART -->
+  <div class="card">
+    <canvas id="chart" height="180"></canvas>
   </div>
 
+  <!-- WALLET -->
   <div class="card">
-    <canvas id="chart"></canvas>
-  </div>
-
-  <button class="connect" onclick="connectWallet()">Connect Wallet</button>
-  <button class="disconnect" onclick="disconnectWallet()">Disconnect</button>
-  <div class="status" id="walletStatus">Wallet not connected</div>
-
-  <div class="card">
-    <strong>Trade Log</strong>
-    <div class="log" id="log"></div>
+    <button class="connect">Connect Wallet</button>
   </div>
 
 </div>
 
 <script>
-let walletConnected = false;
-let position = null;
-let balance = 0;
-let chart;
+const ctx = document.getElementById("chart").getContext("2d");
 
-function log(text) {
-  const l = document.getElementById('log');
-  l.innerHTML = new Date().toLocaleTimeString() + ' — ' + text + '<br>' + l.innerHTML;
-}
+let prices = [];
+let labels = [];
 
-function connectWallet() {
-  walletConnected = true;
-  balance = 100;
-  document.getElementById('balance').innerText = balance.toFixed(2) + ' USDT';
-  document.getElementById('walletStatus').innerText = 'Wallet connected (simulation)';
-  log('Wallet connected');
-}
+const chart = new Chart(ctx, {
+  type: "line",
+  data: {
+    labels,
+    datasets: [{
+      data: prices,
+      borderColor: "#38bdf8",
+      borderWidth: 3,
+      tension: 0.4,
+      pointRadius: 0
+    }]
+  },
+  options: {
+    responsive: true,
+    plugins: { legend: { display: false } },
+    scales: {
+      x: { display: false },
+      y: { ticks: { color: "#94a3b8" } }
+    }
+  }
+});
 
-function disconnectWallet() {
-  walletConnected = false;
-  balance = 0;
-  position = null;
-  document.getElementById('balance').innerText = '0.00 USDT';
-  document.getElementById('position').innerText = 'No position';
-  document.getElementById('walletStatus').innerText = 'Wallet not connected';
-  log('Wallet disconnected');
-}
-
-function buy() {
-  if (!walletConnected) return alert('Connect wallet');
-  position = 'LONG';
-  document.getElementById('position').innerText = 'LONG';
-  log('BUY executed (simulation)');
-}
-
-function sell() {
-  if (!walletConnected) return alert('Connect wallet');
-  position = null;
-  document.getElementById('position').innerText = 'No position';
-  log('SELL executed (simulation)');
-}
-
-async function loadChart() {
-  const ctx = document.getElementById('chart').getContext('2d');
-
-  let prices = [];
-  let labels = [];
-
+async function loadPrice() {
   try {
     const res = await fetch(
-      'https://corsproxy.io/?https://api.binance.com/api/v3/klines?symbol=TONUSDT&interval=1m&limit=20'
+      "https://api.coingecko.com/api/v3/coins/the-open-network/market_chart?vs_currency=usd&days=1"
     );
     const data = await res.json();
-    data.forEach(c => {
-      labels.push('');
-      prices.push(parseFloat(c[4]));
-    });
-    log('Price data loaded from Binance');
-  } catch (e) {
-    // fallback (ALWAYS works)
-    prices = [2.30,2.32,2.31,2.33,2.35,2.34,2.36,2.38,2.37,2.39];
-    labels = prices.map(() => '');
-    log('Fallback price data used');
-  }
 
-  chart = new Chart(ctx, {
-    type: 'line',
-    data: {
-      labels,
-      datasets: [{
-        label: 'USDT / TON',
-        data: prices,
-        borderColor: '#38bdf8',
-        tension: 0.4
-      }]
-    },
-    options: {
-      responsive: true,
-      plugins: { legend: { display: true } },
-      scales: { x: { display: false } }
+    const sliced = data.prices.slice(-30);
+    prices.length = 0;
+    labels.length = 0;
+
+    sliced.forEach(p => {
+      prices.push(p[1]);
+      labels.push("");
+    });
+
+    const first = prices[0];
+    const last = prices[prices.length - 1];
+    const change = ((last - first) / first * 100).toFixed(2);
+
+    document.getElementById("price").textContent = last.toFixed(3) + " USDT";
+    const changeEl = document.getElementById("change");
+    changeEl.textContent = (change > 0 ? "+" : "") + change + "%";
+    changeEl.className = "change " + (change >= 0 ? "up" : "down");
+
+    chart.update();
+
+  } catch {
+    // fallback
+    if (!prices.length) {
+      prices.push(2.3,2.32,2.31,2.34,2.36);
+      chart.update();
     }
-  });
+  }
 }
 
-loadChart();
+loadPrice();
+setInterval(loadPrice, 10000);
 </script>
+
 </body>
 </html>
