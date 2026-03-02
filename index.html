@@ -97,68 +97,7 @@
 </div>
 
 <script>
-  let walletConnected = false;
-  let balance = 0;
-  let position = null;
-  let currentPrice = null;
-
-  function connectWallet() {
-    walletConnected = true;
-    balance = 1000;
-    document.getElementById("walletStatus").innerText =
-      "Wallet connected (simulation)";
-    updateUI();
-  }
-
-  function disconnectWallet() {
-    walletConnected = false;
-    balance = 0;
-    position = null;
-    document.getElementById("walletStatus").innerText =
-      "Wallet not connected";
-    updateUI();
-  }
-
-  function updateUI() {
-    document.getElementById("balance").innerText =
-      balance.toFixed(2) + " USDT";
-    document.getElementById("position").innerText =
-      position ? "LONG @ " + position.toFixed(4) : "No position";
-  }
-
-  async function fetchPrice() {
-    try {
-      const res = await fetch(
-        "https://api.coingecko.com/api/v3/simple/price?ids=the-open-network&vs_currencies=usd",
-        { cache: "no-store" }
-      );
-
-      const data = await res.json();
-      currentPrice = Number(data["the-open-network"].usd);
-
-      document.getElementById("price").innerText =
-        currentPrice.toFixed(4) + " USDT";
-
-    } catch (e) {
-      document.getElementById("price").innerText = "Price error";
-    }
-  }
-
-  function buy() {
-    if (!walletConnected || position) return;
-    position = currentPrice;
-    updateUI();
-  }
-
-  function sell() {
-    if (!walletConnected || !position) return;
-    balance += (currentPrice - position) * 10;
-    position = null;
-    updateUI();
-  }
-
-  fetchPrice();
-  setInterval(fetchPrice, 5000);
+  https://api.coingecko.com/api/v3/simple/price?ids=the-open-network&vs_currencies=usd
 </script>
 
 </body>
