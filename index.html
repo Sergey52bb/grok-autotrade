@@ -2,199 +2,214 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>Grok AutoTrade</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-
-  <!-- TON Connect UI -->
-  <script src="https://unpkg.com/@tonconnect/ui@latest/dist/tonconnect-ui.min.js"></script>
+  <title>USDT / TON Trade</title>
 
   <style>
     body {
       margin: 0;
-      font-family: Inter, system-ui, sans-serif;
-      background: radial-gradient(circle at top, #0b1224, #020617);
+      background: #0b1220;
+      font-family: Arial, sans-serif;
       color: #fff;
     }
 
-    .card {
-      margin: 20px;
+    .container {
+      max-width: 420px;
+      margin: 0 auto;
       padding: 20px;
-      border-radius: 20px;
-      background: linear-gradient(180deg, #0b1224, #020617);
-      box-shadow: 0 20px 50px rgba(0,0,0,.6);
     }
 
-    .price {
+    .card {
+      background: linear-gradient(180deg, #0f172a, #020617);
+      border-radius: 20px;
+      padding: 20px;
+      margin-bottom: 20px;
+    }
+
+    h1 {
+      margin: 0;
       font-size: 36px;
-      font-weight: 700;
     }
 
     .pair {
-      opacity: .7;
-      margin-top: 6px;
+      opacity: 0.7;
+      margin-top: 4px;
     }
 
     .buttons {
       display: flex;
       gap: 12px;
-      margin-top: 20px;
+      margin-top: 16px;
     }
 
     button {
       flex: 1;
-      padding: 16px;
+      padding: 14px;
       border-radius: 14px;
       border: none;
       font-size: 16px;
-      font-weight: 600;
+      font-weight: bold;
       cursor: pointer;
     }
 
-    .buy { background: #22c55e; color: #000; }
-    .sell { background: #ef4444; color: #000; }
-
-    button:disabled {
-      opacity: .4;
-      cursor: not-allowed;
+    #buyBtn {
+      background: #22c55e;
+      color: #022c22;
     }
 
-    .row {
-      margin-top: 14px;
-      font-size: 14px;
-      opacity: .85;
+    #sellBtn {
+      background: #ef4444;
+      color: #450a0a;
+    }
+
+    button:disabled {
+      opacity: 0.4;
+      cursor: not-allowed;
     }
 
     input {
       width: 100%;
-      margin-top: 8px;
       padding: 14px;
       border-radius: 12px;
       border: none;
       font-size: 16px;
+      margin-top: 10px;
+    }
+
+    .row {
+      margin-top: 10px;
+      font-size: 14px;
+      opacity: 0.85;
     }
 
     .connect {
-      margin-top: 20px;
+      background: #3b82f6;
+      color: #fff;
+      margin-top: 14px;
     }
 
     .wallet {
       margin-top: 10px;
-      font-size: 13px;
-      opacity: .75;
-      word-break: break-all;
+      font-size: 14px;
+      opacity: 0.8;
     }
   </style>
 </head>
+
 <body>
+  <div class="container">
 
-  <div class="card">
-    <div class="price">1.248 USDT</div>
-    <div class="pair">USDT / TON</div>
+    <div class="card">
+      <h1>1.248 USDT</h1>
+      <div class="pair">USDT / TON</div>
 
-    <div class="buttons">
-      <button id="buyBtn" class="buy" disabled>BUY</button>
-      <button id="sellBtn" class="sell" disabled>SELL</button>
+      <div class="buttons">
+        <button id="buyBtn" disabled>BUY</button>
+        <button id="sellBtn" disabled>SELL</button>
+      </div>
     </div>
+
+    <div class="card">
+      <div>Amount (TON)</div>
+      <input id="amountInput" type="number" placeholder="0.0" />
+
+      <div class="row">
+        Commission (0.25%):
+        <span id="commissionValue">0.0000 TON</span>
+      </div>
+
+      <div class="row">
+        You will receive:
+        <span id="receiveValue">0.0000 TON</span>
+      </div>
+
+      <button id="connectWalletBtn" class="connect">
+        Connect Wallet
+      </button>
+
+      <div id="walletStatus" class="wallet">
+        Wallet not connected
+      </div>
+
+      <div class="wallet">
+        Balance: <span id="tonBalance">0.0000</span> TON
+      </div>
+    </div>
+
   </div>
 
-  <div class="card">
-    <div class="row">Amount (TON)</div>
-    <input id="amount" type="number" placeholder="0.0" min="0" step="any"/>
+  <!-- TON CONNECT LIB -->
+  <script src="https://unpkg.com/@tonconnect/ui@latest/dist/tonconnect-ui.min.js"></script>
 
-    <div class="row">Commission (0.25%): <span id="fee">0.0000</span> TON</div>
-    <div class="row">You will receive: <span id="receive">0.0000</span> TON</div>
+  <!-- APP SCRIPT -->
+  <script>
+    /* CONFIG */
+    const COMMISSION_RATE = 0.0025;
 
-    <div class="connect" id="ton-connect"></div>
+    /* ELEMENTS */
+    const amountInput = document.getElementById("amountInput");
+    const commissionValue = document.getElementById("commissionValue");
+    const receiveValue = document.getElementById("receiveValue");
+    const buyBtn = document.getElementById("buyBtn");
+    const sellBtn = document.getElementById("sellBtn");
+    const walletStatus = document.getElementById("walletStatus");
+    const balanceEl = document.getElementById("tonBalance");
+    const connectBtn = document.getElementById("connectWalletBtn");
 
-    <div class="wallet" id="walletInfo">Wallet not connected</div>
-    <div class="wallet" id="balanceInfo">Balance: 0.0000 TON</div>
-  </div>
+    /* TON CONNECT */
+    const tonConnectUI = new TON_CONNECT_UI.TonConnectUI({
+      manifestUrl: "https://rgey52bb.github.io/tonconnect-manifest.json"
+    });
 
-<script>
-  /* =========================
-   DEV MODE CONFIG
-========================= */
-const DEV_MODE = true;          // ⬅️ false — для прода
-const DEV_TON_BALANCE = 10;     // тестовый баланс
+    let walletConnected = false;
 
-/* =========================
-   ELEMENTS
-========================= */
-const amountInput = document.getElementById("amountInput");
-const commissionValue = document.getElementById("commissionValue");
-const receiveValue = document.getElementById("receiveValue");
-const buyBtn = document.getElementById("buyBtn");
-const sellBtn = document.getElementById("sellBtn");
-const balanceEl = document.getElementById("tonBalance");
+    function updateButtons() {
+      buyBtn.disabled = !walletConnected;
+      sellBtn.disabled = !walletConnected;
+    }
 
-/* =========================
-   CONSTANTS
-========================= */
-const COMMISSION_RATE = 0.0025;
+    function updateCalc() {
+      const amount = parseFloat(amountInput.value) || 0;
+      const fee = amount * COMMISSION_RATE;
+      const receive = amount - fee;
 
-/* =========================
-   BALANCE
-========================= */
-let tonBalance = 0;
+      commissionValue.textContent = fee.toFixed(4) + " TON";
+      receiveValue.textContent = receive.toFixed(4) + " TON";
+    }
 
-function setBalance(balance) {
-  tonBalance = balance;
-  balanceEl.textContent = balance.toFixed(4) + " TON";
-}
+    amountInput.addEventListener("input", updateCalc);
 
-/* DEV balance */
-if (DEV_MODE) {
-  setBalance(DEV_TON_BALANCE);
-}
+    connectBtn.addEventListener("click", async () => {
+      await tonConnectUI.openModal();
+    });
 
-/* =========================
-   CALCULATION
-========================= */
-function recalc() {
-  const amount = parseFloat(amountInput.value);
+    tonConnectUI.onStatusChange(wallet => {
+      if (!wallet) {
+        walletConnected = false;
+        walletStatus.textContent = "Wallet not connected";
+        balanceEl.textContent = "0.0000";
+        updateButtons();
+        return;
+      }
 
-  if (!amount || amount <= 0) {
-    commissionValue.textContent = "0.0000 TON";
-    receiveValue.textContent = "0.0000 TON";
-    buyBtn.disabled = true;
-    sellBtn.disabled = true;
-    return;
-  }
+      walletConnected = true;
+      walletStatus.textContent = "Wallet connected";
 
-  const commission = amount * COMMISSION_RATE;
-  const receive = amount - commission;
+      try {
+        const bal = Number(wallet.account.balance) / 1e9;
+        balanceEl.textContent = bal.toFixed(4);
+      } catch {
+        balanceEl.textContent = "0.0000";
+      }
 
-  commissionValue.textContent = commission.toFixed(4) + " TON";
-  receiveValue.textContent = receive.toFixed(4) + " TON";
+      updateButtons();
+    });
 
-  const enabled =
-    tonBalance > 0 &&
-    amount <= tonBalance;
+    buyBtn.onclick = () => alert("BUY — next step: transaction");
+    sellBtn.onclick = () => alert("SELL — next step: transaction");
 
-  buyBtn.disabled = !enabled;
-  sellBtn.disabled = !enabled;
-}
-
-/* =========================
-   EVENTS
-========================= */
-amountInput.addEventListener("input", recalc);
-
-/* =========================
-   BUTTON ACTIONS (DEV)
-========================= */
-buyBtn.addEventListener("click", () => {
-  if (DEV_MODE) {
-    alert("DEV MODE: BUY clicked\nTransaction not sent");
-  }
-});
-
-sellBtn.addEventListener("click", () => {
-  if (DEV_MODE) {
-    alert("DEV MODE: SELL clicked\nTransaction not sent");
-  }
-});
-</script>
-
+    updateCalc();
+    updateButtons();
+  </script>
 </body>
 </html>
