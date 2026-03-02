@@ -111,66 +111,89 @@
   </div>
 
 <script>
-  // ===== TON CONNECT INIT =====
-  const tonConnectUI = new TON_CONNECT_UI.TonConnectUI({
-    manifestUrl: 'https://rgey52bb.github.io/tonconnect-manifest.json'
-  });
+  /* =========================
+   DEV MODE CONFIG
+========================= */
+const DEV_MODE = true;          // ⬅️ false — для прода
+const DEV_TON_BALANCE = 10;     // тестовый баланс
 
-  let tonBalance = 0;
+/* =========================
+   ELEMENTS
+========================= */
+const amountInput = document.getElementById("amountInput");
+const commissionValue = document.getElementById("commissionValue");
+const receiveValue = document.getElementById("receiveValue");
+const buyBtn = document.getElementById("buyBtn");
+const sellBtn = document.getElementById("sellBtn");
+const balanceEl = document.getElementById("tonBalance");
 
-  const buyBtn = document.getElementById('buyBtn');
-  const sellBtn = document.getElementById('sellBtn');
-  const amountInput = document.getElementById('amount');
-  const feeEl = document.getElementById('fee');
-  const receiveEl = document.getElementById('receive');
-  const walletInfo = document.getElementById('walletInfo');
-  const balanceInfo = document.getElementById('balanceInfo');
+/* =========================
+   CONSTANTS
+========================= */
+const COMMISSION_RATE = 0.0025;
 
-  tonConnectUI.uiOptions = {
-    buttonRootId: 'ton-connect'
-  };
+/* =========================
+   BALANCE
+========================= */
+let tonBalance = 0;
 
-  // ===== ON CONNECT =====
-  tonConnectUI.onStatusChange(async wallet => {
-    if (!wallet) {
-      walletInfo.textContent = 'Wallet not connected';
-      balanceInfo.textContent = 'Balance: 0.0000 TON';
-      tonBalance = 0;
-      updateButtons();
-      return;
-    }
+function setBalance(balance) {
+  tonBalance = balance;
+  balanceEl.textContent = balance.toFixed(4) + " TON";
+}
 
-    const address = wallet.account.address;
-    walletInfo.textContent = 'Wallet: ' + address.slice(0, 6) + '...' + address.slice(-4);
+/* DEV balance */
+if (DEV_MODE) {
+  setBalance(DEV_TON_BALANCE);
+}
 
-    // Получаем баланс
-    const res = await fetch(`https://toncenter.com/api/v2/getAddressInformation?address=${address}`);
-    const data = await res.json();
+/* =========================
+   CALCULATION
+========================= */
+function recalc() {
+  const amount = parseFloat(amountInput.value);
 
-    tonBalance = Number(data.result.balance) / 1e9;
-    balanceInfo.textContent = 'Balance: ' + tonBalance.toFixed(4) + ' TON';
-
-    updateButtons();
-  });
-
-  // ===== INPUT LOGIC =====
-  amountInput.addEventListener('input', () => {
-    const amount = Number(amountInput.value || 0);
-    const fee = amount * 0.0025;
-    const receive = amount - fee;
-
-    feeEl.textContent = fee.toFixed(4);
-    receiveEl.textContent = receive.toFixed(4);
-
-    updateButtons();
-  });
-
-  function updateButtons() {
-    const amount = Number(amountInput.value || 0);
-    const enabled = tonBalance > 0 && amount > 0 && amount <= tonBalance;
-    buyBtn.disabled = !enabled;
-    sellBtn.disabled = !enabled;
+  if (!amount || amount <= 0) {
+    commissionValue.textContent = "0.0000 TON";
+    receiveValue.textContent = "0.0000 TON";
+    buyBtn.disabled = true;
+    sellBtn.disabled = true;
+    return;
   }
+
+  const commission = amount * COMMISSION_RATE;
+  const receive = amount - commission;
+
+  commissionValue.textContent = commission.toFixed(4) + " TON";
+  receiveValue.textContent = receive.toFixed(4) + " TON";
+
+  const enabled =
+    tonBalance > 0 &&
+    amount <= tonBalance;
+
+  buyBtn.disabled = !enabled;
+  sellBtn.disabled = !enabled;
+}
+
+/* =========================
+   EVENTS
+========================= */
+amountInput.addEventListener("input", recalc);
+
+/* =========================
+   BUTTON ACTIONS (DEV)
+========================= */
+buyBtn.addEventListener("click", () => {
+  if (DEV_MODE) {
+    alert("DEV MODE: BUY clicked\nTransaction not sent");
+  }
+});
+
+sellBtn.addEventListener("click", () => {
+  if (DEV_MODE) {
+    alert("DEV MODE: SELL clicked\nTransaction not sent");
+  }
+});
 </script>
 
 </body>
