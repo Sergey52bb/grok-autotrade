@@ -111,16 +111,21 @@ let currentPrice = null;
 async function fetchPrice() {
   try {
     const res = await fetch(
-      "https://api.binance.com/api/v3/ticker/price?symbol=TONUSDT"
+      "https://api.allorigins.win/raw?url=https://api.binance.com/api/v3/ticker/price?symbol=TONUSDT"
     );
-    const data = await res.json();
 
+    const data = await res.json();
     currentPrice = parseFloat(data.price);
 
-    document.getElementById("price").innerText =
-      currentPrice.toFixed(4) + " USDT";
+    const priceEl = document.getElementById("price");
+    if (priceEl) {
+      priceEl.innerText = currentPrice.toFixed(4) + " USDT";
+    }
   } catch (e) {
-    document.getElementById("price").innerText = "Price error";
+    const priceEl = document.getElementById("price");
+    if (priceEl) {
+      priceEl.innerText = "Price error";
+    }
   }
 }
 
