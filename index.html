@@ -106,33 +106,26 @@ Wallet not connected
 </div>
 
 <script>
-let currentPrice = null;
+let currentPrice = 0;
 
 async function fetchPrice() {
   try {
     const res = await fetch(
-      "https://api.allorigins.win/raw?url=https://api.binance.com/api/v3/ticker/price?symbol=TONUSDT"
+      "https://api.coingecko.com/api/v3/simple/price?ids=the-open-network&vs_currencies=usd"
     );
-
     const data = await res.json();
-    currentPrice = parseFloat(data.price);
 
-    const priceEl = document.getElementById("price");
-    if (priceEl) {
-      priceEl.innerText = currentPrice.toFixed(4) + " USDT";
-    }
+    currentPrice = data["the-open-network"].usd;
+
+    document.getElementById("price").innerText =
+      currentPrice.toFixed(4) + " USDT";
+
   } catch (e) {
-    const priceEl = document.getElementById("price");
-    if (priceEl) {
-      priceEl.innerText = "Price error";
-    }
+    document.getElementById("price").innerText = "Price error";
   }
 }
 
-// первая загрузка
 fetchPrice();
-
-// обновление каждые 5 секунд
 setInterval(fetchPrice, 5000);
 </script>
 
