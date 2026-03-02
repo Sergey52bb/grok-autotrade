@@ -176,8 +176,7 @@ async function fetchPrice() {
   try {
     const res = await fetch(
   'https://corsproxy.io/?https://api.binance.com/api/v3/klines?symbol=TONUSDT&interval=1m&limit=20'
-);
-    );
+  );
     const data = await res.json();
 
     priceChart.data.labels = data.map(d =>
