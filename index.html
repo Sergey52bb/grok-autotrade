@@ -187,9 +187,25 @@ function disconnectWallet() {
 }
 
 // ===== START =====
-fetchPrice();
-setInterval(fetchPrice, 5000);
-updateUI();
+async function fetchPrice() {
+  try {
+    const res = await fetch(
+      "https://api.coingecko.com/api/v3/simple/price?ids=the-open-network&vs_currencies=usd"
+    );
+
+    const data = await res.json();
+
+    currentPrice = data["the-open-network"].usd;
+
+    document.getElementById("price").innerText =
+      currentPrice.toFixed(4) + " USDT";
+
+    updateUI();
+
+  } catch (e) {
+    document.getElementById("price").innerText = "Price error";
+  }
+  }
 </script>
 
 </body>
