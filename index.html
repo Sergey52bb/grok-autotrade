@@ -1,103 +1,132 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <title>TON Demo Trade</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-
-  <style>
-    body {
-      margin: 0;
-      background: #0b1220;
-      font-family: Arial, sans-serif;
-      color: #fff;
-    }
-    .container {
-      padding: 16px;
-      max-width: 420px;
-      margin: auto;
-    }
-    .card {
-      background: linear-gradient(180deg, #121c2f, #0d1526);
-      border-radius: 16px;
-      padding: 16px;
-      margin-bottom: 14px;
-    }
-    .row {
-      display: flex;
-      justify-content: space-between;
-      margin-bottom: 6px;
-    }
-    .btn-row {
-      display: flex;
-      gap: 12px;
-    }
-    button {
-      flex: 1;
-      padding: 14px;
-      border: none;
-      border-radius: 12px;
-      font-size: 16px;
-      color: #fff;
-    }
-    .buy { background: #2ecc71; color:#000; }
-    .sell { background: #7a2e2e; }
-    .connect { background: #3b82f6; }
-    .disconnect { background: #ef4444; }
-    .center { text-align: center; opacity: 0.8; }
-  </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Grok AutoTrade</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
-
 <body>
-<div class="container">
 
-  <div class="card">
+<div class="card">
     <div class="row">
-      <div>Pair</div>
-      <div>USDT / TON</div>
+        <span>Pair</span>
+        <span id="pair">USDT / TON</span>
     </div>
     <div class="row">
-      <div>Status</div>
-      <div>Active</div>
+        <span>Status</span>
+        <span id="status">Active</span>
     </div>
-  </div>
-
-  <div class="card">
-    <div class="card">
-  <div class="row">
-    <span>Pair</span>
-    <span id="pair">USDT / TON</span>
-  </div>
-  <div class="row">
-    <span>Status</span>
-    <span id="status">Active</span>
-  </div>
-  <div class="row">
-    <span>Balance</span>
-    <span id="balance">0.00 USDT</span>
-  </div>
-  <div class="row">
-    <span>Position</span>
-    <span id="position">No position</span>
-  </div>
-  <div class="row">
-    <span>Price</span>
-    <span id="price">-</span>
-  </div>
+    <div class="row">
+        <span>Balance</span>
+        <span id="balance">0.00 USDT</span>
+    </div>
+    <div class="row">
+        <span>Position</span>
+        <span id="position">No position</span>
+    </div>
+    <div class="row">
+        <span>Price</span>
+        <span id="price">-</span>
+    </div>
 </div>
 
-<button onclick="buy()">BUY</button>
-<button onclick="sell()">SELL</button>
-
-<button onclick="connectWallet()">Connect Wallet</button>
-<button onclick="disconnectWallet()">Disconnect</button>
-
-<p id="walletStatus">Wallet not connected</p>
+<div class="buttons">
+    <button id="buyBtn" onclick="buy()">BUY</button>
+    <button id="sellBtn" onclick="sell()">SELL</button>
+    <button id="connectBtn" onclick="connectWallet()">Connect Wallet</button>
+    <button id="disconnectBtn" onclick="disconnectWallet()">Disconnect</button>
 </div>
+
+<p id="walletStatus" style="text-align:center; opacity:0.8;">Wallet not connected</p>
 
 <script>
-  https://api.coingecko.com/api/v3/simple/price?ids=the-open-network&vs_currencies=usd
-</script>
+    let balance = 1000.00; // Initial balance
+    let position = null;   // No position initially
+    let walletConnected = false;
+    let currentPrice = null;
 
+    // Fetch current price from an API (you can adjust the URL based on your data source)
+    async function fetchPrice() {
+        try {
+            const res = await fetch("https://api.coingecko.com/api/v3/simple/price?ids=the-open-network&vs_currencies=usd");
+            const data = await res.json();
+            currentPrice = data["the-open-network"].usd;
+            document.getElementById("price").innerText = currentPrice.toFixed(4) + " USDT";
+        } catch (e) {
+            document.getElementById("price").innerText = "Price error";
+        }
+    }
+
+    // Update the UI for balance and position
+    function updateUI() {
+        document.getElementById("balance").innerText = balance.toFixed(2) + " USDT";
+        document.getElementById("position").innerText = position ? `LONG @ ${position.entryPrice}` : "No position";
+    }
+
+    // BUY function
+    function buy() {
+        if (!walletConnected) {
+            alert("Connect wallet first.");
+            return;
+        }
+
+        if (position) {
+            alert("Position already open.");
+            return;
+        }
+
+        if (balance <= 0) {
+            alert("Insufficient balance.");
+            return;
+        }
+
+        position = {
+            entryPrice: currentPrice
+        };
+        balance -= 1000; // Example trade amount
+        updateUI();
+        alert("BUY executed (simulation)");
+    }
+
+    // SELL function
+    function sell() {
+        if (!walletConnected) {
+            alert("Connect wallet first.");
+            return;
+        }
+
+        if (!position) {
+            alert("No position to sell.");
+            return;
+        }
+
+        const profit = currentPrice - position.entryPrice;
+        balance += profit; // Add profit or loss to balance
+        position = null; // Close position
+        updateUI();
+        alert("SELL executed (simulation)");
+    }
+
+    // Connect Wallet
+    function connectWallet() {
+        walletConnected = true;
+        document.getElementById("walletStatus").innerText = "Wallet connected (simulation)";
+        updateUI();
+    }
+
+    // Disconnect Wallet
+    function disconnectWallet() {
+        walletConnected = false;
+        position = null;
+        document.getElementById("walletStatus").innerText = "Wallet not connected";
+        updateUI();
+    }
+
+    // Start the fetch price and update every 5 seconds
+    fetchPrice();
+    setInterval(fetchPrice, 5000);
+
+</script>
 </body>
-  </html>
+</html>
