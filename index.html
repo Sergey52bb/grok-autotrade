@@ -63,37 +63,36 @@
   </div>
 
   <div class="card">
-    <div class="row">
-      <div>Balance</div>
-      <div id="balance">0.00 USDT</div>
-    </div>
-    <div class="row">
-      <div>Position</div>
-      <div id="position">No position</div>
-    </div>
+    <div class="card">
+  <div class="row">
+    <span>Pair</span>
+    <span id="pair">USDT / TON</span>
   </div>
-
-  <div class="btn-row">
-    <button class="buy" onclick="buy()">BUY</button>
-    <button class="sell" onclick="sell()">SELL</button>
+  <div class="row">
+    <span>Status</span>
+    <span id="status">Active</span>
   </div>
-
-  <div class="card"></div>
-
-  <div class="btn-row">
-    <button class="connect" onclick="connectWallet()">Connect Wallet</button>
-    <button class="disconnect" onclick="disconnectWallet()">Disconnect</button>
+  <div class="row">
+    <span>Balance</span>
+    <span id="balance">0.00 USDT</span>
   </div>
-
-  <div class="card">
-    <div class="row">
-      <div>Price</div>
-      <div id="price">—</div>
-    </div>
+  <div class="row">
+    <span>Position</span>
+    <span id="position">No position</span>
   </div>
+  <div class="row">
+    <span>Price</span>
+    <span id="price">-</span>
+  </div>
+</div>
 
-  <div class="center" id="walletStatus">Wallet not connected</div>
+<button onclick="buy()">BUY</button>
+<button onclick="sell()">SELL</button>
 
+<button onclick="connectWallet()">Connect Wallet</button>
+<button onclick="disconnectWallet()">Disconnect</button>
+
+<p id="walletStatus">Wallet not connected</p>
 </div>
 
 <script>
