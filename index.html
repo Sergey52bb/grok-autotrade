@@ -2,17 +2,14 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>Grok AutoTrade Bot</title>
+  <title>Grok AutoTrade</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-
-  <!-- TON Connect UI -->
-  <script src="https://unpkg.com/@tonconnect/ui@latest/dist/tonconnect-ui.min.js"></script>
 
   <style>
     body {
       margin: 0;
-      font-family: -apple-system, BlinkMacSystemFont, Inter, sans-serif;
-      background: radial-gradient(circle at top, #0f172a, #020617);
+      font-family: Arial, sans-serif;
+      background: radial-gradient(circle at top, #0b1220, #050812);
       color: #fff;
     }
 
@@ -23,20 +20,19 @@
     }
 
     .card {
-      background: linear-gradient(180deg, #0b1220, #05080f);
-      border-radius: 20px;
-      padding: 20px;
+      background: #0e1625;
+      border-radius: 16px;
+      padding: 18px;
       margin-bottom: 16px;
-      box-shadow: 0 10px 30px rgba(0,0,0,.4);
     }
 
     .price {
       font-size: 36px;
-      font-weight: 700;
+      font-weight: bold;
     }
 
     .pair {
-      opacity: .6;
+      opacity: 0.7;
       margin-top: 4px;
     }
 
@@ -46,35 +42,67 @@
       margin-top: 16px;
     }
 
-    .btn {
+    button {
       flex: 1;
       padding: 14px;
-      font-size: 16px;
-      border: none;
       border-radius: 14px;
-      font-weight: 600;
+      border: none;
+      font-size: 16px;
+      font-weight: bold;
       cursor: pointer;
     }
 
-    .buy { background: #22c55e; color: #062b15; }
-    .sell { background: #ef4444; color: #2b0606; }
-
-    .label {
-      font-size: 12px;
-      opacity: .5;
-      margin-top: 12px;
+    .buy {
+      background: #22c55e;
+      color: #000;
     }
 
-    .value {
-      font-size: 18px;
-      font-weight: 600;
+    .sell {
+      background: #ef4444;
+      color: #000;
     }
 
-    .chart {
-      height: 120px;
-      background: linear-gradient(180deg, #020617, #020617);
+    .trade-panel {
+      margin-top: 16px;
+      padding: 16px;
+      background: #0e1625;
       border-radius: 14px;
-      margin-top: 12px;
+    }
+
+    .trade-panel input {
+      width: 100%;
+      padding: 12px;
+      border-radius: 10px;
+      border: none;
+      outline: none;
+      font-size: 16px;
+      margin-bottom: 12px;
+    }
+
+    .calc-line {
+      display: flex;
+      justify-content: space-between;
+      color: #9aa4b2;
+      font-size: 14px;
+      margin-bottom: 6px;
+    }
+
+    .wallet {
+      margin-top: 16px;
+      text-align: center;
+    }
+
+    .connect {
+      background: #3b82f6;
+      color: #fff;
+      width: 100%;
+      margin-top: 10px;
+    }
+
+    .balance {
+      margin-top: 10px;
+      opacity: 0.8;
+      font-size: 14px;
     }
   </style>
 </head>
@@ -82,69 +110,82 @@
 <body>
   <div class="container">
 
-    <!-- PRICE -->
+    <!-- PRICE CARD -->
     <div class="card">
       <div class="price">1.248 USDT</div>
       <div class="pair">USDT / TON</div>
+
+      <div class="buttons">
+        <button class="buy" id="buyBtn" disabled>BUY</button>
+        <button class="sell">SELL</button>
+      </div>
     </div>
 
-    <!-- BUY / SELL -->
-    <div class="card">
-      <div class="buttons">
-        <button class="btn buy" disabled>BUY</button>
-        <button class="btn sell" disabled>SELL</button>
+    <!-- TRADE PANEL -->
+    <div class="trade-panel">
+      <label>Amount (TON)</label>
+      <input
+        type="number"
+        id="amountInput"
+        placeholder="0.0"
+        step="0.01"
+        min="0"
+      />
+
+      <div class="calc-line">
+        <span>Commission (0.25%)</span>
+        <span id="commissionValue">0.0000 TON</span>
+      </div>
+
+      <div class="calc-line">
+        <span>You will receive</span>
+        <span id="receiveValue">0.0000 TON</span>
       </div>
     </div>
 
     <!-- WALLET -->
-    <div class="card" id="wallet-card">
-      <div id="ton-connect"></div>
-
-      <div id="wallet-info" style="display:none;">
-        <div class="label">Wallet</div>
-        <div class="value" id="wallet-address"></div>
-
-        <div class="label">Balance</div>
-        <div class="value" id="wallet-balance">Loading...</div>
-      </div>
-    </div>
-
-    <!-- CHART PLACEHOLDER -->
-    <div class="card">
-      <div class="chart"></div>
+    <div class="card wallet">
+      <button class="connect">Connect Wallet</button>
+      <div class="balance">Balance: <span id="tonBalance">0.0000</span> TON</div>
     </div>
 
   </div>
 
   <script>
-    const tonConnectUI = new TON_CONNECT_UI.TonConnectUI({
-      manifestUrl: "https://rgey52bb.github.io/tonconnect-manifest.json",
-      buttonRootId: "ton-connect"
-    });
+    const amountInput = document.getElementById("amountInput");
+    const commissionValue = document.getElementById("commissionValue");
+    const receiveValue = document.getElementById("receiveValue");
+    const buyBtn = document.getElementById("buyBtn");
+    const tonBalanceEl = document.getElementById("tonBalance");
 
-    const TONCENTER_API = "https://toncenter.com/api/v2/getAddressBalance";
+    const COMMISSION_RATE = 0.0025;
 
-    async function getTonBalance(address) {
-      const res = await fetch(`${TONCENTER_API}?address=${address}`);
-      const data = await res.json();
-      return (Number(data.result) / 1e9).toFixed(4);
-    }
+    // ⚠️ тут потом подставим реальный баланс из кошелька
+    let tonBalance = 0.0;
+    tonBalanceEl.textContent = tonBalance.toFixed(4);
 
-    tonConnectUI.onStatusChange(async wallet => {
-      if (!wallet) return;
+    amountInput.addEventListener("input", () => {
+      const amount = parseFloat(amountInput.value);
 
-      const address = wallet.account.address;
+      if (!amount || amount <= 0) {
+        commissionValue.textContent = "0.0000 TON";
+        receiveValue.textContent = "0.0000 TON";
+        buyBtn.disabled = true;
+        return;
+      }
 
-      document.getElementById("wallet-info").style.display = "block";
-      document.getElementById("wallet-address").innerText =
-        address.slice(0, 6) + "..." + address.slice(-4);
+      if (amount > tonBalance) {
+        receiveValue.textContent = "Not enough balance";
+        buyBtn.disabled = true;
+        return;
+      }
 
-      const balance = await getTonBalance(address);
-      document.getElementById("wallet-balance").innerText =
-        balance + " TON";
+      const commission = amount * COMMISSION_RATE;
+      const receive = amount - commission;
 
-      document.querySelector(".buy").disabled = false;
-      document.querySelector(".sell").disabled = false;
+      commissionValue.textContent = commission.toFixed(4) + " TON";
+      receiveValue.textContent = receive.toFixed(4) + " TON";
+      buyBtn.disabled = false;
     });
   </script>
 </body>
