@@ -1,225 +1,165 @@
 <!DOCTYPE html>
-<html lang="ru">
+<html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Grok AutoTrade</title>
+  <meta charset="UTF-8" />
+  <title>TON Demo Trade</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-
-<style>
-body {
-  margin: 0;
-  font-family: Arial, sans-serif;
-  background: radial-gradient(circle at top, #0b1e3a, #02040a);
-  color: #fff;
-}
-
-.container {
-  max-width: 420px;
-  margin: auto;
-  padding: 20px;
-}
-
-.card {
-  background: rgba(255,255,255,0.05);
-  border-radius: 16px;
-  padding: 16px;
-  margin-bottom: 16px;
-}
-
-.row {
-  display: flex;
-  justify-content: space-between;
-}
-
-button {
-  width: 48%;
-  padding: 14px;
-  border: none;
-  border-radius: 12px;
-  font-size: 16px;
-  cursor: pointer;
-}
-
-.buy { background: #2ecc71; color: #000; }
-.sell { background: #e74c3c; color: #000; }
-
-.disabled {
-  opacity: 0.4;
-  pointer-events: none;
-}
-
-.blue { background: #3b82f6; }
-.red { background: #ef4444; }
-
-.log {
-  max-height: 150px;
-  overflow-y: auto;
-  font-size: 14px;
-  opacity: 0.9;
-}
-</style>
+  <style>
+    body {
+      margin: 0;
+      background: #0b1220;
+      font-family: Arial, sans-serif;
+      color: #fff;
+    }
+    .container {
+      padding: 16px;
+      max-width: 420px;
+      margin: auto;
+    }
+    .card {
+      background: linear-gradient(180deg, #121c2f, #0d1526);
+      border-radius: 16px;
+      padding: 16px;
+      margin-bottom: 14px;
+    }
+    .row {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 6px;
+    }
+    .btn-row {
+      display: flex;
+      gap: 12px;
+    }
+    button {
+      flex: 1;
+      padding: 14px;
+      border: none;
+      border-radius: 12px;
+      font-size: 16px;
+      color: #fff;
+    }
+    .buy { background: #2ecc71; color:#000; }
+    .sell { background: #7a2e2e; }
+    .connect { background: #3b82f6; }
+    .disconnect { background: #ef4444; }
+    .center { text-align: center; opacity: 0.8; }
+  </style>
 </head>
 
 <body>
 <div class="container">
 
-<h2 style="text-align:center;">Grok AutoTrade</h2>
-
-<div class="card">
-  <div class="row"><span>Pair</span><span>USDT / TON</span></div>
-  <div class="row"><span>Status</span><span>Active</span></div>
-</div>
-
-<div class="card">
-  <div class="row"><span>Balance</span><span id="balance">0.00 USDT</span></div>
-  <div class="row"><span>Position</span><span id="position">No position</span></div>
-</div>
-
-<div class="row">
-  <button id="buyBtn" class="buy" onclick="buy()">BUY</button>
-  <button id="sellBtn" class="sell disabled" onclick="sell()">SELL</button>
-</div>
-
-<div class="card">
-  <canvas id="chart"></canvas>
-</div>
-
-<div class="row">
-  <button class="blue" onclick="connectWallet()">Connect Wallet</button>
-  <button class="red" onclick="disconnectWallet()">Disconnect</button>
-</div>
-<div class="card">
-  <div class="row">
-    <span>Price</span>
-    <span id="price">—</span>
-  </div>
-  </div>
-<p id="walletStatus" style="text-align:center; opacity:0.8;">
-Wallet not connected
   <div class="card">
-  <div class="row">
-    <span>Price</span>
-    <span id="price">—</span>
+    <div class="row">
+      <div>Pair</div>
+      <div>USDT / TON</div>
+    </div>
+    <div class="row">
+      <div>Status</div>
+      <div>Active</div>
+    </div>
   </div>
-  </div>
-</p>
 
-<div class="card log" id="log"></div>
+  <div class="card">
+    <div class="row">
+      <div>Balance</div>
+      <div id="balance">0.00 USDT</div>
+    </div>
+    <div class="row">
+      <div>Position</div>
+      <div id="position">No position</div>
+    </div>
+  </div>
+
+  <div class="btn-row">
+    <button class="buy" onclick="buy()">BUY</button>
+    <button class="sell" onclick="sell()">SELL</button>
+  </div>
+
+  <div class="card"></div>
+
+  <div class="btn-row">
+    <button class="connect" onclick="connectWallet()">Connect Wallet</button>
+    <button class="disconnect" onclick="disconnectWallet()">Disconnect</button>
+  </div>
+
+  <div class="card">
+    <div class="row">
+      <div>Price</div>
+      <div id="price">—</div>
+    </div>
+  </div>
+
+  <div class="center" id="walletStatus">Wallet not connected</div>
 
 </div>
 
 <script>
-let currentPrice = 0;
-let walletConnected = false;
-let position = null;
-let balance = 1000;
+  let walletConnected = false;
+  let balance = 0;
+  let position = null;
+  let currentPrice = null;
 
-// ===== PRICE =====
-async function fetchPrice() {
-  try {
-    const res = await fetch(
-      "https://api.binance.com/api/v3/ticker/price?symbol=TONUSDT"
-    );
-    const data = await res.json();
-    currentPrice = parseFloat(data.price);
-    document.getElementById("price").innerText =
-      currentPrice.toFixed(4) + " USDT";
-  } catch (e) {
-    document.getElementById("price").innerText = "Price error";
-  }
-}
-
-// ===== UI =====
-function updateUI() {
-  document.getElementById("balance").innerText =
-    balance.toFixed(2) + " USDT";
-
-  if (position) {
-    const pnl = currentPrice - position.entryPrice;
-    document.getElementById("position").innerText =
-      "LONG @ " +
-      position.entryPrice.toFixed(4) +
-      " | PnL: " +
-      pnl.toFixed(4);
-  } else {
-    document.getElementById("position").innerText =
-      "No position";
-  }
-  }
-}
-
-// ===== TRADING =====
-function buy() {
-  if (!walletConnected) {
-    alert("Wallet not connected");
-    return;
-  }
-  if (position) return;
-
-  position = { entryPrice: currentPrice };
-  updateUI();
-}
-
-function sell() {
-  if (!position) return;
-
-  const profit = currentPrice - position.entryPrice;
-  balance += profit;
-  position = null;
-  updateUI();
-}
-
-// ===== WALLET =====
-function connectWallet() {
-  walletConnected = true;
-  document.getElementById("walletStatus").innerText =
-    "Wallet connected (simulation)";
-}
-
-function disconnectWallet() {
-  walletConnected = false;
-  position = null;
-  document.getElementById("walletStatus").innerText =
-    "Wallet not connected";
-  updateUI();
-}
-
-// ===== START =====
-async function fetchPrice() {
-  try {
-    const response = await fetch(
-      "https://api.coingecko.com/api/v3/simple/price?ids=the-open-network&vs_currencies=usd",
-      { cache: "no-store" }
-    );
-
-    const data = await response.json();
-
-    if (!data["the-open-network"]) {
-      throw new Error("No data");
-    }
-
-    currentPrice = Number(data["the-open-network"].usd);
-
-    const priceEl = document.getElementById("price");
-    if (priceEl) {
-      priceEl.innerText = currentPrice.toFixed(4) + " USDT";
-    }
-
+  function connectWallet() {
+    walletConnected = true;
+    balance = 1000;
+    document.getElementById("walletStatus").innerText =
+      "Wallet connected (simulation)";
     updateUI();
+  }
 
-  } catch (error) {
-    console.log("Price error:", error);
-    const priceEl = document.getElementById("price");
-    if (priceEl) {
-      priceEl.innerText = "Error";
+  function disconnectWallet() {
+    walletConnected = false;
+    balance = 0;
+    position = null;
+    document.getElementById("walletStatus").innerText =
+      "Wallet not connected";
+    updateUI();
+  }
+
+  function updateUI() {
+    document.getElementById("balance").innerText =
+      balance.toFixed(2) + " USDT";
+    document.getElementById("position").innerText =
+      position ? "LONG @ " + position.toFixed(4) : "No position";
+  }
+
+  async function fetchPrice() {
+    try {
+      const res = await fetch(
+        "https://api.coingecko.com/api/v3/simple/price?ids=the-open-network&vs_currencies=usd",
+        { cache: "no-store" }
+      );
+
+      const data = await res.json();
+      currentPrice = Number(data["the-open-network"].usd);
+
+      document.getElementById("price").innerText =
+        currentPrice.toFixed(4) + " USDT";
+
+    } catch (e) {
+      document.getElementById("price").innerText = "Price error";
     }
   }
+
+  function buy() {
+    if (!walletConnected || position) return;
+    position = currentPrice;
+    updateUI();
   }
+
+  function sell() {
+    if (!walletConnected || !position) return;
+    balance += (currentPrice - position) * 10;
+    position = null;
+    updateUI();
+  }
+
   fetchPrice();
-setInterval(fetchPrice, 5000);
+  setInterval(fetchPrice, 5000);
 </script>
 
 </body>
-</html>
+  </html>
