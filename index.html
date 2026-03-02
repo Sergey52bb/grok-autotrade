@@ -1,100 +1,115 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8" />
-    <title>Grok AutoTrade</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Grok AutoTrade</title>
 
-    <!-- TON CONNECT UI -->
-    <script src="https://unpkg.com/@tonconnect/ui@latest/dist/tonconnect-ui.min.js"></script>
+<!-- TON CONNECT SDK -->
+<script src="https://cdn.jsdelivr.net/npm/@tonconnect/ui@2.0.0/dist/tonconnect-ui.min.js"></script>
 
-    <style>
-        body {
-            margin: 0;
-            font-family: Arial, sans-serif;
-            background: radial-gradient(circle at top, #0b1a2d, #050b14);
-            color: #fff;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            height: 100vh;
-        }
-        .card {
-            width: 90%;
-            max-width: 420px;
-            background: #0e1625;
-            border-radius: 16px;
-            padding: 24px;
-            box-shadow: 0 0 40px rgba(0,0,0,.6);
-        }
-        .price {
-            font-size: 42px;
-            text-align: center;
-            margin-bottom: 6px;
-        }
-        .pair {
-            text-align: center;
-            opacity: .6;
-            margin-bottom: 20px;
-        }
-        .buttons {
-            display: flex;
-            gap: 12px;
-            margin-bottom: 24px;
-        }
-        .buttons button {
-            flex: 1;
-            padding: 14px;
-            font-size: 18px;
-            border: none;
-            border-radius: 10px;
-            cursor: pointer;
-        }
-        .buy { background: #1f8f4a; color: #fff; }
-        .sell { background: #8f2d2d; color: #fff; }
-
-        #wallet {
-            margin-top: 16px;
-        }
-
-        .balance {
-            margin-top: 12px;
-            text-align: center;
-            opacity: .85;
-        }
-    </style>
+<style>
+body{
+margin:0;
+font-family:Arial, sans-serif;
+background:radial-gradient(circle at top,#0b1a2d,#050b14);
+color:#fff;
+display:flex;
+justify-content:center;
+align-items:center;
+height:100vh;
+}
+.card{
+width:90%;
+max-width:420px;
+background:#0e1625;
+border-radius:16px;
+padding:24px;
+box-shadow:0 0 40px rgba(0,0,0,.6);
+}
+.price{
+font-size:40px;
+text-align:center;
+margin-bottom:5px;
+}
+.pair{
+text-align:center;
+opacity:.6;
+margin-bottom:20px;
+}
+.buttons{
+display:flex;
+gap:12px;
+margin-bottom:25px;
+}
+.buttons button{
+flex:1;
+padding:14px;
+font-size:18px;
+border:none;
+border-radius:10px;
+cursor:pointer;
+}
+.buy{background:#1f8f4a;color:#fff;}
+.sell{background:#8f2d2d;color:#fff;}
+#wallet{margin-top:10px;}
+.balance{
+margin-top:15px;
+text-align:center;
+font-size:14px;
+opacity:.85;
+word-break:break-all;
+}
+</style>
 </head>
 
 <body>
+
 <div class="card">
-    <div class="price">1.248 USDT</div>
-    <div class="pair">USDT / TON</div>
+<div class="price">1.248 USDT</div>
+<div class="pair">USDT / TON</div>
 
-    <div class="buttons">
-        <button class="buy">BUY</button>
-        <button class="sell">SELL</button>
-    </div>
+<div class="buttons">
+<button class="buy">BUY</button>
+<button class="sell">SELL</button>
+</div>
 
-    <div id="wallet"></div>
-    <div id="balance" class="balance"></div>
+<div id="wallet"></div>
+<div id="balance" class="balance"></div>
 </div>
 
 <script>
-    const tonConnectUI = new TON_CONNECT_UI.TonConnectUI({
-        manifestUrl: 'https://sergey52bb.github.io/grok-autotrade/tonconnect-manifest.json'
-    });
+window.addEventListener("load", function(){
 
-    tonConnectUI.renderWalletButton(document.getElementById('wallet'));
+if (!window.TON_CONNECT_UI) {
+    alert("TON SDK NOT LOADED");
+    return;
+}
 
-    tonConnectUI.onStatusChange(wallet => {
-        if (wallet) {
-            document.getElementById('balance').innerText =
-                `Connected: ${wallet.account.address.slice(0, 6)}...${wallet.account.address.slice(-4)}`;
-        } else {
-            document.getElementById('balance').innerText = '';
-        }
-    });
+const tonConnectUI = new TON_CONNECT_UI.TonConnectUI({
+    manifestUrl: "https://sergey52bb.github.io/grok-autotrade/tonconnect-manifest.json"
+});
+
+tonConnectUI.renderWalletButton(
+    document.getElementById("wallet")
+);
+
+tonConnectUI.onStatusChange(wallet => {
+    const balanceEl = document.getElementById("balance");
+
+    if(wallet){
+        balanceEl.innerText =
+        "Connected: " +
+        wallet.account.address.slice(0,6) +
+        "..." +
+        wallet.account.address.slice(-4);
+    } else {
+        balanceEl.innerText = "";
+    }
+});
+
+});
 </script>
-<script>alert('JS WORKS');</script>
+
 </body>
 </html>
