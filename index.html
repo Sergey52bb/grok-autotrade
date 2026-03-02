@@ -1,168 +1,136 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="ru">
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-<title>Grok AutoTrade Bot</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Grok AutoTrade</title>
 
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <!-- TON CONNECT SDK -->
+  <script src="https://unpkg.com/@tonconnect/ui@latest/dist/tonconnect-ui.min.js"></script>
 
-<style>
-body {
-  margin: 0;
-  font-family: Inter, system-ui, sans-serif;
-  background: radial-gradient(circle at top, #0b1220, #050810);
-  color: #fff;
-}
+  <style>
+    body {
+      margin: 0;
+      font-family: Inter, Arial, sans-serif;
+      background: radial-gradient(circle at top, #0f172a, #020617);
+      color: white;
+    }
 
-.container {
-  max-width: 420px;
-  margin: auto;
-  padding: 16px;
-}
+    .card {
+      margin: 20px;
+      padding: 20px;
+      border-radius: 20px;
+      background: linear-gradient(180deg, #020617, #020617cc);
+      box-shadow: 0 0 40px rgba(0,0,0,0.5);
+    }
 
-.card {
-  background: linear-gradient(180deg, #0f172a, #020617);
-  border-radius: 18px;
-  padding: 16px;
-  margin-bottom: 16px;
-  box-shadow: 0 10px 30px rgba(0,0,0,.5);
-}
+    .price {
+      font-size: 42px;
+      font-weight: 700;
+    }
 
-.row {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-}
+    .change {
+      color: #22c55e;
+      margin-top: 6px;
+    }
 
-.price {
-  font-size: 34px;
-  font-weight: 700;
-}
+    .pair {
+      float: right;
+      opacity: 0.7;
+    }
 
-.change.up { color: #22c55e; }
-.change.down { color: #ef4444; }
+    .buttons {
+      display: flex;
+      gap: 14px;
+      margin-top: 20px;
+    }
 
-button {
-  flex: 1;
-  padding: 14px;
-  margin: 6px;
-  border-radius: 14px;
-  border: none;
-  font-size: 16px;
-  font-weight: 600;
-  color: #fff;
-}
+    button {
+      flex: 1;
+      padding: 18px;
+      font-size: 18px;
+      border: none;
+      border-radius: 16px;
+      color: white;
+      font-weight: 600;
+    }
 
-.buy { background: #22c55e; }
-.sell { background: #ef4444; }
-.connect { background: #3b82f6; }
+    .buy { background: #22c55e; }
+    .sell { background: #ef4444; }
 
-canvas {
-  margin-top: 12px;
-}
-</style>
+    canvas {
+      width: 100%;
+      height: 200px;
+    }
+
+    .wallet {
+      margin-top: 20px;
+    }
+  </style>
 </head>
 
 <body>
-<div class="container">
 
-  <!-- PRICE CARD -->
   <div class="card">
-    <div class="row">
-      <div>
-        <div class="price" id="price">--</div>
-        <div id="change" class="change">--</div>
-      </div>
-      <div>USDT / TON</div>
+    <div class="price">
+      1.248 USDT
+      <span class="pair">USDT / TON</span>
+    </div>
+    <div class="change">+2.39%</div>
+  </div>
+
+  <div class="card">
+    <div class="buttons">
+      <button class="buy">BUY</button>
+      <button class="sell">SELL</button>
     </div>
   </div>
 
-  <!-- ACTIONS -->
-  <div class="card row">
-    <button class="buy">BUY</button>
-    <button class="sell">SELL</button>
-  </div>
-
-  <!-- CHART -->
   <div class="card">
-    <canvas id="chart" height="180"></canvas>
+    <canvas id="chart"></canvas>
   </div>
 
-  <!-- WALLET -->
-  <div class="card">
-    <button class="connect">Connect Wallet</button>
-  </div>
+  <div class="card wallet" id="ton-connect"></div>
 
-</div>
-
-<script>
-const ctx = document.getElementById("chart").getContext("2d");
-
-let prices = [];
-let labels = [];
-
-const chart = new Chart(ctx, {
-  type: "line",
-  data: {
-    labels,
-    datasets: [{
-      data: prices,
-      borderColor: "#38bdf8",
-      borderWidth: 3,
-      tension: 0.4,
-      pointRadius: 0
-    }]
-  },
-  options: {
-    responsive: true,
-    plugins: { legend: { display: false } },
-    scales: {
-      x: { display: false },
-      y: { ticks: { color: "#94a3b8" } }
-    }
-  }
-});
-
-async function loadPrice() {
-  try {
-    const res = await fetch(
-      "https://api.coingecko.com/api/v3/coins/the-open-network/market_chart?vs_currency=usd&days=1"
-    );
-    const data = await res.json();
-
-    const sliced = data.prices.slice(-30);
-    prices.length = 0;
-    labels.length = 0;
-
-    sliced.forEach(p => {
-      prices.push(p[1]);
-      labels.push("");
+  <!-- SCRIPT -->
+  <script>
+    // === TON CONNECT INIT ===
+    const tonConnectUI = new TON_CONNECT_UI.TonConnectUI({
+      manifestUrl: "https://rgey52bb.github.io/tonconnect-manifest.json",
+      buttonRootId: "ton-connect"
     });
 
-    const first = prices[0];
-    const last = prices[prices.length - 1];
-    const change = ((last - first) / first * 100).toFixed(2);
+    // === DEBUG INFO ===
+    tonConnectUI.onStatusChange(wallet => {
+      if (wallet) {
+        console.log("Кошелёк подключён:", wallet.account.address);
+      } else {
+        console.log("Кошелёк отключён");
+      }
+    });
 
-    document.getElementById("price").textContent = last.toFixed(3) + " USDT";
-    const changeEl = document.getElementById("change");
-    changeEl.textContent = (change > 0 ? "+" : "") + change + "%";
-    changeEl.className = "change " + (change >= 0 ? "up" : "down");
+    // === SIMPLE CHART ===
+    const canvas = document.getElementById("chart");
+    const ctx = canvas.getContext("2d");
 
-    chart.update();
+    canvas.width = canvas.offsetWidth;
+    canvas.height = 200;
 
-  } catch {
-    // fallback
-    if (!prices.length) {
-      prices.push(2.3,2.32,2.31,2.34,2.36);
-      chart.update();
-    }
-  }
-}
+    const data = [1.22,1.225,1.23,1.24,1.25,1.238,1.245,1.24,1.25,1.248];
 
-loadPrice();
-setInterval(loadPrice, 10000);
-</script>
+    ctx.strokeStyle = "#38bdf8";
+    ctx.lineWidth = 3;
+    ctx.beginPath();
+
+    data.forEach((v,i) => {
+      const x = (i/(data.length-1)) * canvas.width;
+      const y = canvas.height - (v-1.21)*800;
+      if(i===0) ctx.moveTo(x,y);
+      else ctx.lineTo(x,y);
+    });
+
+    ctx.stroke();
+  </script>
 
 </body>
 </html>
