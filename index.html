@@ -2,69 +2,62 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
 <title>Grok AutoTrade</title>
 
-<!-- Chart.js -->
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
 <style>
 body {
   margin: 0;
   font-family: Arial, sans-serif;
-  background: linear-gradient(180deg,#020617,#020617,#020617);
+  background: linear-gradient(180deg, #0b1020, #020617);
   color: #fff;
 }
-
 .container {
   max-width: 420px;
   margin: auto;
-  padding: 20px;
+  padding: 15px;
 }
-
-h1 {
-  text-align: center;
-  margin-bottom: 20px;
-}
-
 .card {
-  background: #0b1225;
-  border-radius: 18px;
+  background: #0f172a;
+  border-radius: 16px;
   padding: 15px;
   margin-bottom: 15px;
 }
-
 .row {
   display: flex;
   justify-content: space-between;
-  margin: 6px 0;
 }
-
+.btns {
+  display: flex;
+  gap: 10px;
+}
 button {
-  width: 48%;
-  padding: 14px;
-  border-radius: 12px;
+  flex: 1;
+  padding: 15px;
   border: none;
+  border-radius: 14px;
   font-size: 16px;
+  font-weight: bold;
   cursor: pointer;
 }
-
 .buy { background: #22c55e; }
 .sell { background: #ef4444; }
-
-.full {
-  width: 100%;
-  margin-top: 10px;
-}
-
-.blue { background: #3b82f6; }
-.red { background: #ef4444; }
-
+.connect { background: #3b82f6; }
+.disconnect { background: #ef4444; margin-top: 10px; }
 .log {
-  max-height: 150px;
-  overflow-y: auto;
   font-size: 14px;
-  opacity: .9;
+  opacity: 0.85;
+}
+canvas {
+  width: 100% !important;
+  height: 220px !important;
+}
+.status {
+  text-align: center;
+  opacity: 0.7;
+  margin-top: 10px;
 }
 </style>
 </head>
@@ -72,128 +65,122 @@ button {
 <body>
 <div class="container">
 
-<h1>Grok AutoTrade</h1>
+  <div class="card">
+    <div class="row"><span>Pair</span><span>USDT / TON</span></div>
+    <div class="row"><span>Status</span><span>Active</span></div>
+  </div>
 
-<div class="card">
-  <div class="row"><span>Pair</span><span>USDT / TON</span></div>
-  <div class="row"><span>Status</span><span>Active</span></div>
-</div>
+  <div class="card">
+    <div class="row"><span>Balance</span><span id="balance">0.00 USDT</span></div>
+    <div class="row"><span>Position</span><span id="position">No position</span></div>
+  </div>
 
-<div class="card">
-  <div class="row"><span>Balance</span><span id="balance">0.00 USDT</span></div>
-  <div class="row"><span>Position</span><span id="position">No position</span></div>
-</div>
+  <div class="btns">
+    <button class="buy" onclick="buy()">BUY</button>
+    <button class="sell" onclick="sell()">SELL</button>
+  </div>
 
-<div class="row">
-  <button class="buy" id="buyBtn">BUY</button>
-  <button class="sell" id="sellBtn">SELL</button>
-</div>
+  <div class="card">
+    <canvas id="chart"></canvas>
+  </div>
 
-<div class="card">
-  <canvas id="priceChart"></canvas>
-</div>
+  <button class="connect" onclick="connectWallet()">Connect Wallet</button>
+  <button class="disconnect" onclick="disconnectWallet()">Disconnect</button>
+  <div class="status" id="walletStatus">Wallet not connected</div>
 
-<button class="blue full" onclick="connect()">Connect Wallet</button>
-<button class="red full" onclick="disconnect()">Disconnect</button>
-
-<p id="walletStatus" style="text-align:center;opacity:.7;">
-Wallet not connected
-</p>
-
-<div class="card">
-  <b>Trade Log</b>
-  <div class="log" id="log"></div>
-</div>
+  <div class="card">
+    <strong>Trade Log</strong>
+    <div class="log" id="log"></div>
+  </div>
 
 </div>
 
 <script>
-let connected = false;
-let position = 'No position';
-let priceChart;
+let walletConnected = false;
+let position = null;
+let balance = 0;
+let chart;
 
-// ===== LOG =====
 function log(text) {
-  const el = document.getElementById('log');
-  el.innerHTML = new Date().toLocaleTimeString() + ' — ' + text + '<br>' + el.innerHTML;
+  const l = document.getElementById('log');
+  l.innerHTML = new Date().toLocaleTimeString() + ' — ' + text + '<br>' + l.innerHTML;
 }
 
-// ===== WALLET =====
-function connect() {
-  connected = true;
+function connectWallet() {
+  walletConnected = true;
+  balance = 100;
+  document.getElementById('balance').innerText = balance.toFixed(2) + ' USDT';
   document.getElementById('walletStatus').innerText = 'Wallet connected (simulation)';
+  log('Wallet connected');
 }
 
-function disconnect() {
-  connected = false;
-  position = 'No position';
-  document.getElementById('position').innerText = position;
+function disconnectWallet() {
+  walletConnected = false;
+  balance = 0;
+  position = null;
+  document.getElementById('balance').innerText = '0.00 USDT';
+  document.getElementById('position').innerText = 'No position';
   document.getElementById('walletStatus').innerText = 'Wallet not connected';
+  log('Wallet disconnected');
 }
 
-// ===== BUTTONS =====
-document.getElementById('buyBtn').onclick = () => {
-  if (!connected) return alert('Wallet not connected');
+function buy() {
+  if (!walletConnected) return alert('Connect wallet');
   position = 'LONG';
-  document.getElementById('position').innerText = position;
+  document.getElementById('position').innerText = 'LONG';
   log('BUY executed (simulation)');
-};
+}
 
-document.getElementById('sellBtn').onclick = () => {
-  if (!connected) return alert('Wallet not connected');
-  position = 'No position';
-  document.getElementById('position').innerText = position;
+function sell() {
+  if (!walletConnected) return alert('Connect wallet');
+  position = null;
+  document.getElementById('position').innerText = 'No position';
   log('SELL executed (simulation)');
-};
+}
 
-// ===== CHART =====
-const ctx = document.getElementById('priceChart').getContext('2d');
+async function loadChart() {
+  const ctx = document.getElementById('chart').getContext('2d');
 
-priceChart = new Chart(ctx, {
-  type: 'line',
-  data: {
-    labels: [],
-    datasets: [{
-      label: 'USDT / TON',
-      data: [],
-      borderColor: '#38bdf8',
-      backgroundColor: 'rgba(56,189,248,.1)',
-      tension: 0.4,
-      pointRadius: 3
-    }]
-  },
-  options: {
-    responsive: true,
-    scales: {
-      x: { display: true },
-      y: { display: true }
-    }
-  }
-});
+  let prices = [];
+  let labels = [];
 
-// ===== BINANCE API =====
-async function fetchPrice() {
   try {
     const res = await fetch(
-  'https://corsproxy.io/?https://api.binance.com/api/v3/klines?symbol=TONUSDT&interval=1m&limit=20'
-  );
-    const data = await res.json();
-
-    priceChart.data.labels = data.map(d =>
-      new Date(d[0]).toLocaleTimeString().slice(0,5)
+      'https://corsproxy.io/?https://api.binance.com/api/v3/klines?symbol=TONUSDT&interval=1m&limit=20'
     );
-
-    priceChart.data.datasets[0].data = data.map(d => parseFloat(d[4]));
-    priceChart.update();
-
+    const data = await res.json();
+    data.forEach(c => {
+      labels.push('');
+      prices.push(parseFloat(c[4]));
+    });
+    log('Price data loaded from Binance');
   } catch (e) {
-    console.error(e);
+    // fallback (ALWAYS works)
+    prices = [2.30,2.32,2.31,2.33,2.35,2.34,2.36,2.38,2.37,2.39];
+    labels = prices.map(() => '');
+    log('Fallback price data used');
   }
+
+  chart = new Chart(ctx, {
+    type: 'line',
+    data: {
+      labels,
+      datasets: [{
+        label: 'USDT / TON',
+        data: prices,
+        borderColor: '#38bdf8',
+        tension: 0.4
+      }]
+    },
+    options: {
+      responsive: true,
+      plugins: { legend: { display: true } },
+      scales: { x: { display: false } }
+    }
+  });
 }
 
-fetchPrice();
-setInterval(fetchPrice, 60000);
+loadChart();
 </script>
-
 </body>
-    </html>
+</html>
