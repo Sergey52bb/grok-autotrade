@@ -3,129 +3,144 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Grok AutoTrade</title>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <title>Crypto Trading</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #181818;
+            color: white;
+            text-align: center;
+        }
+        .container {
+            margin-top: 50px;
+        }
+        button {
+            padding: 10px 20px;
+            margin: 5px;
+            font-size: 16px;
+            cursor: pointer;
+        }
+        .green {
+            background-color: green;
+            border: none;
+            color: white;
+        }
+        .red {
+            background-color: red;
+            border: none;
+            color: white;
+        }
+        .blue {
+            background-color: blue;
+            border: none;
+            color: white;
+        }
+        .status {
+            margin-top: 10px;
+        }
+    </style>
 </head>
 <body>
+    <h1>Crypto Trading</h1>
+    <div class="container">
+        <div>Pair: USDT / TON</div>
+        <div>Status: Active</div>
+        <div id="balance">Balance: 0.00 USDT</div>
+        <div id="position">Position: No position</div>
+        <div id="price">Price: -</div>
 
-<div class="card">
-    <div class="row">
-        <span>Pair</span>
-        <span id="pair">USDT / TON</span>
+        <button class="green" id="buyBtn">BUY</button>
+        <button class="red" id="sellBtn">SELL</button>
+
+        <div class="status" id="walletStatus">Wallet not connected</div>
+        <button class="blue" id="connectBtn">Connect Wallet</button>
+        <button class="red" id="disconnectBtn">Disconnect</button>
     </div>
-    <div class="row">
-        <span>Status</span>
-        <span id="status">Active</span>
-    </div>
-    <div class="row">
-        <span>Balance</span>
-        <span id="balance">0.00 USDT</span>
-    </div>
-    <div class="row">
-        <span>Position</span>
-        <span id="position">No position</span>
-    </div>
-    <div class="row">
-        <span>Price</span>
-        <span id="price">-</span>
-    </div>
-</div>
 
-<div class="buttons">
-    <button id="buyBtn" onclick="buy()">BUY</button>
-    <button id="sellBtn" onclick="sell()">SELL</button>
-    <button id="connectBtn" onclick="connectWallet()">Connect Wallet</button>
-    <button id="disconnectBtn" onclick="disconnectWallet()">Disconnect</button>
-</div>
+    <script>
+        let balance = 0;
+        let position = null;
+        let walletConnected = false;
+        let currentPrice = null;
 
-<p id="walletStatus" style="text-align:center; opacity:0.8;">Wallet not connected</p>
-
-<script>
-    let balance = 1000.00; // Initial balance
-    let position = null;   // No position initially
-    let walletConnected = false;
-    let currentPrice = null;
-
-    // Fetch current price from an API (you can adjust the URL based on your data source)
-    async function fetchPrice() {
-        try {
-            const res = await fetch("https://api.coingecko.com/api/v3/simple/price?ids=the-open-network&vs_currencies=usd");
-            const data = await res.json();
-            currentPrice = data["the-open-network"].usd;
-            document.getElementById("price").innerText = currentPrice.toFixed(4) + " USDT";
-        } catch (e) {
-            document.getElementById("price").innerText = "Price error";
-        }
-    }
-
-    // Update the UI for balance and position
-    function updateUI() {
-        document.getElementById("balance").innerText = balance.toFixed(2) + " USDT";
-        document.getElementById("position").innerText = position ? `LONG @ ${position.entryPrice}` : "No position";
-    }
-
-    // BUY function
-    function buy() {
-        if (!walletConnected) {
-            alert("Connect wallet first.");
-            return;
+        // API fetch function to get price
+        async function fetchPrice() {
+            try {
+                const res = await fetch("https://api.coingecko.com/api/v3/simple/price?ids=the-open-network&vs_currencies=usd");
+                const data = await res.json();
+                currentPrice = data['the-open-network'].usd;
+                document.getElementById("price").innerText = `Price: ${currentPrice} USD`;
+            } catch (e) {
+                document.getElementById("price").innerText = "Price error";
+            }
         }
 
-        if (position) {
-            alert("Position already open.");
-            return;
+        // Function to update UI elements based on state
+        function updateUI() {
+            document.getElementById("balance").innerText = `Balance: ${balance.toFixed(2)} USDT`;
+            if (position) {
+                document.getElementById("position").innerText = `Position: ${position}`;
+            } else {
+                document.getElementById("position").innerText = "Position: No position";
+            }
+            if (walletConnected) {
+                document.getElementById("walletStatus").innerText = "Wallet connected";
+            } else {
+                document.getElementById("walletStatus").innerText = "Wallet not connected";
+            }
         }
 
-        if (balance <= 0) {
-            alert("Insufficient balance.");
-            return;
-        }
+        // Connect wallet
+        document.getElementById("connectBtn").addEventListener("click", () => {
+            walletConnected = true;
+            updateUI();
+        });
 
-        position = {
-            entryPrice: currentPrice
-        };
-        balance -= 1000; // Example trade amount
-        updateUI();
-        alert("BUY executed (simulation)");
-    }
+        // Disconnect wallet
+        document.getElementById("disconnectBtn").addEventListener("click", () => {
+            walletConnected = false;
+            position = null;
+            balance = 0;
+            updateUI();
+        });
 
-    // SELL function
-    function sell() {
-        if (!walletConnected) {
-            alert("Connect wallet first.");
-            return;
-        }
+        // Buy function
+        document.getElementById("buyBtn").addEventListener("click", () => {
+            if (!walletConnected) {
+                alert("Please connect your wallet first.");
+                return;
+            }
+            if (currentPrice === null) {
+                alert("Price data is not available.");
+                return;
+            }
+            const amountToBuy = 1000 / currentPrice;
+            balance -= 1000;
+            position = `LONG @ ${currentPrice}`;
+            updateUI();
+        });
 
-        if (!position) {
-            alert("No position to sell.");
-            return;
-        }
+        // Sell function
+        document.getElementById("sellBtn").addEventListener("click", () => {
+            if (!walletConnected) {
+                alert("Please connect your wallet first.");
+                return;
+            }
+            if (!position) {
+                alert("No position to sell.");
+                return;
+            }
+            const profit = currentPrice - parseFloat(position.split('@')[1]);
+            balance += profit;
+            position = null;
+            updateUI();
+        });
 
-        const profit = currentPrice - position.entryPrice;
-        balance += profit; // Add profit or loss to balance
-        position = null; // Close position
-        updateUI();
-        alert("SELL executed (simulation)");
-    }
+        // Start fetching the price every 5 seconds
+        setInterval(fetchPrice, 5000);
 
-    // Connect Wallet
-    function connectWallet() {
-        walletConnected = true;
-        document.getElementById("walletStatus").innerText = "Wallet connected (simulation)";
-        updateUI();
-    }
-
-    // Disconnect Wallet
-    function disconnectWallet() {
-        walletConnected = false;
-        position = null;
-        document.getElementById("walletStatus").innerText = "Wallet not connected";
-        updateUI();
-    }
-
-    // Start the fetch price and update every 5 seconds
-    fetchPrice();
-    setInterval(fetchPrice, 5000);
-</script>
+        // Initial fetch price
+        fetchPrice();
+    </script>
 </body>
 </html>
