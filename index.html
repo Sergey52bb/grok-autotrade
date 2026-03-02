@@ -58,89 +58,76 @@
     </div>
 
     <script>
-        let balance = 0;
-        let position = null;
-        let walletConnected = false;
-        let currentPrice = null;
+        /* ===== STATE ===== */
+let walletConnected = true; // кошелек НЕ трогаем
+let balanceUSDT = 1000;
+let position = null;
+let entryPrice = 0;
+let currentPrice = 1.21;
+const COMMISSION_RATE = 0.0025; // 0.25%
 
-        // API fetch function to get price
-        async function fetchPrice() {
-            try {
-                const res = await fetch("https://api.coingecko.com/api/v3/simple/price?ids=the-open-network&vs_currencies=usd");
-                const data = await res.json();
-                currentPrice = data['the-open-network'].usd;
-                document.getElementById("price").innerText = `Price: ${currentPrice} USD`;
-            } catch (e) {
-                document.getElementById("price").innerText = "Price error";
-            }
-        }
+/* ===== UI ===== */
+const priceEl = document.getElementById("price");
+const posEl = document.getElementById("position");
+const balanceEl = document.getElementById("balance");
+const logEl = document.getElementById("log");
 
-        // Function to update UI elements based on state
-        function updateUI() {
-            document.getElementById("balance").innerText = `Balance: ${balance.toFixed(2)} USDT`;
-            if (position) {
-                document.getElementById("position").innerText = `Position: ${position}`;
-            } else {
-                document.getElementById("position").innerText = "Position: No position";
-            }
-            if (walletConnected) {
-                document.getElementById("walletStatus").innerText = "Wallet connected";
-            } else {
-                document.getElementById("walletStatus").innerText = "Wallet not connected";
-            }
-        }
+/* ===== PRICE SIMULATION ===== */
+setInterval(() => {
+  const delta = (Math.random() - 0.5) * 0.02;
+  currentPrice = +(currentPrice + delta).toFixed(4);
+  priceEl.innerText = currentPrice + " USDT";
+}, 1500);
 
-        // Connect wallet
-        document.getElementById("connectBtn").addEventListener("click", () => {
-            walletConnected = true;
-            updateUI();
-        });
+/* ===== BUY ===== */
+function buy() {
+  if (!walletConnected) return alert("Wallet not connected");
+  if (position) return alert("Position already open");
 
-        // Disconnect wallet
-        document.getElementById("disconnectBtn").addEventListener("click", () => {
-            walletConnected = false;
-            position = null;
-            balance = 0;
-            updateUI();
-        });
+  const tradeSize = 100;
+  const fee = tradeSize * COMMISSION_RATE;
 
-        // Buy function
-        document.getElementById("buyBtn").addEventListener("click", () => {
-            if (!walletConnected) {
-                alert("Please connect your wallet first.");
-                return;
-            }
-            if (currentPrice === null) {
-                alert("Price data is not available.");
-                return;
-            }
-            const amountToBuy = 1000 / currentPrice;
-            balance -= 1000;
-            position = `LONG @ ${currentPrice}`;
-            updateUI();
-        });
+  if (balanceUSDT < tradeSize + fee)
+    return alert("Insufficient balance");
 
-        // Sell function
-        document.getElementById("sellBtn").addEventListener("click", () => {
-            if (!walletConnected) {
-                alert("Please connect your wallet first.");
-                return;
-            }
-            if (!position) {
-                alert("No position to sell.");
-                return;
-            }
-            const profit = currentPrice - parseFloat(position.split('@')[1]);
-            balance += profit;
-            position = null;
-            updateUI();
-        });
+  balanceUSDT -= tradeSize + fee;
+  entryPrice = currentPrice;
+  position = "LONG";
 
-        // Start fetching the price every 5 seconds
-        setInterval(fetchPrice, 5000);
+  log(`BUY @ ${entryPrice} | Fee: ${fee.toFixed(2)} USDT`);
+  updateUI();
+}
 
-        // Initial fetch price
-        fetchPrice();
+/* ===== SELL ===== */
+function sell() {
+  if (!position) return alert("No open position");
+
+  const tradeSize = 100;
+  const pnl = (currentPrice - entryPrice) * tradeSize;
+  const fee = tradeSize * COMMISSION_RATE;
+
+  balanceUSDT += tradeSize + pnl - fee;
+  log(`SELL @ ${currentPrice} | PnL: ${pnl.toFixed(2)} | Fee: ${fee.toFixed(2)}`);
+
+  position = null;
+  entryPrice = 0;
+  updateUI();
+}
+
+/* ===== UI UPDATE ===== */
+function updateUI() {
+  balanceEl.innerText = balanceUSDT.toFixed(2) + " USDT";
+  posEl.innerText = position ? `LONG @ ${entryPrice}` : "NO POSITION";
+}
+
+/* ===== LOG ===== */
+function log(text) {
+  const p = document.createElement("div");
+  p.innerText = text;
+  logEl.prepend(p);
+}
+
+updateUI();
     </script>
 </body>
 </html>
