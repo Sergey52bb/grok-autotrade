@@ -90,7 +90,12 @@ button {
   <button class="blue" onclick="connectWallet()">Connect Wallet</button>
   <button class="red" onclick="disconnectWallet()">Disconnect</button>
 </div>
-
+<div class="card">
+  <div class="row">
+    <span>Price</span>
+    <span id="price">—</span>
+  </div>
+  </div>
 <p id="walletStatus" style="text-align:center; opacity:0.8;">
 Wallet not connected
   <div class="card">
@@ -107,26 +112,76 @@ Wallet not connected
 
 <script>
 let currentPrice = 0;
+let walletConnected = false;
+let position = null;
+let balance = 1000;
 
+// ===== PRICE =====
 async function fetchPrice() {
   try {
     const res = await fetch(
-      "https://api.coingecko.com/api/v3/simple/price?ids=the-open-network&vs_currencies=usd"
+      "https://api.binance.com/api/v3/ticker/price?symbol=TONUSDT"
     );
     const data = await res.json();
-
-    currentPrice = data["the-open-network"].usd;
-
+    currentPrice = parseFloat(data.price);
     document.getElementById("price").innerText =
       currentPrice.toFixed(4) + " USDT";
-
   } catch (e) {
     document.getElementById("price").innerText = "Price error";
   }
 }
 
+// ===== UI =====
+function updateUI() {
+  document.getElementById("balance").innerText =
+    balance.toFixed(2) + " USDT";
+
+  document.getElementById("position").innerText =
+    position
+      ? "LONG @ " + position.entryPrice.toFixed(4)
+      : "No position";
+}
+
+// ===== TRADING =====
+function buy() {
+  if (!walletConnected) {
+    alert("Wallet not connected");
+    return;
+  }
+  if (position) return;
+
+  position = { entryPrice: currentPrice };
+  updateUI();
+}
+
+function sell() {
+  if (!position) return;
+
+  const profit = currentPrice - position.entryPrice;
+  balance += profit;
+  position = null;
+  updateUI();
+}
+
+// ===== WALLET =====
+function connectWallet() {
+  walletConnected = true;
+  document.getElementById("walletStatus").innerText =
+    "Wallet connected (simulation)";
+}
+
+function disconnectWallet() {
+  walletConnected = false;
+  position = null;
+  document.getElementById("walletStatus").innerText =
+    "Wallet not connected";
+  updateUI();
+}
+
+// ===== START =====
 fetchPrice();
 setInterval(fetchPrice, 5000);
+updateUI();
 </script>
 
 </body>
