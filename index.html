@@ -136,10 +136,18 @@ function updateUI() {
   document.getElementById("balance").innerText =
     balance.toFixed(2) + " USDT";
 
-  document.getElementById("position").innerText =
-    position
-      ? "LONG @ " + position.entryPrice.toFixed(4)
-      : "No position";
+  if (position) {
+    const pnl = currentPrice - position.entryPrice;
+    document.getElementById("position").innerText =
+      "LONG @ " +
+      position.entryPrice.toFixed(4) +
+      " | PnL: " +
+      pnl.toFixed(4);
+  } else {
+    document.getElementById("position").innerText =
+      "No position";
+  }
+  }
 }
 
 // ===== TRADING =====
