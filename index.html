@@ -3,79 +3,35 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Grok AutoTrade</title>
+<title>TON TEST</title>
 
 <script src="https://unpkg.com/@tonconnect/ui@latest/dist/tonconnect-ui.min.js"></script>
 
 <style>
 body{
-margin:0;
-background:#0b1220;
+background:#0f172a;
+color:white;
 display:flex;
 justify-content:center;
 align-items:center;
 height:100vh;
 font-family:Arial;
-color:white;
 }
-.card{
-background:#111a2e;
-padding:30px;
-border-radius:20px;
-width:90%;
-max-width:400px;
-text-align:center;
-box-shadow:0 0 40px rgba(0,0,0,.6);
-}
-.price{
-font-size:36px;
-margin-bottom:5px;
-}
-.pair{
-opacity:.6;
-margin-bottom:20px;
-}
-.buttons{
-display:flex;
-gap:10px;
-margin-bottom:25px;
-}
-button{
-flex:1;
-padding:14px;
-border:none;
-border-radius:10px;
-font-size:16px;
-color:white;
-}
-.buy{background:#1f8f4a;}
-.sell{background:#8f2d2d;}
 #wallet{
-margin-top:10px;
+padding:20px;
 }
 </style>
 </head>
 
 <body>
 
-<div class="card">
-<div class="price">1.248 USDT</div>
-<div class="pair">USDT / TON</div>
-
-<div class="buttons">
-<button class="buy">BUY</button>
-<button class="sell">SELL</button>
-</div>
-
 <div id="wallet"></div>
-<div id="status"></div>
-</div>
 
 <script>
-window.addEventListener("DOMContentLoaded", async () => {
+window.addEventListener("DOMContentLoaded", () => {
 
 if(!window.TON_CONNECT_UI){
-    alert("TON SDK not loaded");
+    alert("SDK NOT LOADED");
     return;
 }
 
@@ -86,16 +42,6 @@ const tonConnectUI = new TON_CONNECT_UI.TonConnectUI({
 tonConnectUI.renderWalletButton(
     document.getElementById("wallet")
 );
-
-tonConnectUI.onStatusChange(wallet => {
-    const status = document.getElementById("status");
-
-    if(wallet){
-        status.innerText = "Connected: " + wallet.account.address;
-    } else {
-        status.innerText = "Wallet not connected";
-    }
-});
 
 });
 </script>
