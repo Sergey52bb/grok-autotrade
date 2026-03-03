@@ -2,49 +2,22 @@
 <html>
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>TON TEST</title>
-
-<script src="https://unpkg.com/@tonconnect/ui@latest/dist/tonconnect-ui.min.js"></script>
-
+<title>TEST</title>
 <style>
 body{
-background:#0f172a;
+background:black;
 color:white;
 display:flex;
 justify-content:center;
 align-items:center;
 height:100vh;
-font-family:Arial;
-}
-#wallet{
-padding:20px;
+font-size:24px;
 }
 </style>
 </head>
-
 <body>
 
-<div id="wallet"></div>
-
-<script>
-window.addEventListener("DOMContentLoaded", () => {
-
-if(!window.TON_CONNECT_UI){
-    alert("SDK NOT LOADED");
-    return;
-}
-
-const tonConnectUI = new TON_CONNECT_UI.TonConnectUI({
-    manifestUrl: "https://sergey52bb.github.io/grok-autotrade/tonconnect-manifest.json"
-});
-
-tonConnectUI.renderWalletButton(
-    document.getElementById("wallet")
-);
-
-});
-</script>
+WORKING
 
 </body>
 </html>
