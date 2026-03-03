@@ -1,35 +1,81 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>TON Test</title>
+<title>Grok AutoTrade</title>
+
+<!-- Подключаем локально SDK -->
+<script src="tonconnect-ui.min.js"></script>
+
 <style>
-body{
-background:#0f172a;
-color:white;
-display:flex;
-justify-content:center;
-align-items:center;
-height:100vh;
-font-family:Arial;
+body {
+  margin:0;
+  font-family:Arial, sans-serif;
+  background:#0b1220;
+  color:white;
+  display:flex;
+  justify-content:center;
+  align-items:center;
+  height:100vh;
 }
+.card {
+  background:#111a2e;
+  padding:30px;
+  border-radius:20px;
+  width:90%;
+  max-width:400px;
+  text-align:center;
+  box-shadow:0 0 40px rgba(0,0,0,.6);
+}
+.price { font-size:36px; margin-bottom:5px; }
+.pair { opacity:.6; margin-bottom:20px; }
+.buttons { display:flex; gap:10px; margin-bottom:25px; }
+button { flex:1; padding:14px; border:none; border-radius:10px; font-size:16px; color:white; }
+.buy{background:#1f8f4a;} .sell{background:#8f2d2d;}
+#wallet { margin-top:10px; }
+#status { margin-top:15px; font-size:14px; word-break:break-all; opacity:0.8; }
 </style>
 </head>
+
 <body>
+<div class="card">
+  <div class="price">1.248 USDT</div>
+  <div class="pair">USDT / TON</div>
 
-<div id="wallet"></div>
+  <div class="buttons">
+    <button class="buy">BUY</button>
+    <button class="sell">SELL</button>
+  </div>
 
-<script type="module">
-import { TonConnectUI } from "https://esm.sh/@tonconnect/ui@2.0.0";
+  <div id="wallet"></div>
+  <div id="status">Wallet not connected</div>
+</div>
 
-const tonConnectUI = new TonConnectUI({
+<script>
+window.addEventListener("load", () => {
+
+  if (!window.TON_CONNECT_UI) {
+    alert("TON SDK not loaded");
+    return;
+  }
+
+  const tonConnectUI = new TON_CONNECT_UI.TonConnectUI({
     manifestUrl: "https://sergey52bb.github.io/grok-autotrade/tonconnect-manifest.json"
-});
+  });
 
-tonConnectUI.renderWalletButton(
-    document.getElementById("wallet")
-);
+  tonConnectUI.renderWalletButton(document.getElementById("wallet"));
+
+  tonConnectUI.onStatusChange(wallet => {
+    const status = document.getElementById("status");
+    if (wallet) {
+      status.innerText = "Connected: " + wallet.account.address;
+    } else {
+      status.innerText = "Wallet not connected";
+    }
+  });
+
+});
 </script>
 
 </body>
