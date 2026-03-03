@@ -1,64 +1,57 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Grok AutoTrade</title>
 
-<!-- TON CONNECT SDK -->
-<script src="https://cdn.jsdelivr.net/npm/@tonconnect/ui@2.0.0/dist/tonconnect-ui.min.js"></script>
+<script src="https://unpkg.com/@tonconnect/ui@latest/dist/tonconnect-ui.min.js"></script>
 
 <style>
 body{
 margin:0;
-font-family:Arial, sans-serif;
-background:radial-gradient(circle at top,#0b1a2d,#050b14);
-color:#fff;
+background:#0b1220;
 display:flex;
 justify-content:center;
 align-items:center;
 height:100vh;
+font-family:Arial;
+color:white;
 }
 .card{
+background:#111a2e;
+padding:30px;
+border-radius:20px;
 width:90%;
-max-width:420px;
-background:#0e1625;
-border-radius:16px;
-padding:24px;
+max-width:400px;
+text-align:center;
 box-shadow:0 0 40px rgba(0,0,0,.6);
 }
 .price{
-font-size:40px;
-text-align:center;
+font-size:36px;
 margin-bottom:5px;
 }
 .pair{
-text-align:center;
 opacity:.6;
 margin-bottom:20px;
 }
 .buttons{
 display:flex;
-gap:12px;
+gap:10px;
 margin-bottom:25px;
 }
-.buttons button{
+button{
 flex:1;
 padding:14px;
-font-size:18px;
 border:none;
 border-radius:10px;
-cursor:pointer;
+font-size:16px;
+color:white;
 }
-.buy{background:#1f8f4a;color:#fff;}
-.sell{background:#8f2d2d;color:#fff;}
-#wallet{margin-top:10px;}
-.balance{
-margin-top:15px;
-text-align:center;
-font-size:14px;
-opacity:.85;
-word-break:break-all;
+.buy{background:#1f8f4a;}
+.sell{background:#8f2d2d;}
+#wallet{
+margin-top:10px;
 }
 </style>
 </head>
@@ -75,14 +68,14 @@ word-break:break-all;
 </div>
 
 <div id="wallet"></div>
-<div id="balance" class="balance"></div>
+<div id="status"></div>
 </div>
 
 <script>
-window.addEventListener("load", function(){
+window.addEventListener("DOMContentLoaded", async () => {
 
-if (!window.TON_CONNECT_UI) {
-    alert("TON SDK NOT LOADED");
+if(!window.TON_CONNECT_UI){
+    alert("TON SDK not loaded");
     return;
 }
 
@@ -95,20 +88,16 @@ tonConnectUI.renderWalletButton(
 );
 
 tonConnectUI.onStatusChange(wallet => {
-    const balanceEl = document.getElementById("balance");
+    const status = document.getElementById("status");
 
     if(wallet){
-        balanceEl.innerText =
-        "Connected: " +
-        wallet.account.address.slice(0,6) +
-        "..." +
-        wallet.account.address.slice(-4);
+        status.innerText = "Connected: " + wallet.account.address;
     } else {
-        balanceEl.innerText = "";
+        status.innerText = "Wallet not connected";
     }
 });
 
-}) src="tonconnect-ui.min.js"></
+});
 </script>
 
 </body>
