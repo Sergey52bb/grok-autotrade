@@ -2,22 +2,35 @@
 <html>
 <head>
 <meta charset="UTF-8">
-<title>TEST</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>TON Test</title>
 <style>
 body{
-background:black;
+background:#0f172a;
 color:white;
 display:flex;
 justify-content:center;
 align-items:center;
 height:100vh;
-font-size:24px;
+font-family:Arial;
 }
 </style>
 </head>
 <body>
 
-WORKING
+<div id="wallet"></div>
+
+<script type="module">
+import { TonConnectUI } from "https://esm.sh/@tonconnect/ui@2.0.0";
+
+const tonConnectUI = new TonConnectUI({
+    manifestUrl: "https://sergey52bb.github.io/grok-autotrade/tonconnect-manifest.json"
+});
+
+tonConnectUI.renderWalletButton(
+    document.getElementById("wallet")
+);
+</script>
 
 </body>
 </html>
