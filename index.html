@@ -3,139 +3,157 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Grok AutoTrade - STON.fi Terminal</title>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    <title>Grok AutoTrade - Spot Terminal</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&family=Roboto+Mono&display=swap" rel="stylesheet">
     <script src="https://unpkg.com/@tonconnect/ui@latest/dist/tonconnect-ui.min.js"></script>
     <style>
-        :root { --bg: #0d0e12; --card: #18191f; --primary: #007aff; --text: #ffffff; --green: #00ffa3; --input: #212229; }
-        body { font-family: 'Inter', sans-serif; background: var(--bg); color: var(--text); margin: 0; display: flex; flex-direction: column; align-items: center; min-height: 100vh; }
+        :root { --bg: #0b0e11; --card: #161a1e; --text: #eaecef; --primary: #02c076; --secondary: #f84960; --input: #2b3139; --border: #474d57; }
+        body { font-family: 'Inter', sans-serif; background: var(--bg); color: var(--text); margin: 0; display: flex; flex-direction: column; height: 100vh; overflow: hidden; }
         
-        header { width: 100%; max-width: 1200px; padding: 20px; display: flex; justify-content: space-between; align-items: center; box-sizing: border-box; }
-        .logo { font-size: 22px; font-weight: 700; color: var(--primary); display: flex; align-items: center; gap: 8px; }
+        header { padding: 10px 20px; background: var(--card); display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border); }
+        .logo { color: var(--primary); font-weight: 700; font-size: 18px; }
+
+        .main-layout { display: grid; grid-template-columns: 1fr 300px 300px; grid-template-rows: 1fr 250px; flex-grow: 1; gap: 2px; background: var(--border); }
+        .panel { background: var(--card); padding: 15px; position: relative; }
+
+        /* График */
+        .chart-area { grid-column: 1 / 2; grid-row: 1 / 2; display: flex; align-items: center; justify-content: center; color: #474d57; }
+
+        /* Стакан ордеров (Order Book) */
+        .order-book { grid-column: 2 / 3; grid-row: 1 / 3; font-family: 'Roboto Mono', monospace; font-size: 12px; }
+        .ob-header { display: flex; justify-content: space-between; color: #848e9c; margin-bottom: 10px; }
+        .ob-row { display: flex; justify-content: space-between; padding: 2px 0; position: relative; }
+        .ob-price { width: 40%; }
+        .ob-amount { width: 30%; text-align: right; }
+        .ob-total { width: 30%; text-align: right; }
+        .sell-side { color: var(--secondary); }
+        .buy-side { color: var(--primary); }
+        .current-price { font-size: 18px; font-weight: 700; margin: 15px 0; text-align: center; }
+
+        /* Панель торговли */
+        .trade-panel { grid-column: 3 / 4; grid-row: 1 / 3; border-left: 1px solid var(--border); }
+        .tabs { display: flex; gap: 10px; margin-bottom: 20px; }
+        .tab { flex: 1; padding: 10px; text-align: center; border-radius: 4px; cursor: pointer; font-weight: 600; background: var(--input); }
+        .tab.buy { color: var(--primary); border: 1px solid var(--primary); }
+        .tab.sell { color: var(--secondary); border: 1px solid var(--secondary); }
         
-        /* Стили для контейнера кнопки TonConnect */
-        #ton-connect-button { margin-left: auto; }
+        .trade-input { background: var(--input); border: 1px solid transparent; border-radius: 4px; padding: 10px; margin-bottom: 15px; }
+        .trade-input label { font-size: 12px; color: #848e9c; display: block; margin-bottom: 5px; }
+        .trade-input-row { display: flex; justify-content: space-between; align-items: center; }
+        .trade-input input { background: transparent; border: none; color: white; width: 100%; outline: none; font-size: 16px; }
 
-        .swap-container { background: var(--card); border: 1px solid #2e2f36; padding: 24px; border-radius: 24px; width: 90%; max-width: 420px; margin-top: 40px; box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
-        .input-group { background: var(--input); padding: 16px; border-radius: 16px; margin-bottom: 8px; border: 1px solid transparent; transition: 0.2s; }
-        .input-group:hover { border-color: #3e3f4a; }
-        .label { font-size: 14px; color: #8e8e93; margin-bottom: 8px; display: flex; justify-content: space-between; }
-        .input-row { display: flex; justify-content: space-between; align-items: center; }
-        input { background: transparent; border: none; color: white; font-size: 24px; font-weight: 600; width: 60%; outline: none; }
-        .token { background: #2e2f36; padding: 6px 14px; border-radius: 20px; font-weight: 600; font-size: 14px; }
+        .action-btn { width: 100%; padding: 12px; border-radius: 4px; border: none; font-weight: 700; cursor: pointer; font-size: 16px; margin-top: 10px; }
+        .btn-buy { background: var(--primary); color: white; }
+        .btn-sell { background: var(--secondary); color: white; }
 
-        .swap-arrow { background: #2e2f36; width: 36px; height: 36px; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: -18px auto; position: relative; z-index: 2; border: 4px solid var(--card); }
-        .swap-btn { width: 100%; background: #2e2f36; color: #666; border: none; padding: 18px; border-radius: 16px; font-size: 18px; font-weight: 700; margin-top: 20px; cursor: not-allowed; transition: 0.3s; }
-        .swap-btn.active { background: var(--primary); color: white; cursor: pointer; box-shadow: 0 4px 15px rgba(0,122,255,0.3); }
-        
-        .info-row { margin-top: 15px; font-size: 13px; color: #8e8e93; display: flex; justify-content: space-between; padding: 0 4px; }
-        .green-text { color: var(--green); }
-
-        /* Таблица сделок внизу */
-        .history-table { width: 90%; max-width: 420px; margin-top: 30px; background: var(--card); border-radius: 16px; padding: 16px; border: 1px solid #2e2f36; font-size: 14px; }
-        .history-title { font-weight: 700; margin-bottom: 12px; display: block; color: #8e8e93; }
-        .history-item { display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid #212229; }
+        /* История / Ассеты */
+        .assets-panel { grid-column: 1 / 2; grid-row: 2 / 3; border-top: 1px solid var(--border); }
     </style>
 </head>
 <body>
 
-    <header>
-        <div class="logo">💎 STON.fi <span style="color:white; font-size: 12px; opacity: 0.4; font-weight: 400; margin-left: 5px;">GROK TERMINAL</span></div>
-        <div id="ton-connect-button"></div>
-    </header>
+<header>
+    <div class="logo">EDGEX <span style="color:white">TON</span></div>
+    <div id="ton-connect-button"></div>
+</header>
 
-    <div class="swap-container">
-        <div class="input-group">
-            <div class="label">Вы отдаете</div>
-            <div class="input-row">
-                <input type="number" id="sendAmount" placeholder="0.0" oninput="doMath()">
-                <div class="token">TON</div>
-            </div>
-        </div>
-
-        <div class="swap-arrow">↓</div>
-
-        <div class="input-group">
-            <div class="label">Вы получаете</div>
-            <div class="input-row">
-                <input type="number" id="getAmount" placeholder="0.0" readonly>
-                <div class="token">USDT</div>
-            </div>
-        </div>
-
-        <div class="info-row">
-            <span>Курс</span>
-            <span id="live-price">Загрузка курса...</span>
-        </div>
-
-        <button class="swap-btn" id="swap-action">Connect Wallet</button>
-    </div>
-
-    <div class="history-table">
-        <span class="history-title">Последние рыночные данные</span>
-        <div id="market-list">
-            <div class="history-item"><span>TON/USDT</span><span id="price-tick">---</span></div>
-            <div class="history-item"><span>Liquidity</span><span class="green-text">High</span></div>
+<div class="main-layout">
+    <div class="panel chart-area">
+        <div style="text-align: center;">
+            <p>TON/USDT Chart</p>
+            <small>(Здесь будет график TradingView)</small>
         </div>
     </div>
 
-    <script>
-        // Инициализация TonConnect с твоим манифестом
-        const tonConnectUI = new TON_CONNECT_UI.TonConnectUI({
-            manifestUrl: 'https://rgey52bb.github.io/tonconnect-manifest.json',
-            buttonRootId: 'ton-connect-button'
-        });
+    <div class="panel order-book">
+        <div class="ob-header"><span>Price</span><span>Amount</span><span>Total</span></div>
+        <div id="asks"></div> <div class="current-price" id="mid-price">0.00</div>
+        <div id="bids"></div> </div>
 
-        let currentPrice = 0;
+    <div class="panel trade-panel">
+        <div class="tabs">
+            <div class="tab buy" onclick="setMode('buy')">Buy</div>
+            <div class="tab sell" onclick="setMode('sell')">Sell</div>
+        </div>
+        
+        <div class="trade-input">
+            <label>Price</label>
+            <div class="trade-input-row">
+                <input type="number" id="market-price" readonly>
+                <span>USDT</span>
+            </div>
+        </div>
 
-        // Получение цены через API STON.fi
-        async function updateMarketData() {
-            try {
-                const response = await fetch('https://api.ston.fi/v1/assets');
-                const data = await response.json();
-                const tonAsset = data.assets.find(a => a.symbol === 'TON');
-                
-                if (tonAsset) {
-                    currentPrice = parseFloat(tonAsset.dex_usd_price);
-                    document.getElementById('live-price').innerHTML = `1 TON ≈ <span class="green-text">$${currentPrice.toFixed(2)}</span>`;
-                    document.getElementById('price-tick').innerText = `$${currentPrice.toFixed(2)}`;
-                }
-            } catch (err) {
-                console.log("Ошибка API, ставим демо-курс");
-                currentPrice = 5.35; // Запасной вариант
-                document.getElementById('live-price').innerText = "1 TON ≈ $5.35 (Demo)";
-            }
+        <div class="trade-input">
+            <label>Amount</label>
+            <div class="trade-input-row">
+                <input type="number" placeholder="0.00" id="amount-input">
+                <span>TON</span>
+            </div>
+        </div>
+
+        <button class="action-btn btn-buy" id="main-trade-btn">Buy TON</button>
+        
+        <div style="margin-top: 20px; font-size: 12px; color: #848e9c;">
+            <div style="display: flex; justify-content: space-between;"><span>Avail.</span><span>0.00 TON</span></div>
+        </div>
+    </div>
+
+    <div class="panel assets-panel">
+        <div style="font-size: 14px; font-weight: 600; color: #848e9c;">Open Orders (0)</div>
+    </div>
+</div>
+
+<script>
+    const tonConnectUI = new TON_CONNECT_UI.TonConnectUI({
+        manifestUrl: 'https://rgey52bb.github.io/tonconnect-manifest.json',
+        buttonRootId: 'ton-connect-button'
+    });
+
+    let currentPrice = 5.35;
+
+    // Имитация стакана (Order Book)
+    function generateOrderBook() {
+        const asks = document.getElementById('asks');
+        const bids = document.getElementById('bids');
+        asks.innerHTML = ''; bids.innerHTML = '';
+
+        for(let i=0; i<8; i++) {
+            const price = (currentPrice + (i * 0.002)).toFixed(3);
+            asks.innerHTML = `<div class="ob-row sell-side"><span class="ob-price">${price}</span><span class="ob-amount">0.${(Math.random()*99).toFixed(0)}</span><span class="ob-total">1.2</span></div>` + asks.innerHTML;
+            
+            const bPrice = (currentPrice - (i * 0.002)).toFixed(3);
+            bids.innerHTML += `<div class="ob-row buy-side"><span class="ob-price">${bPrice}</span><span class="ob-amount">0.${(Math.random()*99).toFixed(0)}</span><span class="ob-total">0.8</span></div>`;
         }
+    }
 
-        // Расчет обмена
-        function doMath() {
-            const send = document.getElementById('sendAmount').value;
-            const get = document.getElementById('getAmount');
-            if (send > 0 && currentPrice > 0) {
-                get.value = (send * currentPrice * 0.997).toFixed(2); // Минус комиссия 0.3%
-            } else {
-                get.value = '';
+    async function fetchLivePrice() {
+        try {
+            const res = await fetch('https://api.ston.fi/v1/assets');
+            const data = await res.json();
+            const ton = data.assets.find(a => a.symbol === 'TON');
+            if (ton) {
+                currentPrice = parseFloat(ton.dex_usd_price);
+                document.getElementById('mid-price').innerText = currentPrice.toFixed(2);
+                document.getElementById('market-price').value = currentPrice.toFixed(2);
+                generateOrderBook();
             }
+        } catch(e) { console.log("Price error"); }
+    }
+
+    function setMode(mode) {
+        const btn = document.getElementById('main-trade-btn');
+        if(mode === 'buy') {
+            btn.innerText = 'Buy TON';
+            btn.className = 'action-btn btn-buy';
+        } else {
+            btn.innerText = 'Sell TON';
+            btn.className = 'action-btn btn-sell';
         }
+    }
 
-        // Следим за состоянием кошелька
-        tonConnectUI.onStatusChange(wallet => {
-            const btn = document.getElementById('swap-action');
-            if (wallet) {
-                btn.innerText = 'Обменять';
-                btn.classList.add('active');
-                btn.onclick = () => alert('Логика транзакции будет добавлена в следующем модуле SDK!');
-            } else {
-                btn.innerText = 'Connect Wallet';
-                btn.classList.remove('active');
-                btn.onclick = null;
-            }
-        });
-
-        // Запуск
-        updateMarketData();
-        setInterval(updateMarketData, 20000); // Обновлять каждые 20 сек
-    </script>
+    fetchLivePrice();
+    setInterval(fetchLivePrice, 5000);
+</script>
 </body>
 </html>
-
