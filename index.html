@@ -3,45 +3,52 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>STON.fi Clone - Grok AutoTrade</title>
+    <title>Grok AutoTrade - STON.fi Terminal</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/@tonconnect/ui@latest/dist/tonconnect-ui.min.js"></script>
     <style>
-        :root { --bg: #0d0e12; --card: #18191f; --primary: #007aff; --text: #ffffff; --green: #00ffa3; }
+        :root { --bg: #0d0e12; --card: #18191f; --primary: #007aff; --text: #ffffff; --green: #00ffa3; --input: #212229; }
         body { font-family: 'Inter', sans-serif; background: var(--bg); color: var(--text); margin: 0; display: flex; flex-direction: column; align-items: center; min-height: 100vh; }
         
         header { width: 100%; max-width: 1200px; padding: 20px; display: flex; justify-content: space-between; align-items: center; box-sizing: border-box; }
         .logo { font-size: 22px; font-weight: 700; color: var(--primary); display: flex; align-items: center; gap: 8px; }
-        .connect-btn { background: var(--primary); color: white; border: none; padding: 10px 20px; border-radius: 12px; font-weight: 600; cursor: pointer; transition: 0.3s; }
-        .connect-btn:hover { opacity: 0.8; transform: translateY(-2px); }
+        
+        /* Стили для контейнера кнопки TonConnect */
+        #ton-connect-button { margin-left: auto; }
 
-        .swap-container { background: var(--card); border: 1px solid #2e2f36; padding: 24px; border-radius: 24px; width: 400px; margin-top: 50px; box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
-        .input-group { background: #212229; padding: 16px; border-radius: 16px; margin-bottom: 8px; border: 1px solid transparent; }
+        .swap-container { background: var(--card); border: 1px solid #2e2f36; padding: 24px; border-radius: 24px; width: 90%; max-width: 420px; margin-top: 40px; box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
+        .input-group { background: var(--input); padding: 16px; border-radius: 16px; margin-bottom: 8px; border: 1px solid transparent; transition: 0.2s; }
         .input-group:hover { border-color: #3e3f4a; }
         .label { font-size: 14px; color: #8e8e93; margin-bottom: 8px; display: flex; justify-content: space-between; }
         .input-row { display: flex; justify-content: space-between; align-items: center; }
         input { background: transparent; border: none; color: white; font-size: 24px; font-weight: 600; width: 60%; outline: none; }
-        .token { background: #2e2f36; padding: 4px 12px; border-radius: 20px; font-weight: 600; display: flex; align-items: center; gap: 6px; }
+        .token { background: #2e2f36; padding: 6px 14px; border-radius: 20px; font-weight: 600; font-size: 14px; }
 
-        .swap-arrow { background: #2e2f36; width: 36px; height: 36px; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: -15px auto; position: relative; z-index: 2; border: 4px solid var(--card); cursor: pointer; }
-        .swap-btn { width: 100%; background: #2e2f36; color: #555; border: none; padding: 18px; border-radius: 16px; font-size: 18px; font-weight: 700; margin-top: 20px; cursor: not-allowed; transition: 0.3s; }
-        .swap-btn.active { background: var(--primary); color: white; cursor: pointer; }
+        .swap-arrow { background: #2e2f36; width: 36px; height: 36px; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: -18px auto; position: relative; z-index: 2; border: 4px solid var(--card); }
+        .swap-btn { width: 100%; background: #2e2f36; color: #666; border: none; padding: 18px; border-radius: 16px; font-size: 18px; font-weight: 700; margin-top: 20px; cursor: not-allowed; transition: 0.3s; }
+        .swap-btn.active { background: var(--primary); color: white; cursor: pointer; box-shadow: 0 4px 15px rgba(0,122,255,0.3); }
         
-        .price-info { margin-top: 15px; font-size: 13px; color: #8e8e93; display: flex; justify-content: space-between; }
-        .price-val { color: var(--green); }
+        .info-row { margin-top: 15px; font-size: 13px; color: #8e8e93; display: flex; justify-content: space-between; padding: 0 4px; }
+        .green-text { color: var(--green); }
+
+        /* Таблица сделок внизу */
+        .history-table { width: 90%; max-width: 420px; margin-top: 30px; background: var(--card); border-radius: 16px; padding: 16px; border: 1px solid #2e2f36; font-size: 14px; }
+        .history-title { font-weight: 700; margin-bottom: 12px; display: block; color: #8e8e93; }
+        .history-item { display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid #212229; }
     </style>
 </head>
 <body>
 
     <header>
-        <div class="logo">💎 STON.fi <span style="color:white; font-size: 14px; opacity: 0.5;">(Grok Edit)</span></div>
-        <button class="connect-btn" onclick="connect()">Connect Wallet</button>
+        <div class="logo">💎 STON.fi <span style="color:white; font-size: 12px; opacity: 0.4; font-weight: 400; margin-left: 5px;">GROK TERMINAL</span></div>
+        <div id="ton-connect-button"></div>
     </header>
 
     <div class="swap-container">
         <div class="input-group">
-            <div class="label">You pay</div>
+            <div class="label">Вы отдаете</div>
             <div class="input-row">
-                <input type="number" placeholder="0.0" id="payAmount" oninput="calculate()">
+                <input type="number" id="sendAmount" placeholder="0.0" oninput="doMath()">
                 <div class="token">TON</div>
             </div>
         </div>
@@ -49,62 +56,85 @@
         <div class="swap-arrow">↓</div>
 
         <div class="input-group">
-            <div class="label">You receive</div>
+            <div class="label">Вы получаете</div>
             <div class="input-row">
-                <input type="number" placeholder="0.0" id="receiveAmount" readonly>
+                <input type="number" id="getAmount" placeholder="0.0" readonly>
                 <div class="token">USDT</div>
             </div>
         </div>
 
-        <div class="price-info">
-            <span>Price</span>
-            <span id="price-status">Loading price...</span>
+        <div class="info-row">
+            <span>Курс</span>
+            <span id="live-price">Загрузка курса...</span>
         </div>
 
-        <button class="swap-btn" id="main-btn">Connect Wallet</button>
+        <button class="swap-btn" id="swap-action">Connect Wallet</button>
+    </div>
+
+    <div class="history-table">
+        <span class="history-title">Последние рыночные данные</span>
+        <div id="market-list">
+            <div class="history-item"><span>TON/USDT</span><span id="price-tick">---</span></div>
+            <div class="history-item"><span>Liquidity</span><span class="green-text">High</span></div>
+        </div>
     </div>
 
     <script>
-        let tonPrice = 0;
+        // Инициализация TonConnect с твоим манифестом
+        const tonConnectUI = new TON_CONNECT_UI.TonConnectUI({
+            manifestUrl: 'https://rgey52bb.github.io/tonconnect-manifest.json',
+            buttonRootId: 'ton-connect-button'
+        });
 
-        // Функция для получения реальной цены с API STON.fi
-        async function fetchPrice() {
+        let currentPrice = 0;
+
+        // Получение цены через API STON.fi
+        async function updateMarketData() {
             try {
-                const res = await fetch('https://api.ston.fi/v1/assets');
-                const data = await res.json();
-                const ton = data.assets.find(a => a.symbol === 'TON');
-                if (ton) {
-                    tonPrice = parseFloat(ton.dex_usd_price);
-                    document.getElementById('price-status').innerHTML = `1 TON ≈ <span class="price-val">$${tonPrice.toFixed(2)}</span>`;
+                const response = await fetch('https://api.ston.fi/v1/assets');
+                const data = await response.json();
+                const tonAsset = data.assets.find(a => a.symbol === 'TON');
+                
+                if (tonAsset) {
+                    currentPrice = parseFloat(tonAsset.dex_usd_price);
+                    document.getElementById('live-price').innerHTML = `1 TON ≈ <span class="green-text">$${currentPrice.toFixed(2)}</span>`;
+                    document.getElementById('price-tick').innerText = `$${currentPrice.toFixed(2)}`;
                 }
-            } catch (e) {
-                document.getElementById('price-status').innerText = 'Error fetching price';
+            } catch (err) {
+                console.log("Ошибка API, ставим демо-курс");
+                currentPrice = 5.35; // Запасной вариант
+                document.getElementById('live-price').innerText = "1 TON ≈ $5.35 (Demo)";
             }
         }
 
-        function calculate() {
-            const amount = document.getElementById('payAmount').value;
-            const receive = document.getElementById('receiveAmount');
-            const btn = document.getElementById('main-btn');
-
-            if (amount > 0 && tonPrice > 0) {
-                receive.value = (amount * tonPrice * 0.997).toFixed(2); // С учетом комиссии 0.3%
-                btn.innerText = 'Swap (Demo)';
-                btn.classList.add('active');
+        // Расчет обмена
+        function doMath() {
+            const send = document.getElementById('sendAmount').value;
+            const get = document.getElementById('getAmount');
+            if (send > 0 && currentPrice > 0) {
+                get.value = (send * currentPrice * 0.997).toFixed(2); // Минус комиссия 0.3%
             } else {
-                receive.value = '';
-                btn.innerText = 'Enter Amount';
-                btn.classList.remove('active');
+                get.value = '';
             }
         }
 
-        function connect() {
-            alert('Для подключения кошелька в Mini App нужно использовать библиотеку TonConnect. На Netlify это будет работать после добавления SDK.');
-        }
+        // Следим за состоянием кошелька
+        tonConnectUI.onStatusChange(wallet => {
+            const btn = document.getElementById('swap-action');
+            if (wallet) {
+                btn.innerText = 'Обменять';
+                btn.classList.add('active');
+                btn.onclick = () => alert('Логика транзакции будет добавлена в следующем модуле SDK!');
+            } else {
+                btn.innerText = 'Connect Wallet';
+                btn.classList.remove('active');
+                btn.onclick = null;
+            }
+        });
 
-        // Запускаем обновление цены
-        fetchPrice();
-        setInterval(fetchPrice, 30000);
+        // Запуск
+        updateMarketData();
+        setInterval(updateMarketData, 20000); // Обновлять каждые 20 сек
     </script>
 </body>
 </html>
