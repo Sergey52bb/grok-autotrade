@@ -3,142 +3,93 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>STRATEX Pro Terminal</title>
-    <link href="https://fonts.googleapis.com/css2?family=Roboto+Mono:wght@400;700&display=swap" rel="stylesheet">
+    <title>STRATEX Terminal</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
     <script src="https://unpkg.com/@tonconnect/ui@latest/dist/tonconnect-ui.min.js"></script>
     <style>
         :root {
-            --bg: #06090f; --card: #11151c; --border: #1e222d;
-            --primary: #00ff95; /* Насыщенный салатный */
-            --secondary: #ff3b57; /* Насыщенный бордово-красный */
+            --bg: #0b0e11; --card: #181a20; --border: #2b3139;
+            --primary: #02c076; --secondary: #f84960;
             --gold: #f0b90b; --text-dim: #848e9c;
         }
 
         body {
-            font-family: 'Roboto Mono', monospace; background: var(--bg); color: white;
+            font-family: 'Inter', sans-serif; background: var(--bg); color: white;
             margin: 0; display: flex; flex-direction: column; height: 100vh; overflow: hidden;
         }
 
-        /* HEADER */
-        header {
-            padding: 5px 12px; background: var(--card); display: flex;
-            justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border);
+        /* Верхняя панель с ценой */
+        .ticker-header {
+            padding: 15px; background: var(--bg); display: flex; 
+            justify-content: space-between; align-items: center;
         }
-        .logo { font-weight: 800; color: var(--gold); font-size: 14px; }
+        .price-main { font-size: 24px; font-weight: 700; color: var(--primary); }
+        .ticker-info { text-align: right; font-size: 12px; color: var(--text-dim); }
+        .change-up { color: var(--primary); font-weight: 600; }
 
-        /* ВЕРХНЯЯ ЧАСТЬ: ГРАФИК */
-        .chart-container { height: 35vh; border-bottom: 1px solid var(--border); background: #000; }
+        /* Контейнер для графика (основная часть) */
+        .chart-box { flex-grow: 1; background: #000; position: relative; }
+        #tv_container { width: 100%; height: 100%; }
 
-        /* СРЕДНЯЯ ЧАСТЬ: ТОРГОВЛЯ И СТАКАН */
-        .trading-area {
-            display: grid; grid-template-columns: 1fr 1fr; 
-            height: 55vh; background: var(--border); gap: 1px;
-        }
-
-        .panel { background: var(--card); padding: 10px; overflow-y: auto; }
-
-        /* СТИЛЬ СТАКАНА (ORDER BOOK) */
-        .ob-row { 
-            display: flex; justify-content: space-between; 
-            position: relative; height: 18px; align-items: center; 
-            font-size: 11px; margin-bottom: 1px; z-index: 1;
-        }
-        .depth-bar {
-            position: absolute; right: 0; top: 0; height: 100%; 
-            z-index: -1; opacity: 0.65; /* Прозрачность 65% */
-            transition: width 0.3s ease;
-        }
-        .price-up { color: var(--primary); font-weight: bold; }
-        .price-down { color: var(--secondary); font-weight: bold; }
-
-        /* ТОРГОВАЯ ПАНЕЛЬ */
-        .side-tabs { display: flex; gap: 4px; margin-bottom: 10px; }
-        .tab { 
-            flex: 1; padding: 6px; text-align: center; font-size: 12px; 
-            border-radius: 2px; background: #1e2633; cursor: pointer; 
-        }
-        .tab.buy.active { background: var(--primary); color: #000; font-weight: bold; }
-        .tab.sell.active { background: var(--secondary); color: #fff; font-weight: bold; }
-
-        .input-box {
-            background: #1e222d; border: 1px solid #2b3139; 
-            padding: 8px; margin-bottom: 8px; border-radius: 4px;
-        }
-        .input-box label { display: block; font-size: 9px; color: var(--text-dim); }
-        .input-box input { 
-            background: transparent; border: none; color: white; 
-            width: 100%; font-size: 14px; outline: none; font-family: inherit;
+        /* Панель управления внизу */
+        .bottom-controls {
+            background: var(--card); padding: 15px 15px 30px 15px;
+            border-top: 1px solid var(--border);
+            display: grid; grid-template-columns: 1fr 1fr; gap: 12px;
         }
 
-        .btn-trade {
-            width: 100%; padding: 12px; border: none; border-radius: 4px;
-            font-weight: bold; font-size: 14px; cursor: pointer; margin-top: 5px;
+        .btn-action {
+            padding: 14px; border-radius: 8px; border: none;
+            color: white; font-weight: 700; font-size: 16px; cursor: pointer;
+            transition: transform 0.1s;
         }
-        .btn-buy { background: var(--primary); color: #000; }
+        .btn-action:active { transform: scale(0.96); }
+        
+        .buy-btn { background: var(--primary); }
+        .sell-btn { background: var(--secondary); }
 
-        /* FOOTER NAV */
-        nav { 
-            height: 10vh; background: var(--card); border-top: 1px solid var(--border);
-            display: flex; justify-content: space-around; align-items: center;
+        /* Кошелек в углу */
+        .wallet-float { position: absolute; top: 15px; right: 15px; z-index: 100; }
+
+        /* Мини-стат под графиком */
+        .mini-stats {
+            display: flex; justify-content: space-around; padding: 10px;
+            background: var(--card); font-size: 11px; color: var(--text-dim);
+            border-top: 1px solid var(--border);
         }
-        .nav-item { font-size: 10px; color: var(--text-dim); text-align: center; opacity: 0.7; }
-        .nav-item.active { color: var(--gold); opacity: 1; }
+        .mini-stats b { color: white; }
     </style>
 </head>
 <body>
 
-<header>
-    <div class="logo">STRATEX <span>AUTO</span></div>
-    <div id="ton-connect-button"></div>
-</header>
+<div class="wallet-float" id="ton-connect-button"></div>
 
-<div class="chart-container">
-    <div id="tv_container" style="height: 100%; width: 100%;"></div>
-</div>
-
-<div class="trading-area">
-    <div class="panel">
-        <div class="side-tabs">
-            <div class="tab buy active">Buy</div>
-            <div class="tab sell">Sell</div>
-        </div>
-        <div class="input-box">
-            <label>Price (USDT)</label>
-            <input type="number" value="5.350">
-        </div>
-        <div class="input-box">
-            <label>Amount (TON)</label>
-            <input type="number" id="amt" value="25" oninput="updateTotal()">
-        </div>
-        <div style="font-size: 11px; margin: 10px 0;">
-            <div style="display:flex; justify-content:space-between; color: var(--text-dim);">
-                <span>Total:</span><span id="total" style="color:white">133.75 USDT</span>
-            </div>
-            <div style="display:flex; justify-content:space-between; margin-top:4px;">
-                <span>STRATEX Fee:</span><span style="color:var(--gold)">0.35%</span>
-            </div>
-        </div>
-        <button class="btn-trade btn-buy">Buy TON</button>
+<div class="ticker-header">
+    <div>
+        <div style="font-size: 14px; font-weight: 600; margin-bottom: 4px;">TON / USDT</div>
+        <div class="price-main">5.3502</div>
     </div>
-
-    <div class="panel" style="padding: 5px;">
-        <div style="display:flex; justify-content:space-between; font-size:9px; color:var(--text-dim); margin-bottom:5px;">
-            <span>Price</span><span>Amount</span>
-        </div>
-        <div id="asks-list"></div>
-        <div style="text-align:center; padding: 5px 0; border-top:1px solid #2b3139; border-bottom:1px solid #2b3139; margin: 3px 0;">
-            <span style="color:var(--primary); font-size:14px; font-weight:bold;">5.350</span>
-        </div>
-        <div id="bids-list"></div>
+    <div class="ticker-info">
+        <div>24h High: <b>5.4210</b></div>
+        <div>24h Low: <b>5.2105</b></div>
+        <div class="change-up">+3.42%</div>
     </div>
 </div>
 
-<nav>
-    <div class="nav-item active">📈<br>Market</div>
-    <div class="nav-item">🤖<br>Auto</div>
-    <div class="nav-item">👛<br>Wallet</div>
-    <div class="nav-item">⚙️<br>Settings</div>
-</nav>
+<div class="chart-box">
+    <div id="tv_container"></div>
+</div>
+
+<div class="mini-stats">
+    <div>Vol(TON): <b>1.2M</b></div>
+    <div>Vol(USDT): <b>6.4M</b></div>
+    <div>Fee: <b style="color:var(--gold)">0.35%</b></div>
+</div>
+
+<div class="bottom-controls">
+    <button class="btn-action buy-btn" onclick="openTrade('buy')">BUY</button>
+    <button class="btn-action sell-btn" onclick="openTrade('sell')">SELL</button>
+</div>
 
 <script type="text/javascript" src="https://s3.tradingview.com/tv.js"></script>
 <script>
@@ -149,38 +100,25 @@
 
     function initChart() {
         new TradingView.widget({
-            "autosize": true, "symbol": "OKX:TONUSDT", "interval": "5",
-            "theme": "dark", "style": "1", "container_id": "tv_container",
-            "hide_top_toolbar": true, "backgroundColor": "#06090f"
+            "autosize": true,
+            "symbol": "OKX:TONUSDT",
+            "interval": "15",
+            "theme": "dark",
+            "style": "1",
+            "locale": "ru",
+            "container_id": "tv_container",
+            "hide_top_toolbar": true,
+            "backgroundColor": "#0b0e11",
+            "gridColor": "rgba(43, 49, 57, 0.5)"
         });
     }
 
-    function renderOrderBook() {
-        const asks = document.getElementById('asks-list');
-        const bids = document.getElementById('bids-list');
-        asks.innerHTML = ''; bids.innerHTML = '';
-
-        for(let i=0; i<8; i++) {
-            let askVol = Math.random() * 100;
-            asks.innerHTML = `<div class="ob-row">
-                <span class="price-down">5.3${51+i}</span><span>${askVol.toFixed(1)}</span>
-                <div class="depth-bar" style="width:${askVol}%; background:var(--secondary);"></div>
-            </div>` + asks.innerHTML;
-
-            let bidVol = Math.random() * 100;
-            bids.innerHTML += `<div class="ob-row">
-                <span class="price-up">5.3${49-i}</span><span>${bidVol.toFixed(1)}</span>
-                <div class="depth-bar" style="width:${bidVol}%; background:var(--primary);"></div>
-            </div>`;
-        }
+    function openTrade(side) {
+        // Здесь будет открываться модальное окно или шторка для ввода суммы
+        alert('Открываем панель ' + (side === 'buy' ? 'покупки' : 'продажи'));
     }
 
-    function updateTotal() {
-        const amt = document.getElementById('amt').value;
-        document.getElementById('total').innerText = (amt * 5.35).toFixed(2) + ' USDT';
-    }
-
-    window.onload = () => { initChart(); renderOrderBook(); setInterval(renderOrderBook, 1500); };
+    window.onload = initChart;
 </script>
 </body>
 </html>
