@@ -3,125 +3,80 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>STRATEX Terminal V3.5</title>
-    <link href="https://fonts.googleapis.com/css2?family=Roboto+Mono:wght@500;700&family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    <title>STRATEX V4.0</title>
     <script src="https://unpkg.com/@tonconnect/ui@latest/dist/tonconnect-ui.min.js"></script>
     <style>
-        :root {
-            --bg: #05070a; --card: #0d1117; --border: #1a1f26;
-            --primary: #00ff95; --secondary: #ff3b57; --gold: #f0b90b; 
-            --text-dim: #707a8a; --text-main: #e6e8ea;
-        }
-
-        body {
-            font-family: 'Inter', sans-serif; background: var(--bg); color: var(--text-main);
-            margin: 0; display: flex; flex-direction: column; height: 100vh; overflow: hidden;
-        }
-
-        header {
-            padding: 10px 15px; background: var(--card); display: flex;
-            justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border);
-        }
-        .logo { font-weight: 800; color: var(--gold); font-size: 14px; }
-
-        /* Экраны */
-        .view { display: none; flex-direction: column; height: calc(100vh - 120px); overflow-y: auto; }
-        .view.active { display: flex; }
-
-        .debug-log { background: #000; color: #ff9d00; font-family: 'Roboto Mono'; font-size: 10px; padding: 10px; margin: 10px; border: 1px solid #333; height: 60px; overflow-y: scroll; }
-
-        /* Навигация */
-        nav { background: var(--card); border-top: 1px solid var(--border); display: flex; justify-content: space-around; padding: 12px 0; position: fixed; bottom: 0; width: 100%; }
-        .nav-item { font-size: 10px; color: var(--text-dim); text-align: center; cursor: pointer; flex: 1; opacity: 0.6; }
-        .nav-item.active { color: var(--gold); opacity: 1; }
-        .nav-icon { font-size: 18px; display: block; margin-bottom: 2px; }
-
-        .btn-connect { background: var(--gold); color: black; border: none; padding: 12px; border-radius: 6px; font-weight: 800; cursor: pointer; margin: 15px; }
-        .ob-row { display: flex; justify-content: space-between; position: relative; height: 18px; align-items: center; font-family: 'Roboto Mono'; font-size: 11px; }
+        body { background: #05070a; color: white; font-family: sans-serif; margin: 0; padding: 0; }
+        header { padding: 15px; display: flex; justify-content: space-between; align-items: center; background: #0d1117; border-bottom: 1px solid #1a1f26; }
+        #log { background: #000; color: #00ff95; font-family: monospace; font-size: 10px; padding: 10px; height: 80px; overflow-y: auto; border-bottom: 1px solid #333; }
+        .btn-fix { background: #00ff95; color: black; border: none; padding: 15px; width: 90%; margin: 20px 5%; border-radius: 8px; font-weight: bold; cursor: pointer; }
     </style>
 </head>
 <body>
 
+<div id="log">/ System Log initialized...</div>
+
 <header>
-    <div class="logo">STRATEX <span>FIX-MODE</span></div>
+    <div style="font-weight: bold; color: #f0b90b;">STRATEX PRO</div>
     <div id="ton-connect-button"></div>
 </header>
 
-<div class="debug-log" id="debug-out">> System started...</div>
-
-<div id="view-market" class="view active">
-    <div style="height: 35vh; background: #000;" id="tv_container"></div>
-    
-    <div style="padding: 15px;">
-        <button class="btn-connect" onclick="forceConnect()">ПРИНУДИТЕЛЬНО ПОДКЛЮЧИТЬ</button>
-        <div id="asks-box"></div>
-        <div id="bids-box"></div>
-    </div>
+<div style="padding: 20px; text-align: center;">
+    <p style="font-size: 13px; color: #848e9c;">Если обычная кнопка не вызывает подтверждение в кошельке, нажми кнопку ниже:</p>
+    <button class="btn-fix" onclick="connectDirectly()">ВЫЗВАТЬ TONKEEPER</button>
 </div>
 
-<div id="view-assets" class="view">
-    <div style="padding: 40px; text-align: center;">
-        <h3 id="wallet-status">Проверка...</h3>
-        <p id="wallet-addr" style="font-size: 10px; color: var(--text-dim); word-break: break-all;"></p>
-    </div>
+<div id="view-assets" style="padding: 20px; text-align: center; border-top: 1px solid #333;">
+    <div id="status">Статус: Ожидание...</div>
 </div>
 
-<nav>
-    <div class="nav-item active" onclick="switchView('market')"><span class="nav-icon">📊</span>Market</div>
-    <div class="nav-item" onclick="switchView('assets')"><span class="nav-icon">👛</span>Assets</div>
-</nav>
-
-<script type="text/javascript" src="https://s3.tradingview.com/tv.js"></script>
 <script>
-    const log = document.getElementById('debug-out');
-    function print(msg) { log.innerHTML += `<br>> ${msg}`; log.scrollTop = log.scrollHeight; }
+    const logEl = document.getElementById('log');
+    function printLog(m) { logEl.innerHTML += `<br>> ${m}`; logEl.scrollTop = logEl.scrollHeight; }
 
-    // 1. Инициализация. 
-    // Проверь: rgey52bb.github.io — это ТОЧНЫЙ адрес твоего сайта?
+    // 1. Инициализация с полными параметрами
     const tonConnectUI = new TON_CONNECT_UI.TonConnectUI({
         manifestUrl: 'https://rgey52bb.github.io/tonconnect-manifest.json',
         buttonRootId: 'ton-connect-button'
     });
 
-    // 2. Слушатель
+    // 2. Слушаем изменения
     tonConnectUI.onStatusChange(wallet => {
-        const status = document.getElementById('wallet-status');
-        const addr = document.getElementById('wallet-addr');
         if (wallet) {
-            print("Connected: " + wallet.account.address.substring(0,8));
-            status.innerText = "АКТИВЕН ✅";
-            addr.innerText = wallet.account.address;
+            printLog("SUCCESS: Connected to " + wallet.device.appName);
+            document.getElementById('status').innerHTML = "✅ ПОДКЛЮЧЕНО: " + wallet.account.address.substring(0,8) + "...";
         } else {
-            print("Disconnected");
-            status.innerText = "НЕ ПОДКЛЮЧЕН";
+            printLog("Status: Disconnected");
+            document.getElementById('status').innerHTML = "❌ НЕ ПОДКЛЮЧЕНО";
         }
     });
 
-    // 3. Функция принудительного вызова
-    async function forceConnect() {
-        print("Opening Modal...");
+    // 3. Принудительный коннект
+    async function connectDirectly() {
+        printLog("Attempting to open modal...");
         try {
             await tonConnectUI.openModal();
-            print("Modal Opened");
+            printLog("Modal opened. Please select Tonkeeper.");
         } catch (e) {
-            print("Error: " + e.message);
+            printLog("ERROR: " + e.message);
+            console.error(e);
         }
     }
 
-    function switchView(name) {
-        document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
-        document.getElementById('view-' + name).classList.add('active');
-        if(name === 'market') initChart();
-    }
-
-    function initChart() {
-        new TradingView.widget({
-            "autosize": true, "symbol": "OKX:TONUSDT", "interval": "15",
-            "theme": "dark", "container_id": "tv_container", "hide_top_toolbar": true
-        });
-    }
-
-    window.onload = () => { initChart(); print("Ready. Use 'Connect' button."); };
+    // Проверка манифеста при загрузке
+    window.onload = async () => {
+        printLog("Checking manifest access...");
+        try {
+            const resp = await fetch('https://rgey52bb.github.io/tonconnect-manifest.json');
+            if (resp.ok) {
+                printLog("Manifest found (200 OK)");
+            } else {
+                printLog("CRITICAL: Manifest not found! Check GitHub!");
+            }
+        } catch (e) {
+            printLog("FETCH ERROR: " + e.message);
+        }
+    };
 </script>
 </body>
 </html>
