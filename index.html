@@ -3,18 +3,18 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>STRATEX V4.0</title>
+    <title>STRATEX DEBUG V4.5</title>
     <script src="https://unpkg.com/@tonconnect/ui@latest/dist/tonconnect-ui.min.js"></script>
     <style>
-        body { background: #05070a; color: white; font-family: sans-serif; margin: 0; padding: 0; }
-        header { padding: 15px; display: flex; justify-content: space-between; align-items: center; background: #0d1117; border-bottom: 1px solid #1a1f26; }
-        #log { background: #000; color: #00ff95; font-family: monospace; font-size: 10px; padding: 10px; height: 80px; overflow-y: auto; border-bottom: 1px solid #333; }
-        .btn-fix { background: #00ff95; color: black; border: none; padding: 15px; width: 90%; margin: 20px 5%; border-radius: 8px; font-weight: bold; cursor: pointer; }
+        body { background: #05070a; color: white; font-family: sans-serif; margin: 0; }
+        #log-screen { background: #000; color: #00ff95; font-family: monospace; font-size: 11px; padding: 15px; height: 120px; overflow-y: scroll; border-bottom: 2px solid #1a1f26; }
+        .btn-connect { background: #f0b90b; color: black; border: none; padding: 15px; width: 90%; margin: 20px 5%; border-radius: 8px; font-weight: bold; font-size: 16px; cursor: pointer; }
+        header { padding: 15px; background: #0d1117; display: flex; justify-content: space-between; align-items: center; }
     </style>
 </head>
 <body>
 
-<div id="log">/ System Log initialized...</div>
+<div id="log-screen">/ Инициализация лога...</div>
 
 <header>
     <div style="font-weight: bold; color: #f0b90b;">STRATEX PRO</div>
@@ -22,59 +22,61 @@
 </header>
 
 <div style="padding: 20px; text-align: center;">
-    <p style="font-size: 13px; color: #848e9c;">Если обычная кнопка не вызывает подтверждение в кошельке, нажми кнопку ниже:</p>
-    <button class="btn-fix" onclick="connectDirectly()">ВЫЗВАТЬ TONKEEPER</button>
-</div>
-
-<div id="view-assets" style="padding: 20px; text-align: center; border-top: 1px solid #333;">
-    <div id="status">Статус: Ожидание...</div>
+    <p style="color: #848e9c; font-size: 14px;">Статус системы:</p>
+    <h2 id="status-display">ОЖИДАНИЕ</h2>
+    <button class="btn-connect" onclick="startConnect()">ПОДКЛЮЧИТЬ КОШЕЛЕК</button>
 </div>
 
 <script>
-    const logEl = document.getElementById('log');
-    function printLog(m) { logEl.innerHTML += `<br>> ${m}`; logEl.scrollTop = logEl.scrollHeight; }
+    const logger = document.getElementById('log-screen');
+    function addLog(text) {
+        logger.innerHTML += `<br>> ${text}`;
+        logger.scrollTop = logger.scrollHeight;
+    }
 
-    // 1. Инициализация с полными параметрами
+    // 1. Инициализация
     const tonConnectUI = new TON_CONNECT_UI.TonConnectUI({
         manifestUrl: 'https://rgey52bb.github.io/tonconnect-manifest.json',
         buttonRootId: 'ton-connect-button'
     });
 
-    // 2. Слушаем изменения
+    // 2. Следим за подключением
     tonConnectUI.onStatusChange(wallet => {
         if (wallet) {
-            printLog("SUCCESS: Connected to " + wallet.device.appName);
-            document.getElementById('status').innerHTML = "✅ ПОДКЛЮЧЕНО: " + wallet.account.address.substring(0,8) + "...";
+            addLog("УСПЕХ: Кошелек подключен!");
+            document.getElementById('status-display').innerText = "ПОДКЛЮЧЕНО ✅";
+            document.getElementById('status-display').style.color = "#00ff95";
         } else {
-            printLog("Status: Disconnected");
-            document.getElementById('status').innerHTML = "❌ НЕ ПОДКЛЮЧЕНО";
+            addLog("Статус: Кошелек не найден.");
+            document.getElementById('status-display').innerText = "НЕ ПОДКЛЮЧЕН ❌";
         }
     });
 
-    // 3. Принудительный коннект
-    async function connectDirectly() {
-        printLog("Attempting to open modal...");
+    async function startConnect() {
+        addLog("Запуск меню выбора...");
         try {
             await tonConnectUI.openModal();
-            printLog("Modal opened. Please select Tonkeeper.");
         } catch (e) {
-            printLog("ERROR: " + e.message);
-            console.error(e);
+            addLog("ОШИБКА МОДАЛКИ: " + e.message);
         }
     }
 
-    // Проверка манифеста при загрузке
+    // 3. САМОПРОВЕРКА (Самое важное!)
     window.onload = async () => {
-        printLog("Checking manifest access...");
+        addLog("Проверка манифеста по адресу: https://rgey52bb.github.io/tonconnect-manifest.json");
         try {
-            const resp = await fetch('https://rgey52bb.github.io/tonconnect-manifest.json');
-            if (resp.ok) {
-                printLog("Manifest found (200 OK)");
+            const response = await fetch('https://rgey52bb.github.io/tonconnect-manifest.json');
+            if (response.ok) {
+                const data = await response.json();
+                addLog("МАНИФЕСТ НАЙДЕН! Имя приложения: " + data.name);
+                if (data.url !== "https://rgey52bb.github.io") {
+                    addLog("ВНИМАНИЕ: URL в манифесте не совпадает с сайтом!");
+                }
             } else {
-                printLog("CRITICAL: Manifest not found! Check GitHub!");
+                addLog("ОШИБКА 404: Файл манифеста не найден на GitHub!");
             }
         } catch (e) {
-            printLog("FETCH ERROR: " + e.message);
+            addLog("ОШИБКА ЧТЕНИЯ: " + e.message);
         }
     };
 </script>
