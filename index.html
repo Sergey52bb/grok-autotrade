@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Grok AutoTrade - Spot Terminal</title>
+    <title>Grok Terminal - TON Spot</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&family=Roboto+Mono&display=swap" rel="stylesheet">
     <script src="https://unpkg.com/@tonconnect/ui@latest/dist/tonconnect-ui.min.js"></script>
     <style>
@@ -11,149 +11,141 @@
         body { font-family: 'Inter', sans-serif; background: var(--bg); color: var(--text); margin: 0; display: flex; flex-direction: column; height: 100vh; overflow: hidden; }
         
         header { padding: 10px 20px; background: var(--card); display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border); }
-        .logo { color: var(--primary); font-weight: 700; font-size: 18px; }
+        .logo { color: var(--primary); font-weight: 700; font-size: 18px; display: flex; align-items: center; gap: 10px; }
 
-        .main-layout { display: grid; grid-template-columns: 1fr 300px 300px; grid-template-rows: 1fr 250px; flex-grow: 1; gap: 2px; background: var(--border); }
-        .panel { background: var(--card); padding: 15px; position: relative; }
+        .main-layout { display: grid; grid-template-columns: 1fr 280px 320px; flex-grow: 1; gap: 1px; background: var(--border); overflow: hidden; }
+        .panel { background: var(--card); display: flex; flex-direction: column; position: relative; }
 
-        /* График */
-        .chart-area { grid-column: 1 / 2; grid-row: 1 / 2; display: flex; align-items: center; justify-content: center; color: #474d57; }
+        /* График TradingView */
+        #tradingview_widget { flex-grow: 1; width: 100%; }
 
-        /* Стакан ордеров (Order Book) */
-        .order-book { grid-column: 2 / 3; grid-row: 1 / 3; font-family: 'Roboto Mono', monospace; font-size: 12px; }
-        .ob-header { display: flex; justify-content: space-between; color: #848e9c; margin-bottom: 10px; }
-        .ob-row { display: flex; justify-content: space-between; padding: 2px 0; position: relative; }
-        .ob-price { width: 40%; }
-        .ob-amount { width: 30%; text-align: right; }
-        .ob-total { width: 30%; text-align: right; }
+        /* Стакан ордеров */
+        .order-book { padding: 10px; font-family: 'Roboto Mono', monospace; font-size: 11px; border-right: 1px solid var(--border); }
+        .ob-header { display: flex; justify-content: space-between; color: #848e9c; padding-bottom: 10px; }
+        .ob-row { display: flex; justify-content: space-between; padding: 1px 0; }
         .sell-side { color: var(--secondary); }
         .buy-side { color: var(--primary); }
-        .current-price { font-size: 18px; font-weight: 700; margin: 15px 0; text-align: center; }
+        .mid-price { font-size: 18px; font-weight: 700; margin: 15px 0; text-align: center; color: white; }
 
         /* Панель торговли */
-        .trade-panel { grid-column: 3 / 4; grid-row: 1 / 3; border-left: 1px solid var(--border); }
-        .tabs { display: flex; gap: 10px; margin-bottom: 20px; }
-        .tab { flex: 1; padding: 10px; text-align: center; border-radius: 4px; cursor: pointer; font-weight: 600; background: var(--input); }
-        .tab.buy { color: var(--primary); border: 1px solid var(--primary); }
-        .tab.sell { color: var(--secondary); border: 1px solid var(--secondary); }
+        .trade-panel { padding: 20px; }
+        .tabs { display: flex; gap: 8px; margin-bottom: 20px; }
+        .tab { flex: 1; padding: 10px; text-align: center; border-radius: 4px; cursor: pointer; font-weight: 600; background: var(--input); transition: 0.2s; }
+        .tab.active-buy { background: var(--primary); color: white; }
+        .tab.active-sell { background: var(--secondary); color: white; }
         
-        .trade-input { background: var(--input); border: 1px solid transparent; border-radius: 4px; padding: 10px; margin-bottom: 15px; }
+        .trade-input { background: var(--input); border-radius: 4px; padding: 12px; margin-bottom: 15px; }
         .trade-input label { font-size: 12px; color: #848e9c; display: block; margin-bottom: 5px; }
-        .trade-input-row { display: flex; justify-content: space-between; align-items: center; }
-        .trade-input input { background: transparent; border: none; color: white; width: 100%; outline: none; font-size: 16px; }
+        .input-row { display: flex; justify-content: space-between; align-items: center; }
+        input { background: transparent; border: none; color: white; width: 100%; outline: none; font-size: 16px; font-weight: 600; }
 
-        .action-btn { width: 100%; padding: 12px; border-radius: 4px; border: none; font-weight: 700; cursor: pointer; font-size: 16px; margin-top: 10px; }
+        .action-btn { width: 100%; padding: 14px; border-radius: 4px; border: none; font-weight: 700; cursor: pointer; font-size: 16px; margin-top: 10px; transition: 0.3s; }
         .btn-buy { background: var(--primary); color: white; }
         .btn-sell { background: var(--secondary); color: white; }
-
-        /* История / Ассеты */
-        .assets-panel { grid-column: 1 / 2; grid-row: 2 / 3; border-top: 1px solid var(--border); }
     </style>
 </head>
 <body>
 
 <header>
-    <div class="logo">EDGEX <span style="color:white">TON</span></div>
+    <div class="logo"><span>EDGEX</span> <span style="color:white; font-size: 14px; font-weight: 400;">TON / USDT</span></div>
     <div id="ton-connect-button"></div>
 </header>
 
 <div class="main-layout">
-    <div class="panel chart-area">
-        <div style="text-align: center;">
-            <p>TON/USDT Chart</p>
-            <small>(Здесь будет график TradingView)</small>
-        </div>
+    <div class="panel">
+        <div id="tradingview_widget"></div>
     </div>
 
     <div class="panel order-book">
-        <div class="ob-header"><span>Price</span><span>Amount</span><span>Total</span></div>
-        <div id="asks"></div> <div class="current-price" id="mid-price">0.00</div>
-        <div id="bids"></div> </div>
+        <div class="ob-header"><span>Price(USDT)</span><span>Amount(TON)</span></div>
+        <div id="asks"></div>
+        <div class="mid-price" id="current-price">0.00</div>
+        <div id="bids"></div>
+    </div>
 
     <div class="panel trade-panel">
         <div class="tabs">
-            <div class="tab buy" onclick="setMode('buy')">Buy</div>
-            <div class="tab sell" onclick="setMode('sell')">Sell</div>
+            <div class="tab active-buy" id="tab-buy" onclick="setMode('buy')">Buy</div>
+            <div class="tab" id="tab-sell" onclick="setMode('sell')">Sell</div>
         </div>
         
         <div class="trade-input">
             <label>Price</label>
-            <div class="trade-input-row">
-                <input type="number" id="market-price" readonly>
-                <span>USDT</span>
-            </div>
+            <div class="input-row"><input type="number" id="price-input" readonly><span>USDT</span></div>
         </div>
 
         <div class="trade-input">
             <label>Amount</label>
-            <div class="trade-input-row">
-                <input type="number" placeholder="0.00" id="amount-input">
-                <span>TON</span>
-            </div>
+            <div class="input-row"><input type="number" placeholder="0.00"><span>TON</span></div>
         </div>
 
-        <button class="action-btn btn-buy" id="main-trade-btn">Buy TON</button>
-        
-        <div style="margin-top: 20px; font-size: 12px; color: #848e9c;">
-            <div style="display: flex; justify-content: space-between;"><span>Avail.</span><span>0.00 TON</span></div>
+        <button class="action-btn btn-buy" id="main-btn">Buy TON</button>
+        <div style="margin-top: 15px; font-size: 12px; color: #848e9c; display: flex; justify-content: space-between;">
+            <span>Avail.</span><span>0.00 TON</span>
         </div>
-    </div>
-
-    <div class="panel assets-panel">
-        <div style="font-size: 14px; font-weight: 600; color: #848e9c;">Open Orders (0)</div>
     </div>
 </div>
 
+<script type="text/javascript" src="https://s3.tradingview.com/tv.js"></script>
 <script>
+    // 1. Инициализация графика
+    new TradingView.widget({
+        "autosize": true,
+        "symbol": "OKX:TONUSDT",
+        "interval": "30",
+        "timezone": "Etc/UTC",
+        "theme": "dark",
+        "style": "1",
+        "locale": "en",
+        "toolbar_bg": "#f1f3f6",
+        "enable_publishing": false,
+        "hide_top_toolbar": true,
+        "save_image": false,
+        "container_id": "tradingview_widget"
+    });
+
+    // 2. Кошелек
     const tonConnectUI = new TON_CONNECT_UI.TonConnectUI({
         manifestUrl: 'https://rgey52bb.github.io/tonconnect-manifest.json',
         buttonRootId: 'ton-connect-button'
     });
 
-    let currentPrice = 5.35;
-
-    // Имитация стакана (Order Book)
-    function generateOrderBook() {
-        const asks = document.getElementById('asks');
-        const bids = document.getElementById('bids');
-        asks.innerHTML = ''; bids.innerHTML = '';
-
-        for(let i=0; i<8; i++) {
-            const price = (currentPrice + (i * 0.002)).toFixed(3);
-            asks.innerHTML = `<div class="ob-row sell-side"><span class="ob-price">${price}</span><span class="ob-amount">0.${(Math.random()*99).toFixed(0)}</span><span class="ob-total">1.2</span></div>` + asks.innerHTML;
-            
-            const bPrice = (currentPrice - (i * 0.002)).toFixed(3);
-            bids.innerHTML += `<div class="ob-row buy-side"><span class="ob-price">${bPrice}</span><span class="ob-amount">0.${(Math.random()*99).toFixed(0)}</span><span class="ob-total">0.8</span></div>`;
-        }
+    // 3. Логика стакана и цен
+    let price = 5.35;
+    function updateData() {
+        fetch('https://api.ston.fi/v1/assets').then(r => r.json()).then(data => {
+            const ton = data.assets.find(a => a.symbol === 'TON');
+            if(ton) {
+                price = parseFloat(ton.dex_usd_price);
+                document.getElementById('current-price').innerText = price.toFixed(3);
+                document.getElementById('price-input').value = price.toFixed(3);
+                fillOB();
+            }
+        });
     }
 
-    async function fetchLivePrice() {
-        try {
-            const res = await fetch('https://api.ston.fi/v1/assets');
-            const data = await res.json();
-            const ton = data.assets.find(a => a.symbol === 'TON');
-            if (ton) {
-                currentPrice = parseFloat(ton.dex_usd_price);
-                document.getElementById('mid-price').innerText = currentPrice.toFixed(2);
-                document.getElementById('market-price').value = currentPrice.toFixed(2);
-                generateOrderBook();
-            }
-        } catch(e) { console.log("Price error"); }
+    function fillOB() {
+        const a = document.getElementById('asks'); const b = document.getElementById('bids');
+        a.innerHTML = ''; b.innerHTML = '';
+        for(let i=0; i<10; i++) {
+            a.innerHTML = `<div class="ob-row sell-side"><span>${(price + i*0.001).toFixed(3)}</span><span>${(Math.random()*50).toFixed(2)}</span></div>` + a.innerHTML;
+            b.innerHTML += `<div class="ob-row buy-side"><span>${(price - i*0.001).toFixed(3)}</span><span>${(Math.random()*50).toFixed(2)}</span></div>`;
+        }
     }
 
     function setMode(mode) {
-        const btn = document.getElementById('main-trade-btn');
+        const b = document.getElementById('main-btn');
+        const tB = document.getElementById('tab-buy'); const tS = document.getElementById('tab-sell');
         if(mode === 'buy') {
-            btn.innerText = 'Buy TON';
-            btn.className = 'action-btn btn-buy';
+            b.innerText = 'Buy TON'; b.className = 'action-btn btn-buy';
+            tB.className = 'tab active-buy'; tS.className = 'tab';
         } else {
-            btn.innerText = 'Sell TON';
-            btn.className = 'action-btn btn-sell';
+            b.innerText = 'Sell TON'; b.className = 'action-btn btn-sell';
+            tB.className = 'tab'; tS.className = 'tab active-sell';
         }
     }
 
-    fetchLivePrice();
-    setInterval(fetchLivePrice, 5000);
+    updateData(); setInterval(updateData, 10000);
 </script>
 </body>
 </html>
