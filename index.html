@@ -3,14 +3,14 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>EDGEX Grok-AutoTrade</title>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&family=Roboto+Mono&display=swap" rel="stylesheet">
+    <title>STRATEX Terminal</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
     <script src="https://unpkg.com/@tonconnect/ui@latest/dist/tonconnect-ui.min.js"></script>
     <style>
         :root {
-            --bg: #080a0f; --card: #11141d; --primary: #00d084; 
-            --secondary: #ff4d4d; --gold: #f0b90b; --text-dim: #848e9c;
-            --border: #1e222d; --input: #1b1f29;
+            --bg: #0b0e11; --card: #161a1e; --primary: #02c076; 
+            --secondary: #f84960; --gold: #f0b90b; --text-dim: #848e9c;
+            --border: #2b2f36;
         }
 
         body {
@@ -23,198 +23,146 @@
             justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border);
         }
 
-        .logo-area { display: flex; flex-direction: column; }
-        .logo-main { color: var(--gold); font-weight: 800; font-size: 18px; text-shadow: 0 0 10px rgba(240, 185, 11, 0.3); }
-        .logo-sub { font-size: 9px; color: var(--text-dim); letter-spacing: 1px; text-transform: uppercase; }
+        .logo-main { color: var(--gold); font-weight: 800; font-size: 18px; letter-spacing: 1px; }
 
-        .pair-selector {
-            background: var(--input); color: white; border: 1px solid var(--border);
-            padding: 5px 10px; border-radius: 6px; font-weight: 700; font-size: 13px; outline: none;
+        /* ОСНОВНАЯ СЕТКА (КАК НА СКРИНШОТЕ) */
+        .main-layout {
+            display: grid; grid-template-columns: 1.2fr 1fr; 
+            gap: 1px; background: var(--border); flex-grow: 0;
         }
 
-        .app-container {
-            display: flex; flex-direction: column; flex-grow: 1; overflow-y: auto; padding-bottom: 75px;
+        .trade-panel { background: var(--card); padding: 12px; }
+        .order-book { background: var(--card); padding: 12px; font-size: 12px; border-left: 1px solid var(--border); }
+
+        /* СТИЛЬ КНОПОК BUY/SELL */
+        .tabs { display: flex; border-radius: 4px; overflow: hidden; margin-bottom: 12px; background: #2b2f36; }
+        .tab { flex: 1; padding: 8px; text-align: center; font-weight: 600; cursor: pointer; font-size: 13px; }
+        .tab.buy.active { background: var(--primary); color: white; }
+        .tab.sell.active { background: var(--secondary); color: white; }
+
+        .input-box { background: #2b2f36; border-radius: 4px; padding: 8px; margin-bottom: 8px; position: relative; }
+        .input-label { font-size: 10px; color: var(--text-dim); }
+        .input-box input { background: transparent; border: none; color: white; width: 100%; outline: none; font-size: 14px; font-weight: 600; }
+        
+        .btn-action { 
+            width: 100%; padding: 12px; border-radius: 4px; border: none; 
+            color: white; font-weight: 700; margin-top: 5px; cursor: pointer;
         }
 
-        /* Фикс для графика */
-        #tv_chart_container { 
-            width: 100%; height: 300px; min-height: 300px; 
-            background: #000; border-bottom: 1px solid var(--border);
+        /* ГРАФИК ВНИЗУ */
+        .chart-section {
+            flex-grow: 1; position: relative; background: #000;
+            border-top: 1px solid var(--border); transition: 0.3s;
         }
+        #tv_chart_container { width: 100%; height: 100%; }
 
-        .market-data { display: grid; grid-template-columns: 1fr 1fr; gap: 1px; background: var(--border); }
-        .order-book { background: var(--card); padding: 10px; font-family: 'Roboto Mono', monospace; font-size: 11px; }
-        .ob-row { display: flex; justify-content: space-between; margin: 2px 0; }
-        .price-up { color: var(--primary); } .price-down { color: var(--secondary); }
-
-        .trade-controls { background: var(--card); padding: 15px; border-top: 1px solid var(--border); }
-        .trade-tabs { display: flex; gap: 10px; margin-bottom: 12px; }
-        .tab-btn {
-            flex: 1; padding: 10px; text-align: center; border-radius: 6px;
-            background: var(--input); font-weight: 700; cursor: pointer; font-size: 14px;
-        }
-        .tab-buy.active { border: 2px solid var(--primary); color: var(--primary); }
-        .tab-sell.active { border: 2px solid var(--secondary); color: var(--secondary); }
-
-        .input-group { background: var(--input); border-radius: 6px; padding: 8px 12px; margin-bottom: 8px; border: 1px solid var(--border); }
-        .input-label { font-size: 10px; color: var(--text-dim); margin-bottom: 2px; }
-        input { background: transparent; border: none; color: white; width: 100%; outline: none; font-size: 16px; font-weight: 600; }
-
-        .btn-main {
-            width: 100%; padding: 14px; border-radius: 8px; border: none;
-            font-weight: 800; font-size: 16px; cursor: pointer; margin-top: 5px;
-        }
-        .btn-buy { background: linear-gradient(180deg, #00d084 0%, #008f5b 100%); color: white; }
-        .btn-sell { background: linear-gradient(180deg, #ff4d4d 0%, #b32d2d 100%); color: white; }
-
-        .legal-block {
-            margin-top: 12px; font-size: 9px; color: var(--text-dim); 
-            line-height: 1.3; text-align: center;
+        .expand-btn {
+            position: absolute; right: 10px; top: 10px; z-index: 10;
+            background: rgba(255,255,255,0.1); border: none; color: white;
+            padding: 5px 8px; border-radius: 4px; font-size: 10px; cursor: pointer;
         }
 
         nav {
-            position: fixed; bottom: 0; width: 100%; background: var(--card);
-            display: flex; justify-content: space-around; padding: 10px 0;
-            border-top: 1px solid var(--border);
+            background: var(--card); display: flex; justify-content: space-around; 
+            padding: 8px 0; border-top: 1px solid var(--border);
         }
-        .nav-item { font-size: 9px; color: var(--text-dim); text-align: center; flex: 1; text-decoration: none; }
-        .nav-item.active { color: var(--gold); }
-        .nav-icon { font-size: 18px; display: block; margin-bottom: 2px; }
+        .nav-item { font-size: 10px; color: var(--text-dim); text-align: center; text-decoration: none; }
     </style>
 </head>
 <body>
 
 <header>
-    <div class="logo-area">
-        <span class="logo-main">EDGEX</span>
-        <span class="logo-sub">grok-autotrade</span>
-    </div>
-    <select class="pair-selector" id="pair-select" onchange="changePair()">
-        <option value="TON/USDT">💎 TON/USDT</option>
-        <option value="BTC/USDT">₿ BTC/USDT</option>
-        <option value="ETH/USDT">Ξ ETH/USDT</option>
-        <option value="SOL/USDT">☀️ SOL/USDT</option>
-        <option value="XAU/USDT">📀 GOLD/USDT</option>
-    </select>
+    <div class="logo-main">STRATEX</div>
     <div id="ton-connect-button"></div>
 </header>
 
-<div class="app-container">
-    <div id="tv_chart_container"></div>
-
-    <div class="market-data">
-        <div class="order-book">
-            <div id="asks"></div>
-            <div style="text-align:center; font-size:16px; font-weight:bold; padding:5px 0; color:var(--primary);" id="live-price">5.350</div>
-            <div id="bids"></div>
+<div class="main-layout">
+    <div class="trade-panel">
+        <div class="tabs">
+            <div class="tab buy active" id="t-buy" onclick="setMode('buy')">Buy</div>
+            <div class="tab sell" id="t-sell" onclick="setMode('sell')">Sell</div>
         </div>
-        <div class="order-book" style="border-left: 1px solid var(--border); display: flex; align-items: center; justify-content: center; color: var(--text-dim);">
-            Market Trades (Live)
+        <div class="input-box">
+            <div class="input-label">Price</div>
+            <input type="number" value="5.350">
         </div>
+        <div class="input-box">
+            <div class="input-label">Amount (TON)</div>
+            <input type="number" placeholder="0.00">
+        </div>
+        <button class="btn-action" id="main-btn" style="background: var(--primary);">Buy TON</button>
     </div>
 
-    <div class="trade-controls">
-        <div class="trade-tabs">
-            <div class="tab-btn tab-buy active" onclick="switchTrade('buy')">BUY</div>
-            <div class="tab-btn tab-sell" onclick="switchTrade('sell')">SELL</div>
-        </div>
-
-        <div class="input-group">
-            <div class="input-label">Price (USDT)</div>
-            <input type="number" id="trade-price" value="5.350" step="0.001">
-        </div>
-
-        <div class="input-group">
-            <div class="input-label">Amount</div>
-            <input type="number" id="trade-amount" placeholder="Min 3.7 USDT">
-        </div>
-
-        <button class="btn-main btn-buy" id="action-button">BUY TON</button>
-        
-        <div class="legal-block">
-            * Нажимая кнопку, вы соглашаетесь с Политикой конфиденциальности Telegram и законами РФ. 
-            Комиссия: 0.4 TON активация, 0.3 TON сделка.
-        </div>
+    <div class="order-book">
+        <div style="color: var(--secondary); margin-bottom: 2px;">5.358 <span style="float:right; color:var(--text-dim)">72.4</span></div>
+        <div style="color: var(--secondary); margin-bottom: 2px;">5.354 <span style="float:right; color:var(--text-dim)">18.2</span></div>
+        <div style="font-size: 16px; font-weight: bold; padding: 5px 0; color: var(--primary);">5.350</div>
+        <div style="color: var(--primary); margin-bottom: 2px;">5.348 <span style="float:right; color:var(--text-dim)">96.1</span></div>
+        <div style="color: var(--primary); margin-bottom: 2px;">5.344 <span style="float:right; color:var(--text-dim)">79.0</span></div>
     </div>
 </div>
 
+<div class="chart-section" id="chart-area">
+    <button class="expand-btn" onclick="toggleExpand()">РАЗВЕРНУТЬ ↕</button>
+    <div id="tv_chart_container"></div>
+</div>
+
 <nav>
-    <a href="#" class="nav-item active"><span class="nav-icon">📊</span>SPOT</a>
-    <a href="#" class="nav-item"><span class="nav-icon">🤖</span>AUTO-BOT</a>
-    <a href="#" class="nav-item"><span class="nav-icon">🏦</span>WALLET</a>
-    <a href="#" class="nav-item"><span class="nav-icon">⚙️</span>SETTINGS</a>
+    <a href="#" class="nav-item">📊<br>Market</a>
+    <a href="#" class="nav-item" style="color:var(--gold)">🤖<br>Auto-Bot</a>
+    <a href="#" class="nav-item">🏦<br>Assets</a>
 </nav>
 
 <script type="text/javascript" src="https://s3.tradingview.com/tv.js"></script>
 <script>
-    // 1. Инициализация кошелька
     const tonConnectUI = new TON_CONNECT_UI.TonConnectUI({
         manifestUrl: 'https://rgey52bb.github.io/tonconnect-manifest.json',
         buttonRootId: 'ton-connect-button'
     });
 
-    // 2. Функция загрузки графика
-    function loadChart(symbol = "OKX:TONUSDT") {
-        if (typeof TradingView !== 'undefined') {
-            new TradingView.widget({
-                "width": "100%",
-                "height": 300,
-                "symbol": symbol,
-                "interval": "15",
-                "timezone": "Etc/UTC",
-                "theme": "dark",
-                "style": "1",
-                "locale": "ru",
-                "toolbar_bg": "#f1f3f6",
-                "enable_publishing": false,
-                "hide_top_toolbar": true,
-                "save_image": false,
-                "container_id": "tv_chart_container"
-            });
-        }
+    function loadChart() {
+        new TradingView.widget({
+            "autosize": true,
+            "symbol": "OKX:TONUSDT",
+            "interval": "15",
+            "theme": "dark",
+            "style": "1",
+            "locale": "ru",
+            "container_id": "tv_chart_container",
+            "hide_top_toolbar": true,
+            "backgroundColor": "#0b0e11"
+        });
     }
 
-    // Загрузка при старте
-    window.onload = () => loadChart();
-
-    function changePair() {
-        const pair = document.getElementById('pair-select').value;
-        const btn = document.getElementById('action-button');
-        const coin = pair.split('/')[0];
-        btn.innerText = `BUY ${coin}`;
-        
-        let tvSymbol = "OKX:" + pair.replace('/', '');
-        if(coin === 'XAU') tvSymbol = "FX_IDC:XAUUSD";
-        loadChart(tvSymbol);
-    }
-
-    function switchTrade(mode) {
-        const btn = document.getElementById('action-button');
-        const coin = document.getElementById('pair-select').value.split('/')[0];
-        const tBuy = document.querySelector('.tab-buy');
-        const tSell = document.querySelector('.tab-sell');
-        
+    function setMode(mode) {
+        const b = document.getElementById('t-buy');
+        const s = document.getElementById('t-sell');
+        const btn = document.getElementById('main-btn');
         if(mode === 'buy') {
-            btn.innerText = `BUY ${coin}`; btn.className = 'btn-main btn-buy';
-            tBuy.classList.add('active'); tSell.classList.remove('active');
+            b.classList.add('active'); s.classList.remove('active');
+            btn.style.background = 'var(--primary)'; btn.innerText = 'Buy TON';
         } else {
-            btn.innerText = `SELL ${coin}`; btn.className = 'btn-main btn-sell';
-            tSell.classList.add('active'); tBuy.classList.remove('active');
+            s.classList.add('active'); b.classList.remove('active');
+            btn.style.background = 'var(--secondary)'; btn.innerText = 'Sell TON';
         }
     }
 
-    // Имитация стакана
-    function fillOB() {
-        const a = document.getElementById('asks'); const b = document.getElementById('bids');
-        a.innerHTML = ''; b.innerHTML = '';
-        let p = 5.350;
-        for(let i=0; i<4; i++) {
-            a.innerHTML = `<div class="ob-row price-down"><span>${(p + i*0.002).toFixed(3)}</span><span>${(Math.random()*50).toFixed(1)}</span></div>` + a.innerHTML;
-            b.innerHTML += `<div class="ob-row price-up"><span>${(p - i*0.002).toFixed(3)}</span><span>${(Math.random()*50).toFixed(1)}</span></div>`;
+    let isExpanded = false;
+    function toggleExpand() {
+        const area = document.getElementById('chart-area');
+        const layout = document.querySelector('.main-layout');
+        if(!isExpanded) {
+            layout.style.display = 'none';
+            area.style.height = '100%';
+        } else {
+            layout.style.display = 'grid';
+            area.style.height = 'auto';
         }
+        isExpanded = !isExpanded;
+        loadChart(); // Перерисовываем под новый размер
     }
-    setInterval(fillOB, 3000);
-    fillOB();
+
+    window.onload = loadChart;
 </script>
 </body>
 </html>
