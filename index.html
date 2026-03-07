@@ -4,39 +4,45 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>STRATEX Pro Terminal</title>
-    <link href="https://fonts.googleapis.com/css2?family=Roboto+Mono:wght@500;700&family=Inter:wght@400;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Roboto+Mono:wght@500;700&family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
     <script src="https://unpkg.com/@tonconnect/ui@latest/dist/tonconnect-ui.min.js"></script>
     <style>
         :root {
-            --bg: #06090f; --card: #11151c; --border: #1e222d;
+            --bg: #05070a; /* Глубокий черный фон */
+            --card: #0d1117; 
+            --border: #1a1f26;
             --primary: #00ff95; /* Насыщенный салатный */
             --secondary: #ff3b57; /* Бордово-красный */
-            --gold: #f0b90b; --text-dim: #848e9c;
+            --gold: #f0b90b; 
+            --text-dim: #707a8a;
+            --text-main: #e6e8ea;
         }
 
         body {
-            font-family: 'Inter', sans-serif; background: var(--bg); color: white;
+            font-family: 'Inter', sans-serif; background: var(--bg); color: var(--text-main);
             margin: 0; display: flex; flex-direction: column; height: 100vh; overflow: hidden;
         }
 
-        /* Шапка */
+        /* Шапка терминала */
         header {
-            padding: 8px 15px; background: var(--card); display: flex;
+            padding: 10px 15px; background: var(--card); display: flex;
             justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border);
         }
         .logo { font-weight: 800; color: var(--gold); font-size: 14px; letter-spacing: 1px; }
+        .logo span { color: white; opacity: 0.6; font-size: 10px; margin-left: 4px; }
 
-        /* ВЕРХНЯЯ ЧАСТЬ: ГРАФИК (1/3 Экрана) */
-        .chart-section { height: 33vh; position: relative; background: #000; border-bottom: 2px solid var(--border); }
+        /* ГРАФИК (ВЕРХНЯЯ ТРЕТЬ) */
+        .chart-section { height: 33vh; position: relative; background: #000; border-bottom: 2px solid var(--border); transition: height 0.3s ease; }
         #tv_container { width: 100%; height: 100%; }
         
         .expand-btn {
             position: absolute; right: 10px; bottom: 10px; z-index: 10;
-            background: rgba(30, 34, 45, 0.8); border: 1px solid var(--border);
-            color: white; padding: 4px 8px; border-radius: 4px; font-size: 10px; cursor: pointer;
+            background: rgba(26, 31, 38, 0.9); border: 1px solid var(--border);
+            color: white; padding: 5px 10px; border-radius: 4px; font-size: 10px; cursor: pointer;
+            font-weight: 600; box-shadow: 0 2px 10px rgba(0,0,0,0.5);
         }
 
-        /* СРЕДНЯЯ ЧАСТЬ: ТОРГОВЛЯ И ПЛОТНЫЙ СТАКАН */
+        /* ОСНОВНОЙ БЛОК (СЕРЕДИНА) */
         .main-content {
             display: grid; grid-template-columns: 1.1fr 0.9fr; 
             flex-grow: 1; background: var(--border); gap: 1px; overflow: hidden;
@@ -44,52 +50,59 @@
 
         .panel { background: var(--card); padding: 12px; display: flex; flex-direction: column; }
 
-        /* СТИЛЬ СТАКАНА (ORDER BOOK) */
-        .ob-container { font-family: 'Roboto Mono', monospace; font-size: 11px; }
-        .ob-header { display: flex; justify-content: space-between; color: var(--text-dim); margin-bottom: 5px; font-size: 9px; }
+        /* ОБНОВЛЕННЫЙ СТАКАН (32% ПРОЗРАЧНОСТЬ) */
+        .ob-container { font-family: 'Roboto Mono', monospace; }
+        .ob-header { display: flex; justify-content: space-between; color: var(--text-dim); margin-bottom: 6px; font-size: 10px; text-transform: uppercase; }
         .ob-row { 
             display: flex; justify-content: space-between; position: relative; 
-            height: 19px; align-items: center; margin-bottom: 1px;
+            height: 20px; align-items: center; margin-bottom: 1px; padding: 0 4px;
         }
         .depth-bar {
             position: absolute; right: 0; top: 0; height: 100%; 
-            z-index: 0; opacity: 0.65; /* Прозрачность 65% */
+            z-index: 0; opacity: 0.32; /* Тот самый баланс */
+            transition: width 0.4s ease-out;
         }
-        .ob-val { z-index: 1; position: relative; }
-        .price-up { color: var(--primary); font-weight: 700; }
-        .price-down { color: var(--secondary); font-weight: 700; }
+        .ob-val { z-index: 1; position: relative; font-size: 11px; letter-spacing: 0.5px; }
+        .price-up { color: var(--primary); font-weight: 700; text-shadow: 0 0 5px rgba(0, 255, 149, 0.1); }
+        .price-down { color: var(--secondary); font-weight: 700; text-shadow: 0 0 5px rgba(255, 59, 87, 0.1); }
 
-        /* ТОРГОВАЯ ПАНЕЛЬ */
-        .input-group { background: #1e222d; border-radius: 4px; padding: 8px; margin-bottom: 10px; border: 1px solid #2b3139; }
-        .input-group label { display: block; font-size: 9px; color: var(--text-dim); margin-bottom: 2px; }
-        .input-group input { background: transparent; border: none; color: white; width: 100%; font-size: 15px; outline: none; font-weight: 600; }
+        /* ПАНЕЛЬ ТОРГОВЛИ */
+        .input-group { background: #161b22; border-radius: 6px; padding: 10px; margin-bottom: 12px; border: 1px solid var(--border); }
+        .input-group label { display: block; font-size: 10px; color: var(--text-dim); margin-bottom: 4px; }
+        .input-group input { background: transparent; border: none; color: white; width: 100%; font-size: 16px; outline: none; font-weight: 600; font-family: 'Roboto Mono', monospace; }
 
-        .trade-btns { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: auto; padding-bottom: 10px; }
+        .fee-info { font-size: 11px; color: var(--text-dim); margin-bottom: 15px; line-height: 1.5; }
+        .fee-info b { color: var(--gold); }
+
+        /* ЯРКИЕ КНОПКИ ДЕЙСТВИЯ */
+        .trade-btns { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: auto; padding-bottom: 10px; }
         .btn { 
-            padding: 12px; border: none; border-radius: 4px; color: white; 
-            font-weight: 800; font-size: 14px; cursor: pointer; 
+            padding: 14px; border: none; border-radius: 6px; color: white; 
+            font-weight: 800; font-size: 14px; cursor: pointer; transition: transform 0.1s;
         }
-        .btn-buy { background: var(--primary); color: #000; }
-        .btn-sell { background: var(--secondary); }
+        .btn:active { transform: scale(0.97); }
+        .btn-buy { background: var(--primary); color: #05070a; box-shadow: 0 4px 15px rgba(0, 255, 149, 0.15); }
+        .btn-sell { background: var(--secondary); box-shadow: 0 4px 15px rgba(255, 59, 87, 0.15); }
 
-        /* НИЖНЯЯ НАВИГАЦИЯ */
+        /* НАВИГАЦИЯ */
         nav { 
             background: var(--card); border-top: 1px solid var(--border);
-            display: flex; justify-content: space-around; padding: 10px 0;
+            display: flex; justify-content: space-around; padding: 12px 0;
         }
-        .nav-item { font-size: 10px; color: var(--text-dim); text-align: center; opacity: 0.6; text-decoration: none; }
+        .nav-item { font-size: 10px; color: var(--text-dim); text-align: center; opacity: 0.6; text-decoration: none; font-weight: 600; }
         .nav-item.active { color: var(--gold); opacity: 1; }
+        .nav-icon { font-size: 18px; display: block; margin-bottom: 4px; }
     </style>
 </head>
 <body>
 
 <header>
-    <div class="logo">STRATEX <span>AUTO</span></div>
+    <div class="logo">STRATEX <span>AUTO-TERMINAL</span></div>
     <div id="ton-connect-button"></div>
 </header>
 
 <div class="chart-section" id="chart-area">
-    <button class="expand-btn" onclick="toggleFullScreen()">FULL SCREEN ⤢</button>
+    <button class="expand-btn" id="full-btn" onclick="toggleFullScreen()">FULL SCREEN ⤢</button>
     <div id="tv_container"></div>
 </div>
 
@@ -97,16 +110,19 @@
     <div class="panel">
         <div class="input-group">
             <label>Price (USDT)</label>
-            <input type="number" value="5.3502">
+            <input type="number" value="5.3502" step="0.0001">
         </div>
         <div class="input-group">
             <label>Amount (TON)</label>
-            <input type="number" placeholder="Min 1.0">
+            <input type="number" placeholder="0.00" id="main-amount">
         </div>
-        <div style="font-size: 11px; color: var(--text-dim); margin-bottom: 15px;">
-            Fee: <span style="color:var(--gold)">0.35%</span><br>
-            Est. Total: <span style="color:white">-- USDT</span>
+        
+        <div class="fee-info">
+            Network Fee: <b>0.25%</b><br>
+            STRATEX Fee: <b>0.35%</b><br>
+            <span style="color: white; opacity: 0.4; font-size: 9px;">* Нажимая кнопку, вы соглашаетесь с условиями сервиса.</span>
         </div>
+
         <div class="trade-btns">
             <button class="btn btn-buy">BUY</button>
             <button class="btn btn-sell">SELL</button>
@@ -117,8 +133,8 @@
         <div class="ob-container">
             <div class="ob-header"><span>Price</span><span>Amount</span></div>
             <div id="asks-box"></div>
-            <div style="text-align:center; padding: 6px 0; font-size:15px; font-weight:800; color:var(--primary); border-top:1px solid var(--border); border-bottom:1px solid var(--border); margin:4px 0;">
-                5.3502
+            <div style="text-align:center; padding: 8px 0; font-size:16px; font-weight:800; color:var(--primary); border-top:1px solid var(--border); border-bottom:1px solid var(--border); margin:5px 0; background: rgba(0, 255, 149, 0.03);">
+                5.3502 <small style="font-size: 9px; vertical-align: middle; opacity: 0.6;">↑</small>
             </div>
             <div id="bids-box"></div>
         </div>
@@ -126,64 +142,98 @@
 </div>
 
 <nav>
-    <a href="#" class="nav-item active">📈<br>Market</a>
-    <a href="#" class="nav-item">🤖<br>Auto</a>
-    <a href="#" class="nav-item">👛<br>Assets</a>
-    <a href="#" class="nav-item">⚙️<br>Settings</a>
+    <a href="#" class="nav-item active"><span class="nav-icon">📈</span>Market</a>
+    <a href="#" class="nav-item"><span class="nav-icon">🤖</span>Auto-Bot</a>
+    <a href="#" class="nav-item"><span class="nav-icon">👛</span>Wallet</a>
+    <a href="#" class="nav-item"><span class="nav-icon">⚙️</span>Settings</a>
 </nav>
 
 <script type="text/javascript" src="https://s3.tradingview.com/tv.js"></script>
 <script>
+    // Подключение TON Connect
     const tonConnectUI = new TON_CONNECT_UI.TonConnectUI({
         manifestUrl: 'https://rgey52bb.github.io/tonconnect-manifest.json',
         buttonRootId: 'ton-connect-button'
     });
 
-    function initChart(h = "100%") {
+    // Инициализация графика TradingView
+    function initChart() {
         new TradingView.widget({
-            "autosize": true, "symbol": "OKX:TONUSDT", "interval": "15",
-            "theme": "dark", "style": "1", "container_id": "tv_container",
-            "hide_top_toolbar": true, "backgroundColor": "#06090f",
-            "gridColor": "rgba(30, 34, 45, 0.5)"
+            "autosize": true,
+            "symbol": "OKX:TONUSDT",
+            "interval": "15",
+            "theme": "dark",
+            "style": "1",
+            "locale": "ru",
+            "container_id": "tv_container",
+            "hide_top_toolbar": true,
+            "backgroundColor": "#05070a",
+            "gridColor": "rgba(26, 31, 38, 0.5)",
+            "save_image": false
         });
     }
 
+    // Функция развертывания графика
     let isFull = false;
     function toggleFullScreen() {
         const chart = document.getElementById('chart-area');
         const ui = document.getElementById('main-ui');
+        const btn = document.getElementById('full-btn');
+
         if(!isFull) {
-            chart.style.height = "80vh";
+            chart.style.height = "82vh";
             ui.style.display = "none";
+            btn.innerText = "CLOSE ✕";
         } else {
             chart.style.height = "33vh";
             ui.style.display = "grid";
+            btn.innerText = "FULL SCREEN ⤢";
         }
         isFull = !isFull;
+        // Перерисовываем виджет под новый размер
         initChart();
     }
 
+    // Генерация данных для стакана (Order Book)
     function drawOB() {
         const asks = document.getElementById('asks-box');
         const bids = document.getElementById('bids-box');
-        asks.innerHTML = ''; bids.innerHTML = '';
+        if(!asks || !bids) return;
 
-        for(let i=0; i<7; i++) {
-            let aVol = Math.random() * 100;
-            asks.innerHTML = `<div class="ob-row">
-                <span class="price-down ob-val">5.3${51+i}</span><span class="ob-val">${aVol.toFixed(1)}</span>
-                <div class="depth-bar" style="width:${aVol}%; background:var(--secondary);"></div>
-            </div>` + asks.innerHTML;
+        asks.innerHTML = ''; 
+        bids.innerHTML = '';
 
-            let bVol = Math.random() * 100;
-            bids.innerHTML += `<div class="ob-row">
-                <span class="price-up ob-val">5.3${49-i}</span><span class="ob-val">${bVol.toFixed(1)}</span>
-                <div class="depth-bar" style="width:${bVol}%; background:var(--primary);"></div>
-            </div>`;
+        // Аски (Продажа - Красные)
+        for(let i=0; i<8; i++) {
+            let vol = Math.random() * 100;
+            asks.innerHTML = `
+                <div class="ob-row">
+                    <span class="price-down ob-val">5.3${51+i}</span>
+                    <span class="ob-val" style="color:var(--text-main)">${vol.toFixed(1)}</span>
+                    <div class="depth-bar" style="width:${vol}%; background:var(--secondary);"></div>
+                </div>
+            ` + asks.innerHTML;
+        }
+
+        // Биды (Покупка - Зеленые)
+        for(let i=0; i<8; i++) {
+            let vol = Math.random() * 100;
+            bids.innerHTML += `
+                <div class="ob-row">
+                    <span class="price-up ob-val">5.3${49-i}</span>
+                    <span class="ob-val" style="color:var(--text-main)">${vol.toFixed(1)}</span>
+                    <div class="depth-bar" style="width:${vol}%; background:var(--primary);"></div>
+                </div>
+            `;
         }
     }
 
-    window.onload = () => { initChart(); drawOB(); setInterval(drawOB, 2000); };
+    // Запуск при загрузке
+    window.onload = () => {
+        initChart();
+        drawOB();
+        setInterval(drawOB, 2500); // Обновление стакана каждые 2.5 сек
+    };
 </script>
 </body>
 </html>
