@@ -3,9 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>STRATEX Terminal V2.6</title>
+    <title>STRATEX Terminal V3.0</title>
     <link href="https://fonts.googleapis.com/css2?family=Roboto+Mono:wght@500;700&family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
-    <script src="https://unpkg.com/@tonconnect/ui@2.0.9/dist/tonconnect-ui.min.js"></script>
+    <script src="https://unpkg.com/@tonconnect/ui@latest/dist/tonconnect-ui.min.js"></script>
     <style>
         :root {
             --bg: #05070a; --card: #0d1117; --border: #1a1f26;
@@ -21,40 +21,33 @@
         header {
             padding: 10px 15px; background: var(--card); display: flex;
             justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border);
-            z-index: 100;
+            z-index: 1000;
         }
         .logo { font-weight: 800; color: var(--gold); font-size: 14px; letter-spacing: 1px; }
 
-        /* КОНТЕЙНЕР ЭКРАНОВ */
+        /* Вкладки */
         .view { display: none; flex-direction: column; height: calc(100vh - 125px); overflow-y: auto; }
         .view.active { display: flex; }
 
-        /* MARKET VIEW */
-        .chart-section { height: 35vh; min-height: 220px; position: relative; background: #000; border-bottom: 2px solid var(--border); }
+        /* Market */
+        .chart-section { height: 35vh; background: #000; border-bottom: 2px solid var(--border); }
         #tv_container { width: 100%; height: 100%; }
         .market-grid { display: grid; grid-template-columns: 1.1fr 0.9fr; flex-grow: 1; background: var(--border); gap: 1px; }
         .panel { background: var(--card); padding: 12px; }
 
-        /* ORDER BOOK */
-        .ob-row { display: flex; justify-content: space-between; position: relative; height: 19px; align-items: center; font-family: 'Roboto Mono'; font-size: 11px; }
-        .depth-bar { position: absolute; right: 0; top: 0; height: 100%; z-index: 0; opacity: 0.32; transition: width 0.4s; }
+        /* Order Book */
+        .ob-row { display: flex; justify-content: space-between; position: relative; height: 18px; align-items: center; font-family: 'Roboto Mono'; font-size: 11px; }
+        .depth-bar { position: absolute; right: 0; top: 0; height: 100%; z-index: 0; opacity: 0.32; }
         .price-up { color: var(--primary); font-weight: 700; }
         .price-down { color: var(--secondary); font-weight: 700; }
 
-        /* AUTO-BOT */
-        .bot-container { padding: 15px; }
-        .strategy-card { background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 16px; margin-bottom: 15px; position: relative; overflow: hidden; }
-        .bot-field { background: #161b22; border: 1px solid var(--border); border-radius: 6px; padding: 10px; margin-bottom: 10px; }
-        .bot-field label { font-size: 9px; color: var(--text-dim); display: block; margin-bottom: 3px; }
-        .bot-field input { background: transparent; border: none; color: white; width: 100%; font-size: 15px; outline: none; font-weight: 700; font-family: 'Roboto Mono'; }
-
-        /* NAV */
-        nav { background: var(--card); border-top: 1px solid var(--border); display: flex; justify-content: space-around; padding: 12px 0; position: fixed; bottom: 0; width: 100%; z-index: 100; }
-        .nav-item { font-size: 10px; color: var(--text-dim); text-align: center; cursor: pointer; flex: 1; opacity: 0.6; }
+        /* Nav */
+        nav { background: var(--card); border-top: 1px solid var(--border); display: flex; justify-content: space-around; padding: 12px 0; position: fixed; bottom: 0; width: 100%; z-index: 1000; }
+        .nav-item { font-size: 10px; color: var(--text-dim); text-align: center; cursor: pointer; flex: 1; opacity: 0.6; transition: 0.2s; }
         .nav-item.active { color: var(--gold); opacity: 1; }
         .nav-icon { font-size: 20px; display: block; margin-bottom: 4px; }
 
-        .btn-main { background: var(--primary); color: #05070a; border: none; padding: 14px; width: 100%; border-radius: 6px; font-weight: 800; cursor: pointer; }
+        .btn-main { background: var(--primary); color: #05070a; border: none; padding: 14px; width: 100%; border-radius: 6px; font-weight: 800; cursor: pointer; margin-top: 10px; }
     </style>
 </head>
 <body>
@@ -68,35 +61,31 @@
     <div class="chart-section"><div id="tv_container"></div></div>
     <div class="market-grid">
         <div class="panel">
-            <div style="font-size: 12px; margin-bottom: 10px; font-weight: 700; color: var(--gold);">TRADE</div>
-            <div class="bot-field"><label>Amount TON</label><input type="number" placeholder="0.00"></div>
-            <button class="btn-main" onclick="sendTestTx()">TEST SEND</button>
+            <div style="font-size: 12px; color: var(--gold); font-weight: 700;">TRADE</div>
+            <button class="btn-main" onclick="connectAndPay()">TEST CONNECTION</button>
+            <p id="status-log" style="font-size: 9px; color: var(--text-dim); margin-top: 10px;"></p>
         </div>
         <div class="panel">
             <div id="asks-box"></div>
-            <div style="text-align:center; padding: 4px; color: var(--primary); font-weight: 800; border-top: 1px solid var(--border); border-bottom: 1px solid var(--border); margin: 3px 0;">5.3502</div>
+            <div style="text-align:center; padding: 4px; color: var(--primary); font-weight: 800; border: 1px solid var(--border); margin: 3px 0;">5.3502</div>
             <div id="bids-box"></div>
         </div>
     </div>
 </div>
 
 <div id="view-bot" class="view">
-    <div class="bot-container">
-        <div class="strategy-card">
-            <b>Grok Spot Grid</b>
-            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 15px;">
-                <div class="bot-field"><label>Low</label><input type="number" value="4.80"></div>
-                <div class="bot-field"><label>High</label><input type="number" value="6.10"></div>
-            </div>
-            <button class="btn-main" onclick="startGrok()">ЗАПУСТИТЬ ГРОКА</button>
+    <div style="padding: 20px;">
+        <h3>Robot Configuration</h3>
+        <div style="background: var(--card); border: 1px solid var(--border); padding: 15px; border-radius: 12px;">
+            <p style="color: var(--text-dim);">Выберите стратегию и подключите кошелек для старта.</p>
         </div>
     </div>
 </div>
 
 <div id="view-assets" class="view">
     <div style="padding: 40px; text-align: center;">
-        <h2 id="wallet-status">Ожидание...</h2>
-        <p id="wallet-addr" style="font-family: 'Roboto Mono'; font-size: 11px; color: var(--text-dim);"></p>
+        <h2 id="wallet-status">Ожидание кошелька</h2>
+        <div id="wallet-details" style="font-family: 'Roboto Mono'; font-size: 10px; background: #161b22; padding: 15px; border-radius: 8px; margin-top: 10px; border: 1px solid var(--border); display: none;"></div>
     </div>
 </div>
 
@@ -108,52 +97,42 @@
 
 <script type="text/javascript" src="https://s3.tradingview.com/tv.js"></script>
 <script>
-    // 1. Инициализация с прямым указанием манифеста
-    // ВАЖНО: Убедись, что по этой ссылке открывается текст!
+    // 1. ИНИЦИАЛИЗАЦИЯ
     const tonConnectUI = new TON_CONNECT_UI.TonConnectUI({
-        manifestUrl: 'https://rgey52bb.github.io/tonconnect-manifest.json',
+        manifestUrl: 'https://rgey52bb.github.io/tonconnect-manifest.json', // УБЕДИСЬ ЧТО ОН ТАМ ЕСТЬ
         buttonRootId: 'ton-connect-button'
     });
 
-    // 2. Слушатель статуса (поможет понять, видит ли сайт кошелек)
+    // 2. СЛУШАТЕЛЬ СТАТУСА
     tonConnectUI.onStatusChange(wallet => {
         const statusText = document.getElementById('wallet-status');
-        const addrText = document.getElementById('wallet-addr');
+        const details = document.getElementById('wallet-details');
+        const log = document.getElementById('status-log');
+
         if (wallet) {
-            console.log("Wallet connected!", wallet);
-            statusText.innerText = "Подключено ✅";
-            addrText.innerText = wallet.account.address;
+            statusText.innerHTML = "Подключено ✅";
+            details.style.display = "block";
+            details.innerText = "Address: " + wallet.account.address;
+            log.innerText = "Wallet Connected Successfully";
+            console.log("Wallet info:", wallet);
         } else {
-            statusText.innerText = "Не подключено ❌";
-            addrText.innerText = "Нажмите кнопку вверху";
+            statusText.innerHTML = "Не подключено ❌";
+            details.style.display = "none";
+            log.innerText = "Waiting for connection...";
         }
     });
 
-    // 3. Функция проверки транзакции (чтобы проверить связь)
-    async function sendTestTx() {
+    // 3. ФУНКЦИЯ ПРОВЕРКИ
+    async function connectAndPay() {
         if (!tonConnectUI.connected) {
-            alert("Сначала подключи кошелек!");
+            alert("Пожалуйста, нажмите на кнопку 'Connect Wallet' вверху экрана.");
             tonConnectUI.openModal();
             return;
         }
-        
-        const transaction = {
-            validUntil: Math.floor(Date.now() / 1000) + 60,
-            messages: [{
-                address: "EQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAM9c", // Нулевой адрес
-                amount: "1000000" // 0.001 TON для теста
-            }]
-        };
-
-        try {
-            await tonConnectUI.sendTransaction(transaction);
-            alert("Запрос отправлен в Tonkeeper!");
-        } catch (e) {
-            console.error("Ошибка транзакции:", e);
-            alert("Ошибка! Проверь консоль.");
-        }
+        alert("Кошелек уже подключен! Проверь вкладку Assets.");
     }
 
+    // 4. ПЕРЕКЛЮЧЕНИЕ ЭКРАНОВ
     function switchView(name) {
         document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
         document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
@@ -165,7 +144,7 @@
     function initChart() {
         new TradingView.widget({
             "autosize": true, "symbol": "OKX:TONUSDT", "interval": "15",
-            "theme": "dark", "style": "1", "container_id": "tv_container",
+            "theme": "dark", "container_id": "tv_container",
             "hide_top_toolbar": true, "backgroundColor": "#05070a"
         });
     }
@@ -187,3 +166,4 @@
 </script>
 </body>
 </html>
+      
