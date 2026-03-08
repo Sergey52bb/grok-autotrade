@@ -6,133 +6,125 @@
     <title>STRATEX TERMINAL</title>
     <script src="https://unpkg.com/@tonconnect/ui@latest/dist/tonconnect-ui.min.js"></script>
     <style>
-        /* Общие стили */
-        body { background: #0b0e11; color: white; font-family: 'Segoe UI', sans-serif; margin: 0; display: flex; flex-direction: column; height: 100vh; overflow: hidden; }
+        body { background: #0b0e11; color: white; font-family: 'Segoe UI', sans-serif; margin: 0; padding: 0; overflow-x: hidden; }
         
-        /* Шапка */
-        .header { background: #1c2127; padding: 10px 15px; border-bottom: 1px solid #333; display: flex; justify-content: space-between; align-items: center; }
+        .header { background: #1c2127; padding: 10px 15px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #333; position: sticky; top: 0; z-index: 100; }
         .brand { color: #f0b90b; font-size: 18px; font-weight: bold; }
 
-        /* Зона графика */
-        .chart-container { flex: 1.5; min-height: 250px; border-bottom: 4px solid #0b0e11; }
+        .chart-section { height: 300px; width: 100%; border-bottom: 4px solid #0b0e11; }
 
-        /* Торговая зона (Разделенная) */
-        .trade-zone { flex: 2; display: flex; flex-direction: column; background: #1c2127; }
-        .main-controls { display: flex; padding: 10px; gap: 10px; border-bottom: 1px solid #333; }
+        .trading-container { background: #1c2127; padding: 12px; display: flex; flex-direction: column; }
+        .main-row { display: flex; gap: 12px; margin-bottom: 15px; }
 
-        /* Стакан (Order Book - Лево) */
-        .order-book { flex: 0.9; font-size: 11px; display: flex; flex-direction: column; }
-        .ob-header { display: flex; justify-content: space-between; color: #848e9c; margin-bottom: 4px; }
-        .ob-row { display: flex; justify-content: space-between; padding: 1px 0; }
-        .ob-ask { color: #f6465d; } /* Продажа */
-        .ob-bid { color: #0ecb81; } /* Покупка */
-        .price-now { font-size: 16px; font-weight: bold; padding: 8px 0; text-align: center; }
+        /* Левая колонка - Стакан */
+        .order-book { flex: 1; font-size: 11px; }
+        .ob-label { display: flex; justify-content: space-between; color: #848e9c; margin-bottom: 4px; }
+        .ob-row { display: flex; justify-content: space-between; padding: 2px 0; }
+        .red { color: #f6465d; }
+        .green { color: #0ecb81; }
+        .current-price { font-size: 16px; font-weight: bold; text-align: center; margin: 10px 0; }
 
-        /* Форма ордера (Право) */
-        .trade-form { flex: 1.1; display: flex; flex-direction: column; gap: 8px; }
-        .trade-tabs { display: flex; background: #2b3139; border-radius: 4px; overflow: hidden; }
-        .trade-tab { flex: 1; text-align: center; padding: 6px; font-size: 12px; cursor: pointer; color: #848e9c; }
-        .active-buy { background: #0ecb81; color: white; }
-        
-        .input-group { background: #2b3139; padding: 8px; border-radius: 4px; border: 1px solid #444; }
+        /* Правая колонка - Форма */
+        .trade-form { flex: 1.2; display: flex; flex-direction: column; gap: 8px; }
+        .tabs { display: flex; background: #2b3139; border-radius: 4px; overflow: hidden; }
+        .tab { flex: 1; padding: 6px; text-align: center; font-size: 12px; cursor: pointer; color: #848e9c; }
+        .tab.active { background: #0ecb81; color: white; }
+
+        .input-field { background: #2b3139; border: 1px solid #444; border-radius: 4px; padding: 8px; }
         .input-label { font-size: 10px; color: #848e9c; }
-        .input-row { display: flex; justify-content: space-between; font-weight: bold; margin-top: 2px; }
+        .input-row { display: flex; justify-content: space-between; font-weight: bold; font-size: 14px; margin-top: 2px; }
 
-        .btn-buy { background: #0ecb81; color: white; border: none; padding: 12px; border-radius: 4px; font-weight: bold; cursor: pointer; width: 100%; margin-top: auto; }
-        .info-row { display: flex; justify-content: space-between; font-size: 10px; color: #848e9c; margin-top: 2px; }
+        .btn-buy-ton { background: #0ecb81; color: white; border: none; padding: 12px; border-radius: 4px; font-weight: bold; font-size: 15px; cursor: pointer; margin-top: 5px; }
 
-        /* Вкладка ордеров (Снизу) */
-        .orders-container { flex: 1; background: #1c2127; border-top: 4px solid #0b0e11; padding: 10px; }
-        .orders-tabs { border-bottom: 1px solid #333; display: flex; gap: 20px; font-size: 13px; color: #848e9c; padding-bottom: 8px; }
-        .active-orders-tab { color: white; border-bottom: 2px solid #f0b90b; }
+        /* Нижняя часть - Ордера */
+        .orders-section { background: #1c2127; border-top: 4px solid #0b0e11; padding: 15px; min-height: 150px; }
+        .orders-nav { display: flex; gap: 20px; border-bottom: 1px solid #333; padding-bottom: 8px; margin-bottom: 15px; }
+        .nav-item { font-size: 13px; color: #848e9c; cursor: pointer; }
+        .nav-item.active { color: white; border-bottom: 2px solid #f0b90b; padding-bottom: 8px; }
+        .empty-msg { text-align: center; color: #848e9c; font-size: 12px; margin-top: 20px; }
     </style>
 </head>
 <body>
 
-    <div class="header">
-        <div class="brand">STRATEX TERMINAL</div>
-        <div id="ton-connect-button"></div>
-    </div>
+<div class="header">
+    <div class="brand">STRATEX TERMINAL</div>
+    <div id="ton-connect-button"></div>
+</div>
 
-    <div class="chart-container">
-        <div id="tv_chart_container" style="height:100%;"></div>
-        <script type="text/javascript" src="https://s3.tradingview.com/tv.js"></script>
-        <script type="text/javascript">
-            new TradingView.widget({
-              "autosize": true, "symbol": "OKX:TONUSDT", "interval": "15",
-              "theme": "dark", "style": "1", "locale": "ru", "hide_top_toolbar": true, "container_id": "tv_chart_container"
-            });
-        </script>
-    </div>
-
-    <div class="trade-zone">
-        <div class="main-controls">
-            <div class="order-book">
-                <div class="ob-header"><span>Цена</span><span>Кол-во</span></div>
-                <div class="ob-row ob-ask"><span>7.245</span><span>142</span></div>
-                <div class="ob-row ob-ask"><span>7.241</span><span>85</span></div>
-                <div class="ob-row ob-ask"><span>7.238</span><span>1.2K</span></div>
-                <div class="price-now ob-bid">7.235 ↑</div>
-                <div class="ob-row ob-bid"><span>7.232</span><span>410</span></div>
-                <div class="ob-row ob-bid"><span>7.229</span><span>95</span></div>
-                <div class="ob-row ob-bid"><span>7.225</span><span>2.4K</span></div>
-            </div>
-
-            <div class="trade-form">
-                <div class="trade-tabs">
-                    <div class="trade-tab active-buy">Купить</div>
-                    <div class="trade-tab">Продать</div>
-                </div>
-                <div class="input-group">
-                    <div class="input-label">Цена</div>
-                    <div class="input-row"><span>7.235</span><span style="color:#848e9c">USDT</span></div>
-                </div>
-                <div class="input-group">
-                    <div class="input-label">Количество</div>
-                    <div class="input-row"><span>0</span><span style="color:#848e9c">TON</span></div>
-                </div>
-                <div class="info-row">
-                    <span>Доступно:</span>
-                    <span id="balance" style="color:white; font-weight:bold;">0.0033 TON</span>
-                </div>
-                <button class="btn-buy">Купить TON</button>
-            </div>
-        </div>
-
-        <div class="orders-container">
-            <div class="orders-tabs">
-                <span class="active-orders-tab">Открытые ордера (0)</span>
-                <span>История</span>
-            </div>
-            <div style="text-align:center; color:#848e9c; font-size:12px; padding-top:20px;">
-                Подключите кошелек, чтобы просмотреть ордера.
-            </div>
-        </div>
-    </div>
-
+<div class="chart-section">
+    <div id="tradingview_chart" style="height:100%;"></div>
+    <script src="https://s3.tradingview.com/tv.js"></script>
     <script>
-        const tonConnectUI = new TON_CONNECT_UI.TonConnectUI({
-            manifestUrl: 'https://sergey52bb.github.io/grok-autotrade/tonconnect-manifest.json',
-            buttonRootId: 'ton-connect-button'
-        });
-
-        async function fetchBalance(address) {
-            try {
-                const response = await fetch(`https://toncenter.com/api/v2/getAddressBalance?address=${address}`);
-                const data = await response.json();
-                if (data.ok) {
-                    const result = (parseFloat(data.result) / 1e9).toFixed(4);
-                    document.getElementById('balance').innerText = result + " TON";
-                }
-            } catch (e) {}
-        }
-
-        tonConnectUI.onStatusChange(wallet => {
-            if (wallet) {
-                fetchBalance(wallet.account.address);
-                setInterval(() => fetchBalance(wallet.account.address), 30000);
-            }
+        new TradingView.widget({
+            "autosize": true, "symbol": "OKX:TONUSDT", "interval": "15", "theme": "dark",
+            "style": "1", "locale": "ru", "hide_top_toolbar": true, "container_id": "tradingview_chart"
         });
     </script>
+</div>
+
+<div class="trading-container">
+    <div class="main-row">
+        <div class="order-book">
+            <div class="ob-label"><span>Цена</span><span>Кол-во</span></div>
+            <div class="ob-row red"><span>7.245</span><span>142</span></div>
+            <div class="ob-row red"><span>7.241</span><span>85</span></div>
+            <div class="ob-row red"><span>7.238</span><span>1.2K</span></div>
+            <div class="current-price green">7.235 ↑</div>
+            <div class="ob-row green"><span>7.232</span><span>410</span></div>
+            <div class="ob-row green"><span>7.229</span><span>95</span></div>
+            <div class="ob-row green"><span>7.225</span><span>2.4K</span></div>
+        </div>
+
+        <div class="trade-form">
+            <div class="tabs">
+                <div class="tab active">Купить</div>
+                <div class="tab">Продать</div>
+            </div>
+            <div class="input-field">
+                <div class="input-label">Цена</div>
+                <div class="input-row"><span>7.235</span><span style="color:#848e9c">USDT</span></div>
+            </div>
+            <div class="input-field">
+                <div class="input-label">Количество</div>
+                <div class="input-row"><span>0</span><span style="color:#848e9c">TON</span></div>
+            </div>
+            <div style="display:flex; justify-content:space-between; font-size:10px; color:#848e9c; margin-top:2px;">
+                <span>Доступно:</span>
+                <span id="user-bal" style="color:white">0.0033 TON</span>
+            </div>
+            <button class="btn-buy-ton">Купить TON</button>
+        </div>
+    </div>
+</div>
+
+<div class="orders-section">
+    <div class="orders-nav">
+        <div class="nav-item active">Открытые ордера (0)</div>
+        <div class="nav-item">История</div>
+    </div>
+    <div class="empty-msg">Подключите кошелек, чтобы просмотреть ордера.</div>
+</div>
+
+<script>
+    const tonConnectUI = new TON_CONNECT_UI.TonConnectUI({
+        manifestUrl: 'https://sergey52bb.github.io/grok-autotrade/tonconnect-manifest.json',
+        buttonRootId: 'ton-connect-button'
+    });
+
+    async function updateBal(addr) {
+        try {
+            const r = await fetch(`https://toncenter.com/api/v2/getAddressBalance?address=${addr}`);
+            const d = await r.json();
+            if(d.ok) document.getElementById('user-bal').innerText = (d.result/1e9).toFixed(4) + " TON";
+        } catch(e){}
+    }
+
+    tonConnectUI.onStatusChange(w => { 
+        if(w) { 
+            updateBal(w.account.address); 
+            setInterval(() => updateBal(w.account.address), 20000); 
+        }
+    });
+</script>
 </body>
 </html>
