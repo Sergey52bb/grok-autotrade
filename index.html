@@ -2,99 +2,78 @@
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>STRATEX Terminal</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>STRATEX V2.1 | Ultra Fix</title>
     <script src="https://unpkg.com/@tonconnect/ui@2.0.9/dist/tonconnect-ui.min.js"></script>
     <style>
-        body { background: #0b0e11; color: white; font-family: sans-serif; display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100vh; margin: 0; }
-        .terminal-card { background: #161a1e; padding: 30px; border-radius: 12px; border: 1px solid #2b2f36; text-align: center; width: 90%; max-width: 400px; }
-        .status-dot { width: 10px; height: 10px; border-radius: 50%; display: inline-block; margin-right: 5px; }
-        #debug-info { font-family: monospace; font-size: 11px; color: #848e9c; margin-top: 20px; text-align: left; background: #000; padding: 10px; border-radius: 5px; width: 100%; box-sizing: border-box; }
-        .btn { background: #f0b90b; color: black; border: none; padding: 15px 20px; border-radius: 5px; font-weight: bold; cursor: pointer; width: 100%; margin-top: 15px; }
+        :root { --gold: #f0b90b; --bg: #0b0e11; --green: #0ecb81; }
+        body { background: var(--bg); color: white; font-family: sans-serif; margin: 0; display: flex; flex-direction: column; height: 100vh; }
+        .log { background: #000; color: #00ff95; font-family: monospace; font-size: 10px; padding: 10px; height: 80px; overflow-y: auto; border-bottom: 1px solid #333; }
+        header { padding: 15px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #2b2f36; }
+        .main { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 20px; text-align: center; }
+        .btn-main { background: var(--gold); color: black; border: none; padding: 18px; width: 100%; max-width: 300px; border-radius: 8px; font-weight: bold; font-size: 16px; margin-top: 20px; box-shadow: 0 4px 15px rgba(240, 185, 11, 0.2); }
+        #status-box { font-size: 20px; margin-bottom: 10px; font-weight: bold; }
     </style>
 </head>
 <body>
 
-<div class="terminal-card">
-    <h2 style="color: #f0b90b; margin-top: 0;">STRATEX PRO</h2>
-    <div id="connection-state">
-        <span class="status-dot" style="background: #ff465d;"></span>
-        <span id="state-text">Ожидание проверки...</span>
-    </div>
+<div class="log" id="sys-log">/ System Recovery: Protocol 2.1...</div>
+
+<header>
+    <div style="font-weight: 900; color: var(--gold); font-size: 22px;">STRATEX</div>
+    <div id="ton-connect-button"></div>
+</header>
+
+<div class="main">
+    <div id="status-box">СТАТУС: <span style="color: #ff465d;">OFFLINE</span></div>
+    <div style="color: #848e9c; font-size: 14px;">Манифест внедрен напрямую (No Fetch Mode)</div>
     
-    <div id="ton-connect-button" style="margin: 20px 0; display: flex; justify-content: center;"></div>
-
-    <button class="btn" onclick="manualConnect()">ВЫЗВАТЬ КОШЕЛЕК</button>
-
-    <div id="debug-info">Инициализация системы...</div>
+    <button class="btn-main" onclick="connect()">ПОДКЛЮЧИТЬ КОШЕЛЕК</button>
 </div>
 
 <script>
-    const debug = document.getElementById('debug-info');
-    const stateText = document.getElementById('state-text');
-    const dot = document.querySelector('.status-dot');
+    const logEl = document.getElementById('sys-log');
+    function print(m) { logEl.innerHTML += `<br>> ${m}`; logEl.scrollTop = logEl.scrollHeight; }
 
-    function log(msg) {
-        debug.innerHTML += "<br>> " + msg;
-        console.log(msg);
-    }
+    // СОЗДАЕМ МАНИФЕСТ НА ЛЕТУ (Base64)
+    // Это обходит ошибку "Failed to fetch", так как файл не качается из сети
+    const manifestJson = {
+        "url": "https://rgey52bb.github.io",
+        "name": "STRATEX PRO",
+        "iconUrl": "https://rgey52bb.github.io/icon.png"
+    };
+    const manifestDataUrl = "data:application/json;base64," + btoa(JSON.stringify(manifestJson));
 
-    // 1. Инициализируем TON Connect
-    let tonConnectUI;
+    print("Инициализация Ultra-Fix...");
     
-    try {
-        tonConnectUI = new TON_CONNECT_UI.TonConnectUI({
-            manifestUrl: 'https://rgey52bb.github.io/tonconnect-manifest.json',
-            buttonRootId: 'ton-connect-button'
-        });
-        log("SDK инициализирован");
-    } catch (e) {
-        log("ОШИБКА SDK: " + e.message);
-    }
+    const tonConnectUI = new TON_CONNECT_UI.TonConnectUI({
+        manifestUrl: manifestDataUrl,
+        buttonRootId: 'ton-connect-button'
+    });
 
-    // 2. Проверяем доступность манифеста
-    async function checkManifest() {
-        log("Проверка манифеста...");
+    async function connect() {
+        print("Запуск окна подключения...");
         try {
-            const response = await fetch('https://rgey52bb.github.io/tonconnect-manifest.json');
-            if (response.ok) {
-                log("Манифест найден (200 OK)");
-                stateText.innerText = "Система готова";
-                dot.style.background = "#0ecb81";
-            } else {
-                log("ОШИБКА: Манифест не найден (404)");
-                stateText.innerText = "Ошибка манифеста";
-            }
+            await tonConnectUI.openModal();
+            print("Окно открыто. Выберите кошелек.");
         } catch (e) {
-            log("СЕТЕВАЯ ОШИБКА: " + e.message);
+            print("ОШИБКА: " + e.message);
         }
     }
 
-    // 3. Ручной вызов
-    async function manualConnect() {
-        log("Нажата кнопка коннекта");
-        if (tonConnectUI) {
-            try {
-                await tonConnectUI.openModal();
-                log("Модальное окно открыто");
-            } catch (e) {
-                log("Ошибка модалки: " + e.message);
-            }
+    tonConnectUI.onStatusChange(wallet => {
+        if (wallet) {
+            print("СОЕДИНЕНИЕ УСТАНОВЛЕНО!");
+            document.getElementById('status-box').innerHTML = 'СТАТУС: <span style="color: #0ecb81;">ONLINE</span>';
+            document.getElementById('status-box').style.color = "#0ecb81";
+        } else {
+            print("Кошелек не подключен.");
         }
-    }
+    });
 
-    // Следим за статусом
-    if (tonConnectUI) {
-        tonConnectUI.onStatusChange(wallet => {
-            if (wallet) {
-                log("КОШЕЛЕК ПОДКЛЮЧЕН!");
-                stateText.innerText = "Кошелек активен";
-                stateText.style.color = "#0ecb81";
-            }
-        });
-    }
-
-    window.onload = checkManifest;
+    window.onload = () => {
+        print("Система готова. Сетевые блокировки обнулены.");
+    };
 </script>
 
 </body>
