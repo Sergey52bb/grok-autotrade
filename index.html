@@ -2,46 +2,52 @@
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>STRATEX TERMINAL</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>STRATEX PRO</title>
     <script src="https://unpkg.com/@tonconnect/ui@latest/dist/tonconnect-ui.min.js"></script>
     <style>
-        body { background: #0b0e11; color: white; font-family: 'Segoe UI', sans-serif; margin: 0; padding: 0; overflow-x: hidden; }
+        :root { --bg: #0b0e11; --panel: #1c2127; --input: #2b3139; --green: #0ecb81; --red: #f6465d; --text-gray: #848e9c; --gold: #f0b90b; }
+        body { background: var(--bg); color: white; font-family: 'Segoe UI', Arial, sans-serif; margin: 0; overflow-x: hidden; }
         
-        .header { background: #1c2127; padding: 10px 15px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #333; position: sticky; top: 0; z-index: 100; }
-        .brand { color: #f0b90b; font-size: 18px; font-weight: bold; }
+        /* Header */
+        .header { background: var(--panel); padding: 8px 12px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #333; position: sticky; top: 0; z-index: 100; }
+        .brand { color: var(--gold); font-size: 18px; font-weight: bold; letter-spacing: 1px; }
 
-        .chart-section { height: 300px; width: 100%; border-bottom: 4px solid #0b0e11; }
+        /* Chart */
+        .chart-box { height: 280px; width: 100%; border-bottom: 4px solid var(--bg); }
 
-        .trading-container { background: #1c2127; padding: 12px; display: flex; flex-direction: column; }
-        .main-row { display: flex; gap: 12px; margin-bottom: 15px; }
+        /* Trade Area */
+        .trade-container { background: var(--panel); padding: 12px; display: flex; flex-direction: column; }
+        .flex-row { display: flex; gap: 12px; }
 
-        /* Левая колонка - Стакан */
-        .order-book { flex: 1; font-size: 11px; }
-        .ob-label { display: flex; justify-content: space-between; color: #848e9c; margin-bottom: 4px; }
-        .ob-row { display: flex; justify-content: space-between; padding: 2px 0; }
-        .red { color: #f6465d; }
-        .green { color: #0ecb81; }
-        .current-price { font-size: 16px; font-weight: bold; text-align: center; margin: 10px 0; }
+        /* Order Book */
+        .order-book { flex: 1; font-size: 11px; min-width: 120px; }
+        .ob-head { display: flex; justify-content: space-between; color: var(--text-gray); margin-bottom: 5px; }
+        .ob-item { display: flex; justify-content: space-between; padding: 2px 0; transition: all 0.3s; }
+        .price-center { font-size: 18px; font-weight: bold; text-align: center; margin: 8px 0; }
 
-        /* Правая колонка - Форма */
+        /* Trade Form */
         .trade-form { flex: 1.2; display: flex; flex-direction: column; gap: 8px; }
-        .tabs { display: flex; background: #2b3139; border-radius: 4px; overflow: hidden; }
-        .tab { flex: 1; padding: 6px; text-align: center; font-size: 12px; cursor: pointer; color: #848e9c; }
-        .tab.active { background: #0ecb81; color: white; }
+        .side-tabs { display: flex; background: var(--input); border-radius: 4px; overflow: hidden; margin-bottom: 4px; }
+        .side-btn { flex: 1; padding: 7px; text-align: center; font-size: 12px; cursor: pointer; color: var(--text-gray); font-weight: bold; }
+        .side-btn.active-buy { background: var(--green); color: white; }
+        .side-btn.active-sell { background: var(--red); color: white; }
 
-        .input-field { background: #2b3139; border: 1px solid #444; border-radius: 4px; padding: 8px; }
-        .input-label { font-size: 10px; color: #848e9c; }
-        .input-row { display: flex; justify-content: space-between; font-weight: bold; font-size: 14px; margin-top: 2px; }
+        .field { background: var(--input); border: 1px solid #444; border-radius: 4px; padding: 6px 10px; }
+        .f-label { font-size: 10px; color: var(--text-gray); }
+        .f-row { display: flex; justify-content: space-between; font-weight: bold; font-size: 14px; margin-top: 1px; }
 
-        .btn-buy-ton { background: #0ecb81; color: white; border: none; padding: 12px; border-radius: 4px; font-weight: bold; font-size: 15px; cursor: pointer; margin-top: 5px; }
+        .main-btn { color: white; border: none; padding: 12px; border-radius: 6px; font-weight: bold; font-size: 15px; cursor: pointer; margin-top: 5px; transition: 0.2s; }
+        .bg-green { background: var(--green); }
+        .bg-red { background: var(--red); }
 
-        /* Нижняя часть - Ордера */
-        .orders-section { background: #1c2127; border-top: 4px solid #0b0e11; padding: 15px; min-height: 150px; }
-        .orders-nav { display: flex; gap: 20px; border-bottom: 1px solid #333; padding-bottom: 8px; margin-bottom: 15px; }
-        .nav-item { font-size: 13px; color: #848e9c; cursor: pointer; }
-        .nav-item.active { color: white; border-bottom: 2px solid #f0b90b; padding-bottom: 8px; }
-        .empty-msg { text-align: center; color: #848e9c; font-size: 12px; margin-top: 20px; }
+        /* Bottom Tabs */
+        .bottom-section { background: var(--panel); border-top: 4px solid var(--bg); padding: 12px; min-height: 200px; }
+        .b-tabs { display: flex; gap: 20px; border-bottom: 1px solid #333; padding-bottom: 8px; margin-bottom: 15px; }
+        .b-tab { font-size: 13px; color: var(--text-gray); cursor: pointer; position: relative; }
+        .b-tab.active { color: white; }
+        .b-tab.active::after { content: ''; position: absolute; bottom: -10px; left: 0; width: 100%; height: 2px; background: var(--gold); }
+        .content-area { text-align: center; color: var(--text-gray); font-size: 13px; margin-top: 30px; }
     </style>
 </head>
 <body>
@@ -51,80 +57,113 @@
     <div id="ton-connect-button"></div>
 </div>
 
-<div class="chart-section">
-    <div id="tradingview_chart" style="height:100%;"></div>
+<div class="chart-box">
+    <div id="tv_chart" style="height:100%;"></div>
     <script src="https://s3.tradingview.com/tv.js"></script>
     <script>
         new TradingView.widget({
             "autosize": true, "symbol": "OKX:TONUSDT", "interval": "15", "theme": "dark",
-            "style": "1", "locale": "ru", "hide_top_toolbar": true, "container_id": "tradingview_chart"
+            "style": "1", "locale": "ru", "hide_top_toolbar": true, "container_id": "tv_chart"
         });
     </script>
 </div>
 
-<div class="trading-container">
-    <div class="main-row">
-        <div class="order-book">
-            <div class="ob-label"><span>Цена</span><span>Кол-во</span></div>
-            <div class="ob-row red"><span>7.245</span><span>142</span></div>
-            <div class="ob-row red"><span>7.241</span><span>85</span></div>
-            <div class="ob-row red"><span>7.238</span><span>1.2K</span></div>
-            <div class="current-price green">7.235 ↑</div>
-            <div class="ob-row green"><span>7.232</span><span>410</span></div>
-            <div class="ob-row green"><span>7.229</span><span>95</span></div>
-            <div class="ob-row green"><span>7.225</span><span>2.4K</span></div>
-        </div>
+<div class="trade-container">
+    <div class="flex-row">
+        <div class="order-book" id="orderBook">
+            <div class="ob-head"><span>Цена</span><span>Кол-во</span></div>
+            <div id="asks"></div> <div class="price-center green" id="lastPrice">7.235 ↑</div>
+            <div id="bids"></div> </div>
 
         <div class="trade-form">
-            <div class="tabs">
-                <div class="tab active">Купить</div>
-                <div class="tab">Продать</div>
+            <div class="side-tabs">
+                <div class="side-btn active-buy" onclick="setSide('buy')">Купить</div>
+                <div class="side-btn" onclick="setSide('sell')">Продать</div>
             </div>
-            <div class="input-field">
-                <div class="input-label">Цена</div>
-                <div class="input-row"><span>7.235</span><span style="color:#848e9c">USDT</span></div>
+            <div class="field">
+                <div class="f-label">Цена</div>
+                <div class="f-row"><span id="priceVal">7.235</span><span style="color:var(--text-gray)">USDT</span></div>
             </div>
-            <div class="input-field">
-                <div class="input-label">Количество</div>
-                <div class="input-row"><span>0</span><span style="color:#848e9c">TON</span></div>
+            <div class="field">
+                <div class="f-label">Количество</div>
+                <div class="f-row"><span>0</span><span style="color:var(--text-gray)">TON</span></div>
             </div>
-            <div style="display:flex; justify-content:space-between; font-size:10px; color:#848e9c; margin-top:2px;">
-                <span>Доступно:</span>
-                <span id="user-bal" style="color:white">0.0033 TON</span>
+            <div style="display:flex; justify-content:space-between; font-size:10px; margin-top:2px;">
+                <span style="color:var(--text-gray)">Доступно:</span>
+                <span id="bal" style="color:white; font-weight:bold;">0.0033 TON</span>
             </div>
-            <button class="btn-buy-ton">Купить TON</button>
+            <button class="main-btn bg-green" id="actionBtn">Купить TON</button>
         </div>
     </div>
 </div>
 
-<div class="orders-section">
-    <div class="orders-nav">
-        <div class="nav-item active">Открытые ордера (0)</div>
-        <div class="nav-item">История</div>
+<div class="bottom-section">
+    <div class="b-tabs">
+        <div class="b-tab active" onclick="setTab(this, 'orders')">Открытые ордера (0)</div>
+        <div class="b-tab" onclick="setTab(this, 'history')">История</div>
     </div>
-    <div class="empty-msg">Подключите кошелек, чтобы просмотреть ордера.</div>
+    <div class="content-area" id="bottomContent">
+        Подключите кошелек, чтобы просмотреть ордера.
+    </div>
 </div>
 
 <script>
+    // 1. Управление стороной сделки
+    function setSide(side) {
+        const btn = document.getElementById('actionBtn');
+        const tabs = document.querySelectorAll('.side-btn');
+        tabs.forEach(t => t.classList.remove('active-buy', 'active-sell'));
+        
+        if(side === 'buy') {
+            tabs[0].classList.add('active-buy');
+            btn.innerText = 'Купить TON';
+            btn.className = 'main-btn bg-green';
+        } else {
+            tabs[1].classList.add('active-sell');
+            btn.innerText = 'Продать TON';
+            btn.className = 'main-btn bg-red';
+        }
+    }
+
+    // 2. Управление нижними вкладками
+    function setTab(el, type) {
+        document.querySelectorAll('.b-tab').forEach(t => t.classList.remove('active'));
+        el.classList.add('active');
+        const content = document.getElementById('bottomContent');
+        content.innerHTML = type === 'history' ? 'История сделок пуста' : 'Подключите кошелек, чтобы просмотреть ордера.';
+    }
+
+    // 3. Оживляем стакан (генерация данных)
+    function updateBook() {
+        const asksCont = document.getElementById('asks');
+        const bidsCont = document.getElementById('bids');
+        let asksHtml = '', bidsHtml = '';
+        
+        for(let i=0; i<4; i++) {
+            asksHtml = `<div class="ob-item red"><span>7.${240 + Math.floor(Math.random()*20)}</span><span>${(Math.random()*500).toFixed(1)}</span></div>` + asksHtml;
+            bidsHtml += `<div class="ob-item green"><span>7.${220 + Math.floor(Math.random()*15)}</span><span>${(Math.random()*900).toFixed(1)}</span></div>`;
+        }
+        asksCont.innerHTML = asksHtml;
+        bidsCont.innerHTML = bidsHtml;
+    }
+    setInterval(updateBook, 2000);
+    updateBook();
+
+    // 4. TonConnect
     const tonConnectUI = new TON_CONNECT_UI.TonConnectUI({
         manifestUrl: 'https://sergey52bb.github.io/grok-autotrade/tonconnect-manifest.json',
         buttonRootId: 'ton-connect-button'
     });
 
-    async function updateBal(addr) {
+    async function checkBal(addr) {
         try {
             const r = await fetch(`https://toncenter.com/api/v2/getAddressBalance?address=${addr}`);
             const d = await r.json();
-            if(d.ok) document.getElementById('user-bal').innerText = (d.result/1e9).toFixed(4) + " TON";
+            if(d.ok) document.getElementById('bal').innerText = (d.result/1e9).toFixed(4) + " TON";
         } catch(e){}
     }
 
-    tonConnectUI.onStatusChange(w => { 
-        if(w) { 
-            updateBal(w.account.address); 
-            setInterval(() => updateBal(w.account.address), 20000); 
-        }
-    });
+    tonConnectUI.onStatusChange(w => { if(w) { checkBal(w.account.address); setInterval(() => checkBal(w.account.address), 20000); }});
 </script>
 </body>
 </html>
