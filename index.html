@@ -1,42 +1,52 @@
 <!DOCTYPE html>
-<html>
+<html lang="ru">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>STRATEX FIX</title>
+    <title>STRATEX V2.2</title>
     <script src="https://unpkg.com/@tonconnect/ui@latest/dist/tonconnect-ui.min.js"></script>
+    <style>
+        body { background: #0b0e11; color: white; font-family: sans-serif; display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100vh; margin: 0; }
+        .card { background: #1c1f24; padding: 25px; border-radius: 12px; text-align: center; border: 1px solid #333; width: 300px; }
+        .btn { background: #0098ea; color: white; border: none; padding: 15px; width: 100%; border-radius: 8px; font-weight: bold; cursor: pointer; margin-top: 15px; }
+    </style>
 </head>
-<body style="background:#0b0e11; color:white; display:flex; flex-direction:column; align-items:center; justify-content:center; height:100vh; font-family:sans-serif;">
+<body>
 
-    <h2 style="color:#f0b90b">STRATEX RECOVERY</h2>
-    <p id="status">Статус: Проверка...</p>
+<div class="card">
+    <h2 style="color: #0098ea;">STRATEX</h2>
+    <div id="status">Статус: Ожидание...</div>
     
-    <div id="ton-connect-button"></div>
+    <div id="ton-button" style="margin: 20px 0;"></div>
 
-    <script>
-        // Кодируем манифест прямо в скрипт, чтобы не зависеть от файлов
-        const manifest = {
-            url: "https://rgey52bb.github.io",
-            name: "STRATEX",
-            iconUrl: "https://rgey52bb.github.io/icon.png"
-        };
-        const encodedManifest = "data:application/json;base64," + btoa(JSON.stringify(manifest));
+    <button class="btn" onclick="connect()">ПОДКЛЮЧИТЬ КОШЕЛЕК</button>
+</div>
 
+<script>
+    // Добавляем ?v=1, чтобы кошелек принудительно прочитал новый файл
+    const manifestPath = 'https://rgey52bb.github.io/tonconnect-manifest.json?v=1';
+
+    const tonConnectUI = new TON_CONNECT_UI.TonConnectUI({
+        manifestUrl: manifestPath,
+        buttonRootId: 'ton-button'
+    });
+
+    async function connect() {
         try {
-            const tonConnectUI = new TON_CONNECT_UI.TonConnectUI({
-                manifestUrl: encodedManifest,
-                buttonRootId: 'ton-connect-button'
-            });
-
-            tonConnectUI.onStatusChange(wallet => {
-                if (wallet) {
-                    document.getElementById('status').innerText = "ПОДКЛЮЧЕНО: " + wallet.account.address.slice(0,6) + "...";
-                    document.getElementById('status').style.color = "#0ecb81";
-                }
-            });
-        } catch(e) {
-            document.getElementById('status').innerText = "Ошибка: " + e.message;
+            await tonConnectUI.openModal();
+        } catch (e) {
+            console.error(e);
+            alert("Ошибка: " + e.message);
         }
-    </script>
+    }
+
+    tonConnectUI.onStatusChange(wallet => {
+        if (wallet) {
+            document.getElementById('status').innerText = "АКТИВЕН: " + wallet.account.address.substring(0, 8) + "...";
+            document.getElementById('status').style.color = "#0ecb81";
+        }
+    });
+</script>
+
 </body>
 </html>
