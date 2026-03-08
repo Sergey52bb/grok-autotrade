@@ -6,125 +6,133 @@
     <title>STRATEX TERMINAL</title>
     <script src="https://unpkg.com/@tonconnect/ui@latest/dist/tonconnect-ui.min.js"></script>
     <style>
-        body { background: #0b0e11; color: white; font-family: 'Segoe UI', sans-serif; margin: 0; display: flex; flex-direction: column; height: 100vh; }
+        /* Общие стили */
+        body { background: #0b0e11; color: white; font-family: 'Segoe UI', sans-serif; margin: 0; display: flex; flex-direction: column; height: 100vh; overflow: hidden; }
         
-        /* Header */
-        .header { background: #1c2127; padding: 10px 15px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #333; }
+        /* Шапка */
+        .header { background: #1c2127; padding: 10px 15px; border-bottom: 1px solid #333; display: flex; justify-content: space-between; align-items: center; }
         .brand { color: #f0b90b; font-size: 18px; font-weight: bold; }
 
-        /* Chart Section */
+        /* Зона графика */
         .chart-container { flex: 1.5; min-height: 250px; border-bottom: 4px solid #0b0e11; }
 
-        /* Trading Section */
-        .trading-area { flex: 2; display: flex; flex-direction: column; background: #1c2127; }
+        /* Торговая зона (Разделенная) */
+        .trade-zone { flex: 2; display: flex; flex-direction: column; background: #1c2127; }
         .main-controls { display: flex; padding: 10px; gap: 10px; border-bottom: 1px solid #333; }
 
-        /* Order Book (Left) */
-        .order-book { flex: 1; font-size: 11px; }
+        /* Стакан (Order Book - Лево) */
+        .order-book { flex: 0.9; font-size: 11px; display: flex; flex-direction: column; }
+        .ob-header { display: flex; justify-content: space-between; color: #848e9c; margin-bottom: 4px; }
         .ob-row { display: flex; justify-content: space-between; padding: 1px 0; }
-        .red { color: #f6465d; }
-        .green { color: #0ecb81; }
+        .ob-ask { color: #f6465d; } /* Продажа */
+        .ob-bid { color: #0ecb81; } /* Покупка */
         .price-now { font-size: 16px; font-weight: bold; padding: 8px 0; text-align: center; }
 
-        /* Trade Form (Right) */
-        .trade-form { flex: 1.2; display: flex; flex-direction: column; gap: 8px; }
-        .btn-switch { display: flex; background: #2b3139; border-radius: 4px; overflow: hidden; }
-        .sw-btn { flex: 1; padding: 6px; font-size: 12px; text-align: center; cursor: pointer; }
-        .sw-active { background: #0ecb81; color: white; }
-
+        /* Форма ордера (Право) */
+        .trade-form { flex: 1.1; display: flex; flex-direction: column; gap: 8px; }
+        .trade-tabs { display: flex; background: #2b3139; border-radius: 4px; overflow: hidden; }
+        .trade-tab { flex: 1; text-align: center; padding: 6px; font-size: 12px; cursor: pointer; color: #848e9c; }
+        .active-buy { background: #0ecb81; color: white; }
+        
         .input-group { background: #2b3139; padding: 8px; border-radius: 4px; border: 1px solid #444; }
-        .lbl { font-size: 10px; color: #848e9c; }
-        .val-row { display: flex; justify-content: space-between; font-weight: bold; margin-top: 2px; }
+        .input-label { font-size: 10px; color: #848e9c; }
+        .input-row { display: flex; justify-content: space-between; font-weight: bold; margin-top: 2px; }
 
-        .btn-action { background: #0ecb81; color: white; border: none; padding: 10px; border-radius: 4px; font-weight: bold; cursor: pointer; width: 100%; margin-top: 5px; }
+        .btn-buy { background: #0ecb81; color: white; border: none; padding: 12px; border-radius: 4px; font-weight: bold; cursor: pointer; width: 100%; margin-top: auto; }
+        .info-row { display: flex; justify-content: space-between; font-size: 10px; color: #848e9c; margin-top: 2px; }
 
-        /* Orders Tabs */
-        .orders-section { flex: 1; background: #1c2127; border-top: 4px solid #0b0e11; padding: 10px; }
-        .tabs-header { border-bottom: 1px solid #333; display: flex; gap: 20px; font-size: 13px; color: #848e9c; padding-bottom: 8px; }
-        .tab-active { color: white; border-bottom: 2px solid #f0b90b; }
-        .no-orders { text-align: center; color: #848e9c; font-size: 13px; padding-top: 30px; }
+        /* Вкладка ордеров (Снизу) */
+        .orders-container { flex: 1; background: #1c2127; border-top: 4px solid #0b0e11; padding: 10px; }
+        .orders-tabs { border-bottom: 1px solid #333; display: flex; gap: 20px; font-size: 13px; color: #848e9c; padding-bottom: 8px; }
+        .active-orders-tab { color: white; border-bottom: 2px solid #f0b90b; }
     </style>
 </head>
 <body>
 
-<div class="header">
-    <div class="brand">STRATEX</div>
-    <div id="ton-connect-button"></div>
-</div>
+    <div class="header">
+        <div class="brand">STRATEX TERMINAL</div>
+        <div id="ton-connect-button"></div>
+    </div>
 
-<div class="chart-container">
-    <div id="tv_chart" style="height:100%;"></div>
-    <script src="https://s3.tradingview.com/tv.js"></script>
+    <div class="chart-container">
+        <div id="tv_chart_container" style="height:100%;"></div>
+        <script type="text/javascript" src="https://s3.tradingview.com/tv.js"></script>
+        <script type="text/javascript">
+            new TradingView.widget({
+              "autosize": true, "symbol": "OKX:TONUSDT", "interval": "15",
+              "theme": "dark", "style": "1", "locale": "ru", "hide_top_toolbar": true, "container_id": "tv_chart_container"
+            });
+        </script>
+    </div>
+
+    <div class="trade-zone">
+        <div class="main-controls">
+            <div class="order-book">
+                <div class="ob-header"><span>Цена</span><span>Кол-во</span></div>
+                <div class="ob-row ob-ask"><span>7.245</span><span>142</span></div>
+                <div class="ob-row ob-ask"><span>7.241</span><span>85</span></div>
+                <div class="ob-row ob-ask"><span>7.238</span><span>1.2K</span></div>
+                <div class="price-now ob-bid">7.235 ↑</div>
+                <div class="ob-row ob-bid"><span>7.232</span><span>410</span></div>
+                <div class="ob-row ob-bid"><span>7.229</span><span>95</span></div>
+                <div class="ob-row ob-bid"><span>7.225</span><span>2.4K</span></div>
+            </div>
+
+            <div class="trade-form">
+                <div class="trade-tabs">
+                    <div class="trade-tab active-buy">Купить</div>
+                    <div class="trade-tab">Продать</div>
+                </div>
+                <div class="input-group">
+                    <div class="input-label">Цена</div>
+                    <div class="input-row"><span>7.235</span><span style="color:#848e9c">USDT</span></div>
+                </div>
+                <div class="input-group">
+                    <div class="input-label">Количество</div>
+                    <div class="input-row"><span>0</span><span style="color:#848e9c">TON</span></div>
+                </div>
+                <div class="info-row">
+                    <span>Доступно:</span>
+                    <span id="balance" style="color:white; font-weight:bold;">0.0033 TON</span>
+                </div>
+                <button class="btn-buy">Купить TON</button>
+            </div>
+        </div>
+
+        <div class="orders-container">
+            <div class="orders-tabs">
+                <span class="active-orders-tab">Открытые ордера (0)</span>
+                <span>История</span>
+            </div>
+            <div style="text-align:center; color:#848e9c; font-size:12px; padding-top:20px;">
+                Подключите кошелек, чтобы просмотреть ордера.
+            </div>
+        </div>
+    </div>
+
     <script>
-        new TradingView.widget({
-            "autosize": true, "symbol": "OKX:TONUSDT", "interval": "15", "theme": "dark",
-            "style": "1", "locale": "ru", "hide_top_toolbar": true, "container_id": "tv_chart"
+        const tonConnectUI = new TON_CONNECT_UI.TonConnectUI({
+            manifestUrl: 'https://sergey52bb.github.io/grok-autotrade/tonconnect-manifest.json',
+            buttonRootId: 'ton-connect-button'
+        });
+
+        async function fetchBalance(address) {
+            try {
+                const response = await fetch(`https://toncenter.com/api/v2/getAddressBalance?address=${address}`);
+                const data = await response.json();
+                if (data.ok) {
+                    const result = (parseFloat(data.result) / 1e9).toFixed(4);
+                    document.getElementById('balance').innerText = result + " TON";
+                }
+            } catch (e) {}
+        }
+
+        tonConnectUI.onStatusChange(wallet => {
+            if (wallet) {
+                fetchBalance(wallet.account.address);
+                setInterval(() => fetchBalance(wallet.account.address), 30000);
+            }
         });
     </script>
-</div>
-
-<div class="trading-area">
-    <div class="main-controls">
-        <div class="order-book">
-            <div style="display:flex; justify-content:space-between; color:#848e9c; margin-bottom:4px;"><span>Цена</span><span>Кол-во</span></div>
-            <div class="ob-row red"><span>7.245</span><span>142</span></div>
-            <div class="ob-row red"><span>7.241</span><span>85</span></div>
-            <div class="ob-row red"><span>7.238</span><span>1.2K</span></div>
-            <div class="price-now green">7.235 ↑</div>
-            <div class="ob-row green"><span>7.232</span><span>410</span></div>
-            <div class="ob-row green"><span>7.229</span><span>95</span></div>
-            <div class="ob-row green"><span>7.225</span><span>2.4K</span></div>
-        </div>
-
-        <div class="trade-form">
-            <div class="btn-switch">
-                <div class="sw-btn sw-active">Купить</div>
-                <div class="sw-btn">Продать</div>
-            </div>
-            <div class="input-group">
-                <div class="lbl">Цена</div>
-                <div class="val-row"><span>7.235</span><span style="color:#848e9c">USDT</span></div>
-            </div>
-            <div class="input-group">
-                <div class="lbl">Количество</div>
-                <div class="val-row"><span>0</span><span style="color:#848e9c">TON</span></div>
-            </div>
-            <div style="display:flex; justify-content:space-between; font-size:10px; color:#848e9c; margin-top:2px;">
-                <span>Доступно:</span>
-                <span id="bal" style="color:white">0.0033 TON</span>
-            </div>
-            <button class="btn-action">Купить TON</button>
-        </div>
-    </div>
-
-    <div class="orders-section">
-        <div class="tabs-header">
-            <span class="tab-active">Открытые ордера (0)</span>
-            <span>Активы</span>
-            <span>История</span>
-        </div>
-        <div class="no-orders">
-            Войдите или подключите кошелек,<br>чтобы просмотреть ордера
-        </div>
-    </div>
-</div>
-
-<script>
-    const tonConnectUI = new TON_CONNECT_UI.TonConnectUI({
-        manifestUrl: 'https://sergey52bb.github.io/grok-autotrade/tonconnect-manifest.json',
-        buttonRootId: 'ton-connect-button'
-    });
-
-    async function getBal(addr) {
-        try {
-            const r = await fetch(`https://toncenter.com/api/v2/getAddressBalance?address=${addr}`);
-            const d = await r.json();
-            if(d.ok) document.getElementById('bal').innerText = (d.result/1e9).toFixed(4) + " TON";
-        } catch(e){}
-    }
-
-    tonConnectUI.onStatusChange(w => { if(w) { getBal(w.account.address); setInterval(() => getBal(w.account.address), 20000); }});
-</script>
 </body>
 </html>
-
