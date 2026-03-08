@@ -3,62 +3,49 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>STRATEX DEBUG</title>
+    <title>GROK AUTOTRADE</title>
     <script src="https://unpkg.com/@tonconnect/ui@latest/dist/tonconnect-ui.min.js"></script>
     <style>
         body { background: #0b0e11; color: white; font-family: sans-serif; display: flex; align-items: center; justify-content: center; height: 100vh; margin: 0; }
         .card { background: #1c2127; padding: 30px; border-radius: 20px; border: 1px solid #333; text-align: center; width: 300px; }
-        .btn-direct { background: #0098ea; color: white; border: none; padding: 18px; width: 100%; border-radius: 12px; font-weight: bold; cursor: pointer; font-size: 16px; margin-top: 15px; }
-        .info { font-size: 12px; color: #848e9c; margin-top: 10px; }
+        .btn-connect { background: #0098ea; color: white; border: none; padding: 18px; width: 100%; border-radius: 12px; font-weight: bold; cursor: pointer; font-size: 16px; transition: 0.3s; }
+        #status { margin-bottom: 20px; color: #f0b90b; font-weight: bold; }
     </style>
 </head>
 <body>
 
 <div class="card">
-    <h2 style="color:#f0b90b">STRATEX FIX</h2>
-    <div id="status">СТАТУС: ГОТОВ</div>
-    
+    <h2 style="color:#f0b90b">GROK AUTOTRADE</h2>
+    <div id="status">СИСТЕМА ГОТОВА</div>
     <div id="ton-connect-button" style="display:none"></div>
-    
-    <button class="btn-direct" onclick="startConnect()">ПОДКЛЮЧИТЬ TONKEEPER</button>
-    <div class="info">Метод: Прямой вызов модального окна</div>
+    <button class="btn-connect" id="mainButton" onclick="connect()">ПОДКЛЮЧИТЬ TONKEEPER</button>
 </div>
 
 <script>
-    // Создаем манифест прямо здесь, чтобы исключить 404
-    const manifest = {
-    url: "https://rgey52bb.github.io", // Твой точный адрес без ошибок
-    name: "STRATEX TERMINAL",
-    iconUrl: "https://ton.org/static/my_dest/apple-touch-icon.png"
-};
+    // Указываем точный путь к манифесту на твоем GitHub
+    const manifestUrl = 'https://sergey52bb.github.io/grok-autotrade/tonconnect-manifest.json';
 
-    const manifestUrl = "data:application/json;base64," + btoa(JSON.stringify(manifest));
-
-    // Инициализация
     const tonConnectUI = new TON_CONNECT_UI.TonConnectUI({
         manifestUrl: manifestUrl,
         buttonRootId: 'ton-connect-button'
     });
 
-    async function startConnect() {
-        document.getElementById('status').innerText = "ЗАПУСК...";
+    async function connect() {
         try {
-            // Прямая команда на открытие модального окна
             await tonConnectUI.openModal();
-            document.getElementById('status').innerText = "ОЖИДАНИЕ В КОШЕЛЬКЕ";
         } catch (e) {
             alert("Ошибка: " + e.message);
-            document.getElementById('status').innerText = "ОШИБКА";
         }
     }
 
     tonConnectUI.onStatusChange(wallet => {
         if (wallet) {
-            document.getElementById('status').innerText = "ПОДКЛЮЧЕНО!";
+            document.getElementById('status').innerText = "ONLINE";
             document.getElementById('status').style.color = "#0ecb81";
+            document.getElementById('mainButton').innerText = "ПОДКЛЮЧЕНО";
+            document.getElementById('mainButton').style.background = "#232a31";
         }
     });
 </script>
-
 </body>
 </html>
