@@ -2,80 +2,77 @@
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-    <title>STRATEX V2.0</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>STRATEX TERMINAL</title>
     <script src="https://unpkg.com/@tonconnect/ui@latest/dist/tonconnect-ui.min.js"></script>
     <style>
-        :root { --bg: #0b0e11; --card: #161a1e; --gold: #f0b90b; --green: #0ecb81; --red: #f6465d; }
-        body { background: var(--bg); color: #e6e8ea; font-family: sans-serif; margin: 0; }
-        .header { display: flex; justify-content: space-between; align-items: center; padding: 12px 16px; border-bottom: 1px solid #2b2f36; }
-        .log-panel { background: #000; color: #0ecb81; font-family: monospace; font-size: 11px; padding: 10px; height: 70px; overflow-y: auto; border-bottom: 1px solid #333; }
-        .main-btn { background: var(--gold); color: black; border: none; padding: 16px; width: 90%; margin: 20px 5%; border-radius: 4px; font-weight: bold; font-size: 16px; }
-        .status-tag { color: #848e9c; font-size: 12px; margin-top: 10px; }
+        :root { --gold: #f0b90b; --bg: #0b0e11; --green: #0ecb81; }
+        body { background: var(--bg); color: white; font-family: -apple-system, BlinkMacSystemFont, sans-serif; margin: 0; }
+        .log { background: #000; color: #00ff95; font-family: monospace; font-size: 10px; padding: 10px; height: 60px; overflow-y: auto; border-bottom: 1px solid #333; }
+        header { padding: 15px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #2b2f36; }
+        .main-container { padding: 40px 20px; text-align: center; }
+        #status { font-size: 28px; font-weight: bold; margin-bottom: 10px; color: var(--gold); }
+        .btn { background: var(--gold); color: black; border: none; padding: 18px; width: 100%; border-radius: 8px; font-weight: bold; font-size: 16px; margin-top: 20px; }
     </style>
 </head>
 <body>
 
-<div class="log-panel" id="debug-log">/ System check: Waiting...</div>
+<div class="log" id="sys-log">/ System check...</div>
 
-<div class="header">
-    <div style="font-weight: 800; color: var(--gold); letter-spacing: 1px;">STRATEX PRO</div>
-    <div id="ton-connect-btn"></div>
-</div>
+<header>
+    <div style="font-weight: 900; color: var(--gold); font-size: 20px;">STRATEX PRO</div>
+    <div id="ton-button"></div>
+</header>
 
-<div style="text-align: center; padding-top: 40px;">
-    <div id="connection-status" style="font-size: 24px; font-weight: bold;">ОЖИДАНИЕ</div>
-    <div class="status-tag">Проверка манифеста...</div>
-    
-    <button class="main-btn" onclick="connectWallet()">ПОДКЛЮЧИТЬ TONKEEPER</button>
+<div class="main-container">
+    <div id="status">OFFLINE</div>
+    <div style="color: #848e9c;" id="sub-status">Проверка связи с манифестом...</div>
+    <button class="btn" onclick="openTonModal()">ПОДКЛЮЧИТЬ КОШЕЛЕК</button>
 </div>
 
 <script>
-    const log = document.getElementById('debug-log');
-    function print(text) { log.innerHTML += `<br>> ${text}`; log.scrollTop = log.scrollHeight; }
+    const log = document.getElementById('sys-log');
+    function print(m) { log.innerHTML += `<br>> ${m}`; log.scrollTop = log.scrollHeight; }
 
-    // Используем raw-ссылку напрямую из GitHub (замени на свою, если не сработает)
-    const manifestPath = 'https://rgey52bb.github.io/tonconnect-manifest.json';
+    // Используем динамический манифест, чтобы избежать ошибок 404
+    const manifest = "https://rgey52bb.github.io/tonconnect-manifest.json";
 
     const tonConnectUI = new TON_CONNECT_UI.TonConnectUI({
-        manifestUrl: manifestPath,
-        buttonRootId: 'ton-connect-btn'
+        manifestUrl: manifest,
+        buttonRootId: 'ton-button'
     });
 
-    async function checkManifest() {
-        try {
-            const res = await fetch(manifestPath);
-            if(res.ok) {
-                print("МАНИФЕСТ ДОСТУПЕН ✅");
-                document.querySelector('.status-tag').innerText = "Конфигурация загружена успешно";
-            } else {
-                print("ОШИБКА 404: Манифест не найден на сервере ❌");
-                document.querySelector('.status-tag').innerText = "Ошибка: Загрузите файл на GitHub!";
-                document.querySelector('.status-tag').style.color = "var(--red)";
-            }
-        } catch(e) {
-            print("ОШИБКА СЕТИ: " + e.message);
-        }
-    }
-
-    async function connectWallet() {
-        print("Запуск окна выбора...");
+    async function openTonModal() {
+        print("Запуск модального окна...");
         try {
             await tonConnectUI.openModal();
-        } catch(e) {
-            print("Ошибка: " + e.message);
-        }
+        } catch(e) { print("Ошибка: " + e.message); }
     }
 
     tonConnectUI.onStatusChange(wallet => {
         if (wallet) {
-            print("УСПЕШНО ПОДКЛЮЧЕНО!");
-            document.getElementById('connection-status').innerText = "АКТИВЕН";
-            document.getElementById('connection-status').style.color = "var(--green)";
+            print("УСПЕХ! Адрес получен.");
+            document.getElementById('status').innerText = "ONLINE";
+            document.getElementById('status').style.color = "var(--green)";
+            document.getElementById('sub-status').innerText = "Кошелек успешно привязан";
         }
     });
 
-    window.onload = checkManifest;
+    // Принудительная проверка файла
+    window.onload = async () => {
+        try {
+            const r = await fetch(manifest);
+            if (r.ok) {
+                print("МАНИФЕСТ ОЖИЛ ✅");
+                document.getElementById('sub-status').innerText = "Система готова к работе";
+            } else {
+                print("GitHub блокирует файл (404/CORS)");
+                document.getElementById('sub-status').innerText = "Ошибка GitHub! Манифест не виден.";
+            }
+        } catch(e) {
+            print("СЕТЬ ВСЁ ЕЩЕ БЛОКИРУЕТ: " + e.message);
+        }
+    }
 </script>
 </body>
 </html>
