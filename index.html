@@ -6,44 +6,61 @@
     <title>STRATEX TERMINAL</title>
     <script src="https://unpkg.com/@tonconnect/ui@latest/dist/tonconnect-ui.min.js"></script>
     <style>
-        body { background: #0b0e11; color: white; font-family: sans-serif; text-align: center; padding: 50px 20px; }
-        .card { background: #1c2127; padding: 30px; border-radius: 15px; border: 1px solid #30363d; }
-        #status { margin: 20px 0; font-weight: bold; color: #f0b90b; }
+        body { background: #0b0e11; color: white; font-family: sans-serif; text-align: center; padding: 20px; }
+        .card { background: #1c2127; padding: 30px; border-radius: 15px; border: 1px solid #30363d; max-width: 400px; margin: auto; }
+        #status { margin: 20px 0; font-weight: bold; color: #f0b90b; font-size: 14px; }
+        .log { text-align: left; font-size: 10px; color: #6e7681; background: #000; padding: 10px; border-radius: 5px; height: 100px; overflow-y: auto; }
     </style>
 </head>
 <body>
 
 <div class="card">
-    <h2>STRATEX PRO</h2>
-    <div id="status">СТАТУС: ПРОВЕРКА САЙТА...</div>
-    <div id="ton-connect-button"></div>
+    <h2 style="color:#f0b90b">STRATEX PRO</h2>
+    <div id="status">ПРОВЕРКА СИСТЕМЫ...</div>
+    <div id="ton-connect-button" style="display: flex; justify-content: center; margin-bottom: 20px;"></div>
+    
+    <div class="log" id="logger">/ Инициализация...</div>
 </div>
 
 <script>
-    // Автоматически подставляем текущий адрес сайта для манифеста
-    const currentUrl = window.location.origin;
-    const manifestUrl = `${currentUrl}/tonconnect-manifest.json`;
+    const logger = document.getElementById('logger');
+    function log(msg) { logger.innerHTML += `<br>> ${msg}`; logger.scrollTop = logger.scrollHeight; }
+
+    // Автоматически берем адрес, где реально запущен сайт
+    const host = window.location.origin;
+    const manifestPath = `${host}/tonconnect-manifest.json`;
+
+    log(`Запуск на: ${host}`);
 
     const tonConnectUI = new TON_CONNECT_UI.TonConnectUI({
-        manifestUrl: manifestUrl,
+        manifestUrl: manifestPath,
         buttonRootId: 'ton-connect-button'
     });
 
+    // Проверка манифеста в реальном времени
+    fetch(manifestPath)
+        .then(response => {
+            if (response.ok) {
+                log("Манифест найден и доступен!");
+                document.getElementById('status').innerText = "ГОТОВ К ПОДКЛЮЧЕНИЮ";
+                document.getElementById('status').style.color = "#0ecb81";
+            } else {
+                log(`ОШИБКА 404: Файл не найден по адресу ${manifestPath}`);
+                document.getElementById('status').innerText = "ОШИБКА КОНФИГУРАЦИИ (404)";
+                document.getElementById('status').style.color = "#f6465d";
+            }
+        })
+        .catch(err => log("Ошибка сети при проверке манифеста"));
+
     tonConnectUI.onStatusChange(wallet => {
         if (wallet) {
-            document.getElementById('status').innerText = "ПОДКЛЮЧЕНО";
+            log("КОШЕЛЕК ПОДКЛЮЧЕН!");
+            document.getElementById('status').innerText = "ONLINE";
             document.getElementById('status').style.color = "#0ecb81";
-        } else {
-            document.getElementById('status').innerText = "КОШЕЛЕК НЕ ПОДКЛЮЧЕН";
         }
-    });
-
-    // Проверка доступности манифеста для отладки
-    fetch(manifestUrl).then(r => {
-        if(r.ok) console.log("Манифест доступен");
-        else document.getElementById('status').innerText = "ОШИБКА 404: МАНИФЕСТ НЕ НАЙДЕН";
     });
 </script>
 
 </body>
 </html>
+
