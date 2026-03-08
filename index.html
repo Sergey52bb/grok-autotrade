@@ -3,62 +3,58 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>STRATEX TERMINAL</title>
+    <title>STRATEX DEBUG</title>
     <script src="https://unpkg.com/@tonconnect/ui@latest/dist/tonconnect-ui.min.js"></script>
     <style>
         body { background: #0b0e11; color: white; font-family: sans-serif; display: flex; align-items: center; justify-content: center; height: 100vh; margin: 0; }
-        .card { background: #1c2127; padding: 30px; border-radius: 20px; border: 1px solid #30363d; text-align: center; width: 320px; box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
-        #status { margin: 20px 0; font-weight: bold; color: #f0b90b; text-transform: uppercase; letter-spacing: 1px; }
-        .btn-connect { background: #0098ea; color: white; border: none; padding: 18px; width: 100%; border-radius: 12px; font-weight: bold; cursor: pointer; font-size: 16px; transition: 0.3s; }
-        .btn-connect:active { transform: scale(0.98); opacity: 0.8; }
+        .card { background: #1c2127; padding: 30px; border-radius: 20px; border: 1px solid #333; text-align: center; width: 300px; }
+        .btn-direct { background: #0098ea; color: white; border: none; padding: 18px; width: 100%; border-radius: 12px; font-weight: bold; cursor: pointer; font-size: 16px; margin-top: 15px; }
+        .info { font-size: 12px; color: #848e9c; margin-top: 10px; }
     </style>
 </head>
 <body>
 
 <div class="card">
-    <h2 style="color:#f0b90b; margin-top:0;">STRATEX PRO</h2>
-    <div id="status">СИСТЕМА ГОТОВА</div>
+    <h2 style="color:#f0b90b">STRATEX FIX</h2>
+    <div id="status">СТАТУС: ГОТОВ</div>
     
     <div id="ton-connect-button" style="display:none"></div>
     
-    <button class="btn-connect" id="mainButton" onclick="connect()">ПОДКЛЮЧИТЬ КОШЕЛЕК</button>
+    <button class="btn-direct" onclick="startConnect()">ПОДКЛЮЧИТЬ TONKEEPER</button>
+    <div class="info">Метод: Прямой вызов модального окна</div>
 </div>
 
 <script>
-    // Встраиваем манифест прямо в код, чтобы не зависеть от GitHub
-    const myManifest = {
-        "url": window.location.origin,
-        "name": "STRATEX TERMINAL",
-        "iconUrl": "https://raw.githubusercontent.com/ton-blockchain/wallet-interface/main/apple-touch-icon.png"
+    // Создаем манифест прямо здесь, чтобы исключить 404
+    const manifest = {
+        url: window.location.origin,
+        name: "StratexTerminal",
+        iconUrl: "https://ton.org/static/my_dest/apple-touch-icon.png"
     };
-    
-    const manifestDataUrl = "data:application/json;base64," + btoa(JSON.stringify(myManifest));
+    const manifestUrl = "data:application/json;base64," + btoa(JSON.stringify(manifest));
 
+    // Инициализация
     const tonConnectUI = new TON_CONNECT_UI.TonConnectUI({
-        manifestUrl: manifestDataUrl,
+        manifestUrl: manifestUrl,
         buttonRootId: 'ton-connect-button'
     });
 
-    async function connect() {
+    async function startConnect() {
+        document.getElementById('status').innerText = "ЗАПУСК...";
         try {
-            // Принудительно открываем окно выбора кошелька
+            // Прямая команда на открытие модального окна
             await tonConnectUI.openModal();
+            document.getElementById('status').innerText = "ОЖИДАНИЕ В КОШЕЛЬКЕ";
         } catch (e) {
-            alert("Ошибка запуска: " + e.message);
+            alert("Ошибка: " + e.message);
+            document.getElementById('status').innerText = "ОШИБКА";
         }
     }
 
     tonConnectUI.onStatusChange(wallet => {
-        const status = document.getElementById('status');
-        const btn = document.getElementById('mainButton');
         if (wallet) {
-            status.innerText = "ONLINE";
-            status.style.color = "#0ecb81";
-            btn.innerText = "УСПЕШНО";
-            btn.style.background = "#232a31";
-            btn.disabled = true;
-            // Сохраняем адрес для логов
-            console.log("Connected to:", wallet.account.address);
+            document.getElementById('status').innerText = "ПОДКЛЮЧЕНО!";
+            document.getElementById('status').style.color = "#0ecb81";
         }
     });
 </script>
