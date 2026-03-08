@@ -2,78 +2,106 @@
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>STRATEX V2.1 | Ultra Fix</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>STRATEX V2.0</title>
     <script src="https://unpkg.com/@tonconnect/ui@2.0.9/dist/tonconnect-ui.min.js"></script>
     <style>
-        :root { --gold: #f0b90b; --bg: #0b0e11; --green: #0ecb81; }
-        body { background: var(--bg); color: white; font-family: sans-serif; margin: 0; display: flex; flex-direction: column; height: 100vh; }
-        .log { background: #000; color: #00ff95; font-family: monospace; font-size: 10px; padding: 10px; height: 80px; overflow-y: auto; border-bottom: 1px solid #333; }
-        header { padding: 15px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #2b2f36; }
-        .main { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 20px; text-align: center; }
-        .btn-main { background: var(--gold); color: black; border: none; padding: 18px; width: 100%; max-width: 300px; border-radius: 8px; font-weight: bold; font-size: 16px; margin-top: 20px; box-shadow: 0 4px 15px rgba(240, 185, 11, 0.2); }
-        #status-box { font-size: 20px; margin-bottom: 10px; font-weight: bold; }
+        :root { --bg: #0b0e11; --card: #171a1e; --gold: #f0b90b; --green: #0ecb81; --red: #f6465d; }
+        body { background: var(--bg); color: #e6e8ea; font-family: 'Roboto', sans-serif; margin: 0; }
+        header { display: flex; justify-content: space-between; align-items: center; padding: 12px 16px; border-bottom: 1px solid #2b3139; }
+        .logo { color: var(--gold); font-weight: 800; font-size: 18px; }
+        
+        .market-info { display: grid; grid-template-columns: 1fr 140px; gap: 1px; background: #2b3139; }
+        .chart-placeholder { background: var(--bg); height: 250px; display: flex; align-items: center; justify-content: center; color: #474d57; }
+        .order-book { background: var(--bg); font-size: 11px; padding: 8px; }
+        
+        .trade-container { padding: 20px; background: var(--card); }
+        .input-box { background: #2b3139; border-radius: 4px; padding: 12px; margin: 10px 0; display: flex; justify-content: space-between; }
+        .input-box input { background: transparent; border: none; color: white; width: 70%; outline: none; font-size: 16px; }
+        
+        .buy-btn { background: var(--green); color: white; border: none; width: 100%; padding: 16px; border-radius: 4px; font-weight: bold; font-size: 16px; margin-top: 10px; cursor: pointer; }
+        
+        nav { position: fixed; bottom: 0; width: 100%; display: flex; justify-content: space-around; background: var(--card); padding: 10px 0; border-top: 1px solid #2b3139; }
+        .nav-item { text-align: center; font-size: 10px; color: #848e9c; }
+        .nav-item.active { color: var(--gold); }
     </style>
 </head>
 <body>
 
-<div class="log" id="sys-log">/ System Recovery: Protocol 2.1...</div>
-
 <header>
-    <div style="font-weight: 900; color: var(--gold); font-size: 22px;">STRATEX</div>
+    <div class="logo">STRATEX <span style="font-size: 12px; font-weight: 400; color: #848e9c;">V2.0</span></div>
     <div id="ton-connect-button"></div>
 </header>
 
-<div class="main">
-    <div id="status-box">СТАТУС: <span style="color: #ff465d;">OFFLINE</span></div>
-    <div style="color: #848e9c; font-size: 14px;">Манифест внедрен напрямую (No Fetch Mode)</div>
-    
-    <button class="btn-main" onclick="connect()">ПОДКЛЮЧИТЬ КОШЕЛЕК</button>
+<div class="market-info">
+    <div class="chart-placeholder">
+        <iframe src="https://s.tradingview.com/widgetembed/?symbol=OKX%3ATONUSDT&interval=5&theme=dark" style="width:100%; height:100%; border:none;"></iframe>
+    </div>
+    <div class="order-book" id="ob">
+        </div>
 </div>
 
-<script>
-    const logEl = document.getElementById('sys-log');
-    function print(m) { logEl.innerHTML += `<br>> ${m}`; logEl.scrollTop = logEl.scrollHeight; }
-
-    // СОЗДАЕМ МАНИФЕСТ НА ЛЕТУ (Base64)
-    // Это обходит ошибку "Failed to fetch", так как файл не качается из сети
-    const manifestJson = {
-        "url": "https://rgey52bb.github.io",
-        "name": "STRATEX PRO",
-        "iconUrl": "https://rgey52bb.github.io/icon.png"
-    };
-    const manifestDataUrl = "data:application/json;base64," + btoa(JSON.stringify(manifestJson));
-
-    print("Инициализация Ultra-Fix...");
+<div class="trade-container">
+    <div style="display: flex; gap: 20px; margin-bottom: 10px;">
+        <span style="color: var(--green); border-bottom: 2px solid var(--green); padding-bottom: 5px;">Купить</span>
+        <span style="color: #848e9c;">Продать</span>
+    </div>
     
+    <div class="input-box">
+        <input type="number" value="25" id="amount">
+        <span style="color: #848e9c;">TON</span>
+    </div>
+    
+    <div style="font-size: 12px; color: #848e9c; display: flex; justify-content: space-between; margin: 10px 0;">
+        <span>Комиссия STRATEX</span>
+        <span>0.35%</span>
+    </div>
+
+    <button class="buy-btn" id="main-action" onclick="handleAction()">ПОДКЛЮЧИТЬ КОШЕЛЕК</button>
+</div>
+
+<nav>
+    <div class="nav-item active">📊<br>Рынок</div>
+    <div class="nav-item">🤖<br>Автобот</div>
+    <div class="nav-item">🏛️<br>Ресурсы</div>
+    <div class="nav-item">⚙️<br>Настройки</div>
+</nav>
+
+<script>
     const tonConnectUI = new TON_CONNECT_UI.TonConnectUI({
-        manifestUrl: manifestDataUrl,
+        manifestUrl: 'https://rgey52bb.github.io/tonconnect-manifest.json',
         buttonRootId: 'ton-connect-button'
     });
 
-    async function connect() {
-        print("Запуск окна подключения...");
-        try {
-            await tonConnectUI.openModal();
-            print("Окно открыто. Выберите кошелек.");
-        } catch (e) {
-            print("ОШИБКА: " + e.message);
-        }
-    }
-
     tonConnectUI.onStatusChange(wallet => {
+        const btn = document.getElementById('main-action');
         if (wallet) {
-            print("СОЕДИНЕНИЕ УСТАНОВЛЕНО!");
-            document.getElementById('status-box').innerHTML = 'СТАТУС: <span style="color: #0ecb81;">ONLINE</span>';
-            document.getElementById('status-box').style.color = "#0ecb81";
+            btn.innerText = "КУПИТЬ TON";
+            btn.style.background = "var(--green)";
         } else {
-            print("Кошелек не подключен.");
+            btn.innerText = "ПОДКЛЮЧИТЬ КОШЕЛЕК";
+            btn.style.background = "#474d57";
         }
     });
 
-    window.onload = () => {
-        print("Система готова. Сетевые блокировки обнулены.");
-    };
+    async function handleAction() {
+        if (!tonConnectUI.connected) {
+            await tonConnectUI.openModal();
+        } else {
+            alert("Ордер отправлен в обработку Гроку...");
+        }
+    }
+
+    // Простая имитация стакана
+    function updateOB() {
+        const ob = document.getElementById('ob');
+        let h = '<div style="color:#848e9c;margin-bottom:4px">Order Book</div>';
+        for(let i=0; i<5; i++) h += `<div style="display:flex;justify-content:space-between;color:var(--red)"><span>${(5.35+Math.random()*0.01).toFixed(3)}</span><span>${(Math.random()*100).toFixed(1)}</span></div>`;
+        h += `<div style="text-align:center;margin:4px 0;font-weight:bold;color:var(--green)">5.3502 ↑</div>`;
+        for(let i=0; i<5; i++) h += `<div style="display:flex;justify-content:space-between;color:var(--green)"><span>${(5.34+Math.random()*0.01).toFixed(3)}</span><span>${(Math.random()*100).toFixed(1)}</span></div>`;
+        ob.innerHTML = h;
+    }
+    setInterval(updateOB, 2500); updateOB();
 </script>
 
 </body>
