@@ -3,57 +3,45 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>STRATEX | Direct Connect</title>
+    <title>STRATEX TERMINAL</title>
     <script src="https://unpkg.com/@tonconnect/ui@latest/dist/tonconnect-ui.min.js"></script>
     <style>
-        body { background: #0b0e11; color: white; font-family: sans-serif; display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100vh; margin: 0; }
-        .terminal { background: #1c2127; padding: 25px; border-radius: 15px; border: 1px solid #30363d; width: 320px; text-align: center; }
-        .status-tag { font-size: 12px; padding: 4px 8px; border-radius: 4px; background: #232a31; color: #848e9c; margin-bottom: 20px; display: inline-block; }
-        .btn-ton { background: #0098ea; color: white; border: none; padding: 18px; width: 100%; border-radius: 10px; font-weight: bold; cursor: pointer; font-size: 16px; }
-        #log { margin-top: 15px; font-size: 10px; color: #6e7681; text-align: left; max-height: 60px; overflow: hidden; }
+        body { background: #0b0e11; color: white; font-family: sans-serif; text-align: center; padding: 50px 20px; }
+        .card { background: #1c2127; padding: 30px; border-radius: 15px; border: 1px solid #30363d; }
+        #status { margin: 20px 0; font-weight: bold; color: #f0b90b; }
     </style>
 </head>
 <body>
 
-<div class="terminal">
-    <div style="color:#f0b90b; font-weight:bold; margin-bottom:10px;">STRATEX TERMINAL</div>
-    <div id="state" class="status-tag">ОЖИДАНИЕ ПОДКЛЮЧЕНИЯ</div>
-    
-    <div id="ton-connect-button" style="margin-bottom: 15px;"></div>
-    
-    <button class="btn-ton" onclick="forceConnect()">ОТКРЫТЬ TONKEEPER</button>
-    
-    <div id="log">Система готова...</div>
+<div class="card">
+    <h2>STRATEX PRO</h2>
+    <div id="status">СТАТУС: ПРОВЕРКА САЙТА...</div>
+    <div id="ton-connect-button"></div>
 </div>
 
 <script>
-    const log = (m) => document.getElementById('log').innerText = m;
-    
-    // Используем случайную версию манифеста, чтобы обойти кэш GitHub
-    const manifest = "https://rgey52bb.github.io/tonconnect-manifest.json?v=" + Math.random();
+    // Автоматически подставляем текущий адрес сайта для манифеста
+    const currentUrl = window.location.origin;
+    const manifestUrl = `${currentUrl}/tonconnect-manifest.json`;
 
     const tonConnectUI = new TON_CONNECT_UI.TonConnectUI({
-        manifestUrl: manifest,
+        manifestUrl: manifestUrl,
         buttonRootId: 'ton-connect-button'
     });
 
-    async function forceConnect() {
-        log("Попытка прямого вызова...");
-        try {
-            // Если модалка не помогает, пробуем принудительно открыть через провайдера
-            await tonConnectUI.openModal();
-        } catch (e) {
-            log("Ошибка: " + e.message);
-        }
-    }
-
     tonConnectUI.onStatusChange(wallet => {
         if (wallet) {
-            document.getElementById('state').innerText = "ONLINE";
-            document.getElementById('state').style.background = "#0ecb81";
-            document.getElementById('state').style.color = "white";
-            log("Кошелек успешно привязан!");
+            document.getElementById('status').innerText = "ПОДКЛЮЧЕНО";
+            document.getElementById('status').style.color = "#0ecb81";
+        } else {
+            document.getElementById('status').innerText = "КОШЕЛЕК НЕ ПОДКЛЮЧЕН";
         }
+    });
+
+    // Проверка доступности манифеста для отладки
+    fetch(manifestUrl).then(r => {
+        if(r.ok) console.log("Манифест доступен");
+        else document.getElementById('status').innerText = "ОШИБКА 404: МАНИФЕСТ НЕ НАЙДЕН";
     });
 </script>
 
