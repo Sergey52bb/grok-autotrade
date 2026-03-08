@@ -2,77 +2,140 @@
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>STRATEX TERMINAL</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>STRATEX V2.0 | Terminal</title>
     <script src="https://unpkg.com/@tonconnect/ui@latest/dist/tonconnect-ui.min.js"></script>
     <style>
-        :root { --gold: #f0b90b; --bg: #0b0e11; --green: #0ecb81; }
-        body { background: var(--bg); color: white; font-family: -apple-system, BlinkMacSystemFont, sans-serif; margin: 0; }
-        .log { background: #000; color: #00ff95; font-family: monospace; font-size: 10px; padding: 10px; height: 60px; overflow-y: auto; border-bottom: 1px solid #333; }
-        header { padding: 15px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #2b2f36; }
-        .main-container { padding: 40px 20px; text-align: center; }
-        #status { font-size: 28px; font-weight: bold; margin-bottom: 10px; color: var(--gold); }
-        .btn { background: var(--gold); color: black; border: none; padding: 18px; width: 100%; border-radius: 8px; font-weight: bold; font-size: 16px; margin-top: 20px; }
+        :root { --bg: #0b0e11; --card: #161a1e; --gold: #f0b90b; --green: #0ecb81; --red: #f6465d; --text: #e6e8ea; }
+        body { background: var(--bg); color: var(--text); font-family: 'Roboto', sans-serif; margin: 0; overflow-x: hidden; }
+        
+        /* Header */
+        header { display: flex; justify-content: space-between; align-items: center; padding: 10px 15px; background: var(--bg); border-bottom: 1px solid #2b2f36; position: sticky; top: 0; z-index: 100; }
+        .logo { font-weight: 800; color: var(--gold); font-size: 18px; letter-spacing: 1px; }
+
+        /* Trading Layout */
+        .grid-container { display: grid; grid-template-columns: 1fr 150px; gap: 1px; background: #2b2f36; }
+        .chart-section { background: var(--bg); height: 300px; position: relative; }
+        .order-book { background: var(--bg); font-size: 11px; padding: 5px; border-left: 1px solid #2b2f36; }
+        
+        /* Order Book Rows */
+        .ob-row { display: flex; justify-content: space-between; margin-bottom: 2px; position: relative; }
+        .ask { color: var(--red); }
+        .bid { color: var(--green); }
+        .bar-red { position: absolute; right: 0; height: 100%; background: rgba(246, 70, 93, 0.1); z-index: 0; }
+        .bar-green { position: absolute; right: 0; height: 100%; background: rgba(14, 203, 129, 0.1); z-index: 0; }
+
+        /* Trade Panel */
+        .trade-panel { padding: 15px; background: var(--card); }
+        .input-group { background: #2b2f36; border-radius: 4px; padding: 10px; margin-bottom: 15px; display: flex; justify-content: space-between; }
+        .input-group input { background: transparent; border: none; color: white; width: 60%; font-size: 16px; outline: none; }
+        
+        .btn-buy { background: var(--green); color: white; border: none; width: 100%; padding: 15px; border-radius: 4px; font-weight: bold; font-size: 16px; cursor: pointer; }
+        
+        /* Bottom Nav */
+        nav { position: fixed; bottom: 0; width: 100%; display: flex; justify-content: space-around; background: var(--card); border-top: 1px solid #2b2f36; padding: 10px 0; }
+        .nav-item { text-align: center; font-size: 10px; color: #848e9c; cursor: pointer; }
+        .nav-item.active { color: var(--gold); }
+
+        #debug-console { display: none; background: #000; color: #0f0; font-family: monospace; font-size: 10px; padding: 10px; position: fixed; top: 50px; width: 100%; z-index: 99; }
     </style>
 </head>
 <body>
 
-<div class="log" id="sys-log">/ System check...</div>
+<div id="debug-console"></div>
 
 <header>
-    <div style="font-weight: 900; color: var(--gold); font-size: 20px;">STRATEX PRO</div>
-    <div id="ton-button"></div>
+    <div class="logo" onclick="toggleDebug()">STRATEX <span style="font-size: 10px; background: var(--gold); color: black; padding: 2px 4px; border-radius: 3px;">V2.0</span></div>
+    <div id="ton-connect-button"></div>
 </header>
 
-<div class="main-container">
-    <div id="status">OFFLINE</div>
-    <div style="color: #848e9c;" id="sub-status">Проверка связи с манифестом...</div>
-    <button class="btn" onclick="openTonModal()">ПОДКЛЮЧИТЬ КОШЕЛЕК</button>
+<div class="grid-container">
+    <div class="chart-section">
+        <iframe src="https://s.tradingview.com/widgetembed/?frameElementId=tradingview_762f2&symbol=OKX%3ATONUSDT&interval=5&hidesidetoolbar=1&saveimage=0&toolbarbg=f1f3f6&studies=%5B%5D&theme=dark&style=1&timezone=Etc%2FUTC" 
+                style="width: 100%; height: 100%; border: none;"></iframe>
+    </div>
+    <div class="order-book" id="order-book">
+        </div>
 </div>
 
+<div class="trade-panel">
+    <div style="display: flex; gap: 10px; margin-bottom: 15px;">
+        <div style="flex: 1; text-align: center; padding: 8px; border-bottom: 2px solid var(--green);">Купить</div>
+        <div style="flex: 1; text-align: center; padding: 8px; color: #848e9c;">Продать</div>
+    </div>
+    
+    <div class="input-group">
+        <input type="number" id="amount" placeholder="0.00" value="25">
+        <span style="color: #848e9c;">TON</span>
+    </div>
+    
+    <div style="font-size: 12px; color: #848e9c; margin-bottom: 15px; display: flex; justify-content: space-between;">
+        <span>Комиссия STRATEX</span>
+        <span style="color: var(--gold);">0.35%</span>
+    </div>
+
+    <button class="btn-buy" id="action-btn" onclick="handleTrade()">ПОДКЛЮЧИТЕ КОШЕЛЕК</button>
+</div>
+
+<nav>
+    <div class="nav-item active">📊<br>Рынок</div>
+    <div class="nav-item">🤖<br>Автобот</div>
+    <div class="nav-item">🏛️<br>Ресурсы</div>
+    <div class="nav-item">⚙️<br>Настройки</div>
+</nav>
+
 <script>
-    const log = document.getElementById('sys-log');
-    function print(m) { log.innerHTML += `<br>> ${m}`; log.scrollTop = log.scrollHeight; }
+    const log = document.getElementById('debug-console');
+    function print(m) { log.innerHTML += `<br>> ${m}`; console.log(m); }
+    function toggleDebug() { log.style.display = log.style.display === 'block' ? 'none' : 'block'; }
 
-    // Используем динамический манифест, чтобы избежать ошибок 404
-    const manifest = "https://rgey52bb.github.io/tonconnect-manifest.json";
-
+    // Инициализация TON Connect
     const tonConnectUI = new TON_CONNECT_UI.TonConnectUI({
-        manifestUrl: manifest,
-        buttonRootId: 'ton-button'
+        manifestUrl: 'https://rgey52bb.github.io/tonconnect-manifest.json',
+        buttonRootId: 'ton-connect-button'
     });
 
-    async function openTonModal() {
-        print("Запуск модального окна...");
-        try {
-            await tonConnectUI.openModal();
-        } catch(e) { print("Ошибка: " + e.message); }
-    }
-
+    // Мониторинг статуса
     tonConnectUI.onStatusChange(wallet => {
+        const btn = document.getElementById('action-btn');
         if (wallet) {
-            print("УСПЕХ! Адрес получен.");
-            document.getElementById('status').innerText = "ONLINE";
-            document.getElementById('status').style.color = "var(--green)";
-            document.getElementById('sub-status').innerText = "Кошелек успешно привязан";
+            print("Кошелек подключен: " + wallet.account.address);
+            btn.innerText = "КУПИТЬ TON";
+            btn.style.background = "var(--green)";
+        } else {
+            btn.innerText = "ПОДКЛЮЧИТЕ КОШЕЛЕК";
+            btn.style.background = "#2b2f36";
         }
     });
 
-    // Принудительная проверка файла
-    window.onload = async () => {
-        try {
-            const r = await fetch(manifest);
-            if (r.ok) {
-                print("МАНИФЕСТ ОЖИЛ ✅");
-                document.getElementById('sub-status').innerText = "Система готова к работе";
-            } else {
-                print("GitHub блокирует файл (404/CORS)");
-                document.getElementById('sub-status').innerText = "Ошибка GitHub! Манифест не виден.";
-            }
-        } catch(e) {
-            print("СЕТЬ ВСЁ ЕЩЕ БЛОКИРУЕТ: " + e.message);
+    async function handleTrade() {
+        if (!tonConnectUI.connected) {
+            await tonConnectUI.openModal();
+        } else {
+            alert("Стратегия Грока анализирует рынок... Ожидайте сигнала.");
         }
     }
+
+    // Генерация стакана (имитация для визуала)
+    function genOB() {
+        const ob = document.getElementById('order-book');
+        let html = '<div style="color:#848e9c; margin-bottom:5px">Order Book</div>';
+        for(let i=0; i<8; i++) {
+            let p = (5.350 + Math.random()*0.01).toFixed(3);
+            let v = (Math.random()*50).toFixed(1);
+            html += `<div class="ob-row ask"><span>${p}</span><span>${v}</span><div class="bar-red" style="width:${v}%"></div></div>`;
+        }
+        html += `<div style="text-align:center; font-size:14px; margin:5px 0; color:var(--green)">5.3502 ↑</div>`;
+        for(let i=0; i<8; i++) {
+            let p = (5.340 + Math.random()*0.01).toFixed(3);
+            let v = (Math.random()*50).toFixed(1);
+            html += `<div class="ob-row bid"><span>${p}</span><span>${v}</span><div class="bar-green" style="width:${v}%"></div></div>`;
+        }
+        ob.innerHTML = html;
+    }
+    setInterval(genOB, 2000);
+    genOB();
 </script>
+
 </body>
 </html>
