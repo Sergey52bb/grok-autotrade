@@ -3,65 +3,117 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>GROK TERMINAL</title>
+    <title>STRATEX TERMINAL</title>
     <script src="https://unpkg.com/@tonconnect/ui@latest/dist/tonconnect-ui.min.js"></script>
     <style>
-        body { background: #0b0e11; color: white; font-family: 'Segoe UI', sans-serif; display: flex; align-items: center; justify-content: center; height: 100vh; margin: 0; }
-        .card { background: #1c2127; padding: 30px; border-radius: 20px; border: 1px solid #333; text-align: center; width: 320px; box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
-        .brand { color: #f0b90b; font-size: 24px; font-weight: bold; margin-bottom: 5px; }
-        .status-box { background: #2b3139; padding: 15px; border-radius: 12px; margin: 20px 0; border: 1px solid #444; }
-        #balance { font-size: 22px; color: #0ecb81; font-weight: bold; margin: 10px 0; }
-        .address { font-size: 10px; color: #848e9c; word-break: break-all; }
-        #ton-connect-button { display: flex; justify-content: center; }
+        body { background: #0b0e11; color: white; font-family: 'Segoe UI', sans-serif; margin: 0; padding: 0; display: flex; flex-direction: column; height: 100vh; }
+        
+        /* Шапка */
+        .header { background: #1c2127; padding: 15px; border-bottom: 1px solid #333; display: flex; justify-content: space-between; align-items: center; }
+        .brand { color: #f0b90b; font-size: 20px; font-weight: bold; }
+        #status { font-size: 12px; font-weight: bold; }
+
+        /* Зона графика */
+        .chart-container { flex: 1; min-height: 300px; position: relative; border-bottom: 1px solid #333; }
+        
+        /* Торговая панель (Снизу) */
+        .trade-panel { background: #1c2127; padding: 20px; border-top: 1px solid #333; }
+        .balance-row { display: flex; justify-content: space-between; color: #848e9c; font-size: 14px; margin-bottom: 15px; }
+        .order-form { display: flex; gap: 10px; margin-bottom: 15px; }
+        .input-group { flex: 1; background: #2b3139; border-radius: 8px; padding: 10px; border: 1px solid #444; }
+        .input-label { font-size: 10px; color: #848e9c; margin-bottom: 5px; }
+        .input-value { font-size: 18px; color: white; font-weight: bold; }
+        .actions { display: flex; gap: 15px; }
+        .btn { flex: 1; padding: 15px; border-radius: 12px; font-weight: bold; font-size: 16px; border: none; cursor: pointer; transition: 0.3s; text-align: center;}
+        .btn-buy { background: #0ecb81; color: white; }
+        .btn-sell { background: #f6465d; color: white; }
+        .btn:hover { opacity: 0.8; }
     </style>
 </head>
 <body>
 
-<div class="card">
-    <div class="brand">GROK AUTOTRADE</div>
-    <div id="ton-connect-button"></div>
-    
-    <div class="status-box" id="infoBox" style="display:none;">
-        <div style="font-size: 12px; color: #848e9c;">ВАШ БАЛАНС:</div>
-        <div id="balance">Загрузка...</div>
-        <div class="address" id="userAddress"></div>
+    <div class="header">
+        <div class="brand">STRATEX TERMINAL</div>
+        <div id="ton-connect-button"></div>
+        <div id="status" style="display:none; color: #0ecb81;">ONLINE</div>
     </div>
-</div>
 
-<script>
-    const tonConnectUI = new TON_CONNECT_UI.TonConnectUI({
-        manifestUrl: 'https://sergey52bb.github.io/grok-autotrade/tonconnect-manifest.json',
-        buttonRootId: 'ton-connect-button'
-    });
+    <div class="chart-container">
+        <div class="tradingview-widget-container" style="height:100%;width:100%">
+            <div id="tradingview_chart" style="height:100%;width:100%"></div>
+            <script type="text/javascript" src="https://s3.tradingview.com/tv.js"></script>
+            <script type="text/javascript">
+            new TradingView.widget({
+              "autosize": true,
+              "symbol": "OKX:TONUSDT",
+              "interval": "D",
+              "timezone": "Etc/UTC",
+              "theme": "dark",
+              "style": "1",
+              "locale": "ru",
+              "toolbar_bg": "#f1f3f6",
+              "enable_publishing": false,
+              "hide_top_toolbar": true,
+              "save_image": false,
+              "container_id": "tradingview_chart"
+            });
+            </script>
+        </div>
+    </div>
 
-    // Функция получения баланса через публичное API
-    async function fetchBalance(address) {
-        try {
-            const response = await fetch(`https://toncenter.com/api/v2/getAddressBalance?address=${address}`);
-            const data = await response.json();
-            if (data.ok) {
-                // Переводим из нанотонов в TON
-                const result = (parseFloat(data.result) / 1000000000).toFixed(4);
-                document.getElementById('balance').innerText = result + " TON";
+    <div class="trade-panel" id="tradePanel" style="display:none;">
+        <div class="balance-row">
+            <span>ДОСТУПНО:</span>
+            <span id="balance" style="color:white; font-weight:bold;">0.0033 TON</span>
+        </div>
+        
+        <div class="order-form">
+            <div class="input-group">
+                <div class="input-label">ЦЕНА (USDT)</div>
+                <div class="input-value">~7.20</div>
+            </div>
+            <div class="input-group">
+                <div class="input-label">КОЛИЧЕСТВО (TON)</div>
+                <div class="input-value">0.00</div>
+            </div>
+        </div>
+
+        <div class="actions">
+            <button class="btn btn-buy">КУПИТЬ TON</button>
+            <button class="btn btn-sell">ПРОДАТЬ TON</button>
+        </div>
+    </div>
+
+    <script>
+        const tonConnectUI = new TON_CONNECT_UI.TonConnectUI({
+            manifestUrl: 'https://sergey52bb.github.io/grok-autotrade/tonconnect-manifest.json',
+            buttonRootId: 'ton-connect-button'
+        });
+
+        async function fetchBalance(address) {
+            try {
+                const response = await fetch(`https://toncenter.com/api/v2/getAddressBalance?address=${address}`);
+                const data = await response.json();
+                if (data.ok) {
+                    const result = (parseFloat(data.result) / 1000000000).toFixed(4);
+                    document.getElementById('balance').innerText = result + " TON";
+                }
+            } catch (e) {
+                console.error(e);
             }
-        } catch (e) {
-            document.getElementById('balance').innerText = "Ошибка сети";
         }
-    }
 
-    tonConnectUI.onStatusChange(wallet => {
-        const infoBox = document.getElementById('infoBox');
-        if (wallet) {
-            infoBox.style.display = 'block';
-            document.getElementById('userAddress').innerText = wallet.account.address;
-            fetchBalance(wallet.account.address);
-            
-            // Обновляем баланс каждые 30 секунд
-            setInterval(() => fetchBalance(wallet.account.address), 30000);
-        } else {
-            infoBox.style.display = 'none';
-        }
-    });
-</script>
+        tonConnectUI.onStatusChange(wallet => {
+            if (wallet) {
+                document.getElementById('status').style.display = 'block';
+                document.getElementById('tradePanel').style.display = 'block';
+                fetchBalance(wallet.account.address);
+                setInterval(() => fetchBalance(wallet.account.address), 30000);
+            } else {
+                document.getElementById('status').style.display = 'none';
+                document.getElementById('tradePanel').style.display = 'none';
+            }
+        });
+    </script>
 </body>
 </html>
