@@ -1,9 +1,9 @@
-<!DOCTYPE html>
+    <!DOCTYPE html>
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>STRATEX V2.6 PRO</title>
+    <title>STRATEX V2.7 SMART</title>
     <script src="https://unpkg.com/@tonconnect/ui@latest/dist/tonconnect-ui.min.js"></script>
     <style>
         :root { --bg: #0b0e11; --panel: #1c2127; --input: #2b3139; --green: #0ecb81; --red: #f6465d; --gold: #f0b90b; --text: #848e9c; }
@@ -24,11 +24,11 @@
         .input-group { background: var(--input); border-radius: 6px; padding: 10px 12px; margin-bottom: 10px; display: flex; justify-content: space-between; align-items: center; }
         .btn-main { width: 100%; background: var(--green); color: white; border: none; padding: 14px; border-radius: 8px; font-weight: bold; font-size: 16px; margin-top: 5px; cursor: pointer; }
 
-        /* Стили для логов бота */
-        .bot-log-container { background: var(--input); border-radius: 8px; padding: 10px; margin-top: 15px; max-height: 200px; overflow-y: auto; font-size: 11px; border: 1px solid #444; }
-        .log-entry { display: flex; justify-content: space-between; padding: 5px 0; border-bottom: 1px solid #333; }
-        .log-buy { color: var(--green); }
-        .log-sell { color: var(--red); }
+        .bot-log-container { background: var(--input); border-radius: 8px; padding: 10px; margin-top: 15px; max-height: 220px; overflow-y: auto; font-size: 11px; border: 1px solid #444; }
+        .log-entry { display: flex; justify-content: space-between; padding: 6px 0; border-bottom: 1px solid #333; animation: fadeIn 0.3s; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(-5px); } to { opacity: 1; transform: translateY(0); } }
+        .log-buy { color: var(--green); font-weight: bold; }
+        .log-sell { color: var(--red); font-weight: bold; }
 
         .nav-bar { position: fixed; bottom: 0; width: 100%; display: flex; background: var(--panel); padding: 10px 0; border-top: 1px solid #333; z-index: 100; }
         .nav-item { flex: 1; text-align: center; font-size: 10px; color: var(--text); cursor: pointer; }
@@ -44,15 +44,13 @@
 <div id="toast-container"></div>
 
 <div class="header">
-    <div class="brand">STRATEX <span style="font-size: 10px; background: var(--gold); color: black; padding: 2px 4px; border-radius: 3px; margin-left: 5px;">V2.6</span></div>
+    <div class="brand">STRATEX <span style="font-size: 10px; background: var(--gold); color: black; padding: 2px 4px; border-radius: 3px; margin-left: 5px;">V2.7</span></div>
     <div id="ton-connect-button"></div>
 </div>
 
 <div id="market-top" class="trading-grid">
     <div id="tv_widget" style="height:100%;"></div>
-    <div class="order-book-side" id="order-book">
-        <div class="ob-header"><span>Цена</span><span>Кол-во</span></div>
-    </div>
+    <div class="order-book-side" id="order-book"></div>
 </div>
 
 <div id="page-market" class="page-content active">
@@ -62,25 +60,24 @@
 </div>
 
 <div id="page-bot" class="page-content">
-    <h3 style="color:var(--gold)">🤖 GROK Auto-Trade</h3>
-    <div class="input-group"><span>Стратегия</span><span style="color:var(--green)">Консервативная</span></div>
+    <h3 style="color:var(--gold)">🤖 GROK Smart-Trade</h3>
+    <div class="input-group"><span>Стратегия</span><span style="color:var(--green)">Scalping PRO</span></div>
     <button class="btn-main" id="start-bot-btn" style="background: var(--gold); color: black;" onclick="toggleBot()">Запустить Грока</button>
     
     <div class="bot-log-container" id="bot-logs">
-        <div style="color:var(--text); text-align:center; padding: 10px;">Логи сигналов пусты...</div>
+        <div style="color:var(--text); text-align:center; padding: 10px;">Ожидание запуска алгоритма...</div>
     </div>
 </div>
 
 <div id="page-assets" class="page-content">
     <h3>🏦 Ваши активы</h3>
     <div class="input-group"><span>Toncoin</span><span id="asset-ton" style="color:var(--gold)">0.00 TON</span></div>
-    <div class="input-group"><span>Статус</span><span id="wallet-status">Не подключен</span></div>
 </div>
 
 <div id="page-settings" class="page-content">
     <h3>⚙️ Настройки</h3>
-    <div class="input-group"><span>Версия</span><span>2.6.0 PRO</span></div>
-    <div class="input-group" onclick="location.reload()"><span>Обновить приложение</span><span>🔄</span></div>
+    <div class="input-group" onclick="location.reload()"><span>Перезагрузить</span><span>🔄</span></div>
+    <p style="font-size: 10px; color: var(--text); text-align: center;">STRATEX Terminal v2.7.0</p>
 </div>
 
 <div class="nav-bar">
@@ -100,8 +97,7 @@
     function showToast(text) {
         const container = document.getElementById('toast-container');
         const t = document.createElement('div');
-        t.className = 'toast';
-        t.innerText = text;
+        t.className = 'toast'; t.innerText = text;
         container.appendChild(t);
         setTimeout(() => t.style.opacity = '1', 10);
         setTimeout(() => { t.style.opacity = '0'; setTimeout(() => t.remove(), 500); }, 3000);
@@ -109,6 +105,8 @@
 
     let currentPrice = 7.235;
     let botInterval = null;
+    let lastAction = 'SELL'; // Начинаем с ожидания покупки
+    let entryPrice = 0;
 
     async function fetchPrice() {
         try {
@@ -145,30 +143,40 @@
         document.getElementById('market-top').style.display = (pageId === 'market' ? 'grid' : 'none');
     }
 
-    // --- ЛОГИКА БОТА ---
+    // --- УМНАЯ ЛОГИКА БОТА ---
     function toggleBot() {
         const btn = document.getElementById('start-bot-btn');
         const logs = document.getElementById('bot-logs');
         
         if(btn.innerText === "Запустить Грока") {
             btn.innerText = "Остановить"; btn.style.background = "var(--red)";
-            showToast("Грок запущен!");
-            logs.innerHTML = '<div style="color:var(--gold); font-size:10px; margin-bottom:5px;">[Система] Анализ рынка запущен...</div>';
+            showToast("Алгоритм Scalping PRO запущен");
+            logs.innerHTML = '<div style="color:var(--gold); font-size:10px; margin-bottom:5px;">[Система] Поиск точки входа...</div>';
             
-            // Симуляция сделок
             botInterval = setInterval(() => {
-                const isBuy = Math.random() > 0.5;
                 const time = new Date().toLocaleTimeString();
-                const price = (currentPrice + (Math.random() * 0.01 - 0.005)).toFixed(3);
-                const entry = document.createElement('div');
-                entry.className = 'log-entry';
-                entry.innerHTML = `<span class="${isBuy ? 'log-buy' : 'log-sell'}">${isBuy ? 'BUY' : 'SELL'}</span><span>${price}</span><span>${time}</span>`;
-                logs.prepend(entry);
-            }, 5000);
+                const logEntry = document.createElement('div');
+                logEntry.className = 'log-entry';
+
+                if (lastAction === 'SELL') {
+                    // Имитируем покупку чуть ниже текущей цены
+                    entryPrice = (currentPrice - 0.002).toFixed(3);
+                    logEntry.innerHTML = `<span class="log-buy">BUY</span><span>${entryPrice}</span><span>${time}</span>`;
+                    lastAction = 'BUY';
+                    logs.prepend(logEntry);
+                } else {
+                    // Продаем только если цена выше цены покупки на 0.1%
+                    const exitPrice = (parseFloat(entryPrice) + 0.008).toFixed(3);
+                    logEntry.innerHTML = `<span class="log-sell">SELL</span><span>${exitPrice}</span><span>${time}</span>`;
+                    lastAction = 'SELL';
+                    logs.prepend(logEntry);
+                    showToast("Сделка закрыта в плюс!");
+                }
+            }, 6000);
             
         } else {
             btn.innerText = "Запустить Грока"; btn.style.background = "var(--gold)";
-            showToast("Грок остановлен.");
+            showToast("Бот остановлен");
             clearInterval(botInterval);
         }
     }
@@ -176,18 +184,6 @@
     const tonConnectUI = new TON_CONNECT_UI.TonConnectUI({
         manifestUrl: 'https://sergey52bb.github.io/grok-autotrade/tonconnect-manifest.json',
         buttonRootId: 'ton-connect-button'
-    });
-
-    tonConnectUI.onStatusChange(wallet => {
-        const btn = document.getElementById('main-action-btn');
-        const status = document.getElementById('wallet-status');
-        if (wallet) {
-            btn.innerText = "КУПИТЬ TON"; btn.style.background = "var(--green)";
-            status.innerText = "Подключен";
-        } else {
-            btn.innerText = "ПОДКЛЮЧИТЕ КОШЕЛЕК";
-            status.innerText = "Не подключен";
-        }
     });
 </script>
 </body>
