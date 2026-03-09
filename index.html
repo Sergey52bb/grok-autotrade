@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>STRATEX V3.5 FULL</title>
+    <title>STRATEX V3.6 FIX</title>
     <script src="https://unpkg.com/@tonconnect/ui@latest/dist/tonconnect-ui.min.js"></script>
     <style>
         :root { --bg: #0b0e11; --panel: #1c2127; --input: #2b3139; --green: #0ecb81; --red: #f6465d; --gold: #f0b90b; --text: #848e9c; }
@@ -12,12 +12,13 @@
         .header { background: var(--panel); padding: 8px 12px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #333; gap: 10px; }
         .pair-selector { flex-grow: 1; background: var(--input); color: var(--gold); border: 1px solid #444; border-radius: 6px; padding: 6px; font-size: 13px; font-weight: bold; outline: none; }
 
-        .trading-grid { display: grid; grid-template-columns: 1.5fr 1fr; height: 260px; border-bottom: 2px solid #000; }
-        #tv_widget { background: #131722; }
+        .trading-grid { display: grid; grid-template-columns: 1.5fr 1fr; height: 260px; border-bottom: 2px solid #000; background: #131722; }
+        #tv_widget { width: 100%; height: 100%; }
+        
         .order-book-side { background: var(--panel); font-size: 10px; padding: 5px; display: flex; flex-direction: column; border-left: 1px solid #333; overflow: hidden; }
         .ob-header { color: var(--text); font-size: 9px; margin-bottom: 4px; display: flex; justify-content: space-between; }
-        .ob-row { position: relative; display: flex; justify-content: space-between; padding: 2px 0; z-index: 1; height: 16px; align-items: center; }
-        .ob-bg { position: absolute; right: 0; top: 0; bottom: 0; z-index: -1; opacity: 0.15; transition: width 0.3s; }
+        .ob-row { position: relative; display: flex; justify-content: space-between; padding: 2px 0; z-index: 1; height: 16px; }
+        .ob-bg { position: absolute; right: 0; top: 0; bottom: 0; z-index: -1; opacity: 0.15; }
         .price-center { font-size: 14px; font-weight: bold; text-align: center; color: var(--green); padding: 4px 0; border-top: 1px solid #333; border-bottom: 1px solid #333; margin: 2px 0; }
 
         .page-content { display: none; padding: 12px; padding-bottom: 80px; height: calc(100vh - 350px); overflow-y: auto; }
@@ -44,7 +45,7 @@
 
 <div class="header">
     <select class="pair-selector" id="pair-select" onchange="changePair()">
-        <optgroup label="Активные пары">
+        <optgroup label="Весь список">
             <option value="TONUSDT">TON / USDT</option>
             <option value="BTCUSDT">BTC / USDT</option>
             <option value="ETHUSDT">ETH / USDT</option>
@@ -64,7 +65,7 @@
             <option value="SHIBUSDT">SHIB / USDT</option>
             <option value="PAXGUSDT">GOLD / USDT</option>
         </optgroup>
-        <optgroup label="Ожидают листинга">
+        <optgroup label="Soon">
             <option value="CELIA_SOON">CELIA / SOON</option>
             <option value="HOT_SOON">HOT / SOON</option>
         </optgroup>
@@ -81,38 +82,34 @@
     <div id="trading-ui">
         <div class="input-group">
             <span>Live Price</span>
-            <span id="market-price-val" style="font-weight:bold; color:var(--gold)">...</span>
+            <b id="market-price-val" style="color:var(--gold)">...</b>
         </div>
-        <button class="btn-main" id="dep-btn" onclick="toggleDeposit()">ПОПОЛНИТЬ</button>
+        <button class="btn-main" onclick="toggleDeposit()">ДЕПОЗИТ / ПОПОЛНИТЬ</button>
         
         <div id="deposit-section" style="display:none;">
             <div class="deposit-card">
                 <div id="native-box">
                     <div style="display:flex; justify-content:space-between; align-items:center;">
-                        <b id="dep-title">BTC Deposit</b>
-                        <span class="net-badge" id="dep-net">Native Network</span>
+                        <b id="dep-title">Deposit</b>
+                        <span class="net-badge" id="dep-net">Native</span>
                     </div>
                     <div class="address-box" id="addr-native">Генерация...</div>
                 </div>
-                
                 <div style="display:flex; justify-content:space-between; align-items:center; margin-top:10px;">
                     <b>TON Network</b>
                     <span class="net-badge">TON</span>
                 </div>
-                <div class="address-box" id="addr-ton">Подключите TON Кошелек</div>
+                <div class="address-box" id="addr-ton">Подключите TON Wallet</div>
             </div>
         </div>
     </div>
-
-    <div id="soon-ui" style="display:none; margin-top: 20px;">
-        <div style="background: rgba(240,185,11,0.1); color: var(--gold); padding: 25px; border-radius: 12px; text-align: center; border: 1px dashed var(--gold);">
-            ⏳ МОНЕТА В РАЗРАБОТКЕ
-        </div>
+    <div id="soon-ui" style="display:none; margin-top:20px; text-align:center;">
+        <div style="border: 1px dashed var(--gold); padding: 20px; color: var(--gold); border-radius: 12px;">⏳ СКОРО ЛИСТИНГ</div>
     </div>
 </div>
 
 <div id="page-assets" class="page-content">
-    <h3>🏦 Баланс</h3>
+    <h3>🏦 Активы</h3>
     <div class="input-group"><span>TON</span><b id="ton-bal">0.00</b></div>
     <div class="input-group"><span>USDT</span><b>0.00</b></div>
 </div>
@@ -125,7 +122,6 @@
 <script src="https://s3.tradingview.com/tv.js"></script>
 <script>
     let currentPair = "TONUSDT";
-    let currentPrice = 0;
     let walletAddr = null;
 
     const coinMap = {
@@ -138,9 +134,8 @@
     const nativeAddrs = {
         "BTCUSDT": "1A1zP1eP5QGefi2DMPTfTL5SLmv7DivfNa",
         "ETHUSDT": "0x742d35Cc6634C0532925a3b844Bc454e4438f44e",
-        "BNBUSDT": "0x742d35Cc6634C0532925a3b844Bc454e4438f44e",
-        "SOLUSDT": "8v7vL2n7...sol_native",
-        "XRPUSDT": "rEb8TK3g...ripple_addr"
+        "SOLUSDT": "8v7vL2n7...solana",
+        "XRPUSDT": "rEb8TK3g...ripple"
     };
 
     const tonConnectUI = new TON_CONNECT_UI.TonConnectUI({
@@ -156,13 +151,30 @@
         }
     });
 
+    // Улучшенная функция инициализации графика
     function initTV(symbol) {
+        const container = document.getElementById('tv_widget');
+        container.innerHTML = ""; // Полная очистка
+        
         if (symbol.includes('SOON')) return;
-        document.getElementById('tv_widget').innerHTML = "";
-        new TradingView.widget({
-            "autosize": true, "symbol": "OKX:" + symbol, "interval": "15",
-            "theme": "dark", "style": "1", "container_id": "tv_widget", "hide_top_toolbar": true
-        });
+
+        // Небольшая задержка для корректного рендеринга
+        setTimeout(() => {
+            new TradingView.widget({
+                "width": "100%",
+                "height": "100%",
+                "symbol": "OKX:" + symbol,
+                "interval": "15",
+                "theme": "dark",
+                "style": "1",
+                "locale": "ru",
+                "toolbar_bg": "#f1f3f6",
+                "enable_publishing": false,
+                "hide_top_toolbar": true,
+                "save_image": false,
+                "container_id": "tv_widget"
+            });
+        }, 100);
     }
 
     async function fetchPrice() {
@@ -171,27 +183,24 @@
         try {
             const res = await fetch(`https://api.coingecko.com/api/v3/simple/price?ids=${id}&vs_currencies=usd`);
             const data = await res.json();
-            currentPrice = data[id].usd;
-            let prec = currentPrice < 0.01 ? 7 : 2;
-            document.getElementById('market-price-val').innerText = currentPrice.toFixed(prec) + " USDT";
-            updateOrderBook(prec);
+            const price = data[id].usd;
+            const prec = price < 0.01 ? 7 : 2;
+            document.getElementById('market-price-val').innerText = price.toFixed(prec) + " USDT";
+            
+            // Обновление стакана
+            const ob = document.getElementById('order-book');
+            let html = '<div class="ob-header"><span>Цена</span><span>Кол.</span></div>';
+            for(let i=5; i>0; i--) {
+                let p = (price + (i*(price*0.001))).toFixed(prec);
+                html += `<div class="ob-row" style="color:var(--red)"><div class="ob-bg" style="width:${Math.random()*50}%; background:var(--red)"></div><span>${p}</span><span>${(Math.random()*20).toFixed(1)}</span></div>`;
+            }
+            html += `<div class="price-center">${price.toFixed(prec)}</div>`;
+            for(let i=1; i<=5; i++) {
+                let p = (price - (i*(price*0.001))).toFixed(prec);
+                html += `<div class="ob-row" style="color:var(--green)"><div class="ob-bg" style="width:${Math.random()*50}%; background:var(--green)"></div><span>${p}</span><span>${(Math.random()*20).toFixed(1)}</span></div>`;
+            }
+            ob.innerHTML = html;
         } catch(e) {}
-    }
-
-    function updateOrderBook(prec) {
-        const ob = document.getElementById('order-book');
-        let html = '<div class="ob-header"><span>Цена</span><span>Кол.</span></div>';
-        const spread = currentPrice * 0.0008;
-        for(let i=5; i>0; i--) {
-            let p = (currentPrice + (i*spread)).toFixed(prec);
-            html += `<div class="ob-row" style="color:var(--red)"><div class="ob-bg" style="width:${Math.random()*60}%; background:var(--red)"></div><span>${p}</span><span>${(Math.random()*50).toFixed(1)}</span></div>`;
-        }
-        html += `<div class="price-center">${currentPrice.toFixed(prec)}</div>`;
-        for(let i=1; i<=5; i++) {
-            let p = (currentPrice - (i*spread)).toFixed(prec);
-            html += `<div class="ob-row" style="color:var(--green)"><div class="ob-bg" style="width:${Math.random()*60}%; background:var(--green)"></div><span>${p}</span><span>${(Math.random()*50).toFixed(1)}</span></div>`;
-        }
-        ob.innerHTML = html;
     }
 
     function changePair() {
@@ -200,17 +209,17 @@
         document.getElementById('trading-ui').style.display = isSoon ? 'none' : 'block';
         document.getElementById('soon-ui').style.display = isSoon ? 'block' : 'none';
         document.getElementById('deposit-section').style.display = 'none';
-        if (!isSoon) { initTV(currentPair); fetchPrice(); }
+        initTV(currentPair);
+        fetchPrice();
     }
 
     function toggleDeposit() {
-        const sect = document.getElementById('deposit-section');
-        sect.style.display = sect.style.display === 'none' ? 'block' : 'none';
+        const s = document.getElementById('deposit-section');
+        s.style.display = s.style.display === 'none' ? 'block' : 'none';
         const sym = currentPair.split('USDT')[0];
         document.getElementById('dep-title').innerText = sym + " Deposit";
         document.getElementById('dep-net').innerText = sym + " Native";
-        document.getElementById('addr-native').innerText = nativeAddrs[currentPair] || "Используйте TON Network";
-        // Прячем нативный блок для TON, так как он и так в TON
+        document.getElementById('addr-native').innerText = nativeAddrs[currentPair] || "Отсутствует для этой пары";
         document.getElementById('native-box').style.display = (currentPair === "TONUSDT") ? 'none' : 'block';
     }
 
@@ -228,8 +237,10 @@
         document.getElementById('page-' + pId).classList.add('active');
         el.classList.add('active');
         document.getElementById('market-top').style.display = (pId === 'market' ? 'grid' : 'none');
+        if(pId === 'market') initTV(currentPair); // Перерисовка при возврате на рынок
     }
 
+    // Первый запуск
     initTV(currentPair);
     fetchPrice();
     setInterval(fetchPrice, 10000);
