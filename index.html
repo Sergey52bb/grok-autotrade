@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>STRATEX V3.0 GLOBAL</title>
+    <title>STRATEX V3.1 SMART</title>
     <script src="https://unpkg.com/@tonconnect/ui@latest/dist/tonconnect-ui.min.js"></script>
     <style>
         :root { --bg: #0b0e11; --panel: #1c2127; --input: #2b3139; --green: #0ecb81; --red: #f6465d; --gold: #f0b90b; --text: #848e9c; }
@@ -22,13 +22,11 @@
         .page-content { display: none; padding: 12px; padding-bottom: 80px; height: calc(100vh - 350px); overflow-y: auto; }
         .page-content.active { display: block; }
         
-        .input-group { background: var(--input); border-radius: 8px; padding: 12px; margin-bottom: 10px; display: flex; justify-content: space-between; align-items: center; border: 1px solid #333; }
-        .btn-main { width: 100%; background: var(--green); color: white; border: none; padding: 16px; border-radius: 10px; font-weight: bold; font-size: 16px; cursor: pointer; transition: 0.2s; }
-        .btn-main:active { transform: scale(0.98); opacity: 0.9; }
+        .input-group { background: var(--input); border-radius: 8px; padding: 12px; margin-bottom: 10px; display: flex; justify-content: space-between; align-items: center; }
+        .btn-main { width: 100%; background: var(--green); color: white; border: none; padding: 16px; border-radius: 10px; font-weight: bold; font-size: 16px; cursor: pointer; }
 
-        .bot-log-container { background: #000; border-radius: 8px; padding: 10px; margin-top: 15px; height: 200px; overflow-y: auto; font-family: 'Courier New', monospace; font-size: 11px; border: 1px solid #444; }
-        .log-entry { display: flex; justify-content: space-between; padding: 5px 0; border-bottom: 1px solid #222; }
-        .log-buy { color: var(--green); } .log-sell { color: var(--red); }
+        /* Стиль для монет "Скоро" */
+        .soon-badge { background: rgba(240,185,11,0.1); color: var(--gold); padding: 20px; border-radius: 12px; text-align: center; border: 1px dashed var(--gold); margin-top: 10px; }
 
         .nav-bar { position: fixed; bottom: 0; width: 100%; display: flex; background: var(--panel); padding: 10px 0; border-top: 1px solid #333; z-index: 100; }
         .nav-item { flex: 1; text-align: center; font-size: 10px; color: var(--text); cursor: pointer; }
@@ -36,7 +34,7 @@
         .nav-icon { font-size: 20px; margin-bottom: 3px; }
 
         #toast-container { position: fixed; top: 70px; left: 50%; transform: translateX(-50%); z-index: 1000; width: 85%; pointer-events: none; }
-        .toast { background: var(--panel); border-left: 4px solid var(--gold); color: white; padding: 12px; border-radius: 6px; margin-bottom: 8px; font-size: 12px; box-shadow: 0 5px 15px rgba(0,0,0,0.5); opacity: 0; transition: 0.4s; }
+        .toast { background: var(--panel); border-left: 4px solid var(--gold); color: white; padding: 12px; border-radius: 6px; margin-bottom: 8px; font-size: 12px; opacity: 0; transition: 0.4s; }
     </style>
 </head>
 <body>
@@ -45,31 +43,18 @@
 
 <div class="header">
     <select class="pair-selector" id="pair-select" onchange="changePair()">
-        <optgroup label="Популярные">
+        <optgroup label="Активные пары">
             <option value="TONUSDT">TON / USDT</option>
             <option value="BTCUSDT">BTC / USDT</option>
             <option value="ETHUSDT">ETH / USDT</option>
-            <option value="BNBUSDT">BNB / USDT</option>
+            <option value="PAXGUSDT">GOLD / USDT</option>
             <option value="SOLUSDT">SOL / USDT</option>
-        </optgroup>
-        <optgroup label="Экосистема & Альты">
-            <option value="NEARUSDT">NEAR / USDT</option>
             <option value="SUIUSDT">SUI / USDT</option>
-            <option value="POLUSDT">POL (MATIC) / USDT</option>
-            <option value="XRPUSDT">XRP / USDT</option>
-            <option value="TRXUSDT">TRON / USDT</option>
-            <option value="LTCUSDT">LITECOIN / USDT</option>
-        </optgroup>
-        <optgroup label="Мемы & Токены">
             <option value="PEPEUSDT">PEPE / USDT</option>
-            <option value="SHIBUSDT">SHIBA / USDT</option>
-            <option value="CELIAUSDT">CELIA / USDT</option>
-            <option value="UNIUSDT">UNISWAP / USDT</option>
-            <option value="JUPUSDT">JUPITER / USDT</option>
         </optgroup>
-        <optgroup label="Спец. активы">
-            <option value="PAXGUSDT">GOLD (Золото) / USDT</option>
-            <option value="HOTSOON">HOT / SOON (В разработке)</option>
+        <optgroup label="Ожидают листинга">
+            <option value="CELIA_SOON">CELIA / SOON</option>
+            <option value="HOT_SOON">HOT / SOON</option>
         </optgroup>
     </select>
     <div id="ton-connect-button"></div>
@@ -81,148 +66,114 @@
 </div>
 
 <div id="page-market" class="page-content active">
-    <div class="input-group">
-        <span id="price-label">Цена актива</span>
-        <span id="market-price-val" style="font-weight:bold; font-size: 18px; color:var(--gold)">...</span>
+    <div id="active-trading-ui">
+        <div class="input-group">
+            <span>Цена USDT</span>
+            <span id="market-price-val" style="font-weight:bold; font-size: 18px; color:var(--gold)">...</span>
+        </div>
+        <button class="btn-main" id="main-action-btn">ПОДКЛЮЧИТЬ КОШЕЛЕК</button>
     </div>
-    <div id="dev-badge" style="display:none; background:rgba(240,185,11,0.1); color:var(--gold); padding:15px; border-radius:8px; text-align:center; margin-bottom:10px; border:1px dashed var(--gold);">
-        🚧 Пара находится в разработке. Торговля временно недоступна.
+    
+    <div id="soon-trading-ui" style="display:none;">
+        <div class="soon-badge">
+            <div style="font-size: 24px; margin-bottom: 10px;">⏳</div>
+            <div style="font-weight: bold; margin-bottom: 5px;">ЛИСТИНГ ОЖИДАЕТСЯ</div>
+            <div style="font-size: 12px; opacity: 0.8;">Торговля данной монетой будет доступна после официального запуска на биржах.</div>
+        </div>
     </div>
-    <button class="btn-main" id="main-action-btn">ПОДКЛЮЧИТЬ КОШЕЛЕК</button>
 </div>
 
 <div id="page-bot" class="page-content">
-    <h3 style="color:var(--gold); margin-top:0;">🤖 GROK MULTI-BOT</h3>
-    <div class="input-group"><span>Режим</span><span style="color:var(--green)">Auto-Scalping</span></div>
+    <h3 style="color:var(--gold)">🤖 GROK MULTI-BOT</h3>
     <button class="btn-main" id="start-bot-btn" style="background: var(--gold); color: black;" onclick="toggleBot()">Запустить Грока</button>
-    <div class="bot-log-container" id="bot-logs"></div>
+    <div id="bot-logs" style="margin-top:15px; font-size:11px; font-family:monospace; background:#000; padding:10px; height:150px; overflow-y:auto; border:1px solid #333;"></div>
 </div>
 
 <div id="page-assets" class="page-content">
     <h3>🏦 Кошелек</h3>
-    <div class="input-group"><span>Баланс USDT</span><span style="color:var(--gold)">0.00</span></div>
-    <div class="input-group"><span>В управлении</span><span style="color:var(--green)">0.00</span></div>
-</div>
-
-<div id="page-settings" class="page-content">
-    <h3>⚙️ Опции</h3>
-    <div class="input-group" onclick="location.reload()"><span>Перезагрузить</span><span>🔄</span></div>
-    <div class="input-group"><span>Версия</span><span>3.0.0 Global</span></div>
+    <div class="input-group"><span>Общий баланс</span><span style="color:var(--gold)">0.00 USDT</span></div>
 </div>
 
 <div class="nav-bar">
     <div class="nav-item active" onclick="showPage('market', this)"><div class="nav-icon">📊</div>Рынок</div>
     <div class="nav-item" onclick="showPage('bot', this)"><div class="nav-icon">🤖</div>Бот</div>
     <div class="nav-item" onclick="showPage('assets', this)"><div class="nav-icon">🏦</div>Активы</div>
-    <div class="nav-item" onclick="showPage('settings', this)"><div class="nav-icon">⚙️</div>Инфо</div>
 </div>
 
 <script src="https://s3.tradingview.com/tv.js"></script>
 <script>
     let currentPair = "TONUSDT";
     let currentPrice = null;
-    let botInterval = null;
 
-    // Маппинг для API (Coingecko)
     const coinMap = {
         "TONUSDT": "the-open-network", "BTCUSDT": "bitcoin", "ETHUSDT": "ethereum",
-        "BNBUSDT": "binancecoin", "SOLUSDT": "solana", "NEARUSDT": "near",
-        "SUIUSDT": "sui", "POLUSDT": "polygon-ecosystem-token", "XRPUSDT": "ripple",
-        "TRXUSDT": "tron", "LTCUSDT": "litecoin", "PEPEUSDT": "pepe",
-        "SHIBUSDT": "shiba-inu", "UNIUSDT": "uniswap", "JUPUSDT": "jupiter-exchange-solana",
-        "PAXGUSDT": "pax-gold"
+        "PAXGUSDT": "pax-gold", "SOLUSDT": "solana", "SUIUSDT": "sui", "PEPEUSDT": "pepe"
     };
 
     function initTV(symbol) {
-        if (symbol === "HOTSOON") return;
+        if (symbol.includes('_SOON')) {
+            document.getElementById('tv_widget').innerHTML = "<div style='display:flex; height:100%; align-items:center; justify-content:center; color:#555; text-align:center; padding:20px;'>График будет доступен после листинга</div>";
+            return;
+        }
         new TradingView.widget({
             "autosize": true, "symbol": "OKX:" + symbol, "interval": "15",
-            "theme": "dark", "style": "1", "locale": "ru", "container_id": "tv_widget",
-            "hide_top_toolbar": true
+            "theme": "dark", "style": "1", "locale": "ru", "container_id": "tv_widget", "hide_top_toolbar": true
         });
     }
 
     initTV(currentPair);
 
     async function fetchPrice() {
-        if (currentPair === "HOTSOON") return;
-        const id = coinMap[currentPair] || "the-open-network";
+        if (currentPair.includes('_SOON')) return;
+        const id = coinMap[currentPair];
         try {
             const res = await fetch(`https://api.coingecko.com/api/v3/simple/price?ids=${id}&vs_currencies=usd`);
             const data = await res.json();
             currentPrice = data[id].usd;
-            document.getElementById('market-price-val').innerHTML = `${currentPrice.toFixed(currentPrice < 1 ? 6 : 2)} <small>USDT</small>`;
+            document.getElementById('market-price-val').innerHTML = `${currentPrice.toFixed(currentPrice < 1 ? 5 : 2)} <small>USDT</small>`;
             updateOrderBook();
         } catch(e) {}
     }
 
     function changePair() {
         currentPair = document.getElementById('pair-select').value;
-        const isDev = currentPair === "HOTSOON";
+        const isSoon = currentPair.includes('_SOON');
         
-        document.getElementById('dev-badge').style.display = isDev ? 'block' : 'none';
-        document.getElementById('main-action-btn').style.display = isDev ? 'none' : 'block';
-        document.getElementById('market-price-val').innerText = isDev ? "---" : "...";
+        document.getElementById('active-trading-ui').style.display = isSoon ? 'none' : 'block';
+        document.getElementById('soon-trading-ui').style.display = isSoon ? 'block' : 'none';
         
-        if (!isDev) {
+        if (!isSoon) {
             initTV(currentPair);
             fetchPrice();
-            showToast(`Актив: ${currentPair}`);
         } else {
-            showToast("Скоро в приложении!");
+            initTV(currentPair);
+            document.getElementById('order-book').innerHTML = "<div style='text-align:center; padding-top:50px; color:#555;'>Data Offline</div>";
         }
     }
 
     function updateOrderBook() {
-        if (!currentPrice || currentPair === "HOTSOON") return;
+        if (!currentPrice || currentPair.includes('_SOON')) return;
         const ob = document.getElementById('order-book');
         let html = '<div class="ob-header"><span>Цена</span><span>Объем</span></div>';
         const spread = currentPrice * 0.0005;
-        for(let i=4; i>0; i--) {
+        for(let i=3; i>0; i--) {
             let p = (currentPrice + (i*spread)).toFixed(currentPrice < 1 ? 5 : 2);
             html += `<div class="ob-row" style="color:var(--red)"><div class="ob-bg" style="width:${Math.random()*70}%; background:var(--red)"></div><span>${p}</span><span>${(Math.random()*500).toFixed(0)}</span></div>`;
         }
         html += `<div class="price-center">${currentPrice.toFixed(currentPrice < 1 ? 5 : 2)}</div>`;
-        for(let i=1; i<=4; i++) {
+        for(let i=1; i<=3; i++) {
             let p = (currentPrice - (i*spread)).toFixed(currentPrice < 1 ? 5 : 2);
             html += `<div class="ob-row" style="color:var(--green)"><div class="ob-bg" style="width:${Math.random()*70}%; background:var(--green)"></div><span>${p}</span><span>${(Math.random()*500).toFixed(0)}</span></div>`;
         }
         ob.innerHTML = html;
     }
 
-    function showToast(text) {
-        const container = document.getElementById('toast-container');
-        const t = document.createElement('div');
-        t.className = 'toast'; t.innerText = text;
-        container.appendChild(t);
-        setTimeout(() => t.style.opacity = '1', 10);
-        setTimeout(() => { t.style.opacity = '0'; setTimeout(() => t.remove(), 500); }, 3000);
-    }
-
-    function showPage(pageId, el) {
+    function showPage(pId, el) {
         document.querySelectorAll('.page-content').forEach(p => p.classList.remove('active'));
         document.querySelectorAll('.nav-item').forEach(i => i.classList.remove('active'));
-        document.getElementById('page-' + pageId).classList.add('active');
+        document.getElementById('page-' + pId).classList.add('active');
         el.classList.add('active');
-        document.getElementById('market-top').style.display = (pageId === 'market' ? 'grid' : 'none');
-    }
-
-    function toggleBot() {
-        const btn = document.getElementById('start-bot-btn');
-        const logs = document.getElementById('bot-logs');
-        if(btn.innerText === "Запустить Грока") {
-            btn.innerText = "Остановить"; btn.style.background = "var(--red)";
-            showToast("Грок анализирует " + currentPair);
-            botInterval = setInterval(() => {
-                const time = new Date().toLocaleTimeString();
-                const isBuy = Math.random() > 0.5;
-                const p = (currentPrice * (1 + (Math.random()*0.002 - 0.001))).toFixed(4);
-                logs.insertAdjacentHTML('afterbegin', `<div class="log-entry"><span class="${isBuy?'log-buy':'log-sell'}">${isBuy?'BUY':'SELL'}</span><span>${p}</span><span>${time}</span></div>`);
-            }, 4000);
-        } else {
-            btn.innerText = "Запустить Грока"; btn.style.background = "var(--gold)";
-            clearInterval(botInterval);
-        }
+        document.getElementById('market-top').style.display = (pId === 'market' ? 'grid' : 'none');
     }
 
     setInterval(fetchPrice, 10000);
@@ -235,4 +186,3 @@
 </script>
 </body>
 </html>
-        
