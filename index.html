@@ -3,46 +3,44 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>STRATEX PRO TERMINAL</title>
+    <title>STRATEX COMPACT</title>
     <script src="https://unpkg.com/@tonconnect/ui@latest/dist/tonconnect-ui.min.js"></script>
     <style>
         :root { --bg: #0b0e11; --panel: #1c2127; --input: #2b3139; --green: #0ecb81; --red: #f6465d; --gold: #f0b90b; --text: #848e9c; }
-        body { background: var(--bg); color: white; font-family: 'Segoe UI', Arial, sans-serif; margin: 0; overflow-x: hidden; }
+        body { background: var(--bg); color: white; font-family: -apple-system, BlinkMacSystemFont, sans-serif; margin: 0; padding: 0; display: flex; flex-direction: column; height: 100vh; overflow: hidden; }
         
-        /* Header */
-        .header { background: var(--panel); padding: 10px 15px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #333; }
-        .brand { color: var(--gold); font-size: 20px; font-weight: bold; letter-spacing: 1px; }
+        /* Header & Assets */
+        .header { background: var(--panel); padding: 5px 12px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #333; flex-shrink: 0; }
+        .brand { color: var(--gold); font-size: 16px; font-weight: bold; }
+        .asset-bar { background: var(--panel); padding: 4px 12px; display: flex; align-items: center; gap: 8px; border-bottom: 1px solid #000; flex-shrink: 0; }
+        select { background: var(--input); color: white; border: 1px solid #444; padding: 2px 5px; border-radius: 4px; font-size: 12px; }
 
-        /* Asset Selector */
-        .asset-bar { background: var(--panel); padding: 8px 15px; display: flex; align-items: center; gap: 10px; border-bottom: 2px solid var(--bg); }
-        select { background: var(--input); color: white; border: 1px solid #444; padding: 5px; border-radius: 4px; font-weight: bold; }
+        /* Chart Section - Фиксированная высота */
+        .chart-box { height: 200px; width: 100%; flex-shrink: 0; border-bottom: 2px solid #000; }
 
-        /* Chart */
-        .chart-box { height: 260px; width: 100%; border-bottom: 4px solid var(--bg); }
-
-        /* Trade Area */
-        .main-trade { display: flex; padding: 12px; gap: 12px; background: var(--panel); }
+        /* Trade Section - Основная рабочая область */
+        .trade-area { display: flex; flex: 1; padding: 8px; gap: 8px; background: var(--panel); overflow: hidden; }
         
-        /* Order Book (Left) */
-        .ob { flex: 1; font-size: 11px; }
-        .ob-row { display: flex; justify-content: space-between; padding: 2px 0; }
-        .price-now { font-size: 17px; font-weight: bold; text-align: center; margin: 10px 0; color: var(--green); }
+        /* Order Book (Левая колонка) */
+        .ob { flex: 1; font-size: 10px; display: flex; flex-direction: column; justify-content: space-between; }
+        .ob-row { display: flex; justify-content: space-between; padding: 1px 0; }
+        .price-now { font-size: 14px; font-weight: bold; text-align: center; margin: 5px 0; color: var(--green); }
 
-        /* Order Form (Right) */
-        .form { flex: 1.2; display: flex; flex-direction: column; gap: 8px; }
-        .tabs { display: flex; background: var(--input); border-radius: 4px; overflow: hidden; }
-        .tab { flex: 1; text-align: center; padding: 8px; font-size: 12px; cursor: pointer; color: var(--text); font-weight: bold; }
+        /* Trade Form (Правая колонка) */
+        .form { flex: 1.3; display: flex; flex-direction: column; gap: 6px; }
+        .tabs { display: flex; background: var(--input); border-radius: 4px; overflow: hidden; height: 28px; }
+        .tab { flex: 1; text-align: center; line-height: 28px; font-size: 11px; cursor: pointer; color: var(--text); font-weight: bold; }
         .tab.buy { background: var(--green); color: white; }
         
-        .field { background: var(--input); border-radius: 4px; padding: 8px; border: 1px solid #444; }
-        .f-lbl { font-size: 10px; color: var(--text); }
-        .f-val { display: flex; justify-content: space-between; font-weight: bold; font-size: 14px; margin-top: 2px; }
+        .field { background: var(--input); border-radius: 4px; padding: 4px 8px; border: 1px solid #444; }
+        .f-lbl { font-size: 9px; color: var(--text); }
+        .f-val { display: flex; justify-content: space-between; font-weight: bold; font-size: 13px; }
 
-        .btn-trade { background: var(--green); color: white; border: none; padding: 14px; border-radius: 6px; font-weight: bold; font-size: 15px; cursor: pointer; margin-top: 5px; }
-        .fee-hint { font-size: 9px; color: var(--text); text-align: center; margin-top: 5px; }
+        .btn-trade { background: var(--green); color: white; border: none; padding: 10px; border-radius: 4px; font-weight: bold; font-size: 14px; cursor: pointer; }
+        .fee-hint { font-size: 9px; color: var(--text); text-align: center; }
 
-        /* Warning Block */
-        .warning-box { margin: 12px; padding: 10px; border: 1px dashed var(--red); border-radius: 6px; font-size: 11px; color: #ff9999; line-height: 1.4; }
+        /* Footer Warning - Компактный низ */
+        .warning-mini { background: rgba(246, 70, 93, 0.1); padding: 6px 12px; font-size: 10px; color: #ffbaba; border-top: 1px solid rgba(246, 70, 93, 0.2); flex-shrink: 0; }
     </style>
 </head>
 <body>
@@ -58,48 +56,51 @@
         <option>BTC / USDT</option>
         <option>ETH / USDT</option>
         <option>SOL / USDT</option>
-        <option>PEPE / USDT</option>
-        <option>GOLD / USDT</option>
     </select>
-    <span style="font-size: 12px; color: var(--green);">+4.52%</span>
+    <span style="font-size: 11px; color: var(--green);">+4.5%</span>
 </div>
 
 <div class="chart-box">
-    <div id="tradingview_widget" style="height:100%;"></div>
+    <div id="tv_widget" style="height:100%;"></div>
     <script src="https://s3.tradingview.com/tv.js"></script>
     <script>
         new TradingView.widget({
             "autosize": true, "symbol": "OKX:TONUSDT", "interval": "15", "theme": "dark",
-            "style": "1", "locale": "ru", "hide_top_toolbar": true, "container_id": "tradingview_widget"
+            "style": "1", "locale": "ru", "hide_top_toolbar": true, "container_id": "tv_widget"
         });
     </script>
 </div>
 
-<div class="main-trade">
+<div class="trade-area">
     <div class="ob">
-        <div style="display:flex; justify-content:space-between; color:var(--text); margin-bottom:5px;"><span>Цена</span><span>Кол-во</span></div>
-        <div class="ob-row" style="color:var(--red)"><span>7.245</span><span>142</span></div>
-        <div class="ob-row" style="color:var(--red)"><span>7.241</span><span>85</span></div>
+        <div>
+            <div class="ob-row" style="color:var(--red)"><span>7.245</span><span>142</span></div>
+            <div class="ob-row" style="color:var(--red)"><span>7.241</span><span>85</span></div>
+            <div class="ob-row" style="color:var(--red)"><span>7.238</span><span>1.2K</span></div>
+        </div>
         <div class="price-now">7.235 ↑</div>
-        <div class="ob-row" style="color:var(--green)"><span>7.232</span><span>410</span></div>
-        <div class="ob-row" style="color:var(--green)"><span>7.229</span><span>95</span></div>
+        <div>
+            <div class="ob-row" style="color:var(--green)"><span>7.232</span><span>410</span></div>
+            <div class="ob-row" style="color:var(--green)"><span>7.229</span><span>95</span></div>
+            <div class="ob-row" style="color:var(--green)"><span>7.225</span><span>2.4K</span></div>
+        </div>
     </div>
 
     <div class="form">
         <div class="tabs"><div class="tab buy">Купить</div><div class="tab">Продать</div></div>
         <div class="field"><div class="f-lbl">Цена</div><div class="f-val"><span>7.235</span><span style="color:var(--text)">USDT</span></div></div>
         <div class="field"><div class="f-lbl">Количество</div><div class="f-val"><span>0</span><span style="color:var(--text)">TON</span></div></div>
-        <div style="display:flex; justify-content:space-between; font-size:10px; margin-top:2px;">
+        <div style="display:flex; justify-content:space-between; font-size:9px; margin: 2px 0;">
             <span style="color:var(--text)">Баланс:</span>
-            <span id="userBal" style="color:white; font-weight:bold;">0.0033 TON</span>
+            <span id="bal" style="color:white">0.0033 TON</span>
         </div>
         <button class="btn-trade">Купить TON</button>
-        <div class="fee-hint">Комиссия сервиса: 0.13 TON (фикс)</div>
+        <div class="fee-hint">Комиссия: 0.13 TON</div>
     </div>
 </div>
 
-<div class="warning-box">
-    ⚠️ <b>ПРЕДУПРЕЖДЕНИЕ:</b> Выбирайте строго сеть TON для всех переводов. Ошибки в адресе или сети приведут к безвозвратной потере средств. Мы не храним ваши ключи — подтверждайте транзакции только в Tonkeeper.
+<div class="warning-mini">
+    ⚠️ <b>Сеть TON:</b> Проверяйте адрес. Мы не храним ключи — всё через Tonkeeper.
 </div>
 
 <script>
@@ -107,16 +108,7 @@
         manifestUrl: 'https://sergey52bb.github.io/grok-autotrade/tonconnect-manifest.json',
         buttonRootId: 'ton-connect-button'
     });
-
-    async function getBal(addr) {
-        try {
-            const r = await fetch(`https://toncenter.com/api/v2/getAddressBalance?address=${addr}`);
-            const d = await r.json();
-            if(d.ok) document.getElementById('userBal').innerText = (d.result/1e9).toFixed(4) + " TON";
-        } catch(e){}
-    }
-
-    tonConnectUI.onStatusChange(w => { if(w) { getBal(w.account.address); setInterval(() => getBal(w.account.address), 30000); }});
 </script>
 </body>
 </html>
+
