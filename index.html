@@ -3,38 +3,36 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>STRATEX V3.8 FULLSCREEN</title>
+    <title>STRATEX V3.9 SCALE FIX</title>
     <script src="https://unpkg.com/@tonconnect/ui@latest/dist/tonconnect-ui.min.js"></script>
     <style>
         :root { --bg: #0b0e11; --panel: #1c2127; --input: #2b3139; --green: #0ecb81; --red: #f6465d; --gold: #f0b90b; --text: #848e9c; }
         body { background: var(--bg); color: white; font-family: -apple-system, BlinkMacSystemFont, sans-serif; margin: 0; padding: 0; overflow: hidden; height: 100vh; }
         
-        .header { background: var(--panel); padding: 8px 12px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #333; height: 45px; box-sizing: border-box; }
+        .header { background: var(--panel); padding: 8px 12px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #333; height: 45px; }
         .pair-selector { flex-grow: 1; background: var(--input); color: var(--gold); border: 1px solid #444; border-radius: 6px; padding: 5px; font-size: 13px; font-weight: bold; outline: none; margin-right: 10px; }
 
-        /* Контейнер графика и стакана */
-        .trading-grid { display: grid; grid-template-columns: 1fr 1fr; height: 320px; border-bottom: 2px solid #000; background: #131722; position: relative; transition: 0.3s; }
-        
-        /* Полноэкранный режим для графика */
-        .trading-grid.fullscreen { grid-template-columns: 1fr 0fr; height: 80vh; }
+        /* Сетка с учетом отступа для шкалы */
+        .trading-grid { display: grid; grid-template-columns: 1fr 1fr; height: 320px; border-bottom: 2px solid #000; background: #131722; position: relative; }
+        .trading-grid.fullscreen { grid-template-columns: 1fr 0fr; height: 75vh; }
         .trading-grid.fullscreen .order-book-side { display: none; }
 
-        #tv_wrapper { position: relative; width: 100%; height: 100%; overflow: hidden; border-right: 1px solid #333; }
+        /* Контейнер графика с ПРАВЫМ ОТСТУПОМ для шкалы цен */
+        #tv_wrapper { position: relative; width: 100%; height: 100%; border-right: 1px solid #333; box-sizing: border-box; padding-right: 2px; }
         #tv_widget { width: 100%; height: 100%; }
 
-        /* Кнопка развертывания */
-        .expand-btn { position: absolute; right: 10px; top: 10px; z-index: 10; background: rgba(43, 49, 57, 0.8); border: 1px solid #444; color: white; border-radius: 4px; padding: 5px 8px; font-size: 12px; cursor: pointer; }
+        .expand-btn { position: absolute; left: 10px; top: 10px; z-index: 10; background: rgba(43, 49, 57, 0.8); border: 1px solid #444; color: white; border-radius: 4px; padding: 4px 8px; font-size: 10px; cursor: pointer; }
 
         .order-book-side { background: var(--panel); font-size: 10px; padding: 5px; display: flex; flex-direction: column; overflow: hidden; height: 100%; box-sizing: border-box; }
-        .ob-row { position: relative; display: flex; justify-content: space-between; padding: 2px 0; z-index: 1; height: 18px; }
-        .ob-bg { position: absolute; right: 0; top: 0; bottom: 0; z-index: -1; opacity: 0.15; }
         .price-center { font-size: 15px; font-weight: bold; text-align: center; color: var(--green); padding: 6px 0; border-top: 1px solid #333; border-bottom: 1px solid #333; margin: 4px 0; }
+        .ob-row { display: flex; justify-content: space-between; height: 18px; position: relative; }
+        .ob-bg { position: absolute; right: 0; top: 0; bottom: 0; z-index: -1; opacity: 0.15; }
 
         .page-content { display: none; padding: 15px; padding-bottom: 80px; height: calc(100vh - 365px); overflow-y: auto; }
         .page-content.active { display: block; }
         
         .input-group { background: var(--input); border-radius: 8px; padding: 12px; margin-bottom: 10px; display: flex; justify-content: space-between; align-items: center; }
-        .btn-main { width: 100%; background: var(--green); color: white; border: none; padding: 16px; border-radius: 12px; font-weight: bold; font-size: 16px; cursor: pointer; }
+        .btn-main { width: 100%; background: var(--green); color: white; border: none; padding: 16px; border-radius: 12px; font-weight: bold; font-size: 16px; }
 
         .nav-bar { position: fixed; bottom: 0; width: 100%; display: flex; background: var(--panel); padding: 12px 0; border-top: 1px solid #333; z-index: 100; }
         .nav-item { flex: 1; text-align: center; font-size: 11px; color: var(--text); }
@@ -48,7 +46,6 @@
         <option value="TONUSDT">TON / USDT</option>
         <option value="BTCUSDT">BTC / USDT</option>
         <option value="ETHUSDT">ETH / USDT</option>
-        <option value="BNBUSDT">BNB / USDT</option>
         <option value="SOLUSDT">SOL / USDT</option>
         <option value="PEPEUSDT">PEPE / USDT</option>
         <option value="PAXGUSDT">GOLD / USDT</option>
@@ -58,7 +55,7 @@
 
 <div id="market-top" class="trading-grid">
     <div id="tv_wrapper">
-        <button class="expand-btn" onclick="toggleFullscreen()">⬜/⬛</button>
+        <button class="expand-btn" onclick="toggleFullscreen()">FULLSCREEN</button>
         <div id="tv_widget"></div>
     </div>
     <div class="order-book-side" id="order-book"></div>
@@ -66,15 +63,15 @@
 
 <div id="page-market" class="page-content active">
     <div class="input-group">
-        <span>Цена</span>
+        <span>Live Price</span>
         <b id="market-price-val" style="color:var(--gold); font-size: 18px;">...</b>
     </div>
     <button class="btn-main">ДЕПОЗИТ</button>
 </div>
 
 <div id="page-assets" class="page-content">
-    <h3>🏦 Баланс</h3>
-    <div class="input-group"><span>TON</span><b id="ton-bal">0.00</b></div>
+    <h3>🏦 Активы</h3>
+    <div class="input-group"><span>TON Balance</span><b id="ton-bal">0.00</b></div>
 </div>
 
 <div class="nav-bar">
@@ -99,13 +96,21 @@
                 "locale": "ru",
                 "container_id": "tv_widget",
                 "hide_top_toolbar": true,
-                "hide_side_toolbar": true,
-                "allow_symbol_change": false,
+                "hide_legend": true,
                 "save_image": false,
                 "backgroundColor": "#131722",
-                "left_toolbar": false,
-                "width": "100%",
-                "height": "100%"
+                "gridColor": "#242933",
+                "studies": [],
+                // ГЛАВНЫЙ ФИКС: увеличиваем правый отступ внутри самого канваса
+                "overrides": {
+                    "paneProperties.background": "#131722",
+                    "paneProperties.vertGridProperties.color": "#242933",
+                    "paneProperties.horzGridProperties.color": "#242933",
+                    "scalesProperties.fontSize": 10,
+                    "mainSeriesProperties.candleStyle.drawBorder": true
+                },
+                "enabled_features": ["dont_show_boolean_study_arguments"],
+                "disabled_features": ["header_widget", "left_toolbar", "context_menus"]
             });
         }, 50);
     }
@@ -113,17 +118,12 @@
     function toggleFullscreen() {
         const grid = document.getElementById('market-top');
         isFullscreen = !isFullscreen;
-        if(isFullscreen) {
-            grid.classList.add('fullscreen');
-        } else {
-            grid.classList.remove('fullscreen');
-        }
-        // Переинициализируем, чтобы график подстроился под новый размер
+        grid.classList.toggle('fullscreen', isFullscreen);
         initTV(currentPair);
     }
 
     async function fetchPrice() {
-        const ids = {"TONUSDT":"the-open-network","BTCUSDT":"bitcoin","ETHUSDT":"ethereum","BNBUSDT":"binancecoin","SOLUSDT":"solana","PEPEUSDT":"pepe","PAXGUSDT":"pax-gold"};
+        const ids = {"TONUSDT":"the-open-network","BTCUSDT":"bitcoin","ETHUSDT":"ethereum","SOLUSDT":"solana","PEPEUSDT":"pepe","PAXGUSDT":"pax-gold"};
         try {
             const res = await fetch(`https://api.coingecko.com/api/v3/simple/price?ids=${ids[currentPair]}&vs_currencies=usd`);
             const data = await res.json();
@@ -137,15 +137,15 @@
     function updateOrderBook(price, prec) {
         if(isFullscreen) return;
         const ob = document.getElementById('order-book');
-        let html = '<div style="color:var(--text); font-size:9px; margin-bottom:4px; display:flex; justify-content:space-between;"><span>Цена</span><span>Кол.</span></div>';
+        let html = '<div style="color:var(--text); font-size:8px; display:flex; justify-content:space-between;"><span>Price</span><span>Amt</span></div>';
         for(let i=6; i>0; i--) {
             let p = (price + (i*(price*0.001))).toFixed(prec);
-            html += `<div class="ob-row" style="color:var(--red)"><div class="ob-bg" style="width:${Math.random()*60}%; background:var(--red)"></div><span>${p}</span><span>${(Math.random()*10).toFixed(1)}</span></div>`;
+            html += `<div class="ob-row" style="color:var(--red)"><div class="ob-bg" style="width:${Math.random()*60}%; background:var(--red)"></div><span>${p}</span><span>${(Math.random()*5).toFixed(1)}</span></div>`;
         }
         html += `<div class="price-center">${price.toFixed(prec)}</div>`;
         for(let i=1; i<=6; i++) {
             let p = (price - (i*(price*0.001))).toFixed(prec);
-            html += `<div class="ob-row" style="color:var(--green)"><div class="ob-bg" style="width:${Math.random()*60}%; background:var(--green)"></div><span>${p}</span><span>${(Math.random()*10).toFixed(1)}</span></div>`;
+            html += `<div class="ob-row" style="color:var(--green)"><div class="ob-bg" style="width:${Math.random()*60}%; background:var(--green)"></div><span>${p}</span><span>${(Math.random()*5).toFixed(1)}</span></div>`;
         }
         ob.innerHTML = html;
     }
@@ -166,7 +166,7 @@
 
     initTV(currentPair);
     fetchPrice();
-    setInterval(fetchPrice, 8000);
+    setInterval(fetchPrice, 10000);
 </script>
 </body>
 </html>
