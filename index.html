@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>STRATEX V2.5 PRO</title>
+    <title>STRATEX V2.6 PRO</title>
     <script src="https://unpkg.com/@tonconnect/ui@latest/dist/tonconnect-ui.min.js"></script>
     <style>
         :root { --bg: #0b0e11; --panel: #1c2127; --input: #2b3139; --green: #0ecb81; --red: #f6465d; --gold: #f0b90b; --text: #848e9c; }
@@ -12,7 +12,6 @@
         .header { background: var(--panel); padding: 5px 12px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #333; }
         .brand { color: var(--gold); font-size: 18px; font-weight: bold; }
 
-        /* График и Стакан */
         .trading-grid { display: grid; grid-template-columns: 1.6fr 1fr; height: 280px; border-bottom: 2px solid #000; }
         .order-book-side { background: var(--panel); font-size: 10px; padding: 5px; display: flex; flex-direction: column; border-left: 1px solid #333; overflow: hidden; }
         .ob-header { color: var(--text); font-size: 9px; margin-bottom: 4px; display: flex; justify-content: space-between; }
@@ -20,21 +19,24 @@
         .ob-bg { position: absolute; right: 0; top: 0; bottom: 0; z-index: -1; opacity: 0.15; transition: width 0.5s; }
         .price-center { font-size: 15px; font-weight: bold; text-align: center; color: var(--green); padding: 6px 0; border-top: 1px solid #333; border-bottom: 1px solid #333; margin: 4px 0; }
 
-        /* Контент */
         .page-content { display: none; padding: 12px; padding-bottom: 80px; height: calc(100vh - 370px); overflow-y: auto; }
         .page-content.active { display: block; }
         .input-group { background: var(--input); border-radius: 6px; padding: 10px 12px; margin-bottom: 10px; display: flex; justify-content: space-between; align-items: center; }
         .btn-main { width: 100%; background: var(--green); color: white; border: none; padding: 14px; border-radius: 8px; font-weight: bold; font-size: 16px; margin-top: 5px; cursor: pointer; }
 
-        /* Навигация */
+        /* Стили для логов бота */
+        .bot-log-container { background: var(--input); border-radius: 8px; padding: 10px; margin-top: 15px; max-height: 200px; overflow-y: auto; font-size: 11px; border: 1px solid #444; }
+        .log-entry { display: flex; justify-content: space-between; padding: 5px 0; border-bottom: 1px solid #333; }
+        .log-buy { color: var(--green); }
+        .log-sell { color: var(--red); }
+
         .nav-bar { position: fixed; bottom: 0; width: 100%; display: flex; background: var(--panel); padding: 10px 0; border-top: 1px solid #333; z-index: 100; }
         .nav-item { flex: 1; text-align: center; font-size: 10px; color: var(--text); cursor: pointer; }
         .nav-item.active { color: var(--gold); }
         .nav-icon { font-size: 18px; margin-bottom: 2px; }
 
-        /* Уведомления (Toast) */
         #toast-container { position: fixed; top: 60px; left: 50%; transform: translateX(-50%); z-index: 1000; width: 80%; pointer-events: none; }
-        .toast { background: var(--panel); border-left: 4px solid var(--gold); color: white; padding: 12px; border-radius: 4px; margin-bottom: 10px; font-size: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.5); opacity: 0; transition: 0.4s; }
+        .toast { background: var(--panel); border-left: 4px solid var(--gold); color: white; padding: 12px; border-radius: 4px; margin-bottom: 10px; font-size: 12px; opacity: 0; transition: 0.4s; }
     </style>
 </head>
 <body>
@@ -42,7 +44,7 @@
 <div id="toast-container"></div>
 
 <div class="header">
-    <div class="brand">STRATEX <span style="font-size: 10px; background: var(--gold); color: black; padding: 2px 4px; border-radius: 3px; margin-left: 5px;">V2.5</span></div>
+    <div class="brand">STRATEX <span style="font-size: 10px; background: var(--gold); color: black; padding: 2px 4px; border-radius: 3px; margin-left: 5px;">V2.6</span></div>
     <div id="ton-connect-button"></div>
 </div>
 
@@ -54,22 +56,19 @@
 </div>
 
 <div id="page-market" class="page-content active">
-    <div class="input-group">
-        <span style="color:var(--text); font-size: 12px;">Цена TON</span>
-        <span id="market-price-val" style="font-weight:bold; font-size: 16px;">... <small>USDT</small></span>
-    </div>
-    <div class="input-group">
-        <span style="color:var(--text); font-size: 12px;">Сумма</span>
-        <span style="font-weight:bold; font-size: 16px;">25 <small>TON</small></span>
-    </div>
+    <div class="input-group"><span>Цена TON</span><span id="market-price-val" style="font-weight:bold;">... <small>USDT</small></span></div>
+    <div class="input-group"><span>Сумма</span><span style="font-weight:bold;">25 <small>TON</small></span></div>
     <button class="btn-main" id="main-action-btn">ПОДКЛЮЧИТЕ КОШЕЛЕК</button>
 </div>
 
 <div id="page-bot" class="page-content">
     <h3 style="color:var(--gold)">🤖 GROK Auto-Trade</h3>
     <div class="input-group"><span>Стратегия</span><span style="color:var(--green)">Консервативная</span></div>
-    <p id="bot-status" style="font-size: 12px; color:var(--text);">Система готова.</p>
     <button class="btn-main" id="start-bot-btn" style="background: var(--gold); color: black;" onclick="toggleBot()">Запустить Грока</button>
+    
+    <div class="bot-log-container" id="bot-logs">
+        <div style="color:var(--text); text-align:center; padding: 10px;">Логи сигналов пусты...</div>
+    </div>
 </div>
 
 <div id="page-assets" class="page-content">
@@ -80,8 +79,8 @@
 
 <div id="page-settings" class="page-content">
     <h3>⚙️ Настройки</h3>
-    <div class="input-group"><span>Сеть</span><span>TON Mainnet</span></div>
-    <div class="input-group" onclick="showToast('Обновление скоро!')"><span>Версия</span><span>2.5.0</span></div>
+    <div class="input-group"><span>Версия</span><span>2.6.0 PRO</span></div>
+    <div class="input-group" onclick="location.reload()"><span>Обновить приложение</span><span>🔄</span></div>
 </div>
 
 <div class="nav-bar">
@@ -93,13 +92,11 @@
 
 <script src="https://s3.tradingview.com/tv.js"></script>
 <script>
-    // Инициализация графики
     new TradingView.widget({
         "autosize": true, "symbol": "OKX:TONUSDT", "interval": "15", "theme": "dark",
         "style": "1", "locale": "ru", "hide_top_toolbar": true, "container_id": "tv_widget"
     });
 
-    // Уведомления
     function showToast(text) {
         const container = document.getElementById('toast-container');
         const t = document.createElement('div');
@@ -111,6 +108,7 @@
     }
 
     let currentPrice = 7.235;
+    let botInterval = null;
 
     async function fetchPrice() {
         try {
@@ -147,6 +145,34 @@
         document.getElementById('market-top').style.display = (pageId === 'market' ? 'grid' : 'none');
     }
 
+    // --- ЛОГИКА БОТА ---
+    function toggleBot() {
+        const btn = document.getElementById('start-bot-btn');
+        const logs = document.getElementById('bot-logs');
+        
+        if(btn.innerText === "Запустить Грока") {
+            btn.innerText = "Остановить"; btn.style.background = "var(--red)";
+            showToast("Грок запущен!");
+            logs.innerHTML = '<div style="color:var(--gold); font-size:10px; margin-bottom:5px;">[Система] Анализ рынка запущен...</div>';
+            
+            // Симуляция сделок
+            botInterval = setInterval(() => {
+                const isBuy = Math.random() > 0.5;
+                const time = new Date().toLocaleTimeString();
+                const price = (currentPrice + (Math.random() * 0.01 - 0.005)).toFixed(3);
+                const entry = document.createElement('div');
+                entry.className = 'log-entry';
+                entry.innerHTML = `<span class="${isBuy ? 'log-buy' : 'log-sell'}">${isBuy ? 'BUY' : 'SELL'}</span><span>${price}</span><span>${time}</span>`;
+                logs.prepend(entry);
+            }, 5000);
+            
+        } else {
+            btn.innerText = "Запустить Грока"; btn.style.background = "var(--gold)";
+            showToast("Грок остановлен.");
+            clearInterval(botInterval);
+        }
+    }
+
     const tonConnectUI = new TON_CONNECT_UI.TonConnectUI({
         manifestUrl: 'https://sergey52bb.github.io/grok-autotrade/tonconnect-manifest.json',
         buttonRootId: 'ton-connect-button'
@@ -154,29 +180,15 @@
 
     tonConnectUI.onStatusChange(wallet => {
         const btn = document.getElementById('main-action-btn');
+        const status = document.getElementById('wallet-status');
         if (wallet) {
             btn.innerText = "КУПИТЬ TON"; btn.style.background = "var(--green)";
-            showToast("Кошелек успешно подключен!");
-            document.getElementById('wallet-status').innerText = "Подключен";
+            status.innerText = "Подключен";
         } else {
             btn.innerText = "ПОДКЛЮЧИТЕ КОШЕЛЕК";
-            document.getElementById('wallet-status').innerText = "Не подключен";
+            status.innerText = "Не подключен";
         }
     });
-
-    function toggleBot() {
-        const btn = document.getElementById('start-bot-btn');
-        const status = document.getElementById('bot-status');
-        if(btn.innerText === "Запустить Грока") {
-            btn.innerText = "Остановить"; btn.style.background = "var(--red)";
-            status.innerHTML = "🚀 <span style='color:var(--green)'>Грок ищет профит...</span>";
-            showToast("Грок запущен!");
-        } else {
-            btn.innerText = "Запустить Грока"; btn.style.background = "var(--gold)";
-            status.innerText = "Бот спит.";
-            showToast("Грок остановлен.");
-        }
-    }
 </script>
 </body>
 </html>
