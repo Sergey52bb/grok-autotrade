@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>STRATEX V3.3 LIVE</title>
+    <title>STRATEX V3.4 DEPOSIT</title>
     <script src="https://unpkg.com/@tonconnect/ui@latest/dist/tonconnect-ui.min.js"></script>
     <style>
         :root { --bg: #0b0e11; --panel: #1c2127; --input: #2b3139; --green: #0ecb81; --red: #f6465d; --gold: #f0b90b; --text: #848e9c; }
@@ -13,24 +13,26 @@
         .pair-selector { flex-grow: 1; background: var(--input); color: var(--gold); border: 1px solid #444; border-radius: 6px; padding: 6px; font-size: 13px; font-weight: bold; outline: none; }
 
         .trading-grid { display: grid; grid-template-columns: 1.5fr 1fr; height: 260px; border-bottom: 2px solid #000; }
-        .order-book-side { background: var(--panel); font-size: 10px; padding: 5px; display: flex; flex-direction: column; border-left: 1px solid #333; overflow: hidden; }
+        .order-book-side { background: var(--panel); font-size: 10px; padding: 5px; display: flex; flex-direction: column; border-left: 1px solid #333; overflow: hidden; min-height: 260px; }
         .ob-header { color: var(--text); font-size: 9px; margin-bottom: 4px; display: flex; justify-content: space-between; }
         .ob-row { position: relative; display: flex; justify-content: space-between; padding: 2px 0; z-index: 1; }
-        .ob-bg { position: absolute; right: 0; top: 0; bottom: 0; z-index: -1; opacity: 0.15; transition: width 0.5s; }
+        .ob-bg { position: absolute; right: 0; top: 0; bottom: 0; z-index: -1; opacity: 0.15; }
         .price-center { font-size: 14px; font-weight: bold; text-align: center; color: var(--green); padding: 4px 0; border-top: 1px solid #333; border-bottom: 1px solid #333; margin: 2px 0; }
 
         .page-content { display: none; padding: 12px; padding-bottom: 80px; height: calc(100vh - 350px); overflow-y: auto; }
         .page-content.active { display: block; }
         
         .input-group { background: var(--input); border-radius: 8px; padding: 12px; margin-bottom: 10px; display: flex; justify-content: space-between; align-items: center; }
-        .btn-main { width: 100%; background: var(--green); color: white; border: none; padding: 16px; border-radius: 10px; font-weight: bold; font-size: 16px; cursor: pointer; }
-        .btn-main.buy { background: var(--green); }
-        .btn-main.connect { background: var(--gold); color: black; }
+        .btn-main { width: 100%; background: var(--green); color: white; border: none; padding: 16px; border-radius: 10px; font-weight: bold; font-size: 16px; cursor: pointer; margin-top: 10px; }
+
+        /* Стили для Депозита */
+        .deposit-card { background: var(--panel); border-radius: 10px; padding: 15px; margin-top: 10px; border: 1px solid #333; }
+        .address-box { background: #000; padding: 10px; border-radius: 5px; font-family: monospace; font-size: 11px; word-break: break-all; margin: 8px 0; color: var(--gold); border: 1px solid var(--input); }
+        .net-badge { font-size: 9px; padding: 2px 6px; border-radius: 4px; background: var(--input); color: var(--text); }
 
         .nav-bar { position: fixed; bottom: 0; width: 100%; display: flex; background: var(--panel); padding: 10px 0; border-top: 1px solid #333; z-index: 100; }
         .nav-item { flex: 1; text-align: center; font-size: 10px; color: var(--text); cursor: pointer; }
         .nav-item.active { color: var(--gold); }
-        .nav-icon { font-size: 20px; margin-bottom: 3px; }
 
         #toast-container { position: fixed; top: 70px; left: 50%; transform: translateX(-50%); z-index: 1000; width: 85%; pointer-events: none; }
         .toast { background: var(--panel); border-left: 4px solid var(--gold); color: white; padding: 12px; border-radius: 6px; margin-bottom: 8px; font-size: 12px; opacity: 0; transition: 0.4s; }
@@ -43,15 +45,10 @@
 <div class="header">
     <select class="pair-selector" id="pair-select" onchange="changePair()">
         <optgroup label="Топ">
-            <option value="TONUSDT">USDT / TON</option>
-            <option value="BTCUSDT">USDT / BTC</option>
-            <option value="PAXGUSDT">Золото / USDT</option>
-        </optgroup>
-        <optgroup label="Альткоины">
-            <option value="SOLUSDT">USDT / SOL</option>
-            <option value="SUIUSDT">USDT / SUI</option>
-            <option value="POLUSDT">USDT / POL</option>
-            <option value="PEPEUSDT">USDT / PEPE</option>
+            <option value="TONUSDT">TON / USDT</option>
+            <option value="BTCUSDT">BTC / USDT</option>
+            <option value="ETHUSDT">ETH / USDT</option>
+            <option value="SOLUSDT">SOL / USDT</option>
         </optgroup>
         <optgroup label="Soon">
             <option value="CELIA_SOON">CELIA / SOON</option>
@@ -67,171 +64,145 @@
 </div>
 
 <div id="page-market" class="page-content active">
-    <div id="active-trading-ui">
+    <div id="active-ui">
         <div class="input-group">
-            <span id="price-label">Цена</span>
-            <span id="market-price-val" style="font-weight:bold; font-size: 18px; color:var(--gold)">...</span>
+            <span>Live Price</span>
+            <span id="market-price-val" style="font-weight:bold; color:var(--gold)">...</span>
         </div>
-        <button class="btn-main connect" id="main-action-btn" onclick="handleMainAction()">ПОДКЛЮЧИТЬ КОШЕЛЕК</button>
-    </div>
-    
-    <div id="soon-trading-ui" style="display:none;">
-        <div style="background: rgba(240,185,11,0.1); color: var(--gold); padding: 20px; border-radius: 12px; text-align: center; border: 1px dashed var(--gold);">
-            ⏳ ЛИСТИНГ СКОРО
+        <button class="btn-main" onclick="openDeposit()">ПОПОЛНИТЬ / ДЕПОЗИТ</button>
+        
+        <div id="deposit-section" style="display:none;">
+            <div class="deposit-card">
+                <div style="display:flex; justify-content:space-between; align-items:center;">
+                    <b id="dep-title">BTC Deposit</b>
+                    <span class="net-badge" id="dep-net">Native Network</span>
+                </div>
+                <div class="address-box" id="addr-native">Загрузка...</div>
+                
+                <div style="display:flex; justify-content:space-between; align-items:center; margin-top:10px;">
+                    <b>TON Jetton</b>
+                    <span class="net-badge">TON Network</span>
+                </div>
+                <div class="address-box" id="addr-ton">Подключите TON Wallet</div>
+                <p style="font-size:9px; color:var(--text); margin:0;">* Отправляйте только активы в указанных сетях.</p>
+            </div>
         </div>
     </div>
-</div>
-
-<div id="page-bot" class="page-content">
-    <h3 style="color:var(--gold)">🤖 GROK Smart-Trade</h3>
-    <button class="btn-main" style="background: var(--gold); color: black;">Запустить Грока</button>
 </div>
 
 <div id="page-assets" class="page-content">
-    <h3>🏦 Мои активы</h3>
-    <div class="input-group">
-        <span>TON Баланс</span>
-        <span id="ton-balance-val" style="color:var(--gold)">0.00 TON</span>
-    </div>
-    <div class="input-group">
-        <span>Статус</span>
-        <span id="wallet-status" style="color:var(--text)">Не подключен</span>
-    </div>
+    <h3>🏦 Мои Активы</h3>
+    <div class="input-group"><span>TON Баланс</span><b id="ton-bal">0.00</b></div>
+    <div class="input-group"><span>BTC</span><b>0.0000</b></div>
+    <div class="input-group"><span>USDT (TON)</span><b>0.00</b></div>
 </div>
 
 <div class="nav-bar">
-    <div class="nav-item active" onclick="showPage('market', this)"><div class="nav-icon">📊</div>Рынок</div>
-    <div class="nav-item" onclick="showPage('bot', this)"><div class="nav-icon">🤖</div>Бот</div>
-    <div class="nav-item" onclick="showPage('assets', this)"><div class="nav-icon">🏦</div>Активы</div>
+    <div class="nav-item active" onclick="showPage('market', this)">📊 Рынок</div>
+    <div class="nav-item" onclick="showPage('assets', this)">🏦 Активы</div>
 </div>
 
 <script src="https://s3.tradingview.com/tv.js"></script>
 <script>
     let currentPair = "TONUSDT";
-    let currentPrice = null;
-    let userWalletAddress = null;
+    let currentPrice = 0;
+    let walletAddr = null;
 
-    // 1. Инициализация TON Connect
+    // База адресов (примеры для отображения)
+    const nativeAddresses = {
+        "TONUSDT": "EQ... (Ваш TON адрес)",
+        "BTCUSDT": "1A1zP1eP5QGefi2DMPTfTL5SLmv7DivfNa",
+        "ETHUSDT": "0x742d35Cc6634C0532925a3b844Bc454e4438f44e",
+        "SOLUSDT": "8v7vL2...solana_native_addr"
+    };
+
     const tonConnectUI = new TON_CONNECT_UI.TonConnectUI({
         manifestUrl: 'https://sergey52bb.github.io/grok-autotrade/tonconnect-manifest.json',
         buttonRootId: 'ton-connect-button'
     });
 
-    // 2. Отслеживание состояния кошелька
     tonConnectUI.onStatusChange(wallet => {
-        const btn = document.getElementById('main-action-btn');
         if (wallet) {
-            userWalletAddress = wallet.account.address;
-            btn.innerText = "КУПИТЬ " + currentPair.split('USDT')[0];
-            btn.className = "btn-main buy";
-            document.getElementById('wallet-status').innerText = "Подключен";
-            document.getElementById('wallet-status').style.color = "var(--green)";
-            updateWalletBalance(userWalletAddress);
-            showToast("Кошелек подключен!");
-        } else {
-            userWalletAddress = null;
-            btn.innerText = "ПОДКЛЮЧИТЬ КОШЕЛЕК";
-            btn.className = "btn-main connect";
-            document.getElementById('ton-balance-val').innerText = "0.00 TON";
-            document.getElementById('wallet-status').innerText = "Не подключен";
+            walletAddr = wallet.account.address;
+            document.getElementById('addr-ton').innerText = walletAddr;
+            updateBalance(walletAddr);
         }
     });
 
-    // 3. Получение реального баланса TON
-    async function updateWalletBalance(address) {
-        try {
-            // Используем публичное API Toncenter (mainnet)
-            const response = await fetch(`https://toncenter.com/api/v2/getAddressInformation?address=${address}`);
-            const data = await response.json();
-            if (data.ok) {
-                const nanoBalance = data.result.balance;
-                const normalBalance = (nanoBalance / 1000000000).toFixed(2);
-                document.getElementById('ton-balance-val').innerText = normalBalance + " TON";
-            }
-        } catch (e) {
-            console.error("Ошибка получения баланса");
-        }
-    }
-
-    // 4. Обработка нажатия главной кнопки
-    async function handleMainAction() {
-        if (!userWalletAddress) {
-            tonConnectUI.openModal();
-        } else {
-            // Симуляция покупки (вызов транзакции на 0.001 TON для теста)
-            showToast("Подготовка транзакции...");
-            const transaction = {
-                validUntil: Math.floor(Date.now() / 1000) + 60,
-                messages: [
-                    {
-                        address: "UQD3-P_rY8Z9aN3V8N_P_rY8Z9aN3V8N_P_rY8Z9aN3V8N", // Твой кошелек для приема или тестовый
-                        amount: "1000000", // 0.001 TON в наноконах
-                    }
-                ]
-            };
-            try {
-                await tonConnectUI.sendTransaction(transaction);
-                showToast("Ордер исполнен!");
-            } catch (e) {
-                showToast("Транзакция отменена");
-            }
-        }
-    }
-
-    // --- Остальная логика графика и цен (как в V3.2) ---
     function initTV(symbol) {
-        if (symbol.includes('_SOON')) return;
+        if (symbol.includes('SOON')) return;
         new TradingView.widget({
             "autosize": true, "symbol": "OKX:" + symbol, "interval": "15",
-            "theme": "dark", "style": "1", "locale": "ru", "container_id": "tv_widget", "hide_top_toolbar": true
+            "theme": "dark", "container_id": "tv_widget", "hide_top_toolbar": true
         });
     }
 
-    initTV(currentPair);
-
     async function fetchPrice() {
-        if (currentPair.includes('_SOON')) return;
-        const ids = {"TONUSDT":"the-open-network", "BTCUSDT":"bitcoin", "PAXGUSDT":"pax-gold", "SOLUSDT":"solana", "SUIUSDT":"sui", "POLUSDT":"polygon-ecosystem-token", "PEPEUSDT":"pepe"};
-        const id = ids[currentPair];
+        if (currentPair.includes('SOON')) return;
+        const ids = {"TONUSDT":"the-open-network","BTCUSDT":"bitcoin","ETHUSDT":"ethereum","SOLUSDT":"solana"};
         try {
-            const res = await fetch(`https://api.coingecko.com/api/v3/simple/price?ids=${id}&vs_currencies=usd`);
+            const res = await fetch(`https://api.coingecko.com/api/v3/simple/price?ids=${ids[currentPair]}&vs_currencies=usd`);
             const data = await res.json();
-            currentPrice = data[id].usd;
-            document.getElementById('market-price-val').innerHTML = currentPrice.toFixed(currentPrice < 1 ? 5 : 2) + " <small>USDT</small>";
+            currentPrice = data[ids[currentPair]].usd;
+            document.getElementById('market-price-val').innerText = currentPrice.toFixed(2) + " USDT";
+            updateOrderBook();
         } catch(e) {}
+    }
+
+    function updateOrderBook() {
+        const ob = document.getElementById('order-book');
+        let html = '<div class="ob-header"><span>Цена</span><span>Кол.</span></div>';
+        for(let i=5; i>0; i--) {
+            let p = (currentPrice + (i * (currentPrice*0.001))).toFixed(2);
+            html += `<div class="ob-row" style="color:var(--red)"><div class="ob-bg" style="width:${Math.random()*50}%; background:var(--red)"></div><span>${p}</span><span>${(Math.random()*10).toFixed(2)}</span></div>`;
+        }
+        html += `<div class="price-center">${currentPrice.toFixed(2)}</div>`;
+        for(let i=1; i<=5; i++) {
+            let p = (currentPrice - (i * (currentPrice*0.001))).toFixed(2);
+            html += `<div class="ob-row" style="color:var(--green)"><div class="ob-bg" style="width:${Math.random()*50}%; background:var(--green)"></div><span>${p}</span><span>${(Math.random()*10).toFixed(2)}</span></div>`;
+        }
+        ob.innerHTML = html;
     }
 
     function changePair() {
         currentPair = document.getElementById('pair-select').value;
-        const isSoon = currentPair.includes('_SOON');
-        document.getElementById('active-trading-ui').style.display = isSoon ? 'none' : 'block';
-        document.getElementById('soon-trading-ui').style.display = isSoon ? 'block' : 'none';
-        if (!isSoon) { initTV(currentPair); fetchPrice(); }
-        if (userWalletAddress && !isSoon) {
-            document.getElementById('main-action-btn').innerText = "КУПИТЬ " + currentPair.split('USDT')[0];
-        }
+        initTV(currentPair);
+        fetchPrice();
+        document.getElementById('deposit-section').style.display = 'none';
+    }
+
+    function openDeposit() {
+        const sect = document.getElementById('deposit-section');
+        sect.style.display = sect.style.display === 'none' ? 'block' : 'none';
+        const symbol = currentPair.split('USDT')[0];
+        document.getElementById('dep-title').innerText = symbol + " Deposit";
+        document.getElementById('dep-net').innerText = symbol + " Native Network";
+        document.getElementById('addr-native').innerText = nativeAddresses[currentPair] || "Генерация...";
+    }
+
+    async function updateBalance(addr) {
+        const res = await fetch(`https://toncenter.com/api/v2/getAddressInformation?address=${addr}`);
+        const data = await res.json();
+        if(data.ok) document.getElementById('ton-bal').innerText = (data.result.balance / 1e9).toFixed(2);
+    }
+
+    function showPage(pId, el) {
+        document.querySelectorAll('.page-content').forEach(p => p.classList.remove('active'));
+        document.getElementById('page-' + pId).classList.add('active');
+        document.getElementById('market-top').style.display = (pId === 'market' ? 'grid' : 'none');
     }
 
     function showToast(text) {
         const container = document.getElementById('toast-container');
-        const t = document.createElement('div');
-        t.className = 'toast'; t.innerText = text;
+        const t = document.createElement('div'); t.className = 'toast'; t.innerText = text;
         container.appendChild(t);
         setTimeout(() => t.style.opacity = '1', 10);
         setTimeout(() => { t.style.opacity = '0'; setTimeout(() => t.remove(), 500); }, 2000);
     }
 
-    function showPage(pId, el) {
-        document.querySelectorAll('.page-content').forEach(p => p.classList.remove('active'));
-        document.querySelectorAll('.nav-item').forEach(i => i.classList.remove('active'));
-        document.getElementById('page-' + pId).classList.add('active');
-        el.classList.add('active');
-        document.getElementById('market-top').style.display = (pId === 'market' ? 'grid' : 'none');
-    }
-
-    setInterval(fetchPrice, 10000);
+    initTV(currentPair);
     fetchPrice();
+    setInterval(fetchPrice, 8000);
 </script>
 </body>
 </html>
-
