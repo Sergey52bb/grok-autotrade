@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>STRATEX V3.1 SMART</title>
+    <title>STRATEX V3.2 GLOBAL LIST</title>
     <script src="https://unpkg.com/@tonconnect/ui@latest/dist/tonconnect-ui.min.js"></script>
     <style>
         :root { --bg: #0b0e11; --panel: #1c2127; --input: #2b3139; --green: #0ecb81; --red: #f6465d; --gold: #f0b90b; --text: #848e9c; }
@@ -25,7 +25,6 @@
         .input-group { background: var(--input); border-radius: 8px; padding: 12px; margin-bottom: 10px; display: flex; justify-content: space-between; align-items: center; }
         .btn-main { width: 100%; background: var(--green); color: white; border: none; padding: 16px; border-radius: 10px; font-weight: bold; font-size: 16px; cursor: pointer; }
 
-        /* Стиль для монет "Скоро" */
         .soon-badge { background: rgba(240,185,11,0.1); color: var(--gold); padding: 20px; border-radius: 12px; text-align: center; border: 1px dashed var(--gold); margin-top: 10px; }
 
         .nav-bar { position: fixed; bottom: 0; width: 100%; display: flex; background: var(--panel); padding: 10px 0; border-top: 1px solid #333; z-index: 100; }
@@ -43,14 +42,29 @@
 
 <div class="header">
     <select class="pair-selector" id="pair-select" onchange="changePair()">
-        <optgroup label="Активные пары">
-            <option value="TONUSDT">TON / USDT</option>
-            <option value="BTCUSDT">BTC / USDT</option>
-            <option value="ETHUSDT">ETH / USDT</option>
-            <option value="PAXGUSDT">GOLD / USDT</option>
-            <option value="SOLUSDT">SOL / USDT</option>
-            <option value="SUIUSDT">SUI / USDT</option>
-            <option value="PEPEUSDT">PEPE / USDT</option>
+        <optgroup label="Топ Ликвидность">
+            <option value="TONUSDT">USDT / TON</option>
+            <option value="BTCUSDT">USDT / BTC</option>
+            <option value="ETHUSDT">USDT / ETH</option>
+            <option value="BNBUSDT">USDT / BNB</option>
+            <option value="SOLUSDT">USDT / SOL</option>
+        </optgroup>
+        <optgroup label="Альткоины & Стейблы">
+            <option value="NEARUSDT">USDT / NEAR</option>
+            <option value="USDCUSDT">USDT / USDC</option>
+            <option value="SUIUSDT">USDT / SUI</option>
+            <option value="UNIUSDT">USDT / UNISWAP</option>
+            <option value="ASTRUSDT">USDT / ASTR (Aster)</option>
+            <option value="POLUSDT">USDT / POL (ex Matic)</option>
+            <option value="JUPUSDT">USDT / JUPITER</option>
+            <option value="XRPUSDT">USDT / XRP</option>
+            <option value="TRXUSDT">USDT / TRON</option>
+            <option value="LTCUSDT">USDT / LITECOIN</option>
+        </optgroup>
+        <optgroup label="Мемы & Металлы">
+            <option value="PEPEUSDT">USDT / PEPE</option>
+            <option value="SHIBUSDT">USDT / SHIBA</option>
+            <option value="PAXGUSDT">Золото / USDT</option>
         </optgroup>
         <optgroup label="Ожидают листинга">
             <option value="CELIA_SOON">CELIA / SOON</option>
@@ -68,7 +82,7 @@
 <div id="page-market" class="page-content active">
     <div id="active-trading-ui">
         <div class="input-group">
-            <span>Цена USDT</span>
+            <span id="price-label">Цена актива</span>
             <span id="market-price-val" style="font-weight:bold; font-size: 18px; color:var(--gold)">...</span>
         </div>
         <button class="btn-main" id="main-action-btn">ПОДКЛЮЧИТЬ КОШЕЛЕК</button>
@@ -78,20 +92,21 @@
         <div class="soon-badge">
             <div style="font-size: 24px; margin-bottom: 10px;">⏳</div>
             <div style="font-weight: bold; margin-bottom: 5px;">ЛИСТИНГ ОЖИДАЕТСЯ</div>
-            <div style="font-size: 12px; opacity: 0.8;">Торговля данной монетой будет доступна после официального запуска на биржах.</div>
+            <div style="font-size: 12px; opacity: 0.8;">Пара скоро будет добавлена на блокчейн TON.</div>
         </div>
     </div>
 </div>
 
 <div id="page-bot" class="page-content">
-    <h3 style="color:var(--gold)">🤖 GROK MULTI-BOT</h3>
+    <h3 style="color:var(--gold)">🤖 GROK Smart-Trade</h3>
+    <div class="input-group"><span>Стратегия</span><span>Arbitrage v2</span></div>
     <button class="btn-main" id="start-bot-btn" style="background: var(--gold); color: black;" onclick="toggleBot()">Запустить Грока</button>
     <div id="bot-logs" style="margin-top:15px; font-size:11px; font-family:monospace; background:#000; padding:10px; height:150px; overflow-y:auto; border:1px solid #333;"></div>
 </div>
 
 <div id="page-assets" class="page-content">
-    <h3>🏦 Кошелек</h3>
-    <div class="input-group"><span>Общий баланс</span><span style="color:var(--gold)">0.00 USDT</span></div>
+    <h3>🏦 Мои активы</h3>
+    <div class="input-group"><span>Баланс Кошелька</span><span id="wallet-balance" style="color:var(--gold)">0.00 USDT</span></div>
 </div>
 
 <div class="nav-bar">
@@ -107,16 +122,25 @@
 
     const coinMap = {
         "TONUSDT": "the-open-network", "BTCUSDT": "bitcoin", "ETHUSDT": "ethereum",
-        "PAXGUSDT": "pax-gold", "SOLUSDT": "solana", "SUIUSDT": "sui", "PEPEUSDT": "pepe"
+        "BNBUSDT": "binancecoin", "SOLUSDT": "solana", "NEARUSDT": "near",
+        "USDCUSDT": "usd-coin", "SUIUSDT": "sui", "UNIUSDT": "uniswap",
+        "ASTRUSDT": "astar", "POLUSDT": "polygon-ecosystem-token", "JUPUSDT": "jupiter-exchange-solana",
+        "XRPUSDT": "ripple", "TRXUSDT": "tron", "LTCUSDT": "litecoin",
+        "PEPEUSDT": "pepe", "SHIBUSDT": "shiba-inu", "PAXGUSDT": "pax-gold"
     };
 
     function initTV(symbol) {
         if (symbol.includes('_SOON')) {
-            document.getElementById('tv_widget').innerHTML = "<div style='display:flex; height:100%; align-items:center; justify-content:center; color:#555; text-align:center; padding:20px;'>График будет доступен после листинга</div>";
+            document.getElementById('tv_widget').innerHTML = "<div style='display:flex; height:100%; align-items:center; justify-content:center; color:#555; text-align:center;'>Листинг скоро...</div>";
             return;
         }
+        // Маппинг для TradingView (некоторые тикеры отличаются)
+        let tvSymbol = symbol;
+        if(symbol === "PAXGUSDT") tvSymbol = "GOLD";
+        if(symbol === "POLUSDT") tvSymbol = "POLUSDT";
+
         new TradingView.widget({
-            "autosize": true, "symbol": "OKX:" + symbol, "interval": "15",
+            "autosize": true, "symbol": "OKX:" + tvSymbol, "interval": "15",
             "theme": "dark", "style": "1", "locale": "ru", "container_id": "tv_widget", "hide_top_toolbar": true
         });
     }
@@ -130,42 +154,52 @@
             const res = await fetch(`https://api.coingecko.com/api/v3/simple/price?ids=${id}&vs_currencies=usd`);
             const data = await res.json();
             currentPrice = data[id].usd;
-            document.getElementById('market-price-val').innerHTML = `${currentPrice.toFixed(currentPrice < 1 ? 5 : 2)} <small>USDT</small>`;
-            updateOrderBook();
+            let digits = currentPrice < 0.01 ? 7 : (currentPrice < 1 ? 4 : 2);
+            document.getElementById('market-price-val').innerHTML = `${currentPrice.toFixed(digits)} <small>USDT</small>`;
+            updateOrderBook(digits);
         } catch(e) {}
     }
 
     function changePair() {
         currentPair = document.getElementById('pair-select').value;
         const isSoon = currentPair.includes('_SOON');
-        
         document.getElementById('active-trading-ui').style.display = isSoon ? 'none' : 'block';
         document.getElementById('soon-trading-ui').style.display = isSoon ? 'block' : 'none';
         
         if (!isSoon) {
             initTV(currentPair);
             fetchPrice();
+            showToast("Выбрано: " + currentPair);
         } else {
             initTV(currentPair);
-            document.getElementById('order-book').innerHTML = "<div style='text-align:center; padding-top:50px; color:#555;'>Data Offline</div>";
+            document.getElementById('order-book').innerHTML = "";
         }
     }
 
-    function updateOrderBook() {
+    function updateOrderBook(digits) {
         if (!currentPrice || currentPair.includes('_SOON')) return;
         const ob = document.getElementById('order-book');
-        let html = '<div class="ob-header"><span>Цена</span><span>Объем</span></div>';
-        const spread = currentPrice * 0.0005;
+        let html = '<div class="ob-header"><span>Цена</span><span>Кол</span></div>';
+        const spread = currentPrice * 0.001;
         for(let i=3; i>0; i--) {
-            let p = (currentPrice + (i*spread)).toFixed(currentPrice < 1 ? 5 : 2);
-            html += `<div class="ob-row" style="color:var(--red)"><div class="ob-bg" style="width:${Math.random()*70}%; background:var(--red)"></div><span>${p}</span><span>${(Math.random()*500).toFixed(0)}</span></div>`;
+            let p = (currentPrice + (i*spread)).toFixed(digits);
+            html += `<div class="ob-row" style="color:var(--red)"><div class="ob-bg" style="width:${Math.random()*60}%; background:var(--red)"></div><span>${p}</span><span>${(Math.random()*100).toFixed(1)}</span></div>`;
         }
-        html += `<div class="price-center">${currentPrice.toFixed(currentPrice < 1 ? 5 : 2)}</div>`;
+        html += `<div class="price-center">${currentPrice.toFixed(digits)}</div>`;
         for(let i=1; i<=3; i++) {
-            let p = (currentPrice - (i*spread)).toFixed(currentPrice < 1 ? 5 : 2);
-            html += `<div class="ob-row" style="color:var(--green)"><div class="ob-bg" style="width:${Math.random()*70}%; background:var(--green)"></div><span>${p}</span><span>${(Math.random()*500).toFixed(0)}</span></div>`;
+            let p = (currentPrice - (i*spread)).toFixed(digits);
+            html += `<div class="ob-row" style="color:var(--green)"><div class="ob-bg" style="width:${Math.random()*60}%; background:var(--green)"></div><span>${p}</span><span>${(Math.random()*100).toFixed(1)}</span></div>`;
         }
         ob.innerHTML = html;
+    }
+
+    function showToast(text) {
+        const container = document.getElementById('toast-container');
+        const t = document.createElement('div');
+        t.className = 'toast'; t.innerText = text;
+        container.appendChild(t);
+        setTimeout(() => t.style.opacity = '1', 10);
+        setTimeout(() => { t.style.opacity = '0'; setTimeout(() => t.remove(), 500); }, 2500);
     }
 
     function showPage(pId, el) {
@@ -174,6 +208,16 @@
         document.getElementById('page-' + pId).classList.add('active');
         el.classList.add('active');
         document.getElementById('market-top').style.display = (pId === 'market' ? 'grid' : 'none');
+    }
+
+    function toggleBot() {
+        const btn = document.getElementById('start-bot-btn');
+        if(btn.innerText === "Запустить Грока") {
+            btn.innerText = "Стоп"; btn.style.background = "var(--red)";
+            showToast("Бот запущен на " + currentPair);
+        } else {
+            btn.innerText = "Запустить Грока"; btn.style.background = "var(--gold)";
+        }
     }
 
     setInterval(fetchPrice, 10000);
