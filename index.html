@@ -1,9 +1,9 @@
-    <!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>STRATEX V2.7 SMART</title>
+    <title>STRATEX V2.8 FIXED</title>
     <script src="https://unpkg.com/@tonconnect/ui@latest/dist/tonconnect-ui.min.js"></script>
     <style>
         :root { --bg: #0b0e11; --panel: #1c2127; --input: #2b3139; --green: #0ecb81; --red: #f6465d; --gold: #f0b90b; --text: #848e9c; }
@@ -25,8 +25,7 @@
         .btn-main { width: 100%; background: var(--green); color: white; border: none; padding: 14px; border-radius: 8px; font-weight: bold; font-size: 16px; margin-top: 5px; cursor: pointer; }
 
         .bot-log-container { background: var(--input); border-radius: 8px; padding: 10px; margin-top: 15px; max-height: 220px; overflow-y: auto; font-size: 11px; border: 1px solid #444; }
-        .log-entry { display: flex; justify-content: space-between; padding: 6px 0; border-bottom: 1px solid #333; animation: fadeIn 0.3s; }
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(-5px); } to { opacity: 1; transform: translateY(0); } }
+        .log-entry { display: flex; justify-content: space-between; padding: 6px 0; border-bottom: 1px solid #333; }
         .log-buy { color: var(--green); font-weight: bold; }
         .log-sell { color: var(--red); font-weight: bold; }
 
@@ -44,28 +43,34 @@
 <div id="toast-container"></div>
 
 <div class="header">
-    <div class="brand">STRATEX <span style="font-size: 10px; background: var(--gold); color: black; padding: 2px 4px; border-radius: 3px; margin-left: 5px;">V2.7</span></div>
+    <div class="brand">STRATEX <span style="font-size: 10px; background: var(--gold); color: black; padding: 2px 4px; border-radius: 3px; margin-left: 5px;">V2.8</span></div>
     <div id="ton-connect-button"></div>
 </div>
 
 <div id="market-top" class="trading-grid">
     <div id="tv_widget" style="height:100%;"></div>
-    <div class="order-book-side" id="order-book"></div>
+    <div class="order-book-side" id="order-book">
+        <div style="text-align:center; padding-top:50px; color:var(--text); font-size:10px;">Загрузка стакана...</div>
+    </div>
 </div>
 
 <div id="page-market" class="page-content active">
-    <div class="input-group"><span>Цена TON</span><span id="market-price-val" style="font-weight:bold;">... <small>USDT</small></span></div>
-    <div class="input-group"><span>Сумма</span><span style="font-weight:bold;">25 <small>TON</small></span></div>
+    <div class="input-group">
+        <span>Цена TON</span>
+        <span id="market-price-val" style="font-weight:bold; color:var(--gold)">... <small>USDT</small></span>
+    </div>
+    <div class="input-group">
+        <span>Сумма</span>
+        <span style="font-weight:bold;">25 <small>TON</small></span>
+    </div>
     <button class="btn-main" id="main-action-btn">ПОДКЛЮЧИТЕ КОШЕЛЕК</button>
 </div>
 
 <div id="page-bot" class="page-content">
     <h3 style="color:var(--gold)">🤖 GROK Smart-Trade</h3>
-    <div class="input-group"><span>Стратегия</span><span style="color:var(--green)">Scalping PRO</span></div>
     <button class="btn-main" id="start-bot-btn" style="background: var(--gold); color: black;" onclick="toggleBot()">Запустить Грока</button>
-    
     <div class="bot-log-container" id="bot-logs">
-        <div style="color:var(--text); text-align:center; padding: 10px;">Ожидание запуска алгоритма...</div>
+        <div style="color:var(--text); text-align:center; padding: 10px;">Ожидание цены...</div>
     </div>
 </div>
 
@@ -77,7 +82,6 @@
 <div id="page-settings" class="page-content">
     <h3>⚙️ Настройки</h3>
     <div class="input-group" onclick="location.reload()"><span>Перезагрузить</span><span>🔄</span></div>
-    <p style="font-size: 10px; color: var(--text); text-align: center;">STRATEX Terminal v2.7.0</p>
 </div>
 
 <div class="nav-bar">
@@ -103,23 +107,39 @@
         setTimeout(() => { t.style.opacity = '0'; setTimeout(() => t.remove(), 500); }, 3000);
     }
 
-    let currentPrice = 7.235;
+    let currentPrice = null; // Изначально цены нет
     let botInterval = null;
-    let lastAction = 'SELL'; // Начинаем с ожидания покупки
+    let lastAction = 'SELL';
     let entryPrice = 0;
 
+    // ФУНКЦИЯ ОБНОВЛЕНИЯ ЦЕНЫ
     async function fetchPrice() {
         try {
             const res = await fetch('https://api.coingecko.com/api/v3/simple/price?ids=the-open-network&vs_currencies=usd');
             const data = await res.json();
-            currentPrice = data['the-open-network'].usd;
+            const newPrice = data['the-open-network'].usd;
+            
+            // Если это первая загрузка цены
+            if (currentPrice === null) {
+                currentPrice = newPrice;
+                updateOrderBook(); // Сразу рисуем стакан
+            } else {
+                currentPrice = newPrice;
+            }
+            
             document.getElementById('market-price-val').innerHTML = `${currentPrice.toFixed(3)} <small>USDT</small>`;
-        } catch(e) {}
+        } catch(e) {
+            console.log("Ошибка API");
+        }
     }
 
+    // РИСУЕМ СТАКАН (только если есть цена)
     function updateOrderBook() {
+        if (!currentPrice) return; 
+        
         const ob = document.getElementById('order-book');
         let html = '<div class="ob-header"><span>Цена</span><span>Кол-во</span></div>';
+        
         for(let i=4; i>0; i--) {
             let p = (currentPrice + (i*0.002)).toFixed(3);
             html += `<div class="ob-row" style="color:var(--red)"><div class="ob-bg" style="width:${Math.random()*80}%; background:var(--red)"></div><span>${p}</span><span>${(Math.random()*200).toFixed(1)}</span></div>`;
@@ -132,8 +152,10 @@
         ob.innerHTML = html;
     }
 
-    setInterval(fetchPrice, 10000); setInterval(updateOrderBook, 3000);
-    fetchPrice(); updateOrderBook();
+    // Запускаем циклы
+    setInterval(fetchPrice, 8000); 
+    setInterval(updateOrderBook, 3000);
+    fetchPrice(); // Первый запрос улетает мгновенно
 
     function showPage(pageId, el) {
         document.querySelectorAll('.page-content').forEach(p => p.classList.remove('active'));
@@ -143,15 +165,16 @@
         document.getElementById('market-top').style.display = (pageId === 'market' ? 'grid' : 'none');
     }
 
-    // --- УМНАЯ ЛОГИКА БОТА ---
     function toggleBot() {
+        if (!currentPrice) { showToast("Ждем получения цены..."); return; }
+        
         const btn = document.getElementById('start-bot-btn');
         const logs = document.getElementById('bot-logs');
         
         if(btn.innerText === "Запустить Грока") {
             btn.innerText = "Остановить"; btn.style.background = "var(--red)";
-            showToast("Алгоритм Scalping PRO запущен");
-            logs.innerHTML = '<div style="color:var(--gold); font-size:10px; margin-bottom:5px;">[Система] Поиск точки входа...</div>';
+            showToast("Алгоритм запущен");
+            logs.innerHTML = '<div style="color:var(--gold); font-size:10px; margin-bottom:5px;">[Система] Поиск точки...</div>';
             
             botInterval = setInterval(() => {
                 const time = new Date().toLocaleTimeString();
@@ -159,21 +182,18 @@
                 logEntry.className = 'log-entry';
 
                 if (lastAction === 'SELL') {
-                    // Имитируем покупку чуть ниже текущей цены
-                    entryPrice = (currentPrice - 0.002).toFixed(3);
+                    entryPrice = (currentPrice - 0.001).toFixed(3);
                     logEntry.innerHTML = `<span class="log-buy">BUY</span><span>${entryPrice}</span><span>${time}</span>`;
                     lastAction = 'BUY';
                     logs.prepend(logEntry);
                 } else {
-                    // Продаем только если цена выше цены покупки на 0.1%
-                    const exitPrice = (parseFloat(entryPrice) + 0.008).toFixed(3);
+                    const exitPrice = (parseFloat(entryPrice) + 0.005).toFixed(3);
                     logEntry.innerHTML = `<span class="log-sell">SELL</span><span>${exitPrice}</span><span>${time}</span>`;
                     lastAction = 'SELL';
                     logs.prepend(logEntry);
-                    showToast("Сделка закрыта в плюс!");
+                    showToast("Профит зафиксирован!");
                 }
             }, 6000);
-            
         } else {
             btn.innerText = "Запустить Грока"; btn.style.background = "var(--gold)";
             showToast("Бот остановлен");
