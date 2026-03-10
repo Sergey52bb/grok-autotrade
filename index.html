@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>STRATEX V4.2 LIVE</title>
+    <title>STRATEX V4.3 ULTIMATE</title>
     <script src="https://unpkg.com/@tonconnect/ui@latest/dist/tonconnect-ui.min.js"></script>
     <style>
         :root { --bg: #0b0e11; --panel: #1c2127; --input: #2b3139; --green: #0ecb81; --red: #f6465d; --gold: #f0b90b; --text: #848e9c; }
@@ -16,15 +16,15 @@
         .trading-grid.fullscreen { grid-template-columns: 1fr 0fr; height: 75vh; }
         .trading-grid.fullscreen .order-book-side { display: none; }
 
-        #tv_wrapper { position: relative; width: 100%; height: 100%; border-right: 1px solid #333; padding-right: 5px; }
+        #tv_wrapper { position: relative; width: 100%; height: 100%; border-right: 1px solid #333; box-sizing: border-box; }
         #tv_widget { width: 100%; height: 100%; }
 
         .expand-btn { position: absolute; left: 8px; top: 8px; z-index: 100; background: rgba(30,34,45,0.9); border: 1px solid #444; color: var(--gold); border-radius: 4px; padding: 5px 10px; font-size: 10px; }
 
-        .order-book-side { background: var(--panel); font-size: 10px; padding: 5px; display: flex; flex-direction: column; height: 100%; box-sizing: border-box; }
-        .price-center { font-size: 15px; font-weight: bold; text-align: center; color: var(--green); padding: 8px 0; border-top: 1px solid #333; border-bottom: 1px solid #333; margin: 5px 0; }
-        .ob-row { display: flex; justify-content: space-between; height: 18px; position: relative; align-items: center; }
-        .ob-bg { position: absolute; right: 0; top: 0; bottom: 0; z-index: -1; opacity: 0.15; transition: width 0.3s; }
+        .order-book-side { background: var(--panel); font-size: 10px; padding: 5px; display: flex; flex-direction: column; height: 100%; box-sizing: border-box; overflow: hidden; }
+        .price-center { font-size: 14px; font-weight: bold; text-align: center; color: var(--green); padding: 6px 0; border-top: 1px solid #333; border-bottom: 1px solid #333; margin: 4px 0; }
+        .ob-row { display: flex; justify-content: space-between; height: 18px; position: relative; align-items: center; z-index: 1; }
+        .ob-bg { position: absolute; right: 0; top: 0; bottom: 0; z-index: -1; opacity: 0.15; transition: width 0.5s ease; }
 
         .page-content { display: none; padding: 15px; height: calc(100vh - 368px); overflow-y: auto; }
         .page-content.active { display: block; }
@@ -32,12 +32,12 @@
         .input-group { background: var(--input); border-radius: 10px; padding: 12px; margin-bottom: 10px; display: flex; justify-content: space-between; align-items: center; }
         .btn-main { width: 100%; background: var(--green); color: white; border: none; padding: 16px; border-radius: 12px; font-weight: bold; font-size: 16px; cursor: pointer; }
 
-        #trade-panel { position: fixed; bottom: -100%; left: 0; width: 100%; background: var(--panel); border-top: 2px solid var(--gold); border-radius: 20px 20px 0 0; padding: 20px; box-sizing: border-box; transition: 0.4s; z-index: 2000; }
+        #trade-panel { position: fixed; bottom: -100%; left: 0; width: 100%; background: var(--panel); border-top: 2px solid var(--gold); border-radius: 20px 20px 0 0; padding: 20px; box-sizing: border-box; transition: 0.4s cubic-bezier(0.4, 0, 0.2, 1); z-index: 2000; }
         #trade-panel.open { bottom: 0; }
         .trade-tabs { display: flex; gap: 10px; margin-bottom: 20px; }
         .tab-btn { flex: 1; padding: 12px; border-radius: 8px; border: none; font-weight: bold; color: white; opacity: 0.4; }
         .tab-btn.active { opacity: 1; }
-        .amount-input { width: 100%; background: var(--input); border: 1px solid #444; padding: 15px; border-radius: 8px; color: white; font-size: 18px; margin-bottom: 15px; box-sizing: border-box; }
+        .amount-input { width: 100%; background: var(--input); border: 1px solid #444; padding: 15px; border-radius: 8px; color: white; font-size: 18px; margin-bottom: 15px; box-sizing: border-box; outline: none; }
         .pct-btn { flex: 1; background: #333; border: none; color: var(--text); padding: 8px; border-radius: 4px; font-size: 12px; cursor: pointer; }
 
         .nav-bar { position: fixed; bottom: 0; width: 100%; display: flex; background: var(--panel); padding: 12px 0; border-top: 1px solid #333; z-index: 1000; }
@@ -76,16 +76,22 @@
     <button class="btn-main" onclick="openTrade()">ОТКРЫТЬ СДЕЛКУ</button>
 </div>
 
+<div id="page-assets" class="page-content">
+    <h3 style="margin-top:0;">🏦 Мои Активы</h3>
+    <div class="input-group"><span>TON Balance</span><b id="ton-bal">0.00</b></div>
+    <div class="input-group"><span>USDT</span><b>0.00</b></div>
+</div>
+
 <div id="trade-panel">
     <div style="display:flex; justify-content:space-between; margin-bottom:15px;">
         <b id="trade-pair-name">TON / USDT</b>
-        <span onclick="closeTrade()" style="color:var(--text);">✖ Закрыть</span>
+        <span onclick="closeTrade()" style="color:var(--text); cursor:pointer;">✖</span>
     </div>
     <div class="trade-tabs">
-        <button class="tab-btn active" style="background:var(--green)" onclick="setSide('buy', this)">КУПИТЬ</button>
-        <button class="tab-btn" style="background:var(--red)" onclick="setSide('sell', this)">ПРОДАТЬ</button>
+        <button id="buy-tab" class="tab-btn active" style="background:var(--green)" onclick="setSide('buy')">КУПИТЬ</button>
+        <button id="sell-tab" class="tab-btn" style="background:var(--red)" onclick="setSide('sell')">ПРОДАТЬ</button>
     </div>
-    <input type="number" class="amount-input" placeholder="Сумма в USDT" id="trade-amount">
+    <input type="number" class="amount-input" placeholder="Сумма" id="trade-amount">
     <div style="display:flex; gap:8px; margin-bottom:20px;">
         <button class="pct-btn" onclick="setPct(25)">25%</button>
         <button class="pct-btn" onclick="setPct(50)">50%</button>
@@ -106,8 +112,10 @@
     let lastPrice = 0;
 
     function initTV(symbol) {
-        // Очищаем и создаем новый виджет
-        document.getElementById('tv_widget').innerHTML = "";
+        const container = document.getElementById('tv_widget');
+        if(!container) return;
+        container.innerHTML = "";
+        
         new TradingView.widget({
             "autosize": true,
             "symbol": "OKX:" + symbol,
@@ -137,31 +145,32 @@
             const prec = price < 0.01 ? 7 : 2;
             document.getElementById('market-price-val').innerText = price.toFixed(prec) + " USDT";
             updateOrderBook(price, prec);
-        } catch(e) { console.error("Price fetch error"); }
+        } catch(e) {}
     }
 
     function updateOrderBook(price, prec) {
         const ob = document.getElementById('order-book');
         if (isFullscreen || !ob) return;
         
+        const spread = price * 0.0003;
         let html = '<div style="color:var(--text); font-size:8px; display:flex; justify-content:space-between; margin-bottom:5px;"><span>ЦЕНА</span><span>КОЛ-ВО</span></div>';
-        // Аски (продавцы)
-        for(let i=5; i>0; i--) {
-            let p = (price + (i * (price * 0.0005))).toFixed(prec);
-            let vol = (Math.random() * 10 + 1).toFixed(1);
+        
+        for(let i=6; i>0; i--) {
+            let p = (price + spread + (Math.random() * price * 0.002)).toFixed(prec);
+            let vol = (Math.random() * 12 + 0.1).toFixed(1);
             html += `<div class="ob-row" style="color:var(--red)"><div class="ob-bg" style="width:${vol*8}%; background:var(--red)"></div><span>${p}</span><span>${vol}</span></div>`;
         }
         html += `<div class="price-center">${price.toFixed(prec)}</div>`;
-        // Биды (покупатели)
-        for(let i=1; i<=5; i++) {
-            let p = (price - (i * (price * 0.0005))).toFixed(prec);
-            let vol = (Math.random() * 10 + 1).toFixed(1);
+        for(let i=1; i<=6; i++) {
+            let p = (price - spread - (Math.random() * price * 0.002)).toFixed(prec);
+            let vol = (Math.random() * 12 + 0.1).toFixed(1);
             html += `<div class="ob-row" style="color:var(--green)"><div class="ob-bg" style="width:${vol*8}%; background:var(--green)"></div><span>${p}</span><span>${vol}</span></div>`;
         }
         ob.innerHTML = html;
     }
 
     function openTrade() {
+        document.getElementById('trade-pair-name').innerText = currentPair;
         document.getElementById('trade-panel').classList.add('open');
         document.getElementById('overlay').style.display = 'block';
     }
@@ -171,16 +180,14 @@
         document.getElementById('overlay').style.display = 'none';
     }
 
-    function setSide(side, el) {
-        document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
-        el.classList.add('active');
+    function setSide(side) {
+        document.getElementById('buy-tab').classList.toggle('active', side === 'buy');
+        document.getElementById('sell-tab').classList.toggle('active', side === 'sell');
         document.getElementById('confirm-btn').style.background = (side === 'buy' ? 'var(--green)' : 'var(--red)');
     }
 
     function setPct(pct) {
-        // Для примера ставим фиксированные суммы, позже привяжем к балансу TON
-        const val = pct === 100 ? 100 : (pct === 50 ? 50 : 25);
-        document.getElementById('trade-amount').value = val;
+        document.getElementById('trade-amount').value = (pct * 1.5).toFixed(2); // Заглушка до баланса
     }
 
     function toggleFullscreen() {
@@ -188,8 +195,7 @@
         isFullscreen = !isFullscreen;
         grid.classList.toggle('fullscreen', isFullscreen);
         document.getElementById('full-btn').innerText = isFullscreen ? "ВЕРНУТЬ" : "РАЗВЕРНУТЬ";
-        // Важно: даем время CSS отработать перед реинитом
-        setTimeout(() => initTV(currentPair), 200);
+        setTimeout(() => initTV(currentPair), 300);
     }
 
     function changePair() {
@@ -197,6 +203,25 @@
         initTV(currentPair);
         fetchPrice();
     }
- </script>
+
+    function showPage(pId, el) {
+        document.querySelectorAll('.page-content').forEach(p => p.classList.remove('active'));
+        document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+        document.getElementById('page-' + pId).classList.add('active');
+        el.classList.add('active');
+        document.getElementById('market-top').style.display = (pId === 'market' ? 'grid' : 'none');
+    }
+
+    const tonConnectUI = new TON_CONNECT_UI.TonConnectUI({
+        manifestUrl: 'https://sergey52bb.github.io/grok-autotrade/tonconnect-manifest.json',
+        buttonRootId: 'ton-connect-button'
+    });
+
+    window.onload = () => {
+        setTimeout(() => initTV(currentPair), 500);
+        fetchPrice();
+        setInterval(fetchPrice, 3000);
+    };
+</script>
 </body>
-  </html>
+</html>
