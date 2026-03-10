@@ -3,51 +3,46 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>STRATEX V4.1 TRADE</title>
+    <title>STRATEX V4.2 LIVE</title>
     <script src="https://unpkg.com/@tonconnect/ui@latest/dist/tonconnect-ui.min.js"></script>
     <style>
         :root { --bg: #0b0e11; --panel: #1c2127; --input: #2b3139; --green: #0ecb81; --red: #f6465d; --gold: #f0b90b; --text: #848e9c; }
-        body { background: var(--bg); color: white; font-family: -apple-system, BlinkMacSystemFont, sans-serif; margin: 0; padding: 0; overflow: hidden; height: 100vh; }
+        body { background: var(--bg); color: white; font-family: -apple-system, sans-serif; margin: 0; padding: 0; overflow: hidden; height: 100vh; }
         
         .header { background: var(--panel); padding: 8px 12px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #333; height: 48px; }
-        .pair-selector { flex-grow: 1; background: var(--input); color: var(--gold); border: 1px solid #444; border-radius: 6px; padding: 6px; font-size: 14px; font-weight: bold; outline: none; margin-right: 10px; }
+        .pair-selector { background: var(--input); color: var(--gold); border: 1px solid #444; border-radius: 6px; padding: 6px; font-weight: bold; outline: none; }
 
         .trading-grid { display: grid; grid-template-columns: 1.2fr 0.8fr; height: 320px; border-bottom: 2px solid #000; background: #131722; position: relative; }
         .trading-grid.fullscreen { grid-template-columns: 1fr 0fr; height: 75vh; }
         .trading-grid.fullscreen .order-book-side { display: none; }
 
-        #tv_wrapper { position: relative; width: 100%; height: 100%; border-right: 1px solid #333; box-sizing: border-box; padding-right: 5px; }
+        #tv_wrapper { position: relative; width: 100%; height: 100%; border-right: 1px solid #333; padding-right: 5px; }
         #tv_widget { width: 100%; height: 100%; }
 
-        .expand-btn { position: absolute; left: 8px; top: 8px; z-index: 100; background: rgba(30, 34, 45, 0.9); border: 1px solid #444; color: var(--gold); border-radius: 4px; padding: 5px 10px; font-size: 10px; }
+        .expand-btn { position: absolute; left: 8px; top: 8px; z-index: 100; background: rgba(30,34,45,0.9); border: 1px solid #444; color: var(--gold); border-radius: 4px; padding: 5px 10px; font-size: 10px; }
 
-        .order-book-side { background: var(--panel); font-size: 10px; padding: 5px; display: flex; flex-direction: column; overflow: hidden; height: 100%; }
+        .order-book-side { background: var(--panel); font-size: 10px; padding: 5px; display: flex; flex-direction: column; height: 100%; box-sizing: border-box; }
         .price-center { font-size: 15px; font-weight: bold; text-align: center; color: var(--green); padding: 8px 0; border-top: 1px solid #333; border-bottom: 1px solid #333; margin: 5px 0; }
         .ob-row { display: flex; justify-content: space-between; height: 18px; position: relative; align-items: center; }
-        .ob-bg { position: absolute; right: 0; top: 0; bottom: 0; z-index: -1; opacity: 0.15; }
+        .ob-bg { position: absolute; right: 0; top: 0; bottom: 0; z-index: -1; opacity: 0.15; transition: width 0.3s; }
 
-        .page-content { display: none; padding: 15px; padding-bottom: 80px; height: calc(100vh - 368px); overflow-y: auto; }
+        .page-content { display: none; padding: 15px; height: calc(100vh - 368px); overflow-y: auto; }
         .page-content.active { display: block; }
         
-        .input-group { background: var(--input); border-radius: 10px; padding: 12px; margin-bottom: 10px; display: flex; justify-content: space-between; align-items: center; border: 1px solid #333; }
+        .input-group { background: var(--input); border-radius: 10px; padding: 12px; margin-bottom: 10px; display: flex; justify-content: space-between; align-items: center; }
         .btn-main { width: 100%; background: var(--green); color: white; border: none; padding: 16px; border-radius: 12px; font-weight: bold; font-size: 16px; cursor: pointer; }
 
-        /* ТОРГОВАЯ ПАНЕЛЬ */
         #trade-panel { position: fixed; bottom: -100%; left: 0; width: 100%; background: var(--panel); border-top: 2px solid var(--gold); border-radius: 20px 20px 0 0; padding: 20px; box-sizing: border-box; transition: 0.4s; z-index: 2000; }
         #trade-panel.open { bottom: 0; }
         .trade-tabs { display: flex; gap: 10px; margin-bottom: 20px; }
-        .tab-btn { flex: 1; padding: 12px; border-radius: 8px; border: none; font-weight: bold; color: white; cursor: pointer; opacity: 0.4; }
-        .tab-btn.buy { background: var(--green); }
-        .tab-btn.sell { background: var(--red); }
-        .tab-btn.active { opacity: 1; transform: scale(1.05); }
-        .amount-input { width: 100%; background: var(--input); border: 1px solid #444; padding: 15px; border-radius: 8px; color: white; font-size: 18px; outline: none; margin-bottom: 15px; }
-        .percent-row { display: flex; gap: 8px; margin-bottom: 20px; }
-        .pct-btn { flex: 1; background: #333; border: none; color: var(--text); padding: 8px; border-radius: 4px; font-size: 12px; }
+        .tab-btn { flex: 1; padding: 12px; border-radius: 8px; border: none; font-weight: bold; color: white; opacity: 0.4; }
+        .tab-btn.active { opacity: 1; }
+        .amount-input { width: 100%; background: var(--input); border: 1px solid #444; padding: 15px; border-radius: 8px; color: white; font-size: 18px; margin-bottom: 15px; box-sizing: border-box; }
+        .pct-btn { flex: 1; background: #333; border: none; color: var(--text); padding: 8px; border-radius: 4px; font-size: 12px; cursor: pointer; }
 
         .nav-bar { position: fixed; bottom: 0; width: 100%; display: flex; background: var(--panel); padding: 12px 0; border-top: 1px solid #333; z-index: 1000; }
         .nav-item { flex: 1; text-align: center; font-size: 11px; color: var(--text); }
         .nav-item.active { color: var(--gold); }
-        
         .overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7); display: none; z-index: 1999; }
     </style>
 </head>
@@ -61,15 +56,13 @@
         <option value="BTCUSDT">BTC / USDT</option>
         <option value="ETHUSDT">ETH / USDT</option>
         <option value="SOLUSDT">SOL / USDT</option>
-        <option value="PEPEUSDT">PEPE / USDT</option>
-        <option value="PAXGUSDT">GOLD / USDT</option>
     </select>
     <div id="ton-connect-button"></div>
 </div>
 
 <div id="market-top" class="trading-grid">
     <div id="tv_wrapper">
-        <button class="expand-btn" onclick="toggleFullscreen()">РАЗВЕРНУТЬ</button>
+        <button class="expand-btn" id="full-btn" onclick="toggleFullscreen()">РАЗВЕРНУТЬ</button>
         <div id="tv_widget"></div>
     </div>
     <div class="order-book-side" id="order-book"></div>
@@ -83,28 +76,22 @@
     <button class="btn-main" onclick="openTrade()">ОТКРЫТЬ СДЕЛКУ</button>
 </div>
 
-<div id="page-assets" class="page-content">
-    <h3>🏦 Активы</h3>
-    <div class="input-group"><span>TON Balance</span><b id="ton-bal">0.00</b></div>
-</div>
-
 <div id="trade-panel">
     <div style="display:flex; justify-content:space-between; margin-bottom:15px;">
         <b id="trade-pair-name">TON / USDT</b>
-        <span onclick="closeTrade()" style="color:var(--text); cursor:pointer;">✖ Закрыть</span>
+        <span onclick="closeTrade()" style="color:var(--text);">✖ Закрыть</span>
     </div>
     <div class="trade-tabs">
-        <button class="tab-btn buy active" onclick="setSide('buy')">КУПИТЬ</button>
-        <button class="tab-btn sell" onclick="setSide('sell')">ПРОДАТЬ</button>
+        <button class="tab-btn active" style="background:var(--green)" onclick="setSide('buy', this)">КУПИТЬ</button>
+        <button class="tab-btn" style="background:var(--red)" onclick="setSide('sell', this)">ПРОДАТЬ</button>
     </div>
     <input type="number" class="amount-input" placeholder="Сумма в USDT" id="trade-amount">
-    <div class="percent-row">
-        <button class="pct-btn">25%</button>
-        <button class="pct-btn">50%</button>
-        <button class="pct-btn">75%</button>
-        <button class="pct-btn">100%</button>
+    <div style="display:flex; gap:8px; margin-bottom:20px;">
+        <button class="pct-btn" onclick="setPct(25)">25%</button>
+        <button class="pct-btn" onclick="setPct(50)">50%</button>
+        <button class="pct-btn" onclick="setPct(100)">MAX</button>
     </div>
-    <button class="btn-main" id="confirm-trade-btn" style="background: var(--green);">ПОДТВЕРДИТЬ ПОКУПКУ</button>
+    <button class="btn-main" id="confirm-btn">ПОДТВЕРДИТЬ</button>
 </div>
 
 <div class="nav-bar">
@@ -116,21 +103,65 @@
 <script>
     let currentPair = "TONUSDT";
     let isFullscreen = false;
-    let tradeSide = 'buy';
+    let lastPrice = 0;
 
     function initTV(symbol) {
+        // Очищаем и создаем новый виджет
         document.getElementById('tv_widget').innerHTML = "";
-        setTimeout(() => {
-            new TradingView.widget({
-                "autosize": true, "symbol": "OKX:" + symbol, "interval": "15", "theme": "dark", "style": "1",
-                "container_id": "tv_widget", "hide_top_toolbar": true, "hide_legend": true,
-                "overrides": { "paneProperties.rightAxisMargin": 5, "scalesProperties.fontSize": 11 }
-            });
-        }, 50);
+        new TradingView.widget({
+            "autosize": true,
+            "symbol": "OKX:" + symbol,
+            "interval": "15",
+            "theme": "dark",
+            "style": "1",
+            "locale": "ru",
+            "container_id": "tv_widget",
+            "hide_top_toolbar": true,
+            "hide_legend": true,
+            "save_image": false,
+            "backgroundColor": "#131722",
+            "overrides": {
+                "paneProperties.rightAxisMargin": 5,
+                "scalesProperties.fontSize": 11
+            }
+        });
+    }
+
+    async function fetchPrice() {
+        const ids = {"TONUSDT":"the-open-network","BTCUSDT":"bitcoin","ETHUSDT":"ethereum","SOLUSDT":"solana"};
+        try {
+            const res = await fetch(`https://api.coingecko.com/api/v3/simple/price?ids=${ids[currentPair]}&vs_currencies=usd`);
+            const data = await res.json();
+            const price = data[ids[currentPair]].usd;
+            lastPrice = price;
+            const prec = price < 0.01 ? 7 : 2;
+            document.getElementById('market-price-val').innerText = price.toFixed(prec) + " USDT";
+            updateOrderBook(price, prec);
+        } catch(e) { console.error("Price fetch error"); }
+    }
+
+    function updateOrderBook(price, prec) {
+        const ob = document.getElementById('order-book');
+        if (isFullscreen || !ob) return;
+        
+        let html = '<div style="color:var(--text); font-size:8px; display:flex; justify-content:space-between; margin-bottom:5px;"><span>ЦЕНА</span><span>КОЛ-ВО</span></div>';
+        // Аски (продавцы)
+        for(let i=5; i>0; i--) {
+            let p = (price + (i * (price * 0.0005))).toFixed(prec);
+            let vol = (Math.random() * 10 + 1).toFixed(1);
+            html += `<div class="ob-row" style="color:var(--red)"><div class="ob-bg" style="width:${vol*8}%; background:var(--red)"></div><span>${p}</span><span>${vol}</span></div>`;
+        }
+        html += `<div class="price-center">${price.toFixed(prec)}</div>`;
+        // Биды (покупатели)
+        for(let i=1; i<=5; i++) {
+            let p = (price - (i * (price * 0.0005))).toFixed(prec);
+            let vol = (Math.random() * 10 + 1).toFixed(1);
+            html += `<div class="ob-row" style="color:var(--green)"><div class="ob-bg" style="width:${vol*8}%; background:var(--green)"></div><span>${p}</span><span>${vol}</span></div>`;
+        }
+        ob.innerHTML = html;
     }
 
     function openTrade() {
-        document.getElementById('trade-pair-name').innerText = currentPair;
         document.getElementById('trade-panel').classList.add('open');
         document.getElementById('overlay').style.display = 'block';
     }
@@ -140,49 +171,25 @@
         document.getElementById('overlay').style.display = 'none';
     }
 
-    function setSide(side) {
-        tradeSide = side;
+    function setSide(side, el) {
         document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
-        const btn = document.querySelector('.tab-btn.' + side);
-        btn.classList.add('active');
-        const confirmBtn = document.getElementById('confirm-trade-btn');
-        confirmBtn.style.background = side === 'buy' ? 'var(--green)' : 'var(--red)';
-        confirmBtn.innerText = side === 'buy' ? 'ПОДТВЕРДИТЬ ПОКУПКУ' : 'ПОДТВЕРДИТЬ ПРОДАЖУ';
+        el.classList.add('active');
+        document.getElementById('confirm-btn').style.background = (side === 'buy' ? 'var(--green)' : 'var(--red)');
+    }
+
+    function setPct(pct) {
+        // Для примера ставим фиксированные суммы, позже привяжем к балансу TON
+        const val = pct === 100 ? 100 : (pct === 50 ? 50 : 25);
+        document.getElementById('trade-amount').value = val;
     }
 
     function toggleFullscreen() {
         const grid = document.getElementById('market-top');
         isFullscreen = !isFullscreen;
         grid.classList.toggle('fullscreen', isFullscreen);
-        initTV(currentPair);
-    }
-
-    async function fetchPrice() {
-        const ids = {"TONUSDT":"the-open-network","BTCUSDT":"bitcoin","ETHUSDT":"ethereum","SOLUSDT":"solana","PEPEUSDT":"pepe","PAXGUSDT":"pax-gold"};
-        try {
-            const res = await fetch(`https://api.coingecko.com/api/v3/simple/price?ids=${ids[currentPair]}&vs_currencies=usd`);
-            const data = await res.json();
-            const price = data[ids[currentPair]].usd;
-            const prec = price < 0.01 ? 7 : 2;
-            document.getElementById('market-price-val').innerText = price.toFixed(prec) + " USDT";
-            updateOrderBook(price, prec);
-        } catch(e) {}
-    }
-
-    function updateOrderBook(price, prec) {
-        if(isFullscreen) return;
-        const ob = document.getElementById('order-book');
-        let html = '<div style="color:var(--text); font-size:8px; display:flex; justify-content:space-between; margin-bottom:5px;"><span>ЦЕНА</span><span>КОЛ-ВО</span></div>';
-        for(let i=7; i>0; i--) {
-            let p = (price + (i*(price*0.001))).toFixed(prec);
-            html += `<div class="ob-row" style="color:var(--red)"><div class="ob-bg" style="width:${Math.random()*60}%; background:var(--red)"></div><span>${p}</span><span>${(Math.random()*5).toFixed(1)}</span></div>`;
-        }
-        html += `<div class="price-center">${price.toFixed(prec)}</div>`;
-        for(let i=1; i<=7; i++) {
-            let p = (price - (i*(price*0.001))).toFixed(prec);
-            html += `<div class="ob-row" style="color:var(--green)"><div class="ob-bg" style="width:${Math.random()*60}%; background:var(--green)"></div><span>${p}</span><span>${(Math.random()*5).toFixed(1)}</span></div>`;
-        }
-        ob.innerHTML = html;
+        document.getElementById('full-btn').innerText = isFullscreen ? "ВЕРНУТЬ" : "РАЗВЕРНУТЬ";
+        // Важно: даем время CSS отработать перед реинитом
+        setTimeout(() => initTV(currentPair), 200);
     }
 
     function changePair() {
@@ -199,9 +206,10 @@
         document.getElementById('market-top').style.display = (pId === 'market' ? 'grid' : 'none');
     }
 
+    // Старт
     initTV(currentPair);
     fetchPrice();
-    setInterval(fetchPrice, 8000);
+    setInterval(fetchPrice, 5000); // Обновляем цену и стакан каждые 5 сек
 </script>
 </body>
 </html>
