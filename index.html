@@ -3,39 +3,39 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>STRATEX V3.9 SCALE FIX</title>
+    <title>STRATEX V4.0 SCALE MASTER</title>
     <script src="https://unpkg.com/@tonconnect/ui@latest/dist/tonconnect-ui.min.js"></script>
     <style>
         :root { --bg: #0b0e11; --panel: #1c2127; --input: #2b3139; --green: #0ecb81; --red: #f6465d; --gold: #f0b90b; --text: #848e9c; }
         body { background: var(--bg); color: white; font-family: -apple-system, BlinkMacSystemFont, sans-serif; margin: 0; padding: 0; overflow: hidden; height: 100vh; }
         
-        .header { background: var(--panel); padding: 8px 12px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #333; height: 45px; }
-        .pair-selector { flex-grow: 1; background: var(--input); color: var(--gold); border: 1px solid #444; border-radius: 6px; padding: 5px; font-size: 13px; font-weight: bold; outline: none; margin-right: 10px; }
+        .header { background: var(--panel); padding: 8px 12px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #333; height: 48px; box-sizing: border-box; }
+        .pair-selector { flex-grow: 1; background: var(--input); color: var(--gold); border: 1px solid #444; border-radius: 6px; padding: 6px; font-size: 14px; font-weight: bold; outline: none; margin-right: 10px; }
 
-        /* Сетка с учетом отступа для шкалы */
-        .trading-grid { display: grid; grid-template-columns: 1fr 1fr; height: 320px; border-bottom: 2px solid #000; background: #131722; position: relative; }
+        /* Сетка: даем графику 60%, чтобы влезла шкала цен */
+        .trading-grid { display: grid; grid-template-columns: 1.2fr 0.8fr; height: 320px; border-bottom: 2px solid #000; background: #131722; position: relative; }
         .trading-grid.fullscreen { grid-template-columns: 1fr 0fr; height: 75vh; }
         .trading-grid.fullscreen .order-book-side { display: none; }
 
-        /* Контейнер графика с ПРАВЫМ ОТСТУПОМ для шкалы цен */
-        #tv_wrapper { position: relative; width: 100%; height: 100%; border-right: 1px solid #333; box-sizing: border-box; padding-right: 2px; }
+        /* Обертка с ПРАВЫМ ПАДДИНГОМ специально для шкалы */
+        #tv_wrapper { position: relative; width: 100%; height: 100%; border-right: 1px solid #333; box-sizing: border-box; padding-right: 5px; background: #131722; }
         #tv_widget { width: 100%; height: 100%; }
 
-        .expand-btn { position: absolute; left: 10px; top: 10px; z-index: 10; background: rgba(43, 49, 57, 0.8); border: 1px solid #444; color: white; border-radius: 4px; padding: 4px 8px; font-size: 10px; cursor: pointer; }
+        .expand-btn { position: absolute; left: 8px; top: 8px; z-index: 100; background: rgba(30, 34, 45, 0.9); border: 1px solid #444; color: var(--gold); border-radius: 4px; padding: 5px 10px; font-size: 10px; font-weight: bold; cursor: pointer; }
 
         .order-book-side { background: var(--panel); font-size: 10px; padding: 5px; display: flex; flex-direction: column; overflow: hidden; height: 100%; box-sizing: border-box; }
-        .price-center { font-size: 15px; font-weight: bold; text-align: center; color: var(--green); padding: 6px 0; border-top: 1px solid #333; border-bottom: 1px solid #333; margin: 4px 0; }
-        .ob-row { display: flex; justify-content: space-between; height: 18px; position: relative; }
+        .price-center { font-size: 15px; font-weight: bold; text-align: center; color: var(--green); padding: 8px 0; border-top: 1px solid #333; border-bottom: 1px solid #333; margin: 5px 0; }
+        .ob-row { display: flex; justify-content: space-between; height: 18px; position: relative; align-items: center; }
         .ob-bg { position: absolute; right: 0; top: 0; bottom: 0; z-index: -1; opacity: 0.15; }
 
-        .page-content { display: none; padding: 15px; padding-bottom: 80px; height: calc(100vh - 365px); overflow-y: auto; }
+        .page-content { display: none; padding: 15px; padding-bottom: 80px; height: calc(100vh - 368px); overflow-y: auto; }
         .page-content.active { display: block; }
         
-        .input-group { background: var(--input); border-radius: 8px; padding: 12px; margin-bottom: 10px; display: flex; justify-content: space-between; align-items: center; }
-        .btn-main { width: 100%; background: var(--green); color: white; border: none; padding: 16px; border-radius: 12px; font-weight: bold; font-size: 16px; }
+        .input-group { background: var(--input); border-radius: 10px; padding: 14px; margin-bottom: 12px; display: flex; justify-content: space-between; align-items: center; border: 1px solid #333; }
+        .btn-main { width: 100%; background: var(--green); color: white; border: none; padding: 16px; border-radius: 12px; font-weight: bold; font-size: 16px; box-shadow: 0 4px 15px rgba(14, 203, 129, 0.2); }
 
-        .nav-bar { position: fixed; bottom: 0; width: 100%; display: flex; background: var(--panel); padding: 12px 0; border-top: 1px solid #333; z-index: 100; }
-        .nav-item { flex: 1; text-align: center; font-size: 11px; color: var(--text); }
+        .nav-bar { position: fixed; bottom: 0; width: 100%; display: flex; background: var(--panel); padding: 12px 0; border-top: 1px solid #333; z-index: 1000; }
+        .nav-item { flex: 1; text-align: center; font-size: 11px; color: var(--text); font-weight: 500; }
         .nav-item.active { color: var(--gold); }
     </style>
 </head>
@@ -55,7 +55,7 @@
 
 <div id="market-top" class="trading-grid">
     <div id="tv_wrapper">
-        <button class="expand-btn" onclick="toggleFullscreen()">FULLSCREEN</button>
+        <button class="expand-btn" onclick="toggleFullscreen()">РАЗВЕРНУТЬ</button>
         <div id="tv_widget"></div>
     </div>
     <div class="order-book-side" id="order-book"></div>
@@ -63,15 +63,16 @@
 
 <div id="page-market" class="page-content active">
     <div class="input-group">
-        <span>Live Price</span>
-        <b id="market-price-val" style="color:var(--gold); font-size: 18px;">...</b>
+        <span>Цена (Live)</span>
+        <b id="market-price-val" style="color:var(--gold); font-size: 20px;">...</b>
     </div>
-    <button class="btn-main">ДЕПОЗИТ</button>
+    <button class="btn-main" onclick="alert('Окно покупки в разработке')">КУПИТЬ / ПРОДАТЬ</button>
 </div>
 
 <div id="page-assets" class="page-content">
-    <h3>🏦 Активы</h3>
+    <h3 style="margin-top:0;">🏦 Мои Активы</h3>
     <div class="input-group"><span>TON Balance</span><b id="ton-bal">0.00</b></div>
+    <div class="input-group"><span>USDT</span><b>0.00</b></div>
 </div>
 
 <div class="nav-bar">
@@ -101,16 +102,17 @@
                 "backgroundColor": "#131722",
                 "gridColor": "#242933",
                 "studies": [],
-                // ГЛАВНЫЙ ФИКС: увеличиваем правый отступ внутри самого канваса
-                "overrides": {
-                    "paneProperties.background": "#131722",
-                    "paneProperties.vertGridProperties.color": "#242933",
-                    "paneProperties.horzGridProperties.color": "#242933",
-                    "scalesProperties.fontSize": 10,
-                    "mainSeriesProperties.candleStyle.drawBorder": true
-                },
                 "enabled_features": ["dont_show_boolean_study_arguments"],
-                "disabled_features": ["header_widget", "left_toolbar", "context_menus"]
+                "disabled_features": ["header_widget", "left_toolbar", "context_menus", "control_bar"],
+                "overrides": {
+                    "paneProperties.topMargin": 10,
+                    "paneProperties.bottomMargin": 10,
+                    "paneProperties.leftAxisMargin": 0,
+                    // Сдвигаем график влево, освобождая место под шкалу справа
+                    "paneProperties.rightAxisMargin": 5, 
+                    "scalesProperties.fontSize": 11,
+                    "scalesProperties.showRightScale": true
+                }
             });
         }, 50);
     }
@@ -119,6 +121,7 @@
         const grid = document.getElementById('market-top');
         isFullscreen = !isFullscreen;
         grid.classList.toggle('fullscreen', isFullscreen);
+        document.querySelector('.expand-btn').innerText = isFullscreen ? "ВЕРНУТЬ" : "РАЗВЕРНУТЬ";
         initTV(currentPair);
     }
 
@@ -137,15 +140,15 @@
     function updateOrderBook(price, prec) {
         if(isFullscreen) return;
         const ob = document.getElementById('order-book');
-        let html = '<div style="color:var(--text); font-size:8px; display:flex; justify-content:space-between;"><span>Price</span><span>Amt</span></div>';
-        for(let i=6; i>0; i--) {
+        let html = '<div style="color:var(--text); font-size:8px; display:flex; justify-content:space-between; margin-bottom:5px;"><span>ЦЕНА</span><span>КОЛ-ВО</span></div>';
+        for(let i=7; i>0; i--) {
             let p = (price + (i*(price*0.001))).toFixed(prec);
-            html += `<div class="ob-row" style="color:var(--red)"><div class="ob-bg" style="width:${Math.random()*60}%; background:var(--red)"></div><span>${p}</span><span>${(Math.random()*5).toFixed(1)}</span></div>`;
+            html += `<div class="ob-row" style="color:var(--red)"><div class="ob-bg" style="width:${Math.random()*60}%; background:var(--red)"></div><span>${p}</span><span>${(Math.random()*8).toFixed(1)}</span></div>`;
         }
         html += `<div class="price-center">${price.toFixed(prec)}</div>`;
-        for(let i=1; i<=6; i++) {
+        for(let i=1; i<=7; i++) {
             let p = (price - (i*(price*0.001))).toFixed(prec);
-            html += `<div class="ob-row" style="color:var(--green)"><div class="ob-bg" style="width:${Math.random()*60}%; background:var(--green)"></div><span>${p}</span><span>${(Math.random()*5).toFixed(1)}</span></div>`;
+            html += `<div class="ob-row" style="color:var(--green)"><div class="ob-bg" style="width:${Math.random()*60}%; background:var(--green)"></div><span>${p}</span><span>${(Math.random()*8).toFixed(1)}</span></div>`;
         }
         ob.innerHTML = html;
     }
@@ -162,11 +165,17 @@
         document.getElementById('page-' + pId).classList.add('active');
         el.classList.add('active');
         document.getElementById('market-top').style.display = (pId === 'market' ? 'grid' : 'none');
+        if(pId === 'market') setTimeout(() => initTV(currentPair), 100);
     }
+
+    const tonConnectUI = new TON_CONNECT_UI.TonConnectUI({
+        manifestUrl: 'https://sergey52bb.github.io/grok-autotrade/tonconnect-manifest.json',
+        buttonRootId: 'ton-connect-button'
+    });
 
     initTV(currentPair);
     fetchPrice();
-    setInterval(fetchPrice, 10000);
+    setInterval(fetchPrice, 8000);
 </script>
 </body>
 </html>
