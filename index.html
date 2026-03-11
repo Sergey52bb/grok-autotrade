@@ -3,189 +3,156 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>STRATEX TERMINAL</title>
+    <title>STRATEX DEEP</title>
     <style>
         :root { --bg: #0b0e11; --panel: #171a1e; --input: #2b3139; --green: #0ecb81; --red: #f6465d; --text: #848e9c; --grid: #1f2226; }
         * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
         body { background: var(--bg); color: white; font-family: -apple-system, sans-serif; height: 100vh; display: flex; flex-direction: column; overflow: hidden; }
 
         /* ВЕРХ 40% */
-        .top { height: 40%; display: flex; flex-direction: column; border-bottom: 1px solid #222; flex-shrink: 0; }
-        .head { display: flex; justify-content: space-between; padding: 10px 12px; font-size: 14px; background: #121518; }
-        .main-ui { display: flex; flex: 1; padding: 8px; gap: 8px; overflow: hidden; }
+        .top { height: 40%; display: flex; flex-direction: column; border-bottom: 1px solid #333; flex-shrink: 0; }
+        .head { display: flex; justify-content: space-between; padding: 8px 12px; font-size: 13px; background: #121518; border-bottom: 1px solid #222; }
+        .main-ui { display: flex; flex: 1; padding: 6px; gap: 6px; overflow: hidden; }
         
-        .trade { flex: 1.1; display: flex; flex-direction: column; gap: 6px; }
-        .book { flex: 0.9; background: #121518; border-radius: 4px; padding: 4px; font-family: monospace; font-size: 11px; overflow: hidden; border: 1px solid #222; }
-
+        /* Торговля */
+        .trade { flex: 1; display: flex; flex-direction: column; gap: 4px; }
         .tabs { display: flex; background: var(--input); border-radius: 4px; padding: 2px; }
-        .tab { flex: 1; border: none; padding: 8px; border-radius: 3px; color: var(--text); background: transparent; font-size: 11px; font-weight: bold; cursor: pointer; }
+        .tab { flex: 1; border: none; padding: 6px; border-radius: 3px; color: var(--text); background: transparent; font-size: 11px; font-weight: bold; }
         .tab.buy-active { background: var(--green); color: white; }
         .tab.sell-active { background: var(--red); color: white; }
-
-        .inp { background: var(--input); border-radius: 4px; padding: 5px 8px; }
+        .inp { background: var(--input); border-radius: 4px; padding: 4px 8px; }
         .inp label { font-size: 8px; color: var(--text); display: block; }
-        .inp input { background: transparent; border: none; color: white; width: 100%; font-size: 15px; outline: none; }
-        .btn { width: 100%; border: none; padding: 14px; border-radius: 4px; background: var(--green); color: white; font-weight: bold; margin-top: auto; font-size: 14px; transition: 0.2s; }
+        .inp input { background: transparent; border: none; color: white; width: 100%; font-size: 14px; outline: none; }
+        .btn { width: 100%; border: none; padding: 12px; border-radius: 4px; background: var(--green); color: white; font-weight: bold; margin-top: auto; font-size: 13px; }
 
-        .ob-row { display: flex; justify-content: space-between; height: 14px; cursor: pointer; }
-        .ob-row:active { background: rgba(255,255,255,0.1); }
+        /* Глубокий Стакан */
+        .book { flex: 1.2; background: #0b0e11; border-radius: 4px; padding: 2px; font-family: 'Roboto Mono', monospace; font-size: 10px; overflow: hidden; border: 1px solid #222; display: flex; flex-direction: column; }
+        .ob-header { display: flex; justify-content: space-between; color: var(--text); padding: 2px 4px; border-bottom: 1px solid #222; margin-bottom: 2px; }
+        .ob-row { display: flex; justify-content: space-between; height: 12px; position: relative; cursor: pointer; align-items: center; padding: 0 4px; }
+        .ob-bar { position: absolute; right: 0; height: 100%; opacity: 0.15; z-index: 0; transition: width 0.2s; }
+        .ob-price { z-index: 1; }
+        .ob-amt { z-index: 1; color: #eee; }
 
-        /* ЭКРАНЫ (График / Активы / Настройки) */
-        .content-area { flex: 1; display: flex; flex-direction: column; overflow: hidden; }
-        .screen { display: none; width: 100%; height: 100%; }
-        .screen.active { display: flex; flex-direction: column; }
+        /* Графики 30% + 10% */
+        .content { flex: 1; display: flex; flex-direction: column; position: relative; }
+        #chart-container { height: 75%; position: relative; border-bottom: 1px solid #222; }
+        #rsi-container { height: 25%; position: relative; }
+        canvas { position: absolute; top: 0; left: 0; }
 
-        /* ГРАФИКИ 30% + 10% */
-        #chart-wrap { height: 75%; border-bottom: 1px solid #222; }
-        #rsi-wrap { height: 25%; }
-        canvas { display: block; width: 100%; height: 100%; }
-
-        /* НАВИГАЦИЯ 20% */
-        .nav { height: 20%; display: flex; flex-direction: column; background: var(--panel); border-top: 1px solid #222; }
-        .nav-grid { flex: 1; display: flex; justify-content: space-around; align-items: center; }
+        /* Навигация 20% */
+        .nav { height: 20%; display: flex; background: var(--panel); border-top: 1px solid #333; align-items: center; justify-content: space-around; }
         .nav-item { text-align: center; color: var(--text); text-decoration: none; font-size: 10px; display: flex; flex-direction: column; gap: 4px; opacity: 0.6; }
         .nav-item.active { color: white; opacity: 1; font-weight: bold; }
-
-        /* Список активов (заглушка) */
-        .list-view { padding: 15px; gap: 10px; display: flex; flex-direction: column; }
-        .list-item { display: flex; justify-content: space-between; padding: 10px; background: var(--panel); border-radius: 4px; }
     </style>
 </head>
 <body>
 
 <div class="top">
     <div class="head">
-        <div>STRATEX <span id="symbol" style="color:var(--green)">TON/USDT</span></div>
-        <div id="live-p" style="font-family: monospace; font-weight: bold;">1.314</div>
+        <div style="font-weight:bold;">STRATEX <span style="color:var(--green)">TON/USDT</span></div>
+        <div id="live-p" style="color:var(--green); font-family: monospace;">1.3142</div>
     </div>
     <div class="main-ui">
         <div class="trade">
-            <div class="tabs" id="mode-tabs">
-                <button class="tab buy-active" onclick="switchTrade('buy')">Buy</button>
-                <button class="tab" onclick="switchTrade('sell')">Sell</button>
-            </div>
-            <div class="inp"><label>Price (USDT)</label><input type="number" value="1.314" id="p-in" step="0.001"></div>
-            <div class="inp"><label>Amount (TON)</label><input type="number" placeholder="0.0" id="a-in"></div>
-            <button class="btn" id="main-btn">Buy TON</button>
+            <div class="tabs"><button id="tb-b" class="tab buy-active" onclick="setM('buy')">Buy</button><button id="tb-s" class="tab" onclick="setM('sell')">Sell</button></div>
+            <div class="inp"><label>Price</label><input type="number" value="1.314" id="p-in"></div>
+            <div class="inp"><label>Amount</label><input type="number" placeholder="0.0"></div>
+            <button class="btn" id="m-btn">Buy TON</button>
         </div>
-        <div class="book" id="book"></div>
+        <div class="book">
+            <div class="ob-header"><span>Price</span><span>Amount</span></div>
+            <div id="asks" style="display:flex; flex-direction:column-reverse; flex:1"></div>
+            <div id="mid" style="text-align:center; padding:2px; font-weight:bold; background: rgba(255,255,255,0.05);">1.3142</div>
+            <div id="bids" style="flex:1"></div>
+        </div>
     </div>
 </div>
 
-<div class="content-area">
-    <div id="screen-market" class="screen active">
-        <div id="chart-wrap"><canvas id="c"></canvas></div>
-        <div id="rsi-wrap"><canvas id="r"></canvas></div>
-    </div>
-    <div id="screen-assets" class="screen">
-        <div class="list-view">
-            <div class="list-item"><span>TON</span><span>142.5</span></div>
-            <div class="list-item"><span>USDT</span><span>530.2</span></div>
-            <div class="list-item"><span>NOT</span><span>12040.0</span></div>
-        </div>
-    </div>
-    <div id="screen-settings" class="screen">
-        <div class="list-view">
-            <div class="list-item">Language: RU</div>
-            <div class="list-item">Theme: Dark</div>
-            <div class="list-item">Wallet: Connected</div>
-        </div>
-    </div>
+<div class="content">
+    <div id="chart-container"><canvas id="mainC"></canvas></div>
+    <div id="rsi-container"><canvas id="rsiC"></canvas></div>
 </div>
 
 <div class="nav">
-    <div class="nav-grid">
-        <a href="javascript:void(0)" class="nav-item active" onclick="showScreen('market', this)"><span style="font-size:22px">📊</span>Рынок</a>
-        <a href="javascript:void(0)" class="nav-item" onclick="showScreen('assets', this)"><span style="font-size:22px">💼</span>Активы</a>
-        <a href="javascript:void(0)" class="nav-item" onclick="showScreen('settings', this)"><span style="font-size:22px">⚙️</span>Настройки</a>
-    </div>
+    <a href="#" class="nav-item active"><i>📊</i><span>Рынок</span></a>
+    <a href="#" class="nav-item"><i>💼</i><span>Активы</span></a>
+    <a href="#" class="nav-item"><i>📜</i><span>Сделки</span></a>
+    <a href="#" class="nav-item"><i>⚙️</i><span>Настройки</span></a>
 </div>
 
 <script>
-    const c = document.getElementById('c'), r = document.getElementById('r');
-    const ctx = c.getContext('2d'), rctx = r.getContext('2d');
-    let price = 1.314;
-    let history = Array.from({length: 35}, () => {
+    const mc = document.getElementById('mainC'), rc = document.getElementById('rsiC');
+    const mctx = mc.getContext('2d'), rctx = rc.getContext('2d');
+    let price = 1.3142;
+    let history = Array.from({length: 45}, () => {
         let b = 1.31 + Math.random()*0.01;
-        return { o:b, h:b+0.002, l:b-0.002, c:b+0.001 };
+        return { o:b, h:b+0.0015, l:b-0.0015, c:b+0.0005 };
     });
 
-    function switchTrade(mode) {
-        const btn = document.getElementById('main-btn');
-        const tabs = document.getElementById('mode-tabs').children;
-        if(mode === 'buy') {
-            tabs[0].className = 'tab buy-active'; tabs[1].className = 'tab';
-            btn.style.background = 'var(--green)'; btn.innerText = 'Buy TON';
-        } else {
-            tabs[1].className = 'tab sell-active'; tabs[0].className = 'tab';
-            btn.style.background = 'var(--red)'; btn.innerText = 'Sell TON';
-        }
+    function setM(m) {
+        const btn = document.getElementById('m-btn');
+        document.getElementById('tb-b').className = m==='buy'?'tab buy-active':'tab';
+        document.getElementById('tb-s').className = m==='sell'?'tab sell-active':'tab';
+        btn.style.background = m==='buy'?'var(--green)':'var(--red)';
+        btn.innerText = m==='buy'?'Buy TON':'Sell TON';
     }
-
-    function showScreen(id, el) {
-        document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
-        document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
-        document.getElementById('screen-' + id).classList.add('active');
-        el.classList.add('active');
-        if(id === 'market') resize();
-    }
-
-    function setPrice(p) { document.getElementById('p-in').value = p.toFixed(3); }
 
     function resize() {
-        c.width = c.parentElement.clientWidth; c.height = c.parentElement.clientHeight;
-        r.width = r.parentElement.clientWidth; r.height = r.parentElement.clientHeight;
+        mc.width = mc.parentElement.clientWidth; mc.height = mc.parentElement.clientHeight;
+        rc.width = rc.parentElement.clientWidth; rc.height = rc.parentElement.clientHeight;
         draw();
     }
 
     function draw() {
-        ctx.clearRect(0,0,c.width,c.height); rctx.clearRect(0,0,r.width,r.height);
+        mctx.clearRect(0,0,mc.width,mc.height); rctx.clearRect(0,0,rc.width,rc.height);
         
-        // Сетка графиков
-        ctx.strokeStyle = '#1f2226';
-        for(let i=1; i<4; i++) {
-            let y = (c.height/4)*i;
-            ctx.beginPath(); ctx.moveTo(0,y); ctx.lineTo(c.width,y); ctx.stroke();
+        // Сетка и шкала
+        mctx.strokeStyle = '#1f2226'; mctx.lineWidth = 1;
+        for(let i=0; i<5; i++) {
+            let y = (mc.height/5)*i;
+            mctx.beginPath(); mctx.moveTo(0,y); mctx.lineTo(mc.width,y); mctx.stroke();
         }
 
-        const w = c.width / history.length;
+        const w = mc.width / history.length;
+        const scale = mc.height * 50; 
+        const offset = 1.305;
+
         history.forEach((s, i) => {
-            const x = i * w + (w*0.2), cw = w*0.6;
-            const yO = c.height - (s.o - 1.30)*4000, yC = c.height - (s.c - 1.30)*4000;
-            const yH = c.height - (s.h - 1.30)*4000, yL = c.height - (s.l - 1.30)*4000;
-            ctx.strokeStyle = s.c >= s.o ? '#0ecb81' : '#f6465d';
-            ctx.fillStyle = ctx.strokeStyle;
-            ctx.beginPath(); ctx.moveTo(x+cw/2, yH); ctx.lineTo(x+cw/2, yL); ctx.stroke();
-            ctx.fillRect(x, Math.min(yO, yC), cw, Math.abs(yO-yC)+1);
+            const x = i * w + (w*0.15), cw = w*0.7;
+            const yO = mc.height - (s.o - offset)*scale, yC = mc.height - (s.c - offset)*scale;
+            const yH = mc.height - (s.h - offset)*scale, yL = mc.height - (s.l - offset)*scale;
+            
+            mctx.strokeStyle = s.c >= s.o ? '#0ecb81' : '#f6465d';
+            mctx.fillStyle = mctx.strokeStyle;
+            mctx.beginPath(); mctx.moveTo(x+cw/2, yH); mctx.lineTo(x+cw/2, yL); mctx.stroke();
+            mctx.fillRect(x, Math.min(yO, yC), cw, Math.max(Math.abs(yO-yC), 1));
         });
 
         // RSI
-        rctx.strokeStyle = '#9043ff'; rctx.lineWidth = 2; rctx.beginPath();
+        rctx.strokeStyle = '#9043ff'; rctx.lineWidth = 1.5; rctx.beginPath();
         history.forEach((s, i) => {
-            let y = r.height/2 + Math.sin(i*0.4)*20;
+            let y = rc.height/2 + Math.sin(i*0.3)*15;
             if(i===0) rctx.moveTo(0,y); else rctx.lineTo(i*w, y);
         });
         rctx.stroke();
 
-        // Стакан
-        let bh = '';
-        for(let i=0; i<5; i++) {
-            let p = price + 0.005 - i*0.001;
-            bh += `<div class="ob-row" style="color:var(--red)" onclick="setPrice(${p})"><span>${p.toFixed(3)}</span><span>${(Math.random()*20).toFixed(1)}</span></div>`;
-        }
-        bh += `<div style="color:var(--green); text-align:center; font-weight:bold; margin:4px 0; background:rgba(14,203,129,0.1); font-size:13px">${price.toFixed(3)}</div>`;
-        for(let i=0; i<5; i++) {
-            let p = price - 0.001 - i*0.001;
-            bh += `<div class="ob-row" style="color:var(--green)" onclick="setPrice(${p})"><span>${p.toFixed(3)}</span><span>${(Math.random()*20).toFixed(1)}</span></div>`;
-        }
-        document.getElementById('book').innerHTML = bh;
+        // Обновление стакана (10-12 строк)
+        let ah = '', bh = '';
+        const row = (p, v, c) => `<div class="ob-row" onclick="document.getElementById('p-in').value=${p.toFixed(4)}"><div class="ob-bar" style="width:${v*4}%; background:${c}"></div><span class="ob-price" style="color:${c}">${p.toFixed(4)}</span><span class="ob-amt">${v.toFixed(1)}</span></div>`;
+        
+        for(let i=0; i<10; i++) ah += row(price + 0.01 - i*0.001, Math.random()*20, 'var(--red)');
+        for(let i=0; i<10; i++) bh += row(price - 0.001 - i*0.001, Math.random()*20, 'var(--green)');
+        
+        document.getElementById('asks').innerHTML = ah;
+        document.getElementById('bids').innerHTML = bh;
+        document.getElementById('mid').innerText = price.toFixed(4);
+        document.getElementById('live-p').innerText = price.toFixed(4);
     }
 
     setInterval(() => {
-        price += (Math.random()-0.5)*0.002;
+        price += (Math.random()-0.5)*0.001;
         history[history.length-1].c = price;
-        if(Date.now() % 8000 < 1000) { history.push({o:price, h:price, l:price, c:price}); history.shift(); }
-        document.getElementById('live-p').innerText = price.toFixed(3);
+        if(Date.now() % 5000 < 1000) { history.push({o:price, h:price, l:price, c:price}); history.shift(); }
         draw();
     }, 1000);
 
