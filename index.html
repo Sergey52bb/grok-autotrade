@@ -8,59 +8,54 @@
     <script src="https://s3.tradingview.com/tv.js"></script>
     <style>
         :root { --bg: #0b0e11; --panel: #171a1e; --input: #2b3139; --green: #0ecb81; --red: #f6465d; --text: #848e9c; --gold: #f0b90b; }
-        body { background: var(--bg); color: white; font-family: -apple-system, sans-serif; margin: 0; display: flex; flex-direction: column; height: 100vh; overflow: hidden; }
+        * { box-sizing: border-box; }
+        body { background: var(--bg); color: white; font-family: -apple-system, sans-serif; margin: 0; display: flex; flex-direction: column; height: 100vh; overflow: hidden; padding-bottom: 60px; }
         
         /* Шапка */
-        .header { display: flex; justify-content: space-between; align-items: center; padding: 10px; background: var(--panel); border-bottom: 1px solid #222; flex-shrink: 0; }
-        .pair-title { font-weight: bold; font-size: 16px; display: flex; align-items: center; gap: 5px; }
+        .header { display: flex; justify-content: space-between; align-items: center; padding: 5px 10px; background: var(--panel); border-bottom: 1px solid #222; flex-shrink: 0; height: 45px; }
+        .pair-title { font-weight: bold; font-size: 14px; display: flex; align-items: center; gap: 5px; }
 
-        /* Основной торговый блок */
-        .main-container { display: flex; padding: 8px; gap: 8px; flex-shrink: 0; }
-        .order-panel { flex: 1.2; }
-        .order-book { flex: 0.8; font-size: 11px; }
+        /* Торговый блок */
+        .main-container { display: flex; padding: 5px; gap: 5px; flex-shrink: 0; height: 210px; }
+        .order-panel { flex: 1.1; display: flex; flex-direction: column; gap: 4px; }
+        .order-book { flex: 0.9; font-size: 10px; display: flex; flex-direction: column; justify-content: space-between; }
 
-        /* Кнопки Buy/Sell */
-        .tabs { display: flex; border-radius: 4px; overflow: hidden; margin-bottom: 8px; }
-        .tab-btn { flex: 1; border: none; padding: 10px; font-weight: bold; color: white; cursor: pointer; opacity: 0.4; }
+        /* Кнопки */
+        .tabs { display: flex; border-radius: 4px; overflow: hidden; }
+        .tab-btn { flex: 1; border: none; padding: 6px; font-weight: bold; color: white; cursor: pointer; opacity: 0.4; font-size: 12px; }
         .tab-btn.active { opacity: 1; }
         .tab-btn.buy { background: var(--green); }
         .tab-btn.sell { background: var(--red); }
 
-        /* Поля ввода */
-        .input-field { background: var(--input); border-radius: 4px; padding: 6px 10px; margin-bottom: 6px; }
-        .input-field label { font-size: 10px; color: var(--text); display: block; }
+        /* Поля */
+        .input-field { background: var(--input); border-radius: 4px; padding: 4px 8px; }
+        .input-field label { font-size: 9px; color: var(--text); display: block; }
         .input-row { display: flex; justify-content: space-between; align-items: center; }
-        .input-row input { background: transparent; border: none; color: white; font-size: 16px; width: 75%; outline: none; }
+        .input-row input { background: transparent; border: none; color: white; font-size: 14px; width: 70%; outline: none; }
 
-        /* Выбор процентов */
-        .percent-row { display: flex; justify-content: space-between; margin: 10px 0; }
-        .pct-chip { font-size: 11px; color: var(--text); cursor: pointer; border-bottom: 1px solid #333; padding: 2px 4px; }
-        .pct-chip:active { color: var(--gold); border-color: var(--gold); }
-
-        .confirm-btn { width: 100%; border: none; padding: 14px; border-radius: 6px; color: white; font-weight: bold; font-size: 15px; cursor: pointer; }
-        .confirm-btn.buy { background: var(--green); }
-        .confirm-btn.sell { background: var(--red); }
+        .pct-chip { font-size: 10px; color: var(--text); cursor: pointer; padding: 2px; border-bottom: 1px solid transparent; }
+        .confirm-btn { width: 100%; border: none; padding: 10px; border-radius: 4px; color: white; font-weight: bold; font-size: 14px; margin-top: auto; }
 
         /* Стакан */
-        .ob-line { display: flex; justify-content: space-between; position: relative; height: 18px; align-items: center; padding: 0 4px; overflow: hidden; }
+        .ob-line { display: flex; justify-content: space-between; position: relative; height: 14px; align-items: center; padding: 0 4px; }
         .ob-volume { position: absolute; right: 0; height: 100%; opacity: 0.15; z-index: 0; }
-        .ob-line span { z-index: 1; }
-        .current-price { font-size: 18px; font-weight: bold; margin: 8px 0; color: var(--green); }
+        .current-price { font-size: 16px; font-weight: bold; text-align: center; color: var(--green); margin: 2px 0; }
 
-        /* Секция ГРАФИКА */
-        .chart-box { flex-grow: 1; background: #131722; border-top: 2px solid #000; position: relative; width: 100%; }
+        /* График */
+        .chart-box { flex-grow: 1; background: #131722; border-top: 1px solid #000; width: 100%; min-height: 0; }
         #tv_widget_container { width: 100%; height: 100%; }
 
-        /* Навигация */
-        .nav-footer { display: flex; background: var(--panel); padding: 12px 0; border-top: 1px solid #222; flex-shrink: 0; }
-        .nav-link { flex: 1; text-align: center; font-size: 11px; color: var(--text); }
-        .nav-link.active { color: white; font-weight: bold; }
+        /* Навигация (Fixed Bottom) */
+        .nav-footer { position: fixed; bottom: 0; left: 0; width: 100%; display: flex; background: var(--panel); padding: 8px 0; border-top: 1px solid #222; z-index: 100; height: 55px; }
+        .nav-link { flex: 1; text-align: center; font-size: 10px; color: var(--text); display: flex; flex-direction: column; align-items: center; gap: 2px; }
+        .nav-link.active { color: white; }
+        .nav-icon { font-size: 16px; }
     </style>
 </head>
 <body>
 
 <div class="header">
-    <div class="pair-title">TON/USDT <span id="ticker-change" style="font-size:11px; color:var(--green);">+0.00%</span></div>
+    <div class="pair-title">TON/USDT <span id="ticker-change" style="font-size:10px;">+0.0%</span></div>
     <div id="ton-connect-root"></div>
 </div>
 
@@ -72,13 +67,13 @@
         </div>
         <div class="input-field">
             <label>Price</label>
-            <div class="input-row"><input type="number" id="price-input" step="0.001"> <span style="font-size:10px; color:var(--text)">USDT</span></div>
+            <div class="input-row"><input type="number" id="price-input" step="0.001"> <span style="font-size:9px;">USDT</span></div>
         </div>
         <div class="input-field">
             <label>Amount</label>
-            <div class="input-row"><input type="number" id="amount-input" placeholder="0"> <span style="font-size:10px; color:var(--text)">TON</span></div>
+            <div class="input-row"><input type="number" id="amount-input" placeholder="0"> <span style="font-size:9px;">TON</span></div>
         </div>
-        <div class="percent-row">
+        <div style="display:flex; justify-content: space-between;">
             <span class="pct-chip" onclick="applyPct(25)">25%</span>
             <span class="pct-chip" onclick="applyPct(50)">50%</span>
             <span class="pct-chip" onclick="applyPct(75)">75%</span>
@@ -99,69 +94,62 @@
 </div>
 
 <div class="nav-footer">
-    <div class="nav-link active">📊 Trade</div>
-    <div class="nav-link">🏦 Assets</div>
-    <div class="nav-link">🕒 Orders</div>
+    <div class="nav-link active">
+        <span class="nav-icon">📊</span><span>Рынок</span>
+    </div>
+    <div class="nav-link" onclick="alert('Скоро здесь будет баланс!')">
+        <span class="nav-icon">🏦</span><span>Активы</span>
+    </div>
+    <div class="nav-link">
+        <span class="nav-icon">🕒</span><span>Сделки</span>
+    </div>
 </div>
 
 <script>
-    // 1. Инициализация кошелька
     const tonConnectUI = new TON_CONNECT_UI.TonConnectUI({
         manifestUrl: 'https://sergey52bb.github.io/grok-autotrade/tonconnect-manifest.json',
         buttonRootId: 'ton-connect-root'
     });
 
-    // 2. Функция запуска графика
     function startTradingView() {
-        if (typeof TradingView !== 'undefined' && document.getElementById('tv_widget_container')) {
+        if (typeof TradingView !== 'undefined') {
             new TradingView.widget({
                 "autosize": true,
                 "symbol": "OKX:TONUSDT",
                 "interval": "15",
                 "theme": "dark",
-                "style": "1",
-                "locale": "ru",
                 "container_id": "tv_widget_container",
                 "hide_top_toolbar": true,
                 "backgroundColor": "#131722",
-                "save_image": false
+                "hide_legend": true
             });
-        } else {
-            setTimeout(startTradingView, 500); // Повтор если не загрузилось
-        }
+        } else { setTimeout(startTradingView, 500); }
     }
 
-    // 3. Получение реальной цены
     async function fetchPrice() {
         try {
-            const response = await fetch('https://api.coingecko.com/api/v3/simple/price?ids=the-open-network&vs_currencies=usd&include_24hr_change=true');
-            const data = await response.json();
-            const val = data['the-open-network'].usd;
-            const change = data['the-open-network'].usd_24h_change;
-
+            const r = await fetch('https://api.coingecko.com/api/v3/simple/price?ids=the-open-network&vs_currencies=usd&include_24hr_change=true');
+            const d = await r.json();
+            const val = d['the-open-network'].usd;
+            const change = d['the-open-network'].usd_24h_change;
             document.getElementById('price-display').innerText = val.toFixed(3);
-            if(document.activeElement.id !== 'price-input') {
-                document.getElementById('price-input').value = val.toFixed(3);
-            }
-            
+            if(document.activeElement.id !== 'price-input') document.getElementById('price-input').value = val.toFixed(3);
             const ticker = document.getElementById('ticker-change');
-            ticker.innerText = (change >= 0 ? '+' : '') + change.toFixed(2) + '%';
+            ticker.innerText = (change >= 0 ? '+' : '') + change.toFixed(1) + '%';
             ticker.style.color = change >= 0 ? 'var(--green)' : 'var(--red)';
-
             renderOB(val);
-        } catch(e) { console.log("Price fetch error"); }
+        } catch(e) {}
     }
 
-    // 4. Отрисовка стакана (Order Book)
     function renderOB(p) {
         const asks = document.getElementById('asks-list');
         const bids = document.getElementById('bids-list');
         asks.innerHTML = ''; bids.innerHTML = '';
-        for(let i=0; i<5; i++) {
-            let v1 = (Math.random()*80 + 10).toFixed(1);
-            asks.insertAdjacentHTML('afterbegin', `<div class="ob-line" style="color:var(--red)"><div class="ob-volume" style="width:${v1}%; background:var(--red)"></div><span>${(p + (i*0.003)).toFixed(3)}</span><span>${v1}</span></div>`);
-            let v2 = (Math.random()*80 + 10).toFixed(1);
-            bids.innerHTML += `<div class="ob-line" style="color:var(--green)"><div class="ob-volume" style="width:${v2}%; background:var(--green)"></div><span>${(p - (i*0.003)).toFixed(3)}</span><span>${v2}</span></div>`;
+        for(let i=0; i<6; i++) {
+            let v1 = (Math.random()*50).toFixed(1);
+            asks.insertAdjacentHTML('afterbegin', `<div class="ob-line" style="color:var(--red)"><div class="ob-volume" style="width:${v1*2}%; background:var(--red)"></div><span>${(p + (i*0.002)).toFixed(3)}</span><span>${v1}</span></div>`);
+            let v2 = (Math.random()*50).toFixed(1);
+            bids.innerHTML += `<div class="ob-line" style="color:var(--green)"><div class="ob-volume" style="width:${v2*2}%; background:var(--green)"></div><span>${(p - (i*0.002)).toFixed(3)}</span><span>${v2}</span></div>`;
         }
     }
 
@@ -173,16 +161,7 @@
         btn.innerText = (s === 'buy' ? 'Buy' : 'Sell') + ' TON';
     }
 
-    function applyPct(p) {
-        // Пока заглушка
-        document.getElementById('amount-input').value = (p * 0.5).toFixed(1);
-    }
-
-    window.onload = () => {
-        startTradingView();
-        fetchPrice();
-        setInterval(fetchPrice, 5000);
-    };
+    window.onload = () => { startTradingView(); fetchPrice(); setInterval(fetchPrice, 5000); };
 </script>
 </body>
 </html>
