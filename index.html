@@ -3,175 +3,147 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Grok AutoTrade Pro</title>
+    <title>Grok AutoTrade Final</title>
     <script src="https://unpkg.com/@tonconnect/ui@latest/dist/tonconnect-ui.min.js"></script>
     <script src="https://s3.tradingview.com/tv.js"></script>
     <style>
         :root { --bg: #0b0e11; --panel: #171a1e; --input: #2b3139; --green: #0ecb81; --red: #f6465d; --text: #848e9c; --gold: #f0b90b; }
-        * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
-        body { background: var(--bg); color: white; font-family: -apple-system, sans-serif; height: 100vh; display: flex; flex-direction: column; overflow: hidden; }
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { background: var(--bg); color: white; font-family: sans-serif; height: 100vh; display: flex; flex-direction: column; overflow: hidden; }
 
-        /* Верхняя панель */
-        .header { display: flex; justify-content: space-between; align-items: center; padding: 8px 12px; background: var(--panel); height: 50px; border-bottom: 1px solid #222; }
-        .pair-info { display: flex; align-items: center; gap: 8px; }
-        .pair-name { font-weight: bold; font-size: 16px; }
-
-        /* Секция торговли */
-        .trade-container { display: flex; height: 210px; padding: 8px; gap: 8px; flex-shrink: 0; transition: 0.3s; }
-        .order-form { flex: 1.2; display: flex; flex-direction: column; gap: 6px; }
-        .order-book { flex: 0.8; font-family: monospace; font-size: 11px; display: flex; flex-direction: column; justify-content: space-between; }
-
-        /* Переключатель Buy/Sell */
-        .side-tabs { display: flex; background: var(--input); border-radius: 4px; padding: 2px; }
-        .side-btn { flex: 1; border: none; padding: 6px; border-radius: 4px; color: var(--text); background: transparent; font-weight: bold; cursor: pointer; }
-        .side-btn.active.buy { background: var(--green); color: white; }
-        .side-btn.active.sell { background: var(--red); color: white; }
-
-        /* Инпуты */
-        .input-box { background: var(--input); border-radius: 4px; padding: 6px 10px; }
-        .input-box span { font-size: 10px; color: var(--text); display: block; }
-        .input-box input { background: transparent; border: none; color: white; width: 100%; outline: none; font-size: 16px; }
-
-        /* Основная кнопка (теперь белая по умолчанию или цветная) */
-        .action-btn { width: 100%; border: none; padding: 12px; border-radius: 4px; font-weight: bold; font-size: 14px; cursor: pointer; margin-top: auto; }
-        .btn-buy { background: var(--green); color: white; }
-        .btn-sell { background: var(--red); color: white; }
-
-        /* Стакан */
-        .ob-row { display: flex; justify-content: space-between; position: relative; height: 16px; align-items: center; padding: 0 4px; }
-        .ob-bg { position: absolute; right: 0; height: 100%; opacity: 0.2; z-index: 0; }
-        .ob-price { z-index: 1; }
-        .ob-amt { z-index: 1; color: var(--text); }
-
-        /* График */
-        .chart-wrapper { flex-grow: 1; position: relative; background: #131722; display: flex; flex-direction: column; }
-        #tv_chart_container { flex-grow: 1; width: 100%; }
+        /* Шапка */
+        .header { display: flex; justify-content: space-between; align-items: center; padding: 5px 10px; height: 45px; background: var(--panel); border-bottom: 1px solid #222; }
         
-        .fs-toggle { position: absolute; top: 10px; right: 10px; z-index: 10; background: rgba(0,0,0,0.6); color: var(--gold); border: 1px solid #444; padding: 5px 10px; border-radius: 4px; font-size: 10px; }
+        /* Торговая зона (Форма + Стакан) */
+        .trade-area { display: flex; height: 220px; padding: 5px; gap: 5px; flex-shrink: 0; background: var(--bg); }
+        .order-side { flex: 1; display: flex; flex-direction: column; gap: 5px; }
+        .order-book { flex: 0.8; background: var(--panel); border-radius: 4px; padding: 4px; font-family: monospace; font-size: 11px; overflow: hidden; display: flex; flex-direction: column; }
+        
+        /* Кнопки Buy/Sell */
+        .tabs { display: flex; background: var(--input); border-radius: 4px; padding: 2px; }
+        .tab-btn { flex: 1; border: none; padding: 6px; border-radius: 4px; color: var(--text); background: transparent; font-weight: bold; font-size: 12px; }
+        .tab-btn.active.buy { background: var(--green); color: white; }
+        .tab-btn.active.sell { background: var(--red); color: white; }
 
-        /* Нижнее меню */
-        .bottom-nav { display: flex; background: var(--panel); height: 60px; border-top: 1px solid #222; padding-bottom: env(safe-area-inset-bottom); }
-        .nav-item { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; color: var(--text); font-size: 10px; text-decoration: none; }
-        .nav-item.active { color: white; }
-        .nav-icon { font-size: 20px; margin-bottom: 2px; }
+        .field { background: var(--input); border-radius: 4px; padding: 4px 8px; }
+        .field label { font-size: 9px; color: var(--text); display: block; }
+        .field input { background: transparent; border: none; color: white; width: 100%; outline: none; font-size: 14px; }
 
-        /* Режимы экрана */
-        body.is-fullscreen .trade-container, 
-        body.is-fullscreen .header { display: none; }
+        .main-btn { width: 100%; border: none; padding: 10px; border-radius: 4px; font-weight: bold; margin-top: auto; color: white; }
+        .buy-bg { background: var(--green); }
+        .sell-bg { background: var(--red); }
+
+        /* Стакан строк */
+        .ob-row { display: flex; justify-content: space-between; height: 14px; position: relative; }
+        .ob-ask { color: var(--red); }
+        .ob-bid { color: var(--green); }
+        
+        /* Контейнер графика */
+        .chart-section { flex-grow: 1; position: relative; min-height: 0; border-top: 1px solid #222; }
+        #tv_container { height: 100%; width: 100%; }
+
+        /* Нижняя навигация */
+        .footer-nav { height: 55px; background: var(--panel); display: flex; border-top: 1px solid #333; padding-bottom: env(safe-area-inset-bottom); }
+        .nav-link { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; text-decoration: none; color: var(--text); font-size: 10px; }
+        .nav-link.active { color: var(--gold); }
+        .nav-icon { font-size: 18px; }
+
+        /* Скрытие элементов для полноэкранного режима */
+        body.full-chart .trade-area, body.full-chart .header { display: none; }
     </style>
 </head>
-<body id="app-body">
+<body id="main-layout">
 
 <div class="header">
-    <div class="pair-info">
-        <span class="pair-name">TON / USDT</span>
-        <span id="price-change" style="font-size: 12px; color: var(--green);">+2.45%</span>
-    </div>
-    <div id="ton-connect-btn"></div>
+    <div style="font-weight: bold;">TON/USDT <span style="color:var(--green); font-size: 12px;">+2.4%</span></div>
+    <div id="ton-connect"></div>
 </div>
 
-<div class="trade-container">
-    <div class="order-form">
-        <div class="side-tabs">
-            <button id="tab-buy" class="side-btn active buy" onclick="setSide('buy')">Buy</button>
-            <button id="tab-sell" class="side-btn" onclick="setSide('sell')">Sell</button>
+<div class="trade-area">
+    <div class="order-side">
+        <div class="tabs">
+            <button id="b-tab" class="tab-btn active buy" onclick="toggleMode('buy')">Buy</button>
+            <button id="s-tab" class="tab-btn" onclick="toggleMode('sell')">Sell</button>
         </div>
-        <div class="input-box">
-            <span>Price</span>
-            <input type="number" id="inp-price" value="1.300">
-        </div>
-        <div class="input-box">
-            <span>Amount</span>
-            <input type="number" id="inp-amount" placeholder="0.0">
-        </div>
-        <button id="submit-btn" class="action-btn btn-buy">Buy TON</button>
+        <div class="field"><label>Price</label><input type="number" value="1.302"></div>
+        <div class="field"><label>Amount</label><input type="number" placeholder="0.0"></div>
+        <button id="action-btn" class="main-btn buy-bg">Buy TON</button>
     </div>
-
-    <div class="order-book">
-        <div id="ob-asks"></div>
-        <div id="ob-mid-price" style="text-align: center; font-size: 16px; font-weight: bold; color: var(--green); padding: 4px 0;">1.300</div>
-        <div id="ob-bids"></div>
-    </div>
+    
+    <div class="order-book" id="order-book-list">
+        </div>
 </div>
 
-<div class="chart-wrapper">
-    <button class="fs-toggle" onclick="toggleFS()">РАЗВЕРНУТЬ</button>
-    <div id="tv_chart_container"></div>
+<div class="chart-section">
+    <div id="tv_container"></div>
 </div>
 
-<div class="bottom-nav">
-    <a href="#" class="nav-item active"><span class="nav-icon">📊</span>Рынок</a>
-    <a href="#" class="nav-item"><span class="nav-icon">💼</span>Активы</a>
-    <a href="#" class="nav-item"><span class="nav-icon">📜</span>Сделки</a>
-    <a href="#" class="nav-item"><span class="nav-icon">⚙️</span>Настройки</a>
+<div class="footer-nav">
+    <a href="#" class="nav-link active"><span class="nav-icon">📊</span>Рынок</a>
+    <a href="#" class="nav-link"><span class="nav-icon">💼</span>Активы</a>
+    <a href="#" class="nav-link"><span class="nav-icon">📜</span>Сделки</a>
+    <a href="#" class="nav-link" onclick="toggleSettings()"><span class="nav-icon">⚙️</span>Настройки</a>
 </div>
 
 <script>
-    // 1. Инициализация графика с рабочими настройками
-    let widget;
-    function loadChart() {
-        widget = new TradingView.widget({
+    // 1. Инициализация TradingView с рабочими настройками
+    function initChart() {
+        new TradingView.widget({
             "autosize": true,
             "symbol": "OKX:TONUSDT",
-            "interval": "15",
-            "container_id": "tv_chart_container",
-            "library_path": "https://s3.tradingview.com/tv.js",
-            "locale": "ru",
+            "interval": "60",
+            "timezone": "Etc/UTC",
             "theme": "dark",
             "style": "1",
-            "toolbar_bg": "#131722",
+            "locale": "ru",
+            "toolbar_bg": "#f1f3f6",
             "enable_publishing": false,
-            "hide_top_toolbar": false, // ВКЛЮЧАЕМ ВЕРХНЮЮ ПАНЕЛЬ (Таймфреймы)
+            "hide_top_toolbar": false, // Показывает таймфреймы и настройки
             "withdateranges": true,
-            "hide_side_toolbar": false, // ВКЛЮЧАЕМ ИНСТРУМЕНТЫ РИСОВАНИЯ
-            "allow_symbol_change": true,
-            "details": true,
-            "hotlist": true,
-            "calendar": true,
-            "show_popup_button": true,
-            "popup_width": "1000",
-            "popup_height": "650"
+            "container_id": "tv_container",
+            "studies": ["RSI@tv-basicstudies"] // RSI под графиком
         });
     }
 
-    // 2. Переключение сторон (Купить/Продать)
-    function setSide(side) {
-        const buyTab = document.getElementById('tab-buy');
-        const sellTab = document.getElementById('tab-sell');
-        const btn = document.getElementById('submit-btn');
+    // 2. Генератор стакана (чтобы он был виден)
+    function renderOrderBook() {
+        const container = document.getElementById('order-book-list');
+        let html = '<div style="color:var(--text); font-size:9px; display:flex; justify-content:space-between; margin-bottom:4px;"><span>Price</span><span>Amount</span></div>';
+        
+        // Продажи (красные)
+        for(let i=0; i<5; i++) {
+            html += `<div class="ob-row ob-ask"><span>1.31${i}</span><span>${(Math.random()*100).toFixed(1)}</span></div>`;
+        }
+        html += `<div style="text-align:center; color:white; font-size:14px; margin:4px 0; font-weight:bold;">1.302</div>`;
+        // Покупки (зеленые)
+        for(let i=0; i<5; i++) {
+            html += `<div class="ob-row ob-bid"><span>1.29${9-i}</span><span>${(Math.random()*100).toFixed(1)}</span></div>`;
+        }
+        container.innerHTML = html;
+    }
 
+    function toggleMode(side) {
+        const b = document.getElementById('b-tab');
+        const s = document.getElementById('s-tab');
+        const btn = document.getElementById('action-btn');
         if(side === 'buy') {
-            buyTab.classList.add('active', 'buy');
-            sellTab.classList.remove('active', 'sell');
-            btn.className = 'action-btn btn-buy';
-            btn.innerText = 'Buy TON';
+            b.className = 'tab-btn active buy'; s.className = 'tab-btn';
+            btn.className = 'main-btn buy-bg'; btn.innerText = 'Buy TON';
         } else {
-            sellTab.classList.add('active', 'sell');
-            buyTab.classList.remove('active', 'buy');
-            btn.className = 'action-btn btn-sell';
-            btn.innerText = 'Sell TON';
+            s.className = 'tab-btn active sell'; b.className = 'tab-btn';
+            btn.className = 'main-btn sell-bg'; btn.innerText = 'Sell TON';
         }
     }
 
-    // 3. Полноэкранный режим
-    function toggleFS() {
-        const body = document.getElementById('app-body');
-        const isFull = body.classList.toggle('is-fullscreen');
-        document.querySelector('.fs-toggle').innerText = isFull ? 'СВЕРНУТЬ' : 'РАЗВЕРНУТЬ';
-    }
-
-    // 4. Подключение TON Connect
-    const tc = new TON_CONNECT_UI.TonConnectUI({
-        manifestUrl: 'https://sergey52bb.github.io/grok-autotrade/tonconnect-manifest.json',
-        buttonRootId: 'ton-connect-btn'
-    });
-
-    // Запуск при загрузке
+    // Запуск
     window.onload = () => {
-        loadChart();
-        // Здесь можно добавить генерацию стакана (как в прошлом коде)
+        initChart();
+        renderOrderBook();
+        const tonConnectUI = new TON_CONNECT_UI.TonConnectUI({
+            manifestUrl: 'https://sergey52bb.github.io/grok-autotrade/tonconnect-manifest.json',
+            buttonRootId: 'ton-connect'
+        });
     };
 </script>
-
 </body>
 </html>
