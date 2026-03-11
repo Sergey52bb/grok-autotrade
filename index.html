@@ -3,87 +3,87 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>Grok AutoTrade v2.7</title>
+    <title>STRATEX TERMINAL v2.8</title>
     <script src="https://unpkg.com/@tonconnect/ui@latest/dist/tonconnect-ui.min.js"></script>
     <script src="https://s3.tradingview.com/tv.js"></script>
     <style>
         :root { --bg: #0b0e11; --panel: #171a1e; --input: #2b3139; --green: #0ecb81; --red: #f6465d; --text: #848e9c; }
-        * { box-sizing: border-box; margin: 0; padding: 0; }
+        * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
         
-        body { background: var(--bg); color: white; font-family: sans-serif; height: 100vh; display: flex; flex-direction: column; overflow: hidden; }
+        body { background: var(--bg); color: white; font-family: -apple-system, system-ui, sans-serif; height: 100vh; display: flex; flex-direction: column; overflow: hidden; }
 
-        .header { display: flex; justify-content: space-between; align-items: center; padding: 4px 10px; height: 40px; background: var(--panel); flex-shrink: 0; }
+        .header { display: flex; justify-content: space-between; align-items: center; padding: 0 12px; height: 44px; background: var(--panel); flex-shrink: 0; border-bottom: 1px solid #222; }
         
-        /* Основной контейнер сверху */
-        .top-section { display: flex; height: 180px; padding: 5px; gap: 8px; flex-shrink: 0; background: var(--bg); }
+        .top-block { display: flex; height: 185px; padding: 8px; gap: 10px; flex-shrink: 0; background: var(--bg); }
         
-        /* Левая часть: Кнопки и инпуты */
-        .trade-side { flex: 1; display: flex; flex-direction: column; gap: 4px; }
+        .trade-panel { flex: 1.1; display: flex; flex-direction: column; gap: 6px; }
         .tabs { display: flex; background: var(--input); border-radius: 4px; padding: 2px; }
-        .tab-btn { flex: 1; border: none; padding: 5px; border-radius: 4px; color: var(--text); background: transparent; font-size: 11px; font-weight: bold; }
+        .tab-btn { flex: 1; border: none; padding: 6px; border-radius: 4px; color: var(--text); background: transparent; font-size: 11px; font-weight: bold; }
         .tab-btn.active-buy { background: var(--green); color: white; }
         .tab-btn.active-sell { background: var(--red); color: white; }
 
-        .fld { background: var(--input); border-radius: 4px; padding: 4px 8px; }
-        .fld label { font-size: 8px; color: var(--text); display: block; }
-        .fld input { background: transparent; border: none; color: white; width: 100%; font-size: 14px; font-weight: bold; }
+        .fld { background: var(--input); border-radius: 4px; padding: 4px 10px; }
+        .fld label { font-size: 9px; color: var(--text); display: block; }
+        .fld input { background: transparent; border: none; color: white; width: 100%; font-size: 15px; font-weight: 600; }
 
-        .exec-btn { width: 100%; border: none; padding: 10px; border-radius: 4px; font-weight: bold; color: white; margin-top: auto; font-size: 14px; }
+        .exec-btn { width: 100%; border: none; padding: 12px; border-radius: 4px; font-weight: bold; color: white; margin-top: auto; font-size: 14px; }
 
-        /* Правая часть: Стакан (теперь с фиксированной высотой) */
-        .book-side { flex: 1; background: var(--panel); border-radius: 4px; padding: 4px; font-family: monospace; display: flex; flex-direction: column; height: 100%; overflow: hidden; }
-        .book-row { display: flex; justify-content: space-between; height: 13px; align-items: center; font-size: 10px; position: relative; }
-        .book-bar { position: absolute; right: 0; height: 100%; opacity: 0.15; z-index: 0; }
-        .book-row span { z-index: 1; }
+        /* ИСПРАВЛЕННЫЙ СТАКАН */
+        .order-book { flex: 0.9; background: var(--panel); border-radius: 6px; padding: 6px; display: flex; flex-direction: column; height: 100%; overflow: hidden; border: 1px solid #222; }
+        .ob-list { flex: 1; overflow: hidden; display: flex; flex-direction: column; }
+        .ob-row { display: flex; justify-content: space-between; height: 14px; align-items: center; font-size: 10px; font-family: monospace; position: relative; }
+        .ob-bar { position: absolute; right: 0; height: 100%; opacity: 0.15; z-index: 0; }
+        .ob-row span { z-index: 1; }
 
-        /* График на весь остаток экрана */
-        .chart-wrapper { flex-grow: 1; width: 100%; background: #131722; position: relative; margin-bottom: 50px; }
-        #tv_chart_container { height: 100% !important; }
+        /* ГРАФИК */
+        .chart-area { flex-grow: 1; width: 100%; background: #131722; position: relative; margin-bottom: 55px; }
+        #tv_container { height: 100% !important; }
 
-        /* Навигация */
-        .bottom-nav { position: fixed; bottom: 0; width: 100%; height: 50px; background: var(--panel); display: flex; border-top: 1px solid #333; }
-        .nav-btn { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; color: var(--text); text-decoration: none; font-size: 9px; }
-        .nav-btn.active { color: white; }
+        /* МЕНЮ */
+        .footer { position: fixed; bottom: 0; width: 100%; height: 55px; background: var(--panel); display: flex; border-top: 1px solid #333; z-index: 1000; padding-bottom: env(safe-area-inset-bottom); }
+        .nav-item { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; color: var(--text); text-decoration: none; font-size: 10px; gap: 2px; }
+        .nav-item.active { color: white; }
+        .nav-item i { font-size: 18px; font-style: normal; }
     </style>
 </head>
 <body>
 
 <div class="header">
-    <div style="font-weight:bold; font-size:14px">TON/USDT <span style="color:var(--green); font-size:10px">+2.4%</span></div>
+    <div style="font-weight:bold; font-size:15px">STRATEX <span style="color:var(--green); font-size:11px">TON/USDT</span></div>
     <div id="ton-connect"></div>
 </div>
 
-<div class="top-section">
-    <div class="trade-side">
+<div class="top-block">
+    <div class="trade-panel">
         <div class="tabs">
-            <button id="tb" class="tab-btn active-buy" onclick="setM('buy')">Buy</button>
-            <button id="ts" class="tab-btn" onclick="setM('sell')">Sell</button>
+            <button id="b-t" class="tab-btn active-buy" onclick="m('buy')">Buy</button>
+            <button id="s-t" class="tab-btn" onclick="m('sell')">Sell</button>
         </div>
-        <div class="fld"><label>Price (USDT)</label><input type="number" id="pi" value="1.314"></div>
-        <div class="fld"><label>Amount (TON)</label><input type="number" id="ai" placeholder="0.0"></div>
-        <button id="eb" class="exec-btn" style="background:var(--green)">Buy TON</button>
+        <div class="fld"><label>Price</label><input type="number" id="p-i" value="1.314" step="0.001"></div>
+        <div class="fld"><label>Amount</label><input type="number" id="a-i" placeholder="0.0"></div>
+        <button id="e-b" class="exec-btn" style="background:var(--green)">Buy TON</button>
     </div>
     
-    <div class="book-side">
-        <div id="asks" style="display:flex; flex-direction:column-reverse; flex:1"></div>
-        <div id="mp" style="text-align:center; color:var(--green); font-weight:bold; padding:2px 0; font-size:12px">1.314</div>
-        <div id="bids" style="flex:1"></div>
+    <div class="order-book">
+        <div id="asks" class="ob-list" style="flex-direction:column-reverse;"></div>
+        <div id="m-p" style="text-align:center; color:var(--green); font-weight:bold; padding:4px 0; font-size:14px; background: rgba(14,203,129,0.05)">1.314</div>
+        <div id="bids" class="ob-list"></div>
     </div>
 </div>
 
-<div class="chart-wrapper">
-    <div id="tv_chart_container"></div>
+<div class="chart-area">
+    <div id="tv_container"></div>
 </div>
 
-<div class="bottom-nav">
-    <a href="#" class="nav-btn active">📊<span>Рынок</span></a>
-    <a href="#" class="nav-btn">💼<span>Активы</span></a>
-    <a href="#" class="nav-btn">📜<span>Сделки</span></a>
-    <a href="#" class="nav-btn">⚙️<span>Настройки</span></a>
+<div class="footer">
+    <a href="#" class="nav-item active"><i>📊</i><span>Рынок</span></a>
+    <a href="#" class="nav-item"><i>💼</i><span>Активы</span></a>
+    <a href="#" class="nav-item"><i>📜</i><span>Сделки</span></a>
+    <a href="#" class="nav-item"><i>⚙️</i><span>Настройки</span></a>
 </div>
 
 <script>
-    function loadChart() {
+    function init() {
         new TradingView.widget({
             "autosize": true,
             "symbol": "OKX:TONUSDT",
@@ -91,46 +91,49 @@
             "theme": "dark",
             "style": "1",
             "locale": "ru",
-            "container_id": "tv_chart_container",
+            "container_id": "tv_container",
+            "enable_publishing": false,
             "hide_top_toolbar": false,
             "hide_legend": true,
             "save_image": false,
-            "studies": [] // RSI убран
+            "studies": [],
+            "disabled_features": ["use_localstorage_for_settings_visibility"] 
         });
     }
 
-    function drawBook() {
+    function update() {
         const askBox = document.getElementById('asks');
         const bidBox = document.getElementById('bids');
-        const p = parseFloat(document.getElementById('pi').value);
+        const price = parseFloat(document.getElementById('p-i').value);
         let ah = '', bh = '';
         
-        for(let i=0; i<6; i++) { // Ограничено 6 строками, чтобы не вылезало
-            const v = Math.random() * 100;
-            ah += `<div class="book-row" style="color:var(--red)"><div class="book-bar" style="width:${v}%; background:var(--red)"></div><span>${(p + 0.006 - i*0.001).toFixed(3)}</span><span>${v.toFixed(1)}</span></div>`;
-            bh += `<div class="book-row" style="color:var(--green)"><div class="book-bar" style="width:${v}%; background:var(--green)"></div><span>${(p - 0.001 - i*0.001).toFixed(3)}</span><span>${v.toFixed(1)}</span></div>`;
+        for(let i=0; i<7; i++) { // Ровно 7 строк, чтобы влезло идеально
+            const v = Math.random() * 80 + 10;
+            ah += `<div class="ob-row" style="color:var(--red)"><div class="ob-bar" style="width:${v}%; background:var(--red)"></div><span>${(price + 0.007 - i*0.001).toFixed(3)}</span><span>${v.toFixed(1)}</span></div>`;
+            bh += `<div class="book-row ob-row" style="color:var(--green)"><div class="ob-bar" style="width:${v}%; background:var(--green)"></div><span>${(price - 0.001 - i*0.001).toFixed(3)}</span><span>${v.toFixed(1)}</span></div>`;
         }
         askBox.innerHTML = ah;
         bidBox.innerHTML = bh;
+        document.getElementById('m-p').innerText = price.toFixed(3);
     }
 
-    function setM(m) {
-        const b = document.getElementById('eb');
-        if(m==='buy'){
-            document.getElementById('tb').className='tab-btn active-buy';
-            document.getElementById('ts').className='tab-btn';
-            b.style.background='var(--green)'; b.innerText='Buy TON';
+    function m(type) {
+        const btn = document.getElementById('e-b');
+        if(type==='buy') {
+            document.getElementById('b-t').className='tab-btn active-buy';
+            document.getElementById('s-t').className='tab-btn';
+            btn.style.background='var(--green)'; btn.innerText='Buy TON';
         } else {
-            document.getElementById('ts').className='tab-btn active-sell';
-            document.getElementById('tb').className='tab-btn';
-            b.style.background='var(--red)'; b.innerText='Sell TON';
+            document.getElementById('s-t').className='tab-btn active-sell';
+            document.getElementById('b-t').className='tab-btn';
+            btn.style.background='var(--red)'; btn.innerText='Sell TON';
         }
     }
 
     window.onload = () => {
-        loadChart();
-        drawBook();
-        setInterval(drawBook, 2000);
+        init();
+        update();
+        setInterval(update, 2500);
         new TON_CONNECT_UI.TonConnectUI({
             manifestUrl: 'https://sergey52bb.github.io/grok-autotrade/tonconnect-manifest.json',
             buttonRootId: 'ton-connect'
