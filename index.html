@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>Grok AutoTrade v2.6</title>
+    <title>Grok AutoTrade v2.7</title>
     <script src="https://unpkg.com/@tonconnect/ui@latest/dist/tonconnect-ui.min.js"></script>
     <script src="https://s3.tradingview.com/tv.js"></script>
     <style>
@@ -12,79 +12,78 @@
         
         body { background: var(--bg); color: white; font-family: sans-serif; height: 100vh; display: flex; flex-direction: column; overflow: hidden; }
 
-        /* Компактная шапка */
         .header { display: flex; justify-content: space-between; align-items: center; padding: 4px 10px; height: 40px; background: var(--panel); flex-shrink: 0; }
-        .pair-title { font-weight: bold; font-size: 14px; }
-
-        /* Торговый блок стал ниже */
-        .trade-container { display: flex; height: 190px; padding: 6px; gap: 8px; flex-shrink: 0; border-bottom: 1px solid #222; }
-        .controls { flex: 1; display: flex; flex-direction: column; gap: 5px; }
-        .book { flex: 1; background: #121518; border-radius: 4px; padding: 4px; font-family: monospace; font-size: 10px; overflow: hidden; }
-
+        
+        /* Основной контейнер сверху */
+        .top-section { display: flex; height: 180px; padding: 5px; gap: 8px; flex-shrink: 0; background: var(--bg); }
+        
+        /* Левая часть: Кнопки и инпуты */
+        .trade-side { flex: 1; display: flex; flex-direction: column; gap: 4px; }
         .tabs { display: flex; background: var(--input); border-radius: 4px; padding: 2px; }
-        .tab-btn { flex: 1; border: none; padding: 4px; border-radius: 4px; color: var(--text); background: transparent; font-size: 11px; font-weight: bold; }
+        .tab-btn { flex: 1; border: none; padding: 5px; border-radius: 4px; color: var(--text); background: transparent; font-size: 11px; font-weight: bold; }
         .tab-btn.active-buy { background: var(--green); color: white; }
         .tab-btn.active-sell { background: var(--red); color: white; }
 
-        .fld { background: var(--input); border-radius: 4px; padding: 3px 8px; }
+        .fld { background: var(--input); border-radius: 4px; padding: 4px 8px; }
         .fld label { font-size: 8px; color: var(--text); display: block; }
-        .fld input { background: transparent; border: none; color: white; width: 100%; font-size: 13px; }
+        .fld input { background: transparent; border: none; color: white; width: 100%; font-size: 14px; font-weight: bold; }
 
-        .main-btn { width: 100%; border: none; padding: 10px; border-radius: 4px; font-weight: bold; color: white; margin-top: auto; font-size: 13px; }
+        .exec-btn { width: 100%; border: none; padding: 10px; border-radius: 4px; font-weight: bold; color: white; margin-top: auto; font-size: 14px; }
 
-        /* График теперь занимает всё свободное место без RSI */
-        .chart-box { flex-grow: 1; width: 100%; background: #131722; margin-bottom: 50px; }
-        #tv_widget_area { height: 100% !important; width: 100% !important; }
+        /* Правая часть: Стакан (теперь с фиксированной высотой) */
+        .book-side { flex: 1; background: var(--panel); border-radius: 4px; padding: 4px; font-family: monospace; display: flex; flex-direction: column; height: 100%; overflow: hidden; }
+        .book-row { display: flex; justify-content: space-between; height: 13px; align-items: center; font-size: 10px; position: relative; }
+        .book-bar { position: absolute; right: 0; height: 100%; opacity: 0.15; z-index: 0; }
+        .book-row span { z-index: 1; }
 
-        /* Компактные строки стакана */
-        .row { display: flex; justify-content: space-between; height: 14px; align-items: center; position: relative; }
-        .bar { position: absolute; right: 0; height: 100%; opacity: 0.15; z-index: 0; }
-        .row span { z-index: 1; }
+        /* График на весь остаток экрана */
+        .chart-wrapper { flex-grow: 1; width: 100%; background: #131722; position: relative; margin-bottom: 50px; }
+        #tv_chart_container { height: 100% !important; }
 
-        .nav { position: fixed; bottom: 0; left: 0; right: 0; height: 50px; background: var(--panel); display: flex; border-top: 1px solid #333; z-index: 100; }
-        .nav-link { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; color: var(--text); text-decoration: none; font-size: 9px; }
-        .nav-link.active { color: white; }
-        .nav-link i { font-style: normal; font-size: 18px; margin-bottom: 2px; }
+        /* Навигация */
+        .bottom-nav { position: fixed; bottom: 0; width: 100%; height: 50px; background: var(--panel); display: flex; border-top: 1px solid #333; }
+        .nav-btn { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; color: var(--text); text-decoration: none; font-size: 9px; }
+        .nav-btn.active { color: white; }
     </style>
 </head>
 <body>
 
 <div class="header">
-    <div class="pair-title">TON/USDT <span style="color:var(--green); font-size:10px;">+2.45%</span></div>
+    <div style="font-weight:bold; font-size:14px">TON/USDT <span style="color:var(--green); font-size:10px">+2.4%</span></div>
     <div id="ton-connect"></div>
 </div>
 
-<div class="trade-container">
-    <div class="controls">
+<div class="top-section">
+    <div class="trade-side">
         <div class="tabs">
-            <button id="b-tab" class="tab-btn active-buy" onclick="toggle('buy')">Buy</button>
-            <button id="s-tab" class="tab-btn" onclick="toggle('sell')">Sell</button>
+            <button id="tb" class="tab-btn active-buy" onclick="setM('buy')">Buy</button>
+            <button id="ts" class="tab-btn" onclick="setM('sell')">Sell</button>
         </div>
-        <div class="fld"><label>Price (USDT)</label><input type="number" id="p-in" value="1.302"></div>
-        <div class="fld"><label>Amount (TON)</label><input type="number" id="a-in" placeholder="0.0"></div>
-        <button id="exec-btn" class="main-btn" style="background:var(--green)">Buy TON</button>
+        <div class="fld"><label>Price (USDT)</label><input type="number" id="pi" value="1.314"></div>
+        <div class="fld"><label>Amount (TON)</label><input type="number" id="ai" placeholder="0.0"></div>
+        <button id="eb" class="exec-btn" style="background:var(--green)">Buy TON</button>
     </div>
     
-    <div class="book">
-        <div id="asks-v" style="display:flex; flex-direction:column-reverse"></div>
-        <div id="mid-p" style="text-align:center; font-weight:bold; color:var(--green); margin: 2px 0; font-size:13px;">1.302</div>
-        <div id="bids-v"></div>
+    <div class="book-side">
+        <div id="asks" style="display:flex; flex-direction:column-reverse; flex:1"></div>
+        <div id="mp" style="text-align:center; color:var(--green); font-weight:bold; padding:2px 0; font-size:12px">1.314</div>
+        <div id="bids" style="flex:1"></div>
     </div>
 </div>
 
-<div class="chart-box">
-    <div id="tv_widget_area"></div>
+<div class="chart-wrapper">
+    <div id="tv_chart_container"></div>
 </div>
 
-<div class="nav">
-    <a href="#" class="nav-link active"><i>📊</i>Рынок</a>
-    <a href="#" class="nav-link"><i>💼</i>Активы</a>
-    <a href="#" class="nav-link"><i>📜</i>Сделки</a>
-    <a href="#" class="nav-link"><i>⚙️</i>Настройки</a>
+<div class="bottom-nav">
+    <a href="#" class="nav-btn active">📊<span>Рынок</span></a>
+    <a href="#" class="nav-btn">💼<span>Активы</span></a>
+    <a href="#" class="nav-btn">📜<span>Сделки</span></a>
+    <a href="#" class="nav-btn">⚙️<span>Настройки</span></a>
 </div>
 
 <script>
-    function initTV() {
+    function loadChart() {
         new TradingView.widget({
             "autosize": true,
             "symbol": "OKX:TONUSDT",
@@ -92,50 +91,46 @@
             "theme": "dark",
             "style": "1",
             "locale": "ru",
-            "container_id": "tv_widget_area",
+            "container_id": "tv_chart_container",
             "hide_top_toolbar": false,
-            "hide_legend": true, // Убираем легенду для экономии места
+            "hide_legend": true,
             "save_image": false,
-            "studies": [] // RSI полностью убран отсюда
+            "studies": [] // RSI убран
         });
     }
 
-    function renderBook() {
-        const aEl = document.getElementById('asks-v');
-        const bEl = document.getElementById('bids-v');
-        const price = parseFloat(document.getElementById('p-in').value);
+    function drawBook() {
+        const askBox = document.getElementById('asks');
+        const bidBox = document.getElementById('bids');
+        const p = parseFloat(document.getElementById('pi').value);
+        let ah = '', bh = '';
         
-        let aH = '', bH = '';
-        for(let i=0; i<8; i++) { // Увеличил до 8 строк
-            const vol = Math.random() * 100;
-            const ap = (price + 0.008 - i*0.001).toFixed(3);
-            const bp = (price - 0.001 - i*0.001).toFixed(3);
-            
-            aH += `<div class="row" style="color:var(--red)"><div class="bar" style="width:${vol}%; background:var(--red)"></div><span>${ap}</span><span>${(vol/2).toFixed(1)}</span></div>`;
-            bH += `<div class="row" style="color:var(--green)"><div class="bar" style="width:${vol}%; background:var(--green)"></div><span>${bp}</span><span>${(vol/2).toFixed(1)}</span></div>`;
+        for(let i=0; i<6; i++) { // Ограничено 6 строками, чтобы не вылезало
+            const v = Math.random() * 100;
+            ah += `<div class="book-row" style="color:var(--red)"><div class="book-bar" style="width:${v}%; background:var(--red)"></div><span>${(p + 0.006 - i*0.001).toFixed(3)}</span><span>${v.toFixed(1)}</span></div>`;
+            bh += `<div class="book-row" style="color:var(--green)"><div class="book-bar" style="width:${v}%; background:var(--green)"></div><span>${(p - 0.001 - i*0.001).toFixed(3)}</span><span>${v.toFixed(1)}</span></div>`;
         }
-        aEl.innerHTML = aH;
-        bEl.innerHTML = bH;
-        document.getElementById('mid-p').innerText = price.toFixed(3);
+        askBox.innerHTML = ah;
+        bidBox.innerHTML = bh;
     }
 
-    function toggle(m) {
-        const btn = document.getElementById('exec-btn');
-        const bt = document.getElementById('b-tab');
-        const st = document.getElementById('s-tab');
-        if(m === 'buy') {
-            bt.className = 'tab-btn active-buy'; st.className = 'tab-btn';
-            btn.style.background = 'var(--green)'; btn.innerText = 'Buy TON';
+    function setM(m) {
+        const b = document.getElementById('eb');
+        if(m==='buy'){
+            document.getElementById('tb').className='tab-btn active-buy';
+            document.getElementById('ts').className='tab-btn';
+            b.style.background='var(--green)'; b.innerText='Buy TON';
         } else {
-            st.className = 'tab-btn active-sell'; bt.className = 'tab-btn';
-            btn.style.background = 'var(--red)'; btn.innerText = 'Sell TON';
+            document.getElementById('ts').className='tab-btn active-sell';
+            document.getElementById('tb').className='tab-btn';
+            b.style.background='var(--red)'; b.innerText='Sell TON';
         }
     }
 
     window.onload = () => {
-        initTV();
-        renderBook();
-        setInterval(renderBook, 2000);
+        loadChart();
+        drawBook();
+        setInterval(drawBook, 2000);
         new TON_CONNECT_UI.TonConnectUI({
             manifestUrl: 'https://sergey52bb.github.io/grok-autotrade/tonconnect-manifest.json',
             buttonRootId: 'ton-connect'
