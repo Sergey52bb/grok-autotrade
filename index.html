@@ -3,40 +3,40 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>STRATEX TERMINAL</title>
+    <title>STRATEX PRO</title>
     <style>
-        :root { --bg: #0b0e11; --panel: #171a1e; --input: #2b3139; --green: #0ecb81; --red: #f6465d; --text: #848e9c; }
+        :root { --bg: #0b0e11; --panel: #171a1e; --input: #2b3139; --green: #0ecb81; --red: #f6465d; --text: #848e9c; --grid: #1f2226; }
         * { box-sizing: border-box; margin: 0; padding: 0; }
         body { background: var(--bg); color: white; font-family: sans-serif; height: 100vh; display: flex; flex-direction: column; overflow: hidden; }
 
         /* ВЕРХ 40% */
-        .top { height: 40%; display: flex; flex-direction: column; border-bottom: 1px solid #222; flex-shrink: 0; }
-        .head { display: flex; justify-content: space-between; padding: 10px; font-size: 14px; font-weight: bold; background: #121518; }
-        .main-ui { display: flex; flex: 1; padding: 8px; gap: 10px; }
+        .top { height: 40%; display: flex; flex-direction: column; border-bottom: 1px solid #222; }
+        .head { display: flex; justify-content: space-between; padding: 8px 12px; font-size: 14px; background: #121518; align-items: center; }
+        .main-ui { display: flex; flex: 1; padding: 6px; gap: 8px; overflow: hidden; }
         
-        .trade { flex: 1; display: flex; flex-direction: column; gap: 6px; }
-        .book { flex: 1; background: #121518; border-radius: 4px; padding: 5px; font-family: monospace; font-size: 11px; overflow: hidden; }
+        .trade { flex: 1.1; display: flex; flex-direction: column; gap: 5px; }
+        .book { flex: 0.9; background: #121518; border-radius: 4px; padding: 4px; font-family: monospace; font-size: 11px; overflow: hidden; border: 1px solid #222; }
 
         .tabs { display: flex; background: var(--input); border-radius: 4px; padding: 2px; }
-        .tab { flex: 1; border: none; padding: 8px; border-radius: 3px; color: var(--text); background: transparent; font-size: 11px; font-weight: bold; }
+        .tab { flex: 1; border: none; padding: 7px; border-radius: 3px; color: var(--text); background: transparent; font-size: 11px; font-weight: bold; }
         .tab.active { background: var(--green); color: white; }
 
         .inp { background: var(--input); border-radius: 4px; padding: 4px 8px; }
         .inp label { font-size: 8px; color: var(--text); display: block; }
-        .inp input { background: transparent; border: none; color: white; width: 100%; font-size: 15px; outline: none; }
-        .btn { width: 100%; border: none; padding: 15px; border-radius: 4px; background: var(--green); color: white; font-weight: bold; margin-top: auto; }
+        .inp input { background: transparent; border: none; color: white; width: 100%; font-size: 14px; outline: none; }
+        .btn { width: 100%; border: none; padding: 12px; border-radius: 4px; background: var(--green); color: white; font-weight: bold; margin-top: auto; }
 
-        .row { display: flex; justify-content: space-between; height: 14px; color: var(--red); }
+        .ob-row { display: flex; justify-content: space-between; height: 13px; margin: 1px 0; }
 
-        /* ГРАФИК 30% и RSI 10% */
-        canvas { display: block; background: var(--bg); }
-        #chart-wrap { height: 30%; border-bottom: 1px solid #222; }
+        /* ГРАФИКИ */
+        canvas { display: block; }
+        #chart-wrap { height: 30%; border-bottom: 1px solid #222; position: relative; }
         #rsi-wrap { height: 10%; border-bottom: 1px solid #222; }
 
         /* НАВИГАЦИЯ 20% */
         .nav { height: 20%; display: flex; flex-direction: column; background: var(--panel); justify-content: center; }
-        .nav-grid { display: flex; justify-content: space-around; align-items: center; }
-        .nav-item { text-align: center; color: var(--text); text-decoration: none; font-size: 11px; display: flex; flex-direction: column; gap: 4px; }
+        .nav-grid { display: flex; justify-content: space-around; }
+        .nav-item { text-align: center; color: var(--text); text-decoration: none; font-size: 10px; display: flex; flex-direction: column; gap: 4px; }
         .nav-item.active { color: white; }
     </style>
 </head>
@@ -45,13 +45,13 @@
 <div class="top">
     <div class="head">
         <div>STRATEX <span style="color:var(--green)">TON/USDT</span></div>
-        <div id="live-p">1.314</div>
+        <div id="live-p" style="font-family: monospace; font-weight: bold; background: #222; padding: 2px 6px; border-radius: 4px;">1.314</div>
     </div>
     <div class="main-ui">
         <div class="trade">
             <div class="tabs"><button class="tab active">Buy</button><button class="tab">Sell</button></div>
-            <div class="inp"><label>Price</label><input type="number" value="1.314" id="p-in"></div>
-            <div class="inp"><label>Amount</label><input type="number" placeholder="0.0"></div>
+            <div class="inp"><label>Price (USDT)</label><input type="number" value="1.314" id="p-in"></div>
+            <div class="inp"><label>Amount (TON)</label><input type="number" placeholder="0.0"></div>
             <button class="btn">Buy TON</button>
         </div>
         <div class="book" id="book"></div>
@@ -63,74 +63,108 @@
 
 <div class="nav">
     <div class="nav-grid">
-        <a href="#" class="nav-item active"><span style="font-size:20px">📊</span>Рынок</a>
-        <a href="#" class="nav-item"><span style="font-size:20px">💼</span>Активы</a>
-        <a href="#" class="nav-item"><span style="font-size:20px">⚙️</span>Настройки</a>
-        <a href="#" class="nav-item"><span style="font-size:20px">📜</span>Сделки</a>
+        <a href="#" class="nav-item active"><span style="font-size:18px">📊</span>Рынок</a>
+        <a href="#" class="nav-item"><span style="font-size:18px">💼</span>Активы</a>
+        <a href="#" class="nav-item"><span style="font-size:18px">⚙️</span>Настройки</a>
+        <a href="#" class="nav-item"><span style="font-size:18px">📜</span>Сделки</a>
     </div>
 </div>
 
 <script>
-    const c = document.getElementById('c');
-    const r = document.getElementById('r');
-    const ctx = c.getContext('2d');
-    const rctx = r.getContext('2d');
+    const c = document.getElementById('c'), r = document.getElementById('r');
+    const ctx = c.getContext('2d'), rctx = r.getContext('2d');
 
     let price = 1.314;
-    let history = Array.from({length: 40}, () => 1.31 + Math.random() * 0.01);
+    // Генерируем историю свечей: open, high, low, close
+    let history = Array.from({length: 30}, () => {
+        let base = 1.31 + Math.random() * 0.01;
+        return { o: base, h: base + 0.002, l: base - 0.002, c: base + 0.001 };
+    });
 
     function resize() {
         c.width = c.parentElement.clientWidth;
         c.height = c.parentElement.clientHeight;
         r.width = r.parentElement.clientWidth;
         r.height = r.parentElement.clientHeight;
+        draw();
     }
 
     function draw() {
         ctx.clearRect(0, 0, c.width, c.height);
         rctx.clearRect(0, 0, r.width, r.height);
 
-        // Рисуем свечи (упрощенно барами)
+        // Сетка
+        ctx.strokeStyle = '#1f2226';
+        ctx.lineWidth = 1;
+        for(let i=1; i<4; i++) {
+            let y = (c.height / 4) * i;
+            ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(c.width, y); ctx.stroke();
+        }
+
         const w = c.width / history.length;
-        history.forEach((p, i) => {
-            const h = (p - 1.30) * 1000;
-            ctx.fillStyle = i % 2 === 0 ? '#0ecb81' : '#f6465d';
-            ctx.fillRect(i * w + 2, c.height - h, w - 4, h);
+        const scale = 5000; // Масштаб для отрисовки свечей
+        const offset = 1.30;
+
+        history.forEach((s, i) => {
+            const x = i * w + (w * 0.2);
+            const candleW = w * 0.6;
+            
+            const yO = c.height - (s.o - offset) * scale;
+            const yC = c.height - (s.c - offset) * scale;
+            const yH = c.height - (s.h - offset) * scale;
+            const yL = c.height - (s.l - offset) * scale;
+
+            ctx.strokeStyle = s.c >= s.o ? '#0ecb81' : '#f6465d';
+            ctx.fillStyle = ctx.strokeStyle;
+
+            // Фитиль
+            ctx.beginPath();
+            ctx.moveTo(x + candleW/2, yH);
+            ctx.lineTo(x + candleW/2, yL);
+            ctx.stroke();
+
+            // Тело
+            ctx.fillRect(x, Math.min(yO, yC), candleW, Math.abs(yO - yC) + 1);
         });
 
-        // Рисуем RSI (линия)
+        // RSI Линия
         rctx.strokeStyle = '#9043ff';
+        rctx.lineWidth = 2;
         rctx.beginPath();
-        history.forEach((p, i) => {
-            const y = 20 + Math.random() * 30;
-            if(i === 0) rctx.moveTo(0, y);
-            else rctx.lineTo(i * w, y);
+        history.forEach((s, i) => {
+            let y = r.height * 0.2 + (Math.sin(i * 0.5) + 1) * 20;
+            if(i === 0) rctx.moveTo(0, y); else rctx.lineTo(i * w, y);
         });
         rctx.stroke();
 
-        // Стакан
+        // Живой Стакан
         let bh = '';
-        for(let i=0; i<6; i++) {
-            bh += `<div class="row"><span>${(price + 0.005 - i*0.001).toFixed(3)}</span><span>${(Math.random()*10).toFixed(1)}</span></div>`;
-        }
-        bh += `<div style="color:var(--green); text-align:center; font-weight:bold; margin:4px 0">${price.toFixed(3)}</div>`;
-        for(let i=0; i<6; i++) {
-            bh += `<div class="row" style="color:var(--green)"><span>${(price - 0.001 - i*0.001).toFixed(3)}</span><span>${(Math.random()*10).toFixed(1)}</span></div>`;
-        }
+        const row = (p, v, col) => `<div class="ob-row" style="color:${col}"><span>${p.toFixed(3)}</span><span>${v.toFixed(1)}</span></div>`;
+        for(let i=0; i<6; i++) bh += row(price + 0.006 - i*0.001, Math.random()*20, 'var(--red)');
+        bh += `<div style="color:var(--green); text-align:center; font-weight:bold; margin:3px 0; background:rgba(14,203,129,0.1)">${price.toFixed(3)}</div>`;
+        for(let i=0; i<6; i++) bh += row(price - 0.001 - i*0.001, Math.random()*20, 'var(--green)');
         document.getElementById('book').innerHTML = bh;
     }
 
     setInterval(() => {
+        let last = history[history.length - 1];
         price += (Math.random() - 0.5) * 0.002;
-        history.push(price);
-        history.shift();
+        last.c = price;
+        if(price > last.h) last.h = price;
+        if(price < last.l) last.l = price;
+        
+        // Каждые 10 секунд создаем новую свечу
+        if(Date.now() % 10000 < 1000) {
+            history.push({ o: price, h: price, l: price, c: price });
+            history.shift();
+        }
+
         document.getElementById('live-p').innerText = price.toFixed(3);
         draw();
     }, 1000);
 
     window.onresize = resize;
     resize();
-    draw();
 </script>
 </body>
 </html>
