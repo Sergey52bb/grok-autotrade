@@ -3,132 +3,157 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>Grok AutoTrade v2.4</title>
+    <title>Grok AutoTrade v2.5</title>
     <script src="https://unpkg.com/@tonconnect/ui@latest/dist/tonconnect-ui.min.js"></script>
     <script src="https://s3.tradingview.com/tv.js"></script>
     <style>
         :root { --bg: #0b0e11; --panel: #171a1e; --input: #2b3139; --green: #0ecb81; --red: #f6465d; --text: #848e9c; --gold: #f0b90b; }
-        * { box-sizing: border-box; margin: 0; padding: 0; }
+        * { box-sizing: border-box; margin: 0; padding: 0; outline: none; }
         
-        body { 
-            background: var(--bg); 
-            color: white; 
-            font-family: sans-serif; 
-            height: 100vh; 
-            display: flex; 
-            flex-direction: column; 
-            overflow: hidden; /* Запрещаем общий скролл страницы */
-        }
+        body { background: var(--bg); color: white; font-family: -apple-system, BlinkMacSystemFont, sans-serif; height: 100vh; display: flex; flex-direction: column; overflow: hidden; }
 
-        /* Шапка */
-        .header { display: flex; justify-content: space-between; align-items: center; padding: 5px 12px; height: 45px; background: var(--panel); border-bottom: 1px solid #222; }
+        .header { display: flex; justify-content: space-between; align-items: center; padding: 5px 12px; height: 48px; background: var(--panel); border-bottom: 1px solid #222; flex-shrink: 0; }
+        .pair-info { font-weight: bold; font-size: 15px; }
 
-        /* Торговая зона */
-        .trade-section { display: flex; height: 180px; padding: 5px; gap: 5px; flex-shrink: 0; }
-        .order-form { flex: 1; display: flex; flex-direction: column; gap: 4px; }
-        .order-book { flex: 0.8; background: #121518; border-radius: 4px; padding: 4px; font-family: monospace; font-size: 10px; overflow: hidden; }
+        /* Торговля и Стакан */
+        .main-trade-block { display: flex; height: 210px; padding: 8px; gap: 10px; flex-shrink: 0; background: var(--bg); }
+        .order-controls { flex: 1.1; display: flex; flex-direction: column; gap: 6px; }
+        .order-book { flex: 0.9; background: var(--panel); border-radius: 6px; padding: 6px; font-family: 'Roboto Mono', monospace; font-size: 10px; display: flex; flex-direction: column; position: relative; }
 
-        .side-tabs { display: flex; background: var(--input); border-radius: 4px; padding: 2px; }
-        .side-btn { flex: 1; border: none; padding: 5px; border-radius: 4px; color: var(--text); background: transparent; font-weight: bold; font-size: 11px; }
-        .side-btn.active.buy { background: var(--green); color: white; }
-        
-        .input-box { background: var(--input); border-radius: 4px; padding: 2px 8px; }
-        .input-box label { font-size: 9px; color: var(--text); display: block; }
-        .input-box input { background: transparent; border: none; color: white; width: 100%; outline: none; font-size: 14px; }
+        .btn-group { display: flex; background: var(--input); border-radius: 4px; padding: 2px; }
+        .btn-s { flex: 1; border: none; padding: 6px; border-radius: 4px; color: var(--text); background: transparent; font-weight: bold; font-size: 11px; cursor: pointer; }
+        .btn-s.active-buy { background: var(--green); color: white; }
+        .btn-s.active-sell { background: var(--red); color: white; }
 
-        .btn-main { width: 100%; border: none; padding: 10px; border-radius: 4px; font-weight: bold; background: var(--green); color: white; margin-top: auto; }
+        .inp-fld { background: var(--input); border-radius: 4px; padding: 4px 10px; }
+        .inp-fld label { font-size: 9px; color: var(--text); display: block; margin-bottom: 1px; }
+        .inp-fld input { background: transparent; border: none; color: white; width: 100%; font-size: 15px; font-weight: 500; }
 
-        /* График (Растягивается на весь остаток) */
-        .chart-wrapper { 
-            flex-grow: 1; 
-            width: 100%; 
-            position: relative; 
-            margin-bottom: 55px; /* Оставляем место под вкладки */
-        }
-        #tv_chart_container { height: 100% !important; width: 100% !important; }
+        .submit-btn { width: 100%; border: none; padding: 12px; border-radius: 4px; font-weight: bold; font-size: 14px; color: white; margin-top: auto; cursor: pointer; transition: 0.2s; }
+        .bg-green { background: var(--green); }
+        .bg-red { background: var(--red); }
 
-        /* Нижние вкладки (Фиксированные) */
-        .bottom-nav { 
-            position: fixed; 
-            bottom: 0; 
-            left: 0; 
-            right: 0; 
-            height: 55px; 
-            background: var(--panel); 
-            display: flex; 
-            border-top: 1px solid #333; 
-            z-index: 9999; 
-            padding-bottom: env(safe-area-inset-bottom);
-        }
-        .nav-item { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; color: var(--text); text-decoration: none; font-size: 10px; }
-        .nav-item.active { color: white; }
-        .nav-item span { font-size: 18px; margin-bottom: 2px; }
+        /* Стакан: строки и анимация */
+        .ob-header { display: flex; justify-content: space-between; color: var(--text); font-size: 9px; margin-bottom: 4px; }
+        .ob-row { display: flex; justify-content: space-between; height: 16px; align-items: center; position: relative; z-index: 1; transition: 0.3s; }
+        .ob-val { position: absolute; right: 0; height: 100%; opacity: 0.12; z-index: -1; transition: width 0.5s ease; }
 
-        .ob-row { display: flex; justify-content: space-between; line-height: 1.2; }
+        /* График */
+        .chart-container { flex-grow: 1; position: relative; min-height: 0; background: #131722; }
+        #tradingview_widget { height: 100% !important; width: 100% !important; }
+
+        /* Нижнее меню */
+        .footer { position: fixed; bottom: 0; left: 0; right: 0; height: 60px; background: var(--panel); display: flex; border-top: 1px solid #333; z-index: 1000; padding-bottom: env(safe-area-inset-bottom); }
+        .footer-item { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; text-decoration: none; color: var(--text); font-size: 10px; gap: 4px; }
+        .footer-item.active { color: white; }
+        .footer-item i { font-size: 20px; font-style: normal; }
     </style>
 </head>
 <body>
 
 <div class="header">
-    <div style="font-weight:bold; font-size:14px;">TON/USDT</div>
+    <div class="pair-info">TON/USDT <span id="price-change" style="color:var(--green); font-size: 11px;">+2.4%</span></div>
     <div id="ton-connect"></div>
 </div>
 
-<div class="trade-section">
-    <div class="order-form">
-        <div class="side-tabs">
-            <button class="side-btn active buy">Buy</button>
-            <button class="side-btn">Sell</button>
+<div class="main-trade-block">
+    <div class="order-controls">
+        <div class="btn-group">
+            <button id="tab-buy" class="btn-s active-buy" onclick="setMode('buy')">Buy</button>
+            <button id="tab-sell" class="btn-s" onclick="setMode('sell')">Sell</button>
         </div>
-        <div class="input-box"><label>Price</label><input type="number" value="1.302"></div>
-        <div class="input-box"><label>Amount</label><input type="number" placeholder="0.0"></div>
-        <button class="btn-main">Buy TON</button>
+        <div class="inp-fld"><label>Price (USDT)</label><input type="number" id="trade-price" value="1.302" step="0.001"></div>
+        <div class="inp-fld"><label>Amount (TON)</label><input type="number" placeholder="0.0" id="trade-amount"></div>
+        <button id="main-exec-btn" class="submit-btn bg-green">Buy TON</button>
     </div>
-    <div class="order-book" id="ob-list">
-        </div>
+    
+    <div class="order-book">
+        <div class="ob-header"><span>Price</span><span>Amount</span></div>
+        <div id="asks-list"></div>
+        <div id="current-market-price" style="text-align:center; font-size:15px; font-weight:bold; margin:5px 0; color:var(--green)">1.302</div>
+        <div id="bids-list"></div>
+    </div>
 </div>
 
-<div class="chart-wrapper">
-    <div id="tv_chart_container"></div>
+<div class="chart-container">
+    <div id="tradingview_widget"></div>
 </div>
 
-<div class="bottom-nav">
-    <a href="#" class="nav-item active"><span>📊</span>Рынок</a>
-    <a href="#" class="nav-item"><span>💼</span>Активы</a>
-    <a href="#" class="nav-item"><span>📜</span>Сделки</a>
-    <a href="#" class="nav-item"><span>⚙️</span>Настройки</a>
-</div>
+<nav class="footer">
+    <a href="#" class="footer-item active"><i>📊</i><span>Рынок</span></a>
+    <a href="#" class="footer-item"><i>💼</i><span>Активы</span></a>
+    <a href="#" class="footer-item"><i>📜</i><span>Сделки</span></a>
+    <a href="#" class="footer-item"><i>⚙️</i><span>Настройки</span></a>
+</nav>
 
 <script>
-    function loadTV() {
+    // Инициализация графика
+    function initChart() {
         new TradingView.widget({
             "autosize": true,
             "symbol": "OKX:TONUSDT",
-            "interval": "1", // Поставил 1 минуту по умолчанию
+            "interval": "1",
+            "timezone": "Etc/UTC",
             "theme": "dark",
             "style": "1",
             "locale": "ru",
-            "toolbar_bg": "#f1f3f6",
+            "toolbar_bg": "#131722",
             "enable_publishing": false,
-            "hide_top_toolbar": false, // Настройки и таймфреймы теперь будут видны
-            "container_id": "tv_chart_container",
-            "studies": ["RSI@tv-basicstudies"]
+            "hide_top_toolbar": false,
+            "hide_legend": false,
+            "save_image": false,
+            "container_id": "tradingview_widget",
+            "studies": ["RSI@tv-basicstudies"],
+            "disabled_features": ["header_symbol_search"],
+            "enabled_features": ["side_toolbar_in_fullscreen_mode"]
         });
     }
 
-    function drawOB() {
-        const ob = document.getElementById('ob-list');
-        let html = '<div style="color:var(--text); font-size:9px; display:flex; justify-content:space-between;"><span>Price</span><span>Amt</span></div>';
-        for(let i=0; i<4; i++) html += `<div class="ob-row" style="color:var(--red)"><span>1.30${5-i}</span><span>${(Math.random()*50).toFixed(1)}</span></div>`;
-        html += `<div style="text-align:center; margin:3px 0; font-weight:bold; color:var(--green)">1.302</div>`;
-        for(let i=0; i<4; i++) html += `<div class="ob-row" style="color:var(--green)"><span>1.29${9-i}</span><span>${(Math.random()*50).toFixed(1)}</span></div>`;
-        ob.innerHTML = html;
+    // Живой стакан
+    function updateOrderBook() {
+        const basePrice = parseFloat(document.getElementById('trade-price').value);
+        const asksCont = document.getElementById('asks-list');
+        const bidsCont = document.getElementById('bids-list');
+        
+        let asksHtml = '';
+        let bidsHtml = '';
+
+        for(let i=0; i<6; i++) {
+            const vol = Math.random() * 100;
+            const p = (basePrice + 0.006 - i*0.001).toFixed(3);
+            asksHtml = `<div class="ob-row" style="color:var(--red)"><div class="ob-val" style="width:${vol}%; background:var(--red)"></div><span>${p}</span><span>${vol.toFixed(1)}</span></div>` + asksHtml;
+        }
+
+        for(let i=0; i<6; i++) {
+            const vol = Math.random() * 100;
+            const p = (basePrice - 0.001 - i*0.001).toFixed(3);
+            bidsHtml += `<div class="ob-row" style="color:var(--green)"><div class="ob-val" style="width:${vol}%; background:var(--green)"></div><span>${p}</span><span>${vol.toFixed(1)}</span></div>`;
+        }
+
+        asksCont.innerHTML = asksHtml;
+        bidsCont.innerHTML = bidsHtml;
+        document.getElementById('current-market-price').innerText = basePrice.toFixed(3);
+    }
+
+    function setMode(mode) {
+        const b = document.getElementById('tab-buy');
+        const s = document.getElementById('tab-sell');
+        const btn = document.getElementById('main-exec-btn');
+        if(mode === 'buy') {
+            b.className = 'btn-s active-buy'; s.className = 'btn-s';
+            btn.className = 'submit-btn bg-green'; btn.innerText = 'Buy TON';
+        } else {
+            s.className = 'btn-s active-sell'; b.className = 'btn-s';
+            btn.className = 'submit-btn bg-red'; btn.innerText = 'Sell TON';
+        }
     }
 
     window.onload = () => {
-        loadTV();
-        drawOB();
-        const tc = new TON_CONNECT_UI.TonConnectUI({
+        initChart();
+        updateOrderBook();
+        setInterval(updateOrderBook, 2500); // Обновление каждые 2.5 сек
+        
+        const tonConnectUI = new TON_CONNECT_UI.TonConnectUI({
             manifestUrl: 'https://sergey52bb.github.io/grok-autotrade/tonconnect-manifest.json',
             buttonRootId: 'ton-connect'
         });
@@ -136,3 +161,4 @@
 </script>
 </body>
 </html>
+
