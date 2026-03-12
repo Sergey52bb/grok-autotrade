@@ -2,61 +2,62 @@
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>STRATEX</title>
     <script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
     <style>
         :root { --bg: #0b0e11; --panel: #171a1e; --input: #2b3139; --green: #0ecb81; --red: #f6465d; --text: #848e9c; }
         * { box-sizing: border-box; margin: 0; padding: 0; }
-        
-        body { 
-            background: var(--bg); color: white; font-family: sans-serif; 
-            height: 100vh; overflow: hidden; display: flex; flex-direction: column; 
-        }
+        body { background: var(--bg); color: white; font-family: sans-serif; height: 100vh; overflow: hidden; display: flex; flex-direction: column; }
 
-        /* Верх: Торговля и Стакан (фиксированные 300px) */
-        .top-container { height: 280px; display: flex; flex-direction: column; border-bottom: 1px solid #222; flex-shrink: 0; }
-        .header { padding: 8px 12px; font-size: 14px; background: #121518; display: flex; justify-content: space-between; }
+        /* Верх: 280px фиксированно */
+        .top-ui { height: 280px; display: flex; flex-direction: column; flex-shrink: 0; border-bottom: 1px solid #222; }
+        .header { padding: 10px 15px; display: flex; justify-content: space-between; align-items: center; font-size: 14px; background: #121518; }
         
-        .main-ui { display: flex; flex: 1; padding: 8px; gap: 8px; overflow: hidden; }
+        .main-layout { display: flex; flex: 1; padding: 8px; gap: 8px; overflow: hidden; }
         
-        .trade-box { flex: 1; display: flex; flex-direction: column; gap: 8px; }
-        .input-item { background: var(--input); border-radius: 4px; padding: 6px; }
-        .input-item label { font-size: 10px; color: var(--text); display: block; }
-        .input-item input { background: transparent; border: none; color: white; width: 100%; font-size: 16px; outline: none; }
+        /* Слева: Форма (50%) */
+        .trade-form { flex: 1; display: flex; flex-direction: column; gap: 6px; }
+        .input-box { background: var(--input); border-radius: 4px; padding: 6px 10px; }
+        .input-box label { font-size: 9px; color: var(--text); display: block; text-transform: uppercase; margin-bottom: 2px; }
+        .input-box input { background: transparent; border: none; color: white; width: 100%; font-size: 16px; outline: none; font-weight: bold; }
         
-        .buy-btn { background: var(--green); color: white; border: none; padding: 12px; border-radius: 4px; font-weight: bold; margin-top: auto; }
+        .buy-btn { background: var(--green); color: white; border: none; padding: 15px; border-radius: 4px; font-weight: bold; font-size: 14px; margin-top: auto; }
 
-        .order-book { flex: 1; background: #0b0e11; border: 1px solid #222; border-radius: 4px; display: flex; flex-direction: column; overflow: hidden; font-family: monospace; font-size: 11px; }
-        .ob-rows { flex: 1; overflow-y: auto; }
-        .ob-row { display: flex; justify-content: space-between; padding: 2px 4px; }
+        /* Справа: Стакан (50%) */
+        .order-book { flex: 1; background: #0b0e11; border: 1px solid #222; border-radius: 4px; display: flex; flex-direction: column; font-family: 'Courier New', monospace; font-size: 11px; overflow: hidden; }
+        .ob-header { display: flex; justify-content: space-between; padding: 4px 6px; color: var(--text); font-size: 9px; border-bottom: 1px solid #222; }
+        .ob-list { flex: 1; overflow: hidden; display: flex; flex-direction: column; justify-content: center; }
+        .ob-row { display: flex; justify-content: space-between; padding: 2px 6px; position: relative; }
 
-        /* Центр: График (занимает всё свободное место) */
-        #chart { flex-grow: 1; width: 100%; background: var(--bg); }
+        /* Центр: График (занимает всё остальное место) */
+        #chart { flex-grow: 1; width: 100%; margin-top: -10px; }
 
-        /* Низ: Навигация (фиксированные 60px) */
-        .nav { height: 65px; background: var(--panel); border-top: 1px solid #222; display: flex; justify-content: space-around; align-items: center; flex-shrink: 0; }
-        .nav-item { text-align: center; color: var(--text); font-size: 10px; text-decoration: none; }
-        .nav-item.active { color: white; }
+        /* Низ: Навигация */
+        .nav { height: 60px; background: var(--panel); border-top: 1px solid #222; display: flex; justify-content: space-around; align-items: center; flex-shrink: 0; }
+        .nav-item { text-align: center; color: var(--text); font-size: 10px; text-decoration: none; opacity: 0.6; }
+        .nav-item.active { color: white; opacity: 1; }
+        .nav-icon { font-size: 18px; margin-bottom: 3px; }
     </style>
 </head>
 <body>
 
-<div class="top-container">
+<div class="top-ui">
     <div class="header">
         <b>STRATEX</b>
-        <span style="color:var(--green)">1.3145 TON/USDT</span>
+        <span style="color:var(--green); font-weight: bold;" id="price-display">1.3145 TON/USDT</span>
     </div>
-    <div class="main-ui">
-        <div class="trade-box">
-            <div class="input-item"><label>Price</label><input type="number" value="1.3145"></div>
-            <div class="input-item"><label>Amount</label><input type="number" placeholder="0.0"></div>
+    <div class="main-layout">
+        <div class="trade-form">
+            <div class="input-box"><label>Price (USDT)</label><input type="number" value="1.3145" id="price-input"></div>
+            <div class="input-box"><label>Amount (TON)</label><input type="number" placeholder="0.0"></div>
             <button class="buy-btn">Buy TON</button>
         </div>
         <div class="order-book">
-            <div class="ob-rows" id="asks" style="color:var(--red)"></div>
-            <div style="text-align:center; padding:2px; background:#121518; font-weight:bold;">1.3145</div>
-            <div class="ob-rows" id="bids" style="color:var(--green)"></div>
+            <div class="ob-header"><span>Price</span><span>Amount</span></div>
+            <div class="ob-list" id="asks" style="color:var(--red)"></div>
+            <div style="text-align:center; padding:5px; background: rgba(14,203,129,0.1); font-weight:bold; color:var(--green); font-size: 13px;">1.3145</div>
+            <div class="ob-list" id="bids" style="color:var(--green)"></div>
         </div>
     </div>
 </div>
@@ -64,49 +65,64 @@
 <div id="chart"></div>
 
 <nav class="nav">
-    <a href="#" class="nav-item active">📊<br>Рынок</a>
-    <a href="#" class="nav-item">💼<br>Активы</a>
-    <a href="#" class="nav-item">📜<br>Сделки</a>
-    <a href="#" class="nav-item">⚙️<br>Настройки</a>
+    <a href="#" class="nav-item active"><div class="nav-icon">📊</div>Рынок</a>
+    <a href="#" class="nav-item"><div class="nav-icon">💼</div>Активы</a>
+    <a href="#" class="nav-item"><div class="nav-icon">📜</div>Сделки</a>
+    <a href="#" class="nav-item"><div class="nav-icon">⚙️</div>Настройки</a>
 </nav>
 
 <script>
-    // Настройка графика
+    let currentPrice = 1.3145;
+
+    // График с исправленными осями
     var options = {
         series: [{ data: [] }],
-        chart: { type: 'candlestick', height: '100%', toolbar: { show: false }, animations: { enabled: false }, background: '#0b0e11' },
+        chart: { type: 'candlestick', height: '100%', toolbar: { show: false }, sparkline: { enabled: false }, background: '#0b0e11' },
         theme: { mode: 'dark' },
-        xaxis: { type: 'datetime', labels: { style: { colors: '#848e9c' } } },
-        yaxis: { tooltip: { enabled: true }, labels: { style: { colors: '#848e9c' } } },
-        grid: { borderColor: '#1f2226' }
+        xaxis: { type: 'datetime', labels: { show: false }, axisBorder: { show: false } },
+        yaxis: { 
+            labels: { 
+                formatter: (val) => val.toFixed(4), // Ограничиваем знаки после запятой
+                style: { colors: '#848e9c' } 
+            },
+            opposite: true
+        },
+        grid: { borderColor: '#1f2226', strokeDashArray: 3 },
+        plotOptions: { candlestick: { colors: { upward: '#0ecb81', downward: '#f6465d' } } }
     };
 
     var chart = new ApexCharts(document.querySelector("#chart"), options);
     chart.render();
 
-    // Генерация данных
-    function generateData() {
+    function updateData() {
         let series = [];
-        let time = Date.now() - (50 * 60000);
-        for(let i=0; i<50; i++) {
-            let o = 1.310 + Math.random()*0.01;
-            series.push({ x: time + (i*60000), y: [o, o+0.002, o-0.001, o+0.001] });
+        let time = Date.now() - (40 * 60000);
+        let base = 1.3145;
+        for(let i=0; i<40; i++) {
+            let o = base + (Math.random()-0.5)*0.005;
+            series.push({ x: time + (i*60000), y: [o, o+0.002, o-0.002, o+0.001] });
         }
         chart.updateSeries([{ data: series }]);
     }
-    generateData();
+    updateData();
 
-    // Стакан
-    function fillOB() {
+    function updateOB() {
         let a = '', b = '';
-        for(let i=0; i<6; i++) {
-            a = `<div class="ob-row"><span>${(1.315+i*0.001).toFixed(4)}</span><span>${(Math.random()*10).toFixed(1)}</span></div>` + a;
-            b += `<div class="ob-row"><span>${(1.314-i*0.001).toFixed(4)}</span><span>${(Math.random()*10).toFixed(1)}</span></div>`;
+        for(let i=0; i<5; i++) {
+            a = `<div class="ob-row"><span>${(currentPrice + 0.005 - i*0.001).toFixed(4)}</span><span>${(Math.random()*20).toFixed(1)}</span></div>` + a;
+            b += `<div class="ob-row"><span>${(currentPrice - 0.001 - i*0.001).toFixed(4)}</span><span>${(Math.random()*20).toFixed(1)}</span></div>`;
         }
         document.getElementById('asks').innerHTML = a;
         document.getElementById('bids').innerHTML = b;
     }
-    fillOB();
+    updateOB();
+
+    // Авто-обновление цены
+    setInterval(() => {
+        currentPrice += (Math.random() - 0.5) * 0.0005;
+        document.getElementById('price-display').innerText = currentPrice.toFixed(4) + ' TON/USDT';
+        updateOB();
+    }, 2000);
 </script>
 </body>
 </html>
