@@ -2,124 +2,128 @@
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>STRATEX</title>
     <style>
         :root { --bg: #0b0e11; --panel: #171a1e; --input: #2b3139; --green: #0ecb81; --red: #f6465d; --text: #848e9c; --border: #2b2f36; }
-        * { box-sizing: border-box; margin: 0; padding: 0; font-family: sans-serif; }
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, sans-serif; }
         
-        body { background: var(--bg); color: white; display: flex; flex-direction: column; min-height: 100vh; padding: 10px; gap: 10px; }
+        body { background: var(--bg); color: white; height: 100vh; overflow: hidden; display: flex; flex-direction: column; }
 
-        /* Шапка */
-        .header { display: flex; justify-content: space-between; align-items: center; padding: 5px 0; border-bottom: 1px solid var(--border); margin-bottom: 5px; }
-        .logo { font-weight: 800; font-size: 18px; color: white; }
-        .price-top { color: var(--green); font-weight: bold; font-family: monospace; }
+        /* Шапка с ценой */
+        header { padding: 12px 16px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border); }
+        .pair { font-weight: bold; font-size: 16px; }
+        .price-up { color: var(--green); font-weight: bold; font-family: monospace; }
 
-        /* ТОРГОВЛЯ И СТАКАН (Верхний блок) */
-        .top-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; align-items: stretch; }
-        @media (max-width: 400px) { .top-grid { grid-template-columns: 1fr; } } /* На совсем мелких экранах в столбик */
+        /* Зона графика (сжатая) */
+        .chart-min { height: 180px; background: #0b0e11; border-bottom: 1px solid var(--border); position: relative; }
+        .chart-placeholder { position: absolute; bottom: 10px; left: 10px; font-size: 10px; color: var(--text); }
 
-        .card { background: var(--panel); border: 1px solid var(--border); border-radius: 6px; padding: 12px; display: flex; flex-direction: column; }
-        
-        /* Стакан */
-        .orderbook { font-family: monospace; font-size: 11px; min-height: 180px; }
+        /* ГЛАВНЫЙ БЛОК: Стакан слева, Форма справа (как на скрине 2) */
+        .trade-container { display: flex; flex: 1; overflow: hidden; border-bottom: 1px solid var(--border); }
+
+        /* СТАКАН (Левая колонка) */
+        .order-book { flex: 1; display: flex; flex-direction: column; padding: 8px; border-right: 1px solid var(--border); font-family: monospace; }
+        .ob-header { display: flex; justify-content: space-between; font-size: 9px; color: var(--text); margin-bottom: 4px; }
+        .ob-list { flex: 1; display: flex; flex-direction: column; font-size: 11px; }
         .ob-row { display: flex; justify-content: space-between; padding: 2px 0; }
-        .mid-price { text-align: center; padding: 8px 0; font-size: 14px; font-weight: bold; color: var(--green); }
 
-        /* Поля ввода */
-        .input-group { background: var(--input); padding: 6px 10px; border-radius: 4px; margin-bottom: 8px; }
-        .input-group label { display: block; font-size: 9px; color: var(--text); text-transform: uppercase; margin-bottom: 2px; }
-        .input-group input { background: transparent; border: none; color: white; width: 100%; font-size: 16px; outline: none; font-weight: bold; }
-        
-        .btn { border: none; padding: 12px; border-radius: 4px; font-weight: bold; color: white; font-size: 14px; cursor: pointer; transition: 0.2s; }
-        .btn-buy { background: var(--green); margin-bottom: 5px; }
-        .btn-sell { background: var(--red); }
+        /* ТОРГОВЛЯ (Правая колонка) */
+        .trade-form { flex: 1; padding: 12px 8px; display: flex; flex-direction: column; gap: 8px; }
+        .side-selector { display: flex; background: var(--input); border-radius: 4px; padding: 2px; margin-bottom: 4px; }
+        .side-btn { flex: 1; border: none; padding: 6px; border-radius: 3px; font-size: 11px; font-weight: bold; color: var(--text); background: transparent; }
+        .side-btn.buy { background: var(--green); color: white; }
 
-        /* ГРАФИК (Простой холст, который не тупит) */
-        .chart-card { background: var(--panel); border: 1px solid var(--border); border-radius: 6px; flex: 1; min-height: 250px; position: relative; overflow: hidden; }
-        .chart-header { padding: 8px; font-size: 10px; color: var(--text); border-bottom: 1px solid var(--border); }
-        #simple-chart { width: 100%; height: 200px; display: block; }
+        .input-item { background: var(--input); border-radius: 4px; padding: 6px 8px; }
+        .input-item label { display: block; font-size: 8px; color: var(--text); text-transform: uppercase; }
+        .input-item input { background: transparent; border: none; color: white; width: 100%; font-size: 14px; outline: none; font-weight: bold; }
+
+        .exec-button { background: var(--green); border: none; color: white; padding: 12px; border-radius: 4px; font-weight: bold; font-size: 14px; margin-top: auto; }
+
+        /* НИЖНЕЕ МЕНЮ */
+        nav { height: 60px; display: flex; justify-content: space-around; align-items: center; background: var(--panel); border-top: 1px solid var(--border); }
+        .nav-tab { text-align: center; color: var(--text); font-size: 10px; text-decoration: none; }
+        .nav-tab.active { color: white; }
     </style>
 </head>
 <body>
 
-<div class="header">
-    <div class="logo">STRATEX</div>
-    <div class="price-top">1.3145</div>
+<header>
+    <div class="pair">TON/USDT</div>
+    <div class="price-up">1.3145 ↑</div>
+</header>
+
+<div class="chart-min">
+    <canvas id="miniChart" style="width: 100%; height: 100%;"></canvas>
+    <div class="chart-placeholder">1H Chart</div>
 </div>
 
-<div class="top-grid">
-    <div class="card orderbook">
-        <div style="color:var(--text); font-size:9px; margin-bottom:5px;">ORDER BOOK</div>
-        <div id="asks" style="color:var(--red)"></div>
-        <div class="mid-price">1.3145</div>
-        <div id="bids" style="color:var(--green)"></div>
+<div class="trade-container">
+    <div class="order-book">
+        <div class="ob-header"><span>Цена</span><span>Кол-во</span></div>
+        <div id="asks" style="color: var(--red); display: flex; flex-direction: column-reverse;"></div>
+        <div style="padding: 10px 0; text-align: center; font-weight: bold; font-size: 14px;">1.3145</div>
+        <div id="bids" style="color: var(--green);"></div>
     </div>
 
-    <div class="card">
-        <div class="input-group">
-            <label>Price (USDT)</label>
+    <div class="trade-form">
+        <div class="side-selector">
+            <button class="side-btn buy">Купить</button>
+            <button class="side-btn">Продать</button>
+        </div>
+        
+        <div class="input-item">
+            <label>Цена</label>
             <input type="number" value="1.3145">
         </div>
-        <div class="input-group">
-            <label>Amount (TON)</label>
+        
+        <div class="input-item">
+            <label>Количество</label>
             <input type="number" placeholder="0.0">
         </div>
-        <button class="btn btn-buy">BUY</button>
-        <button class="btn btn-sell">SELL</button>
+
+        <div style="font-size: 10px; color: var(--text); display: flex; justify-content: space-between; margin-top: 5px;">
+            <span>Доступно:</span>
+            <span style="color: white;">0.00 TON</span>
+        </div>
+
+        <button class="exec-button">Купить TON</button>
     </div>
 </div>
 
-<div class="chart-card">
-    <div class="chart-header">TRADING VIEW (SIMULATED)</div>
-    <canvas id="simple-chart"></canvas>
-</div>
+<nav>
+    <a href="#" class="nav-tab active">📊<br>Рынок</a>
+    <a href="#" class="nav-tab">💼<br>Активы</a>
+    <a href="#" class="nav-tab">📜<br>Сделки</a>
+</nav>
 
 <script>
-    // Простой скрипт для отрисовки графиков без тяжелых библиотек
-    const canvas = document.getElementById('simple-chart');
-    const ctx = canvas.getContext('2d');
-
-    function drawChart() {
-        ctx.clearRect(0, 0, canvas.width, canvas.height);
-        ctx.strokeStyle = '#333';
-        ctx.lineWidth = 1;
-        
-        // Рисуем сетку
-        for(let i=0; i<canvas.height; i+=30) {
-            ctx.beginPath(); ctx.moveTo(0, i); ctx.lineTo(canvas.width, i); ctx.stroke();
-        }
-
-        // Рисуем имитацию свечей
-        for(let i=0; i<20; i++) {
-            const x = 10 + (i * 15);
-            const h = 40 + Math.random() * 60;
-            const up = Math.random() > 0.5;
-            ctx.fillStyle = up ? '#0ecb81' : '#f6465d';
-            ctx.fillRect(x, 100 - (up ? h : h/2), 8, h);
-        }
-    }
-
-    function updateOB() {
+    // Простейшая анимация стакана
+    function updateBook() {
         const row = (p, a) => `<div class="ob-row"><span>${p.toFixed(4)}</span><span>${a.toFixed(1)}</span></div>`;
         let ah = '', bh = '';
-        for(let i=0; i<5; i++) {
-            ah = row(1.315 + i*0.001, Math.random()*10) + ah;
-            bh += row(1.314 - i*0.001, Math.random()*10);
+        for(let i=0; i<6; i++) {
+            ah += row(1.315 + i*0.001, Math.random()*15);
+            bh += row(1.314 - i*0.001, Math.random()*15);
         }
         document.getElementById('asks').innerHTML = ah;
         document.getElementById('bids').innerHTML = bh;
     }
 
-    window.onresize = () => {
-        canvas.width = canvas.parentElement.clientWidth;
-        canvas.height = canvas.parentElement.clientHeight - 30;
-        drawChart();
-    };
+    // Рисуем простую линию графика на фоне
+    const ctx = document.getElementById('miniChart').getContext('2d');
+    function draw() {
+        ctx.strokeStyle = '#2b3139';
+        ctx.beginPath();
+        ctx.moveTo(0, 100);
+        for(let i=0; i<400; i+=10) ctx.lineTo(i, 80 + Math.random()*40);
+        ctx.stroke();
+    }
     
-    window.onresize();
-    updateOB();
-    setInterval(updateOB, 2000);
+    updateBook();
+    draw();
+    setInterval(updateBook, 1500);
 </script>
+
 </body>
 </html>
