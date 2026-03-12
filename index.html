@@ -2,173 +2,169 @@
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>STRATEX LIVE</title>
-    <script src="https://unpkg.com/lightweight-charts/dist/lightweight-charts.standalone.production.js"></script>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>STRATEX</title>
     <style>
         :root { --bg: #0b0e11; --panel: #171a1e; --input: #2b3139; --green: #0ecb81; --red: #f6465d; --text: #848e9c; --border: #2b2f36; }
         * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, sans-serif; }
         
         body { background: var(--bg); color: white; height: 100vh; display: flex; flex-direction: column; overflow: hidden; }
 
-        header { height: 50px; padding: 0 16px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border); flex-shrink: 0; }
+        header { height: 45px; padding: 0 15px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border); flex-shrink: 0; }
+
+        /* Зона графика */
+        .chart-area { height: 200px; position: relative; background: #0b0e11; border-bottom: 1px solid var(--border); flex-shrink: 0; }
+        #canvasChart { width: 100%; height: 100%; display: block; }
+
+        /* Основной контент */
+        .trade-content { display: flex; flex: 1; overflow: hidden; }
+
+        /* Лево: Стакан */
+        .orderbook { width: 45%; border-right: 1px solid var(--border); display: flex; flex-direction: column; padding: 5px; font-family: monospace; }
+        .ob-row { display: flex; justify-content: space-between; font-size: 11px; height: 18px; position: relative; align-items: center; }
+        .ob-bar { position: absolute; right: 0; height: 80%; opacity: 0.12; z-index: 0; }
+
+        /* Право: Торговля */
+        .trade-panel { width: 55%; padding: 10px; display: flex; flex-direction: column; gap: 8px; }
         
-        /* ГРАФИК: Теперь с фиксированной высотой */
-        #chart-container { height: 220px; width: 100%; border-bottom: 1px solid var(--border); flex-shrink: 0; }
+        .tabs { display: flex; gap: 12px; margin-bottom: 2px; }
+        .tab-btn { background: none; border: none; color: var(--text); font-size: 12px; font-weight: bold; border-bottom: 2px solid transparent; padding-bottom: 3px; }
+        .tab-btn.active { color: white; border-bottom-color: var(--green); }
 
-        /* ОСНОВНАЯ ЗОНА: Стакан и Торговля */
-        .main-trade { display: flex; flex: 1; overflow: hidden; }
+        .side-ctrl { display: flex; background: var(--input); border-radius: 4px; padding: 2px; }
+        .s-btn { flex: 1; border: none; padding: 7px; border-radius: 3px; font-size: 12px; font-weight: bold; color: var(--text); background: none; }
+        .s-btn.buy { background: var(--green); color: white; }
+        .s-btn.sell { background: var(--red); color: white; }
 
-        /* СТАКАН (Лево) */
-        .order-book { width: 45%; display: flex; flex-direction: column; padding: 8px; border-right: 1px solid var(--border); font-family: monospace; }
-        .ob-header { display: flex; justify-content: space-between; font-size: 10px; color: var(--text); margin-bottom: 5px; }
-        .ob-list { flex: 1; overflow: hidden; display: flex; flex-direction: column; }
-        .ob-row { display: flex; justify-content: space-between; font-size: 11px; height: 18px; position: relative; }
-        .ob-bar { position: absolute; right: 0; height: 90%; opacity: 0.15; z-index: 0; }
+        .inp { background: var(--input); border-radius: 4px; padding: 6px 10px; }
+        .inp label { display: block; font-size: 8px; color: var(--text); text-transform: uppercase; }
+        .inp input { background: none; border: none; color: white; width: 100%; font-size: 15px; outline: none; font-weight: bold; }
 
-        /* ТОРГОВЛЯ (Право) */
-        .trade-form { width: 55%; padding: 10px; display: flex; flex-direction: column; gap: 8px; overflow-y: auto; }
-        
-        /* Табы Лимит/Маркет */
-        .order-type { display: flex; gap: 12px; margin-bottom: 2px; }
-        .type-btn { background: transparent; border: none; color: var(--text); font-size: 13px; font-weight: bold; padding-bottom: 4px; border-bottom: 2px solid transparent; }
-        .type-btn.active { color: white; border-bottom-color: var(--green); }
+        .buy-action { background: var(--green); border: none; color: white; padding: 14px; border-radius: 4px; font-weight: bold; font-size: 14px; margin-top: auto; }
 
-        /* Переключатель Buy/Sell */
-        .side-toggle { display: flex; background: var(--input); border-radius: 4px; padding: 2px; }
-        .side-btn { flex: 1; border: none; padding: 8px; border-radius: 3px; font-size: 12px; font-weight: bold; color: var(--text); background: transparent; }
-        .side-btn.buy-active { background: var(--green); color: white; }
-        .side-btn.sell-active { background: var(--red); color: white; }
-
-        /* Инпуты */
-        .field { background: var(--input); border-radius: 4px; padding: 6px 10px; }
-        .field label { display: block; font-size: 9px; color: var(--text); text-transform: uppercase; }
-        .field input { background: transparent; border: none; color: white; width: 100%; font-size: 15px; outline: none; font-weight: bold; }
-
-        .exec-btn { background: var(--green); border: none; color: white; padding: 14px; border-radius: 4px; font-weight: bold; font-size: 15px; margin-top: auto; }
-
-        nav { height: 60px; display: flex; justify-content: space-around; align-items: center; background: var(--panel); border-top: 1px solid var(--border); flex-shrink: 0; }
-        .nav-item { text-align: center; color: var(--text); font-size: 10px; text-decoration: none; }
+        nav { height: 55px; display: flex; justify-content: space-around; align-items: center; background: var(--panel); border-top: 1px solid var(--border); flex-shrink: 0; }
     </style>
 </head>
 <body>
 
 <header>
     <div style="font-weight: bold;">TON/USDT</div>
-    <div style="color:var(--green); font-weight:bold;" id="top-p">1.3145</div>
+    <div id="priceHeader" style="color:var(--green); font-weight:bold;">1.3145</div>
 </header>
 
-<div id="chart-container"></div>
+<div class="chart-area">
+    <canvas id="canvasChart"></canvas>
+</div>
 
-<div class="main-trade">
-    <div class="order-book">
-        <div class="ob-header"><span>Price</span><span>Amt</span></div>
-        <div id="asks" class="ob-list" style="justify-content: flex-end; color:var(--red);"></div>
-        <div id="mid-price" style="text-align:center; padding:8px 0; font-size:16px; font-weight:bold; color:var(--green);">1.3145</div>
-        <div id="bids" class="ob-list" style="color:var(--green);"></div>
+<div class="trade-content">
+    <div class="orderbook">
+        <div id="asks" style="display:flex; flex-direction:column-reverse; color:var(--red);"></div>
+        <div id="priceMid" style="text-align:center; padding:10px 0; font-weight:bold; font-size:15px; color:var(--green);">1.3145</div>
+        <div id="bids" style="color:var(--green);"></div>
     </div>
 
-    <div class="trade-form">
-        <div class="order-type">
-            <button class="type-btn active" id="t-limit">Limit</button>
-            <button class="type-btn" id="t-market">Market</button>
+    <div class="trade-panel">
+        <div class="tabs">
+            <button class="tab-btn active">Limit</button>
+            <button class="tab-btn">Market</button>
         </div>
-        
-        <div class="side-toggle">
-            <button class="side-btn buy-active" id="s-buy">Buy</button>
-            <button class="side-btn" id="s-sell">Sell</button>
+        <div class="side-ctrl">
+            <button class="s-btn buy" id="buyToggle">Buy</button>
+            <button class="s-btn" id="sellToggle">Sell</button>
         </div>
-
-        <div class="field" id="p-field">
+        <div class="inp">
             <label>Price</label>
-            <input type="number" id="i-price" value="1.3145">
+            <input type="number" id="priceInp" value="1.3145">
         </div>
-
-        <div class="field">
+        <div class="inp">
             <label>Amount</label>
             <input type="number" placeholder="0.00">
         </div>
-
-        <button class="exec-btn" id="exec-btn">Buy TON</button>
+        <button class="buy-action" id="mainBtn">Buy TON</button>
     </div>
 </div>
 
 <nav>
-    <a href="#" class="nav-item active">📊<br>Market</a>
-    <a href="#" class="nav-item">💼<br>Assets</a>
-    <a href="#" class="nav-item">⚙️<br>Settings</a>
+    <span style="font-size: 10px; color: white;">📊 Market</span>
+    <span style="font-size: 10px; color: var(--text);">💼 Assets</span>
+    <span style="font-size: 10px; color: var(--text);">⚙️ Settings</span>
 </nav>
 
 <script>
-    let price = 1.3145;
+    let currentPrice = 1.3145;
+    const canvas = document.getElementById('canvasChart');
+    const ctx = canvas.getContext('2d');
 
-    // ГРАФИК
-    const chart = LightweightCharts.createChart(document.getElementById('chart-container'), {
-        layout: { backgroundColor: '#0b0e11', textColor: '#848e9c', fontSize: 10 },
-        grid: { vertLines: { visible: false }, horzLines: { color: '#1f2226' } },
-        rightPriceScale: { borderColor: '#2b2f36', scaleMargins: { top: 0.2, bottom: 0.2 } },
-        timeScale: { borderColor: '#2b2f36', visible: false },
-        handleScroll: false, handleScale: false
-    });
-    const candles = chart.addCandlestickSeries({ upColor: '#0ecb81', downColor: '#f6465d', borderVisible: false, wickUpColor: '#0ecb81', wickDownColor: '#f6465d' });
+    // 1. ЛОГИКА ГРАФИКА
+    let candles = Array.from({length: 40}, (_, i) => ({
+        h: 1.315 + Math.random()*0.005,
+        l: 1.310 + Math.random()*0.005,
+        o: 1.312, c: 1.313
+    }));
 
-    // Имитация данных
-    let cData = [];
-    let now = Math.floor(Date.now() / 1000);
-    for(let i=0; i<60; i++) {
-        let v = 1.31 + Math.random()*0.01;
-        cData.push({ time: now - (60-i)*60, open: v, high: v+0.001, low: v-0.001, close: v+0.0005 });
+    function drawChart() {
+        canvas.width = canvas.offsetWidth;
+        canvas.height = canvas.offsetHeight;
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        
+        const candleWidth = canvas.width / candles.length;
+        candles.forEach((c, i) => {
+            const x = i * candleWidth + 2;
+            const yHigh = (1.325 - c.h) * 5000;
+            const yLow = (1.325 - c.l) * 5000;
+            const yOpen = (1.325 - c.o) * 5000;
+            const yClose = (1.325 - c.c) * 5000;
+
+            ctx.strokeStyle = c.c >= c.o ? '#0ecb81' : '#f6465d';
+            ctx.beginPath(); ctx.moveTo(x + candleWidth/4, yHigh); ctx.lineTo(x + candleWidth/4, yLow); ctx.stroke();
+            ctx.fillStyle = ctx.strokeStyle;
+            ctx.fillRect(x, Math.min(yOpen, yClose), candleWidth/2, Math.max(0.5, Math.abs(yOpen - yClose)));
+        });
     }
-    candles.setData(cData);
 
-    // СТАКАН
+    // 2. СТАКАН
     function updateOB() {
-        const row = (p, c) => `<div class="ob-row"><div class="ob-bar" style="width:${Math.random()*70}%; background:${c}"></div><span style="z-index:1">${p.toFixed(4)}</span><span style="z-index:1; color:var(--text)">${(Math.random()*20).toFixed(1)}</span></div>`;
+        const row = (p, c) => `<div class="ob-row"><div class="ob-bar" style="width:${Math.random()*80}%; background:${c}"></div><span>${p.toFixed(4)}</span><span style="color:var(--text)">${(Math.random()*20).toFixed(1)}</span></div>`;
         let ah = '', bh = '';
-        for(let i=0; i<8; i++) {
-            ah = row(price + 0.001 + i*0.001, 'var(--red)') + ah;
-            bh += row(price - 0.001 - i*0.001, 'var(--green)');
+        for(let i=0; i<7; i++) {
+            ah += row(currentPrice + 0.001 + i*0.001, 'var(--red)');
+            bh += row(currentPrice - 0.001 - i*0.001, 'var(--green)');
         }
         document.getElementById('asks').innerHTML = ah;
         document.getElementById('bids').innerHTML = bh;
     }
 
-    // ЛОГИКА КНОПОК
-    document.getElementById('s-buy').onclick = () => {
-        document.getElementById('s-buy').className = 'side-btn buy-active';
-        document.getElementById('s-sell').className = 'side-btn';
-        document.getElementById('exec-btn').style.background = 'var(--green)';
-        document.getElementById('exec-btn').innerText = 'Buy TON';
+    // 3. ПЕРЕКЛЮЧАТЕЛИ
+    document.getElementById('buyToggle').onclick = () => {
+        document.getElementById('buyToggle').className = 's-btn buy';
+        document.getElementById('sellToggle').className = 's-btn';
+        document.getElementById('mainBtn').style.background = 'var(--green)';
+        document.getElementById('mainBtn').innerText = 'Buy TON';
     };
-    document.getElementById('s-sell').onclick = () => {
-        document.getElementById('s-sell').className = 'side-btn sell-active';
-        document.getElementById('s-buy').className = 'side-btn';
-        document.getElementById('exec-btn').style.background = 'var(--red)';
-        document.getElementById('exec-btn').innerText = 'Sell TON';
-    };
-    
-    document.getElementById('t-market').onclick = () => {
-        document.getElementById('t-market').className = 'type-btn active';
-        document.getElementById('t-limit').className = 'type-btn';
-        document.getElementById('p-field').style.opacity = '0.3';
-    };
-    document.getElementById('t-limit').onclick = () => {
-        document.getElementById('t-limit').className = 'type-btn active';
-        document.getElementById('t-market').className = 'type-btn';
-        document.getElementById('p-field').style.opacity = '1';
+    document.getElementById('sellToggle').onclick = () => {
+        document.getElementById('sellToggle').className = 's-btn sell';
+        document.getElementById('buyToggle').className = 's-btn';
+        document.getElementById('mainBtn').style.background = 'var(--red)';
+        document.getElementById('mainBtn').innerText = 'Sell TON';
     };
 
-    // ОБНОВЛЕНИЕ
+    // ЦИКЛ ОБНОВЛЕНИЯ
     setInterval(() => {
-        price += (Math.random() - 0.5) * 0.0004;
-        document.getElementById('top-p').innerText = price.toFixed(4);
-        document.getElementById('mid-price').innerText = price.toFixed(4);
+        currentPrice += (Math.random() - 0.5) * 0.0006;
+        document.getElementById('priceHeader').innerText = currentPrice.toFixed(4);
+        document.getElementById('priceMid').innerText = currentPrice.toFixed(4);
+        
+        let last = candles[candles.length - 1];
+        last.c = currentPrice;
+        if(currentPrice > last.h) last.h = currentPrice;
+        if(currentPrice < last.l) last.l = currentPrice;
+        
+        drawChart();
         updateOB();
-        let last = cData[cData.length-1];
-        last.close = price;
-        candles.update(last);
     }, 1000);
 
+    window.onresize = drawChart;
+    drawChart();
     updateOB();
 </script>
 </body>
