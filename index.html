@@ -3,114 +3,123 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>STRATEX Terminal</title>
-    <script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
+    <title>STRATEX</title>
     <style>
-        :root { --bg: #0b0e11; --panel: #171a1e; --input: #2b3139; --green: #0ecb81; --red: #f6465d; --text: #848e9c; --border: #222; }
+        :root { --bg: #0b0e11; --panel: #171a1e; --input: #2b3139; --green: #0ecb81; --red: #f6465d; --text: #848e9c; --border: #2b2f36; }
         * { box-sizing: border-box; margin: 0; padding: 0; font-family: sans-serif; }
         
-        body { background: var(--bg); color: white; display: flex; flex-direction: column; min-height: 100vh; }
+        body { background: var(--bg); color: white; display: flex; flex-direction: column; min-height: 100vh; padding: 10px; gap: 10px; }
 
         /* Шапка */
-        header { height: 50px; background: #121518; border-bottom: 1px solid var(--border); display: flex; align-items: center; padding: 0 15px; flex-shrink: 0; }
-        
-        /* Главный контейнер */
-        .content { display: flex; flex-direction: column; flex: 1; padding: 10px; gap: 10px; }
+        .header { display: flex; justify-content: space-between; align-items: center; padding: 5px 0; border-bottom: 1px solid var(--border); margin-bottom: 5px; }
+        .logo { font-weight: 800; font-size: 18px; color: white; }
+        .price-top { color: var(--green); font-weight: bold; font-family: monospace; }
 
-        /* Блок графика - теперь он главный и тянется */
-        .card-chart { background: var(--panel); border: 1px solid var(--border); border-radius: 8px; flex: 1; min-height: 350px; display: flex; flex-direction: column; }
-        #chart { flex: 1; width: 100%; }
+        /* ТОРГОВЛЯ И СТАКАН (Верхний блок) */
+        .top-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; align-items: stretch; }
+        @media (max-width: 400px) { .top-grid { grid-template-columns: 1fr; } } /* На совсем мелких экранах в столбик */
 
-        /* Сетка для Стакана и Формы */
-        .bottom-grid { display: grid; grid-template-columns: 1fr; gap: 10px; }
-
-        /* Адаптив для ПК: если экран широкий, ставим стакан и форму в ряд */
-        @media (min-width: 900px) {
-            .bottom-grid { grid-template-columns: 1fr 350px; }
-            .content { flex-direction: row; }
-            .card-chart { flex: 2; }
-        }
-
-        .card { background: var(--panel); border: 1px solid var(--border); border-radius: 8px; padding: 15px; }
+        .card { background: var(--panel); border: 1px solid var(--border); border-radius: 6px; padding: 12px; display: flex; flex-direction: column; }
         
         /* Стакан */
-        .orderbook { font-family: monospace; font-size: 13px; }
+        .orderbook { font-family: monospace; font-size: 11px; min-height: 180px; }
         .ob-row { display: flex; justify-content: space-between; padding: 2px 0; }
-        
-        /* Поля ввода */
-        .input-group { background: var(--input); padding: 8px 12px; border-radius: 4px; margin-bottom: 10px; }
-        .input-group label { display: block; font-size: 10px; color: var(--text); margin-bottom: 4px; }
-        .input-group input { background: transparent; border: none; color: white; width: 100%; font-size: 18px; outline: none; }
+        .mid-price { text-align: center; padding: 8px 0; font-size: 14px; font-weight: bold; color: var(--green); }
 
-        .btn-row { display: flex; gap: 10px; }
-        .btn { flex: 1; border: none; padding: 15px; border-radius: 4px; font-weight: bold; color: white; cursor: pointer; font-size: 14px; }
+        /* Поля ввода */
+        .input-group { background: var(--input); padding: 6px 10px; border-radius: 4px; margin-bottom: 8px; }
+        .input-group label { display: block; font-size: 9px; color: var(--text); text-transform: uppercase; margin-bottom: 2px; }
+        .input-group input { background: transparent; border: none; color: white; width: 100%; font-size: 16px; outline: none; font-weight: bold; }
+        
+        .btn { border: none; padding: 12px; border-radius: 4px; font-weight: bold; color: white; font-size: 14px; cursor: pointer; transition: 0.2s; }
+        .btn-buy { background: var(--green); margin-bottom: 5px; }
+        .btn-sell { background: var(--red); }
+
+        /* ГРАФИК (Простой холст, который не тупит) */
+        .chart-card { background: var(--panel); border: 1px solid var(--border); border-radius: 6px; flex: 1; min-height: 250px; position: relative; overflow: hidden; }
+        .chart-header { padding: 8px; font-size: 10px; color: var(--text); border-bottom: 1px solid var(--border); }
+        #simple-chart { width: 100%; height: 200px; display: block; }
     </style>
 </head>
 <body>
 
-<header>
-    <div style="font-weight: bold; font-size: 18px;">STRATEX <span style="color: var(--green)">PRO</span></div>
-</header>
+<div class="header">
+    <div class="logo">STRATEX</div>
+    <div class="price-top">1.3145</div>
+</div>
 
-<div class="content">
-    <div class="card-chart">
-        <div id="chart"></div>
+<div class="top-grid">
+    <div class="card orderbook">
+        <div style="color:var(--text); font-size:9px; margin-bottom:5px;">ORDER BOOK</div>
+        <div id="asks" style="color:var(--red)"></div>
+        <div class="mid-price">1.3145</div>
+        <div id="bids" style="color:var(--green)"></div>
     </div>
 
-    <div class="bottom-grid">
-        <div class="card orderbook">
-            <div style="color: var(--text); font-size: 11px; margin-bottom: 10px;">ORDER BOOK (TON/USDT)</div>
-            <div id="asks" style="color: var(--red); display: flex; flex-direction: column-reverse;"></div>
-            <div id="price-now" style="text-align: center; font-size: 18px; font-weight: bold; padding: 10px 0; color: var(--green);">1.3145</div>
-            <div id="bids" style="color: var(--green);"></div>
+    <div class="card">
+        <div class="input-group">
+            <label>Price (USDT)</label>
+            <input type="number" value="1.3145">
         </div>
-
-        <div class="card">
-            <div class="input-group">
-                <label>Price</label>
-                <input type="number" value="1.3145" step="0.0001">
-            </div>
-            <div class="input-group">
-                <label>Amount (TON)</label>
-                <input type="number" placeholder="0.0">
-            </div>
-            <div class="btn-row">
-                <button class="btn" style="background: var(--green)">BUY</button>
-                <button class="btn" style="background: var(--red)">SELL</button>
-            </div>
+        <div class="input-group">
+            <label>Amount (TON)</label>
+            <input type="number" placeholder="0.0">
         </div>
+        <button class="btn btn-buy">BUY</button>
+        <button class="btn btn-sell">SELL</button>
     </div>
 </div>
 
+<div class="chart-card">
+    <div class="chart-header">TRADING VIEW (SIMULATED)</div>
+    <canvas id="simple-chart"></canvas>
+</div>
+
 <script>
-    var options = {
-        series: [{ data: [] }],
-        chart: { type: 'candlestick', height: '100%', toolbar: { show: false }, background: 'transparent' },
-        xaxis: { type: 'datetime', labels: { style: { colors: '#848e9c' } } },
-        yaxis: { opposite: true, labels: { style: { colors: '#848e9c' }, formatter: v => v.toFixed(3) } },
-        grid: { borderColor: '#222' }
-    };
+    // Простой скрипт для отрисовки графиков без тяжелых библиотек
+    const canvas = document.getElementById('simple-chart');
+    const ctx = canvas.getContext('2d');
 
-    var chart = new ApexCharts(document.querySelector("#chart"), options);
-    chart.render();
-
-    function refresh() {
-        let d = []; let b = 1.314; let t = Date.now();
-        for(let i=0; i<30; i++) {
-            let o = b + Math.random()*0.01;
-            d.push({ x: t - i*60000, y: [o, o+0.002, o-0.002, o+0.001] });
-        }
-        chart.updateSeries([{ data: d.reverse() }]);
+    function drawChart() {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        ctx.strokeStyle = '#333';
+        ctx.lineWidth = 1;
         
+        // Рисуем сетку
+        for(let i=0; i<canvas.height; i+=30) {
+            ctx.beginPath(); ctx.moveTo(0, i); ctx.lineTo(canvas.width, i); ctx.stroke();
+        }
+
+        // Рисуем имитацию свечей
+        for(let i=0; i<20; i++) {
+            const x = 10 + (i * 15);
+            const h = 40 + Math.random() * 60;
+            const up = Math.random() > 0.5;
+            ctx.fillStyle = up ? '#0ecb81' : '#f6465d';
+            ctx.fillRect(x, 100 - (up ? h : h/2), 8, h);
+        }
+    }
+
+    function updateOB() {
+        const row = (p, a) => `<div class="ob-row"><span>${p.toFixed(4)}</span><span>${a.toFixed(1)}</span></div>`;
         let ah = '', bh = '';
         for(let i=0; i<5; i++) {
-            ah += `<div class="ob-row"><span>${(b+0.005-i*0.001).toFixed(4)}</span><span>${(Math.random()*20).toFixed(1)}</span></div>`;
-            bh += `<div class="ob-row"><span>${(b-0.001-i*0.001).toFixed(4)}</span><span>${(Math.random()*20).toFixed(1)}</span></div>`;
+            ah = row(1.315 + i*0.001, Math.random()*10) + ah;
+            bh += row(1.314 - i*0.001, Math.random()*10);
         }
         document.getElementById('asks').innerHTML = ah;
         document.getElementById('bids').innerHTML = bh;
     }
-    refresh();
+
+    window.onresize = () => {
+        canvas.width = canvas.parentElement.clientWidth;
+        canvas.height = canvas.parentElement.clientHeight - 30;
+        drawChart();
+    };
+    
+    window.onresize();
+    updateOB();
+    setInterval(updateOB, 2000);
 </script>
 </body>
 </html>
