@@ -2,109 +2,109 @@
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>STRATEX</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>STRATEX PRO</title>
     <script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
     <style>
-        :root { --bg: #0b0e11; --panel: #171a1e; --input: #2b3139; --green: #0ecb81; --red: #f6465d; --text: #848e9c; }
-        * { box-sizing: border-box; margin: 0; padding: 0; }
-        
-        body { 
-            background: var(--bg); color: white; font-family: -apple-system, BlinkMacSystemFont, sans-serif;
-            height: 100vh; width: 100vw; overflow: hidden;
-            display: grid;
-            /* Сетка: Шапка (40px) | Форма/Стакан (220px) | График (остаток) | Навбар (65px) */
-            grid-template-rows: 40px 220px 1fr 65px;
+        :root { --bg: #0b0e11; --panel: #171a1e; --input: #2b3139; --green: #0ecb81; --red: #f6465d; --text: #848e9c; --border: #222; }
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, sans-serif; }
+        body { background: var(--bg); color: white; min-height: 100vh; overflow-x: hidden; }
+
+        /* HEADER */
+        header { height: 50px; background: #121518; border-bottom: 1px solid var(--border); display: flex; align-items: center; padding: 0 20px; justify-content: space-between; }
+
+        /* GRID SYSTEM */
+        .wrapper { display: grid; gap: 10px; padding: 10px; height: calc(100vh - 50px); grid-template-areas: "chart" "trade" "book"; grid-template-rows: 1fr auto auto; }
+
+        /* На ПК (ширина > 1000px) меняем сетку на 3 колонки */
+        @media (min-width: 1000px) {
+            .wrapper { 
+                grid-template-areas: "book chart trade"; 
+                grid-template-columns: 280px 1fr 300px; 
+                grid-template-rows: 1fr;
+            }
         }
 
-        .header { background: #121518; display: flex; justify-content: space-between; align-items: center; padding: 0 15px; font-size: 13px; border-bottom: 1px solid #222; }
-
-        /* Блок торговли и стакана */
-        .trade-area { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; padding: 10px; border-bottom: 1px solid #222; }
+        .box { background: var(--panel); border-radius: 8px; border: 1px solid var(--border); overflow: hidden; display: flex; flex-direction: column; }
         
-        .form-col { display: flex; flex-direction: column; gap: 6px; }
-        .inp { background: var(--input); border-radius: 4px; padding: 5px 8px; }
-        .inp label { font-size: 9px; color: var(--text); display: block; }
-        .inp input { background: transparent; border: none; color: white; width: 100%; font-size: 15px; outline: none; font-weight: bold; }
-        
-        .btn-buy { background: var(--green); border: none; color: white; padding: 12px; border-radius: 4px; font-weight: bold; margin-top: auto; font-size: 14px; }
+        /* ГРАФИК */
+        .chart-box { grid-area: chart; min-height: 300px; }
+        #chart { flex-grow: 1; width: 100%; }
 
-        .book-col { border: 1px solid #222; border-radius: 4px; display: grid; grid-template-rows: 15px 1fr 25px 1fr; font-family: monospace; font-size: 10px; overflow: hidden; }
-        .row { display: flex; justify-content: space-between; padding: 1px 5px; }
+        /* ТОРГОВЛЯ */
+        .trade-box { grid-area: trade; padding: 15px; gap: 10px; }
+        .inp-grp { background: var(--input); padding: 8px 12px; border-radius: 4px; margin-bottom: 8px; }
+        .inp-grp label { display: block; font-size: 10px; color: var(--text); margin-bottom: 4px; }
+        .inp-grp input { background: transparent; border: none; color: white; width: 100%; font-size: 16px; outline: none; }
+        .btn { width: 100%; border: none; padding: 15px; border-radius: 4px; font-weight: bold; font-size: 14px; cursor: pointer; }
+        .btn-buy { background: var(--green); color: white; }
 
-        /* График */
-        #chart { width: 100%; height: 100%; overflow: hidden; }
-
-        /* Навигация */
-        .navbar { background: var(--panel); border-top: 1px solid #222; display: flex; justify-content: space-around; align-items: center; }
-        .nav-link { text-align: center; color: var(--text); font-size: 10px; text-decoration: none; }
-        .nav-link.active { color: white; }
+        /* СТАКАН */
+        .book-box { grid-area: book; min-height: 200px; font-family: monospace; font-size: 12px; }
+        .ob-row { display: flex; justify-content: space-between; padding: 3px 10px; position: relative; }
+        .ob-bar { position: absolute; right: 0; height: 100%; opacity: 0.1; z-index: 0; }
+        .mid-p { text-align: center; padding: 10px; background: rgba(255,255,255,0.03); font-weight: bold; color: var(--green); }
     </style>
 </head>
 <body>
 
-<div class="header">
-    <b>STRATEX</b>
-    <span style="color:var(--green)" id="price-top">1.3145 TON/USDT</span>
-</div>
+<header>
+    <div style="font-weight: 800; letter-spacing: 1px;">STRATEX <span style="color: var(--green)">PRO</span></div>
+    <div id="top-price" style="font-weight: bold;">1.3145</div>
+</header>
 
-<div class="trade-area">
-    <div class="form-col">
-        <div class="inp"><label>Price</label><input type="number" value="1.3145"></div>
-        <div class="inp"><label>Amount</label><input type="number" placeholder="0.0"></div>
-        <button class="btn-buy">Buy TON</button>
+<div class="wrapper">
+    <div class="box chart-box">
+        <div id="chart"></div>
     </div>
-    <div class="book-col">
-        <div style="color:var(--text); padding: 2px 5px; border-bottom: 1px solid #222;">Price / Size</div>
-        <div id="asks" style="color:var(--red); display: flex; flex-direction: column-reverse;"></div>
-        <div id="price-mid" style="text-align:center; line-height:25px; background: #121518; font-weight:bold;">1.3145</div>
-        <div id="bids" style="color:var(--green)"></div>
+
+    <div class="box book-box">
+        <div style="padding: 10px; color: var(--text); font-size: 10px; border-bottom: 1px solid var(--border);">ORDER BOOK</div>
+        <div id="asks" style="color: var(--red); flex: 1; display: flex; flex-direction: column-reverse; justify-content: flex-start;"></div>
+        <div class="mid-p" id="mid-p">1.3145</div>
+        <div id="bids" style="color: var(--green); flex: 1;"></div>
+    </div>
+
+    <div class="box trade-box">
+        <div class="inp-grp"><label>Price (USDT)</label><input type="number" value="1.3145" id="p-in"></div>
+        <div class="inp-grp"><label>Amount (TON)</label><input type="number" placeholder="0.0"></div>
+        <div style="display: flex; gap: 5px; margin-top: auto;">
+            <button class="btn btn-buy">BUY</button>
+            <button class="btn" style="background: var(--red); color: white;">SELL</button>
+        </div>
     </div>
 </div>
-
-<div id="chart"></div>
-
-<nav class="navbar">
-    <a href="#" class="nav-link active">📊<br>Рынок</a>
-    <a href="#" class="nav-item">💼<br>Активы</a>
-    <a href="#" class="nav-item">📜<br>Сделки</a>
-    <a href="#" class="nav-item">⚙️<br>Настройки</a>
-</nav>
 
 <script>
     var options = {
         series: [{ data: [] }],
-        chart: { type: 'candlestick', height: '100%', toolbar: { show: false }, animations: { enabled: false } },
+        chart: { type: 'candlestick', height: '100%', toolbar: { show: false }, background: 'transparent' },
+        theme: { mode: 'dark' },
         xaxis: { type: 'datetime', labels: { show: false } },
-        yaxis: { opposite: true, labels: { formatter: (v) => v.toFixed(4), style: { colors: '#848e9c' } } },
-        grid: { borderColor: '#1f2226' },
-        plotOptions: { candlestick: { colors: { upward: '#0ecb81', downward: '#f6465d' }, wick: { useFillColor: true } } }
+        yaxis: { opposite: true, labels: { formatter: v => v.toFixed(4) } },
+        grid: { borderColor: '#1f2226' }
     };
-
     var chart = new ApexCharts(document.querySelector("#chart"), options);
     chart.render();
 
-    function mockData() {
-        let data = [];
-        let t = Date.now() - 3600000;
+    function update() {
+        let d = []; let t = Date.now(); let b = 1.3145;
         for(let i=0; i<30; i++) {
-            let o = 1.314 + Math.random()*0.005;
-            data.push({ x: t + i*120000, y: [o, o+0.002, o-0.001, o+0.001] });
+            let o = b + (Math.random()-0.5)*0.005;
+            d.push({ x: t - i*60000, y: [o, o+0.002, o-0.002, o+0.001] });
         }
-        chart.updateSeries([{ data: data }]);
-    }
-    mockData();
-
-    function mockBook() {
-        let a = '', b = '';
-        for(let i=0; i<4; i++) {
-            a += `<div class="row"><span>${(1.315+i*0.001).toFixed(4)}</span><span>${(Math.random()*5).toFixed(1)}</span></div>`;
-            b += `<div class="row"><span>${(1.314-i*0.001).toFixed(4)}</span><span>${(Math.random()*5).toFixed(1)}</span></div>`;
+        chart.updateSeries([{ data: d.reverse() }]);
+        
+        let ah = '', bh = '';
+        for(let i=0; i<8; i++) {
+            ah += `<div class="ob-row"><div class="ob-bar" style="width:${Math.random()*80}%; background:var(--red)"></div><span>${(b+0.001+i*0.001).toFixed(4)}</span><span>${(Math.random()*10).toFixed(1)}</span></div>`;
+            bh += `<div class="ob-row"><div class="ob-bar" style="width:${Math.random()*80}%; background:var(--green)"></div><span>${(b-0.001-i*0.001).toFixed(4)}</span><span>${(Math.random()*10).toFixed(1)}</span></div>`;
         }
-        document.getElementById('asks').innerHTML = a;
-        document.getElementById('bids').innerHTML = b;
+        document.getElementById('asks').innerHTML = ah;
+        document.getElementById('bids').innerHTML = bh;
     }
-    mockBook();
+    update();
+    setInterval(update, 5000);
 </script>
 </body>
 </html>
