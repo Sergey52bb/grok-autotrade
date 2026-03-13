@@ -5,22 +5,36 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>STRATEX Terminal</title>
     <style>
-        :root { --bg: #0b0e11; --panel: #171a1e; --input: #2b3139; --green: #0ecb81; --red: #f6465d; --text: #848e9c; --border: #2b2f36; }
+        :root { --bg: #0b0e11; --panel: #171a1e; --input: #2b3139; --green: #0ecb81; --red: #f6465d; --text: #848e9c; --border: #2b2f36; --accent: #3b82f6; }
         * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, sans-serif; }
         body { background: var(--bg); color: white; height: 100vh; display: flex; flex-direction: column; overflow: hidden; }
 
-        header { height: 45px; padding: 0 12px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border); flex-shrink: 0; cursor: pointer; }
-        .token-info { display: flex; align-items: center; gap: 5px; }
+        /* Шапка с индикатором выбора */
+        header { height: 45px; padding: 0 12px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border); flex-shrink: 0; position: relative; cursor: pointer; }
+        header:active { background: rgba(255,255,255,0.05); }
+        .token-select-trigger { display: flex; align-items: center; gap: 6px; }
         .price-top { color: var(--green); font-weight: bold; font-family: monospace; font-size: 16px; }
 
+        /* ВЫПАДАЮЩЕЕ МЕНЮ (Вместо alert) */
+        #assetMenu { 
+            position: absolute; top: 45px; left: 0; width: 100%; background: var(--panel); 
+            border-bottom: 1px solid var(--border); z-index: 1000; display: none; 
+            box-shadow: 0 10px 20px rgba(0,0,0,0.5);
+        }
+        .asset-item { padding: 12px 15px; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; }
+        .asset-item:active { background: var(--input); }
+        .asset-name { font-weight: bold; font-size: 14px; }
+        .asset-ticker { font-size: 10px; color: var(--text); margin-left: 5px; }
+
+        /* График */
         .chart-container { height: 260px; width: 100%; border-bottom: 1px solid var(--border); flex-shrink: 0; }
 
+        /* Основная зона */
         .main-workspace { display: flex; flex: 1; overflow: hidden; }
 
         /* Стакан */
         .orderbook { width: 42%; border-right: 1px solid var(--border); display: flex; flex-direction: column; padding: 4px; font-family: monospace; }
-        .ob-row { display: flex; justify-content: space-between; font-size: 10px; height: 18px; position: relative; align-items: center; cursor: pointer; transition: background 0.2s; }
-        .ob-row:hover { background: rgba(255,255,255,0.05); }
+        .ob-row { display: flex; justify-content: space-between; font-size: 10px; height: 18px; position: relative; align-items: center; cursor: pointer; }
         .ob-bar { position: absolute; right: 0; height: 85%; opacity: 0.12; z-index: 0; pointer-events: none; }
 
         /* Торговля */
@@ -42,13 +56,28 @@
 </head>
 <body>
 
-<header onclick="alert('Выбор токена: TON/USDT, STRAT/TON, BTC/USDT')">
-    <div class="token-info">
-        <span style="font-weight: 800; font-size: 14px;">TON/USDT</span>
-        <span style="font-size: 10px; color: var(--text);">▼</span>
+<header onclick="toggleMenu()">
+    <div class="token-select-trigger">
+        <span id="activeToken" style="font-weight: 800; font-size: 14px;">TON/USDT</span>
+        <span style="font-size: 8px; color: var(--text);">▼</span>
     </div>
     <div class="price-top" id="hPrice">1.3145</div>
 </header>
+
+<div id="assetMenu">
+    <div class="asset-item" onclick="selectAsset('TON/USDT', 1.3145)">
+        <div><span class="asset-name">TON</span><span class="asset-ticker">/USDT</span></div>
+        <div style="color:var(--green)">1.3145</div>
+    </div>
+    <div class="asset-item" onclick="selectAsset('STRAT/TON', 0.0540)">
+        <div><span class="asset-name">STRAT</span><span class="asset-ticker">/TON</span></div>
+        <div style="color:var(--green)">0.0540</div>
+    </div>
+    <div class="asset-item" onclick="selectAsset('BTC/USDT', 64200)">
+        <div><span class="asset-name">BTC</span><span class="asset-ticker">/USDT</span></div>
+        <div style="color:var(--red)">64200.5</div>
+    </div>
+</div>
 
 <div class="chart-container">
     <div id="tv_widget" style="width: 100%; height: 100%;"></div>
@@ -71,7 +100,7 @@
             <input type="number" id="inputPrice" step="0.0001" value="1.3145">
         </div>
         <div class="inp-field">
-            <label>Amount (TON)</label>
+            <label>Amount</label>
             <input type="number" placeholder="0.0">
         </div>
         <button class="action-btn" id="execBtn">Buy TON</button>
@@ -81,44 +110,47 @@
 <nav>
     <a href="#" class="n-link" style="color: white;">📊<br>Market</a>
     <a href="#" class="n-link">💼<br>Wallet</a>
-    <a href="#" class="n-link">💎<br>STRAT Token</a>
+    <a href="#" class="n-link">💎<br>STRAT</a>
 </nav>
 
 <script type="text/javascript" src="https://s3.tradingview.com/tv.js"></script>
 <script>
+    let currentPrice = 1.3145;
+
+    // Логика меню
+    function toggleMenu() {
+        const menu = document.getElementById('assetMenu');
+        menu.style.display = menu.style.display === 'block' ? 'none' : 'block';
+    }
+
+    function selectAsset(pair, price) {
+        document.getElementById('activeToken').innerText = pair;
+        document.getElementById('inputPrice').value = price;
+        currentPrice = price;
+        toggleMenu();
+        // В реальности тут бы еще менялся символ в виджете TradingView
+    }
+
     new TradingView.widget({
         "autosize": true,
         "symbol": "BYBIT:TONUSDT",
         "interval": "5",
-        "timezone": "Etc/UTC",
         "theme": "dark",
         "style": "1",
         "locale": "ru",
         "container_id": "tv_widget",
-        "hide_top_toolbar": false,
-        "hide_legend": true,
-        "save_image": false
+        "hide_legend": true
     });
-
-    let currentPrice = 1.3145;
-
-    function setPriceFromBook(p) {
-        document.getElementById('inputPrice').value = p.toFixed(4);
-    }
 
     function update() {
         currentPrice += (Math.random() - 0.5) * 0.0006;
-        const createRow = (type, color) => {
-            let p = currentPrice + (type === 'ask' ? Math.random()*0.02 : -Math.random()*0.02);
-            return `<div class="ob-row" onclick="setPriceFromBook(${p})">
-                <div class="ob-bar" style="width:${Math.random()*80}%; background:${color}"></div>
-                <span>${p.toFixed(4)}</span>
-                <span style="color:var(--text)">${(Math.random()*12).toFixed(1)}</span>
-            </div>`;
-        };
-
+        const row = (c) => `<div class="ob-row" onclick="document.getElementById('inputPrice').value=${(currentPrice + (Math.random()-0.5)*0.01).toFixed(4)}">
+            <div class="ob-bar" style="width:${Math.random()*80}%; background:${c}"></div>
+            <span>${(currentPrice + (Math.random()-0.5)*0.01).toFixed(4)}</span>
+            <span style="color:var(--text)">${(Math.random()*12).toFixed(1)}</span>
+        </div>`;
         let ah = '', bh = '';
-        for(let i=0; i<8; i++) { ah += createRow('ask', 'var(--red)'); bh += createRow('bid', 'var(--green)'); }
+        for(let i=0; i<8; i++) { ah += row('var(--red)'); bh += row('var(--green)'); }
         document.getElementById('asks').innerHTML = ah;
         document.getElementById('bids').innerHTML = bh;
         document.getElementById('hPrice').innerText = currentPrice.toFixed(4);
@@ -127,14 +159,15 @@
 
     function switchSide(s) {
         const btn = document.getElementById('execBtn');
+        const activeToken = document.getElementById('activeToken').innerText.split('/')[0];
         if(s === 'buy') {
             document.getElementById('bBuy').className = 's-btn active-buy';
             document.getElementById('bSell').className = 's-btn';
-            btn.style.background = 'var(--green)'; btn.innerText = 'Buy TON';
+            btn.style.background = 'var(--green)'; btn.innerText = 'Buy ' + activeToken;
         } else {
             document.getElementById('bSell').className = 's-btn active-sell';
             document.getElementById('bBuy').className = 's-btn';
-            btn.style.background = 'var(--red)'; btn.innerText = 'Sell TON';
+            btn.style.background = 'var(--red)'; btn.innerText = 'Sell ' + activeToken;
         }
     }
 
