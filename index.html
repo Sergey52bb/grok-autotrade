@@ -5,48 +5,44 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>STRATEX Terminal</title>
     <style>
-        :root { --bg: #0b0e11; --panel: #171a1e; --input: #2b3139; --green: #0ecb81; --red: #f6465d; --text: #848e9c; --border: #2b2f36; --accent: #3b82f6; }
+        :root { --bg: #0b0e11; --panel: #171a1e; --input: #2b3139; --green: #0ecb81; --red: #f6465d; --text: #848e9c; --border: #2b2f36; --gold: #f0b90b; }
         * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, sans-serif; }
         body { background: var(--bg); color: white; height: 100vh; display: flex; flex-direction: column; overflow: hidden; }
 
-        /* Шапка с индикатором выбора */
-        header { height: 45px; padding: 0 12px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border); flex-shrink: 0; position: relative; cursor: pointer; }
-        header:active { background: rgba(255,255,255,0.05); }
-        .token-select-trigger { display: flex; align-items: center; gap: 6px; }
-        .price-top { color: var(--green); font-weight: bold; font-family: monospace; font-size: 16px; }
+        header { height: 45px; padding: 0 12px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border); flex-shrink: 0; z-index: 1001; background: var(--bg); cursor: pointer; }
+        .current-asset { display: flex; align-items: center; gap: 8px; }
+        .price-display { color: var(--green); font-weight: bold; font-family: monospace; font-size: 16px; }
 
-        /* ВЫПАДАЮЩЕЕ МЕНЮ (Вместо alert) */
-        #assetMenu { 
-            position: absolute; top: 45px; left: 0; width: 100%; background: var(--panel); 
-            border-bottom: 1px solid var(--border); z-index: 1000; display: none; 
-            box-shadow: 0 10px 20px rgba(0,0,0,0.5);
+        /* МЕНЮ ВЫБОРА МОНЕТ */
+        #coinList { 
+            position: absolute; top: 45px; left: 0; width: 100%; height: calc(100vh - 45px); 
+            background: var(--bg); z-index: 1000; display: none; overflow-y: auto; padding: 10px 0;
         }
-        .asset-item { padding: 12px 15px; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; }
-        .asset-item:active { background: var(--input); }
-        .asset-name { font-weight: bold; font-size: 14px; }
-        .asset-ticker { font-size: 10px; color: var(--text); margin-left: 5px; }
+        .coin-item { padding: 12px 16px; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; }
+        .coin-item:active { background: var(--panel); }
+        .coin-info { display: flex; align-items: center; gap: 10px; }
+        .coin-logo { width: 24px; height: 24px; display: flex; align-items: center; justify-content: center; background: var(--input); border-radius: 50%; font-size: 14px; }
 
-        /* График */
-        .chart-container { height: 260px; width: 100%; border-bottom: 1px solid var(--border); flex-shrink: 0; }
+        /* ОСНОВНОЙ ГРАФИК */
+        .chart-box { height: 250px; width: 100%; border-bottom: 1px solid var(--border); flex-shrink: 0; }
 
-        /* Основная зона */
-        .main-workspace { display: flex; flex: 1; overflow: hidden; }
+        .workspace { display: flex; flex: 1; overflow: hidden; }
 
-        /* Стакан */
-        .orderbook { width: 42%; border-right: 1px solid var(--border); display: flex; flex-direction: column; padding: 4px; font-family: monospace; }
-        .ob-row { display: flex; justify-content: space-between; font-size: 10px; height: 18px; position: relative; align-items: center; cursor: pointer; }
-        .ob-bar { position: absolute; right: 0; height: 85%; opacity: 0.12; z-index: 0; pointer-events: none; }
+        /* СТАКАН */
+        .book { width: 42%; border-right: 1px solid var(--border); display: flex; flex-direction: column; padding: 4px; font-family: monospace; }
+        .row { display: flex; justify-content: space-between; font-size: 10px; height: 18px; position: relative; align-items: center; cursor: pointer; }
+        .bar { position: absolute; right: 0; height: 80%; opacity: 0.12; z-index: 0; pointer-events: none; }
 
-        /* Торговля */
-        .trade-panel { width: 58%; padding: 10px; display: flex; flex-direction: column; gap: 8px; }
-        .side-ctrl { display: flex; background: var(--input); border-radius: 4px; padding: 2px; }
+        /* ТОРГОВЛЯ */
+        .trade { width: 58%; padding: 10px; display: flex; flex-direction: column; gap: 8px; }
+        .side-toggle { display: flex; background: var(--input); border-radius: 4px; padding: 2px; }
         .s-btn { flex: 1; border: none; padding: 8px; border-radius: 3px; font-size: 11px; font-weight: bold; color: var(--text); background: none; }
-        .s-btn.active-buy { background: var(--green); color: white; }
-        .s-btn.active-sell { background: var(--red); color: white; }
+        .s-btn.buy { background: var(--green); color: white; }
+        .s-btn.sell { background: var(--red); color: white; }
 
-        .inp-field { background: var(--input); border-radius: 4px; padding: 6px 10px; }
-        .inp-field label { display: block; font-size: 8px; color: var(--text); text-transform: uppercase; }
-        .inp-field input { background: none; border: none; color: white; width: 100%; font-size: 16px; outline: none; font-weight: bold; }
+        .inp { background: var(--input); border-radius: 4px; padding: 6px 10px; }
+        .inp label { display: block; font-size: 8px; color: var(--text); text-transform: uppercase; }
+        .inp input { background: none; border: none; color: white; width: 100%; font-size: 16px; outline: none; font-weight: bold; }
 
         .action-btn { background: var(--green); border: none; color: white; padding: 14px; border-radius: 4px; font-weight: bold; font-size: 14px; margin-top: auto; }
 
@@ -56,123 +52,137 @@
 </head>
 <body>
 
-<header onclick="toggleMenu()">
-    <div class="token-select-trigger">
-        <span id="activeToken" style="font-weight: 800; font-size: 14px;">TON/USDT</span>
+<header onclick="toggleCoins()">
+    <div class="current-asset">
+        <span id="activeLogo" style="font-size: 16px;">💎</span>
+        <span id="activePair" style="font-weight: 800; font-size: 14px;">STRAT/USDT</span>
         <span style="font-size: 8px; color: var(--text);">▼</span>
     </div>
-    <div class="price-top" id="hPrice">1.3145</div>
+    <div class="price-display" id="topPrice">17.3800</div>
 </header>
 
-<div id="assetMenu">
-    <div class="asset-item" onclick="selectAsset('TON/USDT', 1.3145)">
-        <div><span class="asset-name">TON</span><span class="asset-ticker">/USDT</span></div>
+<div id="coinList">
+    <div class="coin-item" onclick="pick('💎', 'STRAT/USDT', 17.3800)">
+        <div class="coin-info"><div class="coin-logo" style="color:var(--gold)">💎</div><span>STRAT <small style="color:var(--text)">/USDT</small></span></div>
+        <div style="color:var(--green)">17.3800</div>
+    </div>
+    <div class="coin-item" onclick="pick('🔵', 'TON/USDT', 1.3145)">
+        <div class="coin-info"><div class="coin-logo" style="color:#0088cc">🔵</div><span>TON <small style="color:var(--text)">/USDT</small></span></div>
         <div style="color:var(--green)">1.3145</div>
     </div>
-    <div class="asset-item" onclick="selectAsset('STRAT/TON', 0.0540)">
-        <div><span class="asset-name">STRAT</span><span class="asset-ticker">/TON</span></div>
-        <div style="color:var(--green)">0.0540</div>
+    <div class="coin-item" onclick="pick('₿', 'BTC/USDT', 64205)">
+        <div class="coin-info"><div class="coin-logo" style="color:#f7931a">₿</div><span>BTC <small style="color:var(--text)">/USDT</small></span></div>
+        <div style="color:var(--red)">64205.1</div>
     </div>
-    <div class="asset-item" onclick="selectAsset('BTC/USDT', 64200)">
-        <div><span class="asset-name">BTC</span><span class="asset-ticker">/USDT</span></div>
-        <div style="color:var(--red)">64200.5</div>
+    <div class="coin-item" onclick="pick('💠', 'ETH/USDT', 3450.2)">
+        <div class="coin-info"><div class="coin-logo" style="color:#627eea">💠</div><span>ETH <small style="color:var(--text)">/USDT</small></span></div>
+        <div style="color:var(--green)">3450.21</div>
+    </div>
+    <div class="coin-item" onclick="pick('☀️', 'SOL/USDT', 145.12)">
+        <div class="coin-info"><div class="coin-logo" style="color:#14f195">☀️</div><span>SOL <small style="color:var(--text)">/USDT</small></span></div>
+        <div style="color:var(--green)">145.12</div>
+    </div>
+    <div class="coin-item" onclick="pick('🐕', 'DOGE/USDT', 0.1621)">
+        <div class="coin-info"><div class="coin-logo" style="color:#c2a633">🐕</div><span>DOGE <small style="color:var(--text)">/USDT</small></span></div>
+        <div style="color:var(--red)">0.1621</div>
     </div>
 </div>
 
-<div class="chart-container">
-    <div id="tv_widget" style="width: 100%; height: 100%;"></div>
+<div class="chart-box">
+    <div id="tv_main" style="width: 100%; height: 100%;"></div>
 </div>
 
-<div class="main-workspace">
-    <div class="orderbook">
+<div class="workspace">
+    <div class="book">
         <div id="asks" style="display:flex; flex-direction:column-reverse; color:var(--red);"></div>
-        <div id="mPrice" style="text-align:center; padding:8px 0; font-weight:bold; font-size:15px; color:var(--green);">1.3145</div>
+        <div id="midPrice" style="text-align:center; padding:8px 0; font-weight:bold; font-size:15px; color:var(--green);">17.3800</div>
         <div id="bids" style="color:var(--green);"></div>
     </div>
 
-    <div class="trade-panel">
-        <div class="side-ctrl">
-            <button class="s-btn active-buy" id="bBuy" onclick="switchSide('buy')">Buy</button>
-            <button class="s-btn" id="bSell" onclick="switchSide('sell')">Sell</button>
+    <div class="trade">
+        <div class="side-toggle">
+            <button class="s-btn buy" id="bBuy" onclick="side('buy')">Buy</button>
+            <button class="s-btn" id="bSell" onclick="side('sell')">Sell</button>
         </div>
-        <div class="inp-field">
+        <div class="inp">
             <label>Price</label>
-            <input type="number" id="inputPrice" step="0.0001" value="1.3145">
+            <input type="number" id="iPrice" value="17.3800">
         </div>
-        <div class="inp-field">
+        <div class="inp">
             <label>Amount</label>
             <input type="number" placeholder="0.0">
         </div>
-        <button class="action-btn" id="execBtn">Buy TON</button>
+        <button class="action-btn" id="mainBtn">Buy STRAT</button>
     </div>
 </div>
 
 <nav>
-    <a href="#" class="n-link" style="color: white;">📊<br>Market</a>
+    <a href="#" class="n-link" style="color: white;">📊<br>Trade</a>
     <a href="#" class="n-link">💼<br>Wallet</a>
     <a href="#" class="n-link">💎<br>STRAT</a>
 </nav>
 
 <script type="text/javascript" src="https://s3.tradingview.com/tv.js"></script>
 <script>
-    let currentPrice = 1.3145;
+    let curP = 17.3800;
+    let widget = null;
 
-    // Логика меню
-    function toggleMenu() {
-        const menu = document.getElementById('assetMenu');
-        menu.style.display = menu.style.display === 'block' ? 'none' : 'block';
+    function toggleCoins() {
+        const list = document.getElementById('coinList');
+        list.style.display = list.style.display === 'block' ? 'none' : 'block';
     }
 
-    function selectAsset(pair, price) {
-        document.getElementById('activeToken').innerText = pair;
-        document.getElementById('inputPrice').value = price;
-        currentPrice = price;
-        toggleMenu();
-        // В реальности тут бы еще менялся символ в виджете TradingView
+    function pick(logo, pair, price) {
+        document.getElementById('activeLogo').innerText = logo;
+        document.getElementById('activePair').innerText = pair;
+        document.getElementById('iPrice').value = price;
+        curP = price;
+        toggleCoins();
+        updateBtn();
+        // Переключение графика
+        initChart(pair.replace('/', ''));
     }
 
-    new TradingView.widget({
-        "autosize": true,
-        "symbol": "BYBIT:TONUSDT",
-        "interval": "5",
-        "theme": "dark",
-        "style": "1",
-        "locale": "ru",
-        "container_id": "tv_widget",
-        "hide_legend": true
-    });
+    function initChart(symbol) {
+        let s = symbol === "STRATUSDT" ? "OKX:TONUSDT" : "BYBIT:" + symbol;
+        new TradingView.widget({
+            "autosize": true, "symbol": s, "interval": "15", "theme": "dark",
+            "style": "1", "locale": "ru", "container_id": "tv_main", "hide_legend": true
+        });
+    }
 
-    function update() {
-        currentPrice += (Math.random() - 0.5) * 0.0006;
-        const row = (c) => `<div class="ob-row" onclick="document.getElementById('inputPrice').value=${(currentPrice + (Math.random()-0.5)*0.01).toFixed(4)}">
-            <div class="ob-bar" style="width:${Math.random()*80}%; background:${c}"></div>
-            <span>${(currentPrice + (Math.random()-0.5)*0.01).toFixed(4)}</span>
-            <span style="color:var(--text)">${(Math.random()*12).toFixed(1)}</span>
+    function side(s) {
+        const b = document.getElementById('mainBtn');
+        document.getElementById('bBuy').className = s === 'buy' ? 's-btn buy' : 's-btn';
+        document.getElementById('bSell').className = s === 'sell' ? 's-btn sell' : 's-btn';
+        b.style.background = s === 'buy' ? 'var(--green)' : 'var(--red)';
+        updateBtn();
+    }
+
+    function updateBtn() {
+        const pair = document.getElementById('activePair').innerText.split('/')[0];
+        const isBuy = document.getElementById('bBuy').classList.contains('buy');
+        document.getElementById('mainBtn').innerText = (isBuy ? 'Buy ' : 'Sell ') + pair;
+    }
+
+    function live() {
+        curP += (Math.random() - 0.5) * (curP * 0.0005);
+        const row = (c) => `<div class="row" onclick="document.getElementById('iPrice').value=${(curP + (Math.random()-0.5)*(curP*0.01)).toFixed(4)}">
+            <div class="bar" style="width:${Math.random()*80}%; background:${c}"></div>
+            <span>${(curP + (Math.random()-0.5)*(curP*0.01)).toFixed(4)}</span>
+            <span style="color:var(--text)">${(Math.random()*10).toFixed(1)}</span>
         </div>`;
         let ah = '', bh = '';
         for(let i=0; i<8; i++) { ah += row('var(--red)'); bh += row('var(--green)'); }
         document.getElementById('asks').innerHTML = ah;
         document.getElementById('bids').innerHTML = bh;
-        document.getElementById('hPrice').innerText = currentPrice.toFixed(4);
-        document.getElementById('mPrice').innerText = currentPrice.toFixed(4);
+        document.getElementById('topPrice').innerText = curP.toFixed(4);
+        document.getElementById('midPrice').innerText = curP.toFixed(4);
     }
 
-    function switchSide(s) {
-        const btn = document.getElementById('execBtn');
-        const activeToken = document.getElementById('activeToken').innerText.split('/')[0];
-        if(s === 'buy') {
-            document.getElementById('bBuy').className = 's-btn active-buy';
-            document.getElementById('bSell').className = 's-btn';
-            btn.style.background = 'var(--green)'; btn.innerText = 'Buy ' + activeToken;
-        } else {
-            document.getElementById('bSell').className = 's-btn active-sell';
-            document.getElementById('bBuy').className = 's-btn';
-            btn.style.background = 'var(--red)'; btn.innerText = 'Sell ' + activeToken;
-        }
-    }
-
-    setInterval(update, 2000);
-    update();
+    initChart("TONUSDT");
+    setInterval(live, 2000);
+    live();
 </script>
 </body>
 </html>
