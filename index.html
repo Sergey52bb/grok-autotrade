@@ -2,156 +2,159 @@
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>STRATEX Terminal</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>STRATEX TERMINAL</title>
     <style>
         :root { --bg: #0b0e11; --panel: #171a1e; --input: #2b3139; --green: #0ecb81; --red: #f6465d; --text: #848e9c; --border: #2b2f36; }
         * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, sans-serif; }
-        body { background: var(--bg); color: white; display: flex; flex-direction: column; height: 100vh; overflow: hidden; }
-
-        /* Шапка */
-        header { height: 45px; padding: 0 15px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border); flex-shrink: 0; }
-
-        /* График (как на рабочем скрине) */
-        .chart-box { height: 210px; background: #000; border-bottom: 1px solid var(--border); position: relative; flex-shrink: 0; }
-        #liveChart { width: 100%; height: 100%; display: block; }
-
-        /* Основной блок: Стакан + Торговля в ряд */
-        .main-row { display: flex; flex: 1; overflow: hidden; }
-
-        /* СТАКАН (Слева) */
-        .book { width: 45%; border-right: 1px solid var(--border); display: flex; flex-direction: column; padding: 5px; font-family: monospace; font-size: 11px; }
-        .ob-row { display: flex; justify-content: space-between; height: 18px; position: relative; align-items: center; overflow: hidden; }
-        .ob-bar { position: absolute; right: 0; height: 80%; opacity: 0.15; z-index: 0; }
-
-        /* ТОРГОВЛЯ (Справа) */
-        .trade { width: 55%; padding: 10px; display: flex; flex-direction: column; gap: 8px; }
         
-        /* Тип ордера */
-        .type-tabs { display: flex; gap: 12px; margin-bottom: 2px; }
-        .t-btn { background: none; border: none; color: var(--text); font-size: 12px; font-weight: bold; cursor: pointer; border-bottom: 2px solid transparent; }
-        .t-btn.active { color: white; border-bottom-color: var(--green); }
+        body { background: var(--bg); color: white; height: 100vh; display: flex; flex-direction: column; overflow: hidden; }
 
-        /* Купить/Продать */
-        .side-box { display: flex; background: var(--input); border-radius: 4px; padding: 2px; }
-        .s-btn { flex: 1; border: none; padding: 8px; border-radius: 3px; font-size: 12px; font-weight: bold; color: var(--text); background: none; }
-        .s-btn.active-buy { background: var(--green); color: white; }
-        .s-btn.active-sell { background: var(--red); color: white; }
+        header { height: 45px; padding: 0 15px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border); flex-shrink: 0; }
+        .price-top { color: var(--green); font-weight: bold; font-family: monospace; font-size: 16px; }
 
-        .inp-field { background: var(--input); border-radius: 4px; padding: 6px 10px; }
-        .inp-field label { display: block; font-size: 8px; color: var(--text); text-transform: uppercase; }
-        .inp-field input { background: none; border: none; color: white; width: 100%; font-size: 16px; outline: none; font-weight: bold; }
+        /* КОНТЕЙНЕР ДЛЯ ГРАФИКА TRADINGVIEW */
+        .chart-container { height: 250px; width: 100%; border-bottom: 1px solid var(--border); flex-shrink: 0; background: #000; }
 
-        .main-btn { background: var(--green); border: none; color: white; padding: 14px; border-radius: 4px; font-weight: bold; font-size: 14px; margin-top: auto; cursor: pointer; }
+        /* ОСНОВНАЯ ЗОНА: СТАКАН + ТОРГОВЛЯ */
+        .main-workspace { display: flex; flex: 1; overflow: hidden; }
 
-        nav { height: 50px; background: var(--panel); border-top: 1px solid var(--border); display: flex; justify-content: space-around; align-items: center; flex-shrink: 0; }
+        /* ЛЕВО: СТАКАН */
+        .orderbook { width: 45%; border-right: 1px solid var(--border); display: flex; flex-direction: column; padding: 5px; font-family: monospace; }
+        .ob-label { display: flex; justify-content: space-between; font-size: 9px; color: var(--text); margin-bottom: 4px; }
+        .ob-row { display: flex; justify-content: space-between; font-size: 11px; height: 18px; position: relative; align-items: center; }
+        .ob-bar { position: absolute; right: 0; height: 85%; opacity: 0.15; z-index: 0; }
+
+        /* ПРАВО: ТОРГОВЛЯ */
+        .trade-panel { width: 55%; padding: 10px; display: flex; flex-direction: column; gap: 8px; }
+        
+        .tabs { display: flex; gap: 12px; margin-bottom: 2px; }
+        .tab { background: none; border: none; color: var(--text); font-size: 12px; font-weight: bold; border-bottom: 2px solid transparent; padding-bottom: 3px; cursor: pointer; }
+        .tab.active { color: white; border-bottom-color: var(--green); }
+
+        .side-ctrl { display: flex; background: var(--input); border-radius: 4px; padding: 2px; }
+        .side-btn { flex: 1; border: none; padding: 8px; border-radius: 3px; font-size: 12px; font-weight: bold; color: var(--text); background: none; }
+        .side-btn.buy { background: var(--green); color: white; }
+        .side-btn.sell { background: var(--red); color: white; }
+
+        .inp-group { background: var(--input); border-radius: 4px; padding: 6px 10px; }
+        .inp-group label { display: block; font-size: 8px; color: var(--text); text-transform: uppercase; margin-bottom: 2px; }
+        .inp-group input { background: none; border: none; color: white; width: 100%; font-size: 16px; outline: none; font-weight: bold; }
+
+        .btn-action { background: var(--green); border: none; color: white; padding: 14px; border-radius: 4px; font-weight: bold; font-size: 14px; margin-top: auto; cursor: pointer; }
+
+        nav { height: 55px; background: var(--panel); border-top: 1px solid var(--border); display: flex; justify-content: space-around; align-items: center; flex-shrink: 0; }
+        .nav-link { font-size: 10px; color: var(--text); text-decoration: none; text-align: center; }
     </style>
 </head>
 <body>
 
 <header>
-    <div style="font-weight: bold;">TON/USDT</div>
-    <div id="price-top" style="color:var(--green); font-weight:bold;">1.3145</div>
+    <div style="font-weight: 800; letter-spacing: 1px;">STRATEX</div>
+    <div class="price-top" id="headerPrice">1.3145</div>
 </header>
 
-<div class="chart-box">
-    <canvas id="liveChart"></canvas>
+<div class="chart-container">
+    <div id="tradingview_chart" style="width: 100%; height: 100%;"></div>
 </div>
 
-<div class="main-row">
-    <div class="book">
+<div class="main-workspace">
+    <div class="orderbook">
+        <div class="ob-label"><span>Price</span><span>Size</span></div>
         <div id="asks" style="display:flex; flex-direction:column-reverse; color:var(--red);"></div>
-        <div id="price-mid" style="text-align:center; padding:8px 0; font-weight:bold; font-size:16px; color:var(--green);">1.3145</div>
+        <div id="midPrice" style="text-align:center; padding:8px 0; font-weight:bold; font-size:16px; color:var(--green);">1.3145</div>
         <div id="bids" style="color:var(--green);"></div>
     </div>
 
-    <div class="trade">
-        <div class="type-tabs">
-            <button class="t-btn active" onclick="switchType('limit', this)">Limit</button>
-            <button class="t-btn" onclick="switchType('market', this)">Market</button>
+    <div class="trade-panel">
+        <div class="tabs">
+            <button class="tab active" onclick="setT('limit', this)">Limit</button>
+            <button class="tab" onclick="setT('market', this)">Market</button>
         </div>
-        <div class="side-box">
-            <button class="s-btn active-buy" id="b-buy" onclick="switchSide('buy')">Buy</button>
-            <button class="s-btn" id="b-sell" onclick="switchSide('sell')">Sell</button>
+        <div class="side-ctrl">
+            <button class="side-btn buy" id="tBuy" onclick="setS('buy')">Buy</button>
+            <button class="side-btn" id="tSell" onclick="setS('sell')">Sell</button>
         </div>
-        <div class="inp-field" id="p-box">
-            <label>Price</label>
-            <input type="number" id="p-val" value="1.3145">
+        <div class="inp-group" id="priceInputBox">
+            <label>Price (USDT)</label>
+            <input type="number" id="valPrice" value="1.3145">
         </div>
-        <div class="inp-field">
-            <label>Amount</label>
+        <div class="inp-group">
+            <label>Amount (TON)</label>
             <input type="number" placeholder="0.00">
         </div>
-        <button class="main-btn" id="exec-btn">Buy TON</button>
+        <button class="btn-action" id="mainActionBtn">Buy TON</button>
     </div>
 </div>
 
 <nav>
-    <span style="font-size: 10px; color: white;">📊 Market</span>
-    <span style="font-size: 10px; color: var(--text);">💼 Assets</span>
+    <a href="#" class="nav-link" style="color: white;">📊<br>Market</a>
+    <a href="#" class="nav-link">💼<br>Assets</a>
+    <a href="#" class="nav-link">⚙️<br>Settings</a>
 </nav>
 
+<script type="text/javascript" src="https://s3.tradingview.com/tv.js"></script>
 <script>
-    let price = 1.3145;
-    const canvas = document.getElementById('liveChart');
-    const ctx = canvas.getContext('2d');
+    // Инициализация реального графика TON/USDT
+    new TradingView.widget({
+        "autosize": true,
+        "symbol": "BYBIT:TONUSDT",
+        "interval": "15",
+        "timezone": "Etc/UTC",
+        "theme": "dark",
+        "style": "1",
+        "locale": "ru",
+        "toolbar_bg": "#0b0e11",
+        "enable_publishing": false,
+        "hide_top_toolbar": false,
+        "hide_legend": true,
+        "save_image": false,
+        "container_id": "tradingview_chart"
+    });
 
-    // График (упрощенный, но живой)
-    let dots = Array.from({length: 50}, () => 1.310 + Math.random()*0.01);
-    function draw() {
-        canvas.width = canvas.offsetWidth; canvas.height = canvas.offsetHeight;
-        ctx.clearRect(0, 0, canvas.width, canvas.height);
-        ctx.strokeStyle = '#0ecb81'; ctx.lineWidth = 2;
-        ctx.beginPath();
-        dots.forEach((d, i) => {
-            let x = i * (canvas.width/dots.length);
-            let y = canvas.height - (d - 1.30) * 8000;
-            if(i==0) ctx.moveTo(x, y); else ctx.lineTo(x, y);
-        });
-        ctx.stroke();
-    }
+    let currentPrice = 1.3145;
 
-    // Стакан
-    function updateOB() {
-        const row = (p, c) => `<div class="ob-row"><div class="ob-bar" style="width:${Math.random()*80}%; background:${c}"></div><span>${p.toFixed(4)}</span><span style="color:var(--text)">${(Math.random()*15).toFixed(1)}</span></div>`;
-        let ah = '', bh = '';
-        for(let i=0; i<7; i++) {
-            ah += row(price + 0.001 + i*0.001, 'var(--red)');
-            bh += row(price - 0.001 - i*0.001, 'var(--green)');
-        }
-        document.getElementById('asks').innerHTML = ah;
-        document.getElementById('bids').innerHTML = bh;
-    }
-
-    // Логика кнопок
-    function switchSide(s) {
-        const btn = document.getElementById('exec-btn');
+    // Логика переключения сторон
+    function setS(s) {
+        const btn = document.getElementById('mainActionBtn');
         if(s === 'buy') {
-            document.getElementById('b-buy').className = 's-btn active-buy';
-            document.getElementById('b-sell').className = 's-btn';
+            document.getElementById('tBuy').className = 'side-btn buy';
+            document.getElementById('tSell').className = 'side-btn';
             btn.style.background = 'var(--green)'; btn.innerText = 'Buy TON';
         } else {
-            document.getElementById('b-sell').className = 's-btn active-sell';
-            document.getElementById('b-buy').className = 's-btn';
+            document.getElementById('tSell').className = 'side-btn sell';
+            document.getElementById('tBuy').className = 'side-btn';
             btn.style.background = 'var(--red)'; btn.innerText = 'Sell TON';
         }
     }
 
-    function switchType(t, el) {
-        document.querySelectorAll('.t-btn').forEach(b => b.classList.remove('active'));
+    function setT(t, el) {
+        document.querySelectorAll('.tab').forEach(b => b.classList.remove('active'));
         el.classList.add('active');
-        document.getElementById('p-box').style.opacity = (t === 'market') ? '0.3' : '1';
+        document.getElementById('priceInputBox').style.opacity = (t === 'market') ? '0.3' : '1';
+    }
+
+    // Живой стакан
+    function updateOB() {
+        const row = (p, c) => `<div class="ob-row"><div class="ob-bar" style="width:${Math.random()*85}%; background:${c}"></div><span>${p.toFixed(4)}</span><span style="color:var(--text)">${(Math.random()*15).toFixed(1)}</span></div>`;
+        let ah = '', bh = '';
+        for(let i=0; i<7; i++) {
+            ah += row(currentPrice + 0.001 + i*0.001, 'var(--red)');
+            bh += row(currentPrice - 0.001 - i*0.001, 'var(--green)');
+        }
+        document.getElementById('asks').innerHTML = ah;
+        document.getElementById('bids').innerHTML = bh;
+        document.getElementById('headerPrice').innerText = currentPrice.toFixed(4);
+        document.getElementById('midPrice').innerText = currentPrice.toFixed(4);
     }
 
     setInterval(() => {
-        price += (Math.random() - 0.5) * 0.0005;
-        document.getElementById('price-top').innerText = price.toFixed(4);
-        document.getElementById('price-mid').innerText = price.toFixed(4);
-        dots.shift(); dots.push(price);
-        draw(); updateOB();
-    }, 1000);
+        currentPrice += (Math.random() - 0.5) * 0.0004;
+        updateOB();
+    }, 2000);
 
-    draw(); updateOB();
+    updateOB();
 </script>
+
 </body>
 </html>
