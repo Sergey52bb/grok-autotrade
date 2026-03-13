@@ -3,97 +3,89 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>STRATEX PRO</title>
+    <title>STRATEX Terminal</title>
     <style>
         :root { --bg: #0b0e11; --panel: #171a1e; --input: #2b3139; --green: #0ecb81; --red: #f6465d; --text: #848e9c; --border: #2b2f36; }
         * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, sans-serif; }
-        
         body { background: var(--bg); color: white; height: 100vh; display: flex; flex-direction: column; overflow: hidden; }
 
-        header { height: 40px; padding: 0 12px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border); flex-shrink: 0; }
-        .logo { font-weight: 800; font-size: 14px; letter-spacing: 0.5px; }
+        header { height: 45px; padding: 0 12px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border); flex-shrink: 0; cursor: pointer; }
+        .token-info { display: flex; align-items: center; gap: 5px; }
+        .price-top { color: var(--green); font-weight: bold; font-family: monospace; font-size: 16px; }
 
-        /* Контейнер графика - чуть увеличил высоту для стабильности */
-        .chart-container { height: 260px; width: 100%; border-bottom: 1px solid var(--border); flex-shrink: 0; background: #000; }
+        .chart-container { height: 260px; width: 100%; border-bottom: 1px solid var(--border); flex-shrink: 0; }
 
-        /* Рабочая зона */
-        .main-content { display: flex; flex: 1; overflow: hidden; }
+        .main-workspace { display: flex; flex: 1; overflow: hidden; }
 
         /* Стакан */
-        .ob { width: 42%; border-right: 1px solid var(--border); display: flex; flex-direction: column; padding: 4px; font-family: monospace; }
-        .ob-row { display: flex; justify-content: space-between; font-size: 10px; height: 16px; position: relative; align-items: center; }
-        .ob-bar { position: absolute; right: 0; height: 80%; opacity: 0.12; z-index: 0; }
+        .orderbook { width: 42%; border-right: 1px solid var(--border); display: flex; flex-direction: column; padding: 4px; font-family: monospace; }
+        .ob-row { display: flex; justify-content: space-between; font-size: 10px; height: 18px; position: relative; align-items: center; cursor: pointer; transition: background 0.2s; }
+        .ob-row:hover { background: rgba(255,255,255,0.05); }
+        .ob-bar { position: absolute; right: 0; height: 85%; opacity: 0.12; z-index: 0; pointer-events: none; }
 
-        /* Панель торговли */
-        .trade { width: 58%; padding: 8px; display: flex; flex-direction: column; gap: 6px; }
-        
-        .type-select { display: flex; gap: 10px; margin-bottom: 2px; }
-        .t-btn { background: none; border: none; color: var(--text); font-size: 11px; font-weight: bold; border-bottom: 2px solid transparent; padding-bottom: 2px; }
-        .t-btn.active { color: white; border-bottom-color: var(--green); }
+        /* Торговля */
+        .trade-panel { width: 58%; padding: 10px; display: flex; flex-direction: column; gap: 8px; }
+        .side-ctrl { display: flex; background: var(--input); border-radius: 4px; padding: 2px; }
+        .s-btn { flex: 1; border: none; padding: 8px; border-radius: 3px; font-size: 11px; font-weight: bold; color: var(--text); background: none; }
+        .s-btn.active-buy { background: var(--green); color: white; }
+        .s-btn.active-sell { background: var(--red); color: white; }
 
-        .side-select { display: flex; background: var(--input); border-radius: 4px; padding: 2px; }
-        .s-btn { flex: 1; border: none; padding: 6px; border-radius: 3px; font-size: 11px; font-weight: bold; color: var(--text); background: none; }
-        .s-btn.buy { background: var(--green); color: white; }
-        .s-btn.sell { background: var(--red); color: white; }
+        .inp-field { background: var(--input); border-radius: 4px; padding: 6px 10px; }
+        .inp-field label { display: block; font-size: 8px; color: var(--text); text-transform: uppercase; }
+        .inp-field input { background: none; border: none; color: white; width: 100%; font-size: 16px; outline: none; font-weight: bold; }
 
-        .field { background: var(--input); border-radius: 4px; padding: 4px 8px; }
-        .field label { display: block; font-size: 8px; color: var(--text); text-transform: uppercase; }
-        .field input { background: none; border: none; color: white; width: 100%; font-size: 14px; outline: none; font-weight: bold; }
+        .action-btn { background: var(--green); border: none; color: white; padding: 14px; border-radius: 4px; font-weight: bold; font-size: 14px; margin-top: auto; }
 
-        .action-btn { background: var(--green); border: none; color: white; padding: 12px; border-radius: 4px; font-weight: bold; font-size: 13px; margin-top: auto; }
-
-        nav { height: 50px; background: var(--panel); border-top: 1px solid var(--border); display: flex; justify-content: space-around; align-items: center; flex-shrink: 0; }
-        .n-link { font-size: 9px; color: var(--text); text-decoration: none; text-align: center; }
+        nav { height: 55px; background: var(--panel); border-top: 1px solid var(--border); display: flex; justify-content: space-around; align-items: center; flex-shrink: 0; }
+        .n-link { font-size: 10px; color: var(--text); text-decoration: none; text-align: center; }
     </style>
 </head>
 <body>
 
-<header>
-    <div class="logo">STRATEX <span style="color:var(--text); font-weight:400; font-size:10px;">TON/USDT</span></div>
-    <div style="color:var(--green); font-weight:bold; font-size:14px;" id="hPrice">1.3145</div>
+<header onclick="alert('Выбор токена: TON/USDT, STRAT/TON, BTC/USDT')">
+    <div class="token-info">
+        <span style="font-weight: 800; font-size: 14px;">TON/USDT</span>
+        <span style="font-size: 10px; color: var(--text);">▼</span>
+    </div>
+    <div class="price-top" id="hPrice">1.3145</div>
 </header>
 
 <div class="chart-container">
-    <div id="tv_chart_container" style="width: 100%; height: 100%;"></div>
+    <div id="tv_widget" style="width: 100%; height: 100%;"></div>
 </div>
 
-<div class="main-content">
-    <div class="ob">
+<div class="main-workspace">
+    <div class="orderbook">
         <div id="asks" style="display:flex; flex-direction:column-reverse; color:var(--red);"></div>
-        <div id="mPrice" style="text-align:center; padding:6px 0; font-weight:bold; font-size:14px; color:var(--green);">1.3145</div>
+        <div id="mPrice" style="text-align:center; padding:8px 0; font-weight:bold; font-size:15px; color:var(--green);">1.3145</div>
         <div id="bids" style="color:var(--green);"></div>
     </div>
 
-    <div class="trade">
-        <div class="type-select">
-            <button class="t-btn active">Limit</button>
-            <button class="t-btn">Market</button>
+    <div class="trade-panel">
+        <div class="side-ctrl">
+            <button class="s-btn active-buy" id="bBuy" onclick="switchSide('buy')">Buy</button>
+            <button class="s-btn" id="bSell" onclick="switchSide('sell')">Sell</button>
         </div>
-        <div class="side-select">
-            <button class="s-btn buy" id="bS">Buy</button>
-            <button class="s-btn" id="sS">Sell</button>
-        </div>
-        <div class="field">
+        <div class="inp-field">
             <label>Price</label>
-            <input type="number" value="1.3145">
+            <input type="number" id="inputPrice" step="0.0001" value="1.3145">
         </div>
-        <div class="field">
-            <label>Amount</label>
+        <div class="inp-field">
+            <label>Amount (TON)</label>
             <input type="number" placeholder="0.0">
         </div>
-        <button class="action-btn" id="mainBtn">Buy TON</button>
+        <button class="action-btn" id="execBtn">Buy TON</button>
     </div>
 </div>
 
 <nav>
-    <a href="#" class="n-link" style="color:white;">📊<br>Trade</a>
+    <a href="#" class="n-link" style="color: white;">📊<br>Market</a>
     <a href="#" class="n-link">💼<br>Wallet</a>
-    <a href="#" class="n-link">🚀<br>Presale</a>
+    <a href="#" class="n-link">💎<br>STRAT Token</a>
 </nav>
 
 <script type="text/javascript" src="https://s3.tradingview.com/tv.js"></script>
 <script>
-    // Настройки для устранения "разрывов" на малых таймфреймах
     new TradingView.widget({
         "autosize": true,
         "symbol": "BYBIT:TONUSDT",
@@ -102,40 +94,52 @@
         "theme": "dark",
         "style": "1",
         "locale": "ru",
-        "toolbar_bg": "#0b0e11",
-        "enable_publishing": false,
-        "hide_top_toolbar": false, // Оставил, чтобы ты мог менять 3м/5м вручную
+        "container_id": "tv_widget",
+        "hide_top_toolbar": false,
         "hide_legend": true,
-        "save_image": false,
-        "container_id": "tv_chart_container",
-        "disabled_features": ["header_symbol_search", "header_compare"],
-        "enabled_features": ["study_templates"]
+        "save_image": false
     });
 
-    let p = 1.3145;
+    let currentPrice = 1.3145;
+
+    function setPriceFromBook(p) {
+        document.getElementById('inputPrice').value = p.toFixed(4);
+    }
+
     function update() {
-        p += (Math.random() - 0.5) * 0.0004;
-        const r = (c) => `<div class="ob-row"><div class="ob-bar" style="width:${Math.random()*80}%; background:${c}"></div><span>${(p + (Math.random()-0.5)*0.01).toFixed(4)}</span><span style="color:var(--text)">${(Math.random()*10).toFixed(1)}</span></div>`;
+        currentPrice += (Math.random() - 0.5) * 0.0006;
+        const createRow = (type, color) => {
+            let p = currentPrice + (type === 'ask' ? Math.random()*0.02 : -Math.random()*0.02);
+            return `<div class="ob-row" onclick="setPriceFromBook(${p})">
+                <div class="ob-bar" style="width:${Math.random()*80}%; background:${color}"></div>
+                <span>${p.toFixed(4)}</span>
+                <span style="color:var(--text)">${(Math.random()*12).toFixed(1)}</span>
+            </div>`;
+        };
+
         let ah = '', bh = '';
-        for(let i=0; i<8; i++) { ah += r('var(--red)'); bh += r('var(--green)'); }
+        for(let i=0; i<8; i++) { ah += createRow('ask', 'var(--red)'); bh += createRow('bid', 'var(--green)'); }
         document.getElementById('asks').innerHTML = ah;
         document.getElementById('bids').innerHTML = bh;
-        document.getElementById('hPrice').innerText = p.toFixed(4);
-        document.getElementById('mPrice').innerText = p.toFixed(4);
+        document.getElementById('hPrice').innerText = currentPrice.toFixed(4);
+        document.getElementById('mPrice').innerText = currentPrice.toFixed(4);
     }
-    
-    document.getElementById('bS').onclick = () => { 
-        document.getElementById('bS').className = 's-btn buy'; document.getElementById('sS').className = 's-btn';
-        document.getElementById('mainBtn').style.background = 'var(--green)'; document.getElementById('mainBtn').innerText = 'Buy TON';
-    };
-    document.getElementById('sS').onclick = () => { 
-        document.getElementById('sS').className = 's-btn sell'; document.getElementById('bS').className = 's-btn';
-        document.getElementById('mainBtn').style.background = 'var(--red)'; document.getElementById('mainBtn').innerText = 'Sell TON';
-    };
+
+    function switchSide(s) {
+        const btn = document.getElementById('execBtn');
+        if(s === 'buy') {
+            document.getElementById('bBuy').className = 's-btn active-buy';
+            document.getElementById('bSell').className = 's-btn';
+            btn.style.background = 'var(--green)'; btn.innerText = 'Buy TON';
+        } else {
+            document.getElementById('bSell').className = 's-btn active-sell';
+            document.getElementById('bBuy').className = 's-btn';
+            btn.style.background = 'var(--red)'; btn.innerText = 'Sell TON';
+        }
+    }
 
     setInterval(update, 2000);
     update();
 </script>
 </body>
 </html>
-
