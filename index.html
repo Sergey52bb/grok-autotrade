@@ -3,27 +3,26 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>STRATEX Engine</title>
-    <script src="https://unpkg.com/lightweight-charts/dist/lightweight-charts.standalone.production.js"></script>
+    <title>STRATEX Terminal</title>
     <style>
         :root { --bg: #0b0e11; --panel: #171a1e; --input: #2b3139; --green: #0ecb81; --red: #f6465d; --text: #848e9c; --border: #2b2f36; }
         * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, sans-serif; }
         body { background: var(--bg); color: white; height: 100vh; display: flex; flex-direction: column; overflow: hidden; }
 
-        header { height: 50px; padding: 0 12px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border); }
+        header { height: 50px; padding: 0 12px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border); flex-shrink: 0; }
         .selector-zone { display: flex; align-items: center; gap: 8px; padding: 6px 12px; border-radius: 6px; background: var(--panel); cursor: pointer; }
-        .price-display { color: var(--green); font-weight: bold; font-family: monospace; font-size: 16px; min-width: 95px; text-align: right; }
+        .price-display { color: var(--green); font-weight: bold; font-family: monospace; font-size: 16px; min-width: 90px; text-align: right; }
 
         #coinList { position: absolute; top: 55px; left: 10px; right: 10px; background: var(--panel); z-index: 2000; display: none; border-radius: 8px; border: 1px solid var(--border); }
         .coin-item { padding: 15px; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; }
         
-        #chart_container { height: 260px; width: 100%; border-bottom: 1px solid var(--border); background: #000; position: relative; }
-        #tv_frame { width: 100%; height: 100%; border: none; }
-        #strat_chart { width: 100%; height: 100%; display: none; }
+        #chart_area { height: 260px; width: 100%; border-bottom: 1px solid var(--border); background: #000; position: relative; }
+        #strat_canvas { width: 100%; height: 100%; display: block; }
+        #tv_container { width: 100%; height: 100%; display: none; }
 
         .workspace { display: flex; flex: 1; overflow: hidden; }
         .book { width: 40%; border-right: 1px solid var(--border); display: flex; flex-direction: column; padding: 4px; font-family: monospace; font-size: 10px; }
-        .row { display: flex; justify-content: space-between; height: 18px; position: relative; align-items: center; }
+        .row { display: flex; justify-content: space-between; height: 18px; position: relative; }
         .bar { position: absolute; right: 0; height: 80%; opacity: 0.15; }
 
         .trade { width: 60%; padding: 10px; display: flex; flex-direction: column; gap: 8px; }
@@ -45,8 +44,8 @@
 <header>
     <div style="color:var(--green); font-weight:900;">STRATEX</div>
     <div class="selector-zone" onclick="toggleCoins()">
-        <span id="activePair" style="font-weight:bold; font-size:13px;">STRAT/USDT</span>
-        <span style="font-size:10px; color:var(--text);">▼</span>
+        <span id="activePair" style="font-weight: bold; font-size: 13px;">STRAT/USDT</span>
+        <span style="font-size: 10px; color: var(--text);">▼</span>
     </div>
     <div class="price-display" id="topPrice">17.3800</div>
 </header>
@@ -57,15 +56,15 @@
     <div class="coin-item" onclick="pick('ASTER')"><b>ASTER</b> <span id="p-ASTER" style="color:var(--green)">...</span></div>
 </div>
 
-<div id="chart_container">
-    <div id="strat_chart"></div>
-    <div id="tv_frame"></div>
+<div id="chart_area">
+    <canvas id="strat_canvas"></canvas>
+    <div id="tv_container"></div>
 </div>
 
 <div class="workspace">
     <div class="book">
         <div id="asks" style="display:flex; flex-direction:column-reverse; color:var(--red);"></div>
-        <div id="midPrice" style="text-align:center; padding:8px 0; font-weight:bold; font-size:15px; color:var(--green);">17.3800</div>
+        <div id="midPrice" style="text-align:center; padding:8px 0; font-weight:bold; font-size:15px; color:var(--green);">0.0000</div>
         <div id="bids" style="color:var(--green);"></div>
     </div>
     <div class="trade">
@@ -73,7 +72,7 @@
             <button class="s-btn buy" id="bBuy" onclick="side('buy')">Buy</button>
             <button class="s-btn" id="bSell" onclick="side('sell')">Sell</button>
         </div>
-        <div class="inp"><label>Price (USDT)</label><input type="number" id="iPrice" step="any"></div>
+        <div class="inp"><label>Price</label><input type="number" id="iPrice" step="any"></div>
         <div class="inp"><label>Amount</label><input type="number" placeholder="0.0"></div>
         <button class="action-btn" id="mainBtn">Buy STRAT</button>
     </div>
@@ -89,86 +88,98 @@
 <script>
     let current = 'STRAT';
     let stratPrice = 17.3800;
-    let tonPrice = 0, asterPrice = 0;
-    let chart, candleSeries;
+    let history = [];
+    const canvas = document.getElementById('strat_canvas');
+    const ctx = canvas.getContext('2d');
 
-    // 1. Инициализация нашего графика для STRAT
-    function initStratChart() {
-        const chartElement = document.getElementById('strat_chart');
-        chart = LightweightCharts.createChart(chartElement, {
-            layout: { backgroundColor: '#000', textColor: '#848e9c' },
-            grid: { vertLines: { color: '#171a1e' }, horzLines: { color: '#171a1e' } },
-            timeScale: { timeVisible: true, secondsVisible: false }
-        });
-        candleSeries = chart.addCandlestickSeries({
-            upColor: '#0ecb81', downColor: '#f6465d', borderVisible: false, wickUpColor: '#0ecb81', wickDownColor: '#f6465d'
-        });
-
-        // Генерируем историю (фейковые свечи)
-        let data = [];
-        let time = Math.floor(Date.now() / 1000) - 50 * 60;
-        for(let i=0; i<50; i++) {
-            let open = 17.30 + Math.random() * 0.15;
-            data.push({ time: time + i*60, open: open, high: open+0.05, low: open-0.05, close: open + (Math.random()-0.5)*0.1 });
-        }
-        candleSeries.setData(data);
+    // Генерация начальных данных для STRAT
+    for(let i=0; i<40; i++) {
+        let base = 17.35 + Math.random() * 0.1;
+        history.push({ o: base, h: base+0.05, l: base-0.05, c: base + (Math.random()-0.5)*0.1 });
     }
 
-    // Живое обновление цены STRAT
-    function tickStrat() {
+    function drawStratChart() {
         if (current !== 'STRAT') return;
-        let change = (Math.random() - 0.5) * 0.02; 
-        stratPrice += change;
-        updateUI(stratPrice);
+        canvas.width = canvas.offsetWidth;
+        canvas.height = canvas.offsetHeight;
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
         
-        // Обновляем свечу на графике
-        const lastTime = Math.floor(Date.now() / 1000);
-        candleSeries.update({
-            time: lastTime - (lastTime % 60),
-            open: stratPrice, high: stratPrice + 0.01, low: stratPrice - 0.01, close: stratPrice
+        const w = canvas.width / history.length;
+        history.forEach((cand, i) => {
+            const x = i * w;
+            const h_ratio = 100; // Масштаб
+            const offset = 17.0 * h_ratio;
+            
+            ctx.strokeStyle = '#2b2f36';
+            ctx.beginPath(); ctx.moveTo(x + w/2, 0); ctx.lineTo(x + w/2, canvas.height); ctx.stroke(); // Сетка
+
+            const color = cand.c >= cand.o ? '#0ecb81' : '#f6465d';
+            ctx.fillStyle = color;
+            ctx.strokeStyle = color;
+
+            // Фитиль
+            ctx.beginPath();
+            ctx.moveTo(x + w/2, canvas.height - (cand.h * h_ratio - offset));
+            ctx.lineTo(x + w/2, canvas.height - (cand.l * h_ratio - offset));
+            ctx.stroke();
+
+            // Тело свечи
+            const top = canvas.height - (Math.max(cand.o, cand.c) * h_ratio - offset);
+            const bottom = canvas.height - (Math.min(cand.o, cand.c) * h_ratio - offset);
+            ctx.fillRect(x + 2, top, w - 4, Math.max(bottom - top, 1));
         });
     }
 
-    // 2. Логика переключения
+    function updateStrat() {
+        if (current !== 'STRAT') return;
+        let last = history[history.length-1];
+        stratPrice += (Math.random() - 0.5) * 0.01;
+        last.c = stratPrice;
+        if (stratPrice > last.h) last.h = stratPrice;
+        if (stratPrice < last.l) last.l = stratPrice;
+        
+        updateUI(stratPrice);
+        drawStratChart();
+    }
+
     function pick(id) {
         current = id;
         document.getElementById('activePair').innerText = id + '/USDT';
         document.getElementById('coinList').style.display = 'none';
         
         if (id === 'STRAT') {
-            document.getElementById('tv_frame').style.display = 'none';
-            document.getElementById('strat_chart').style.display = 'block';
+            document.getElementById('tv_container').style.display = 'none';
+            document.getElementById('strat_canvas').style.display = 'block';
             updateUI(stratPrice);
+            drawStratChart();
         } else {
-            document.getElementById('strat_chart').style.display = 'none';
-            document.getElementById('tv_frame').style.display = 'block';
+            document.getElementById('strat_canvas').style.display = 'none';
+            document.getElementById('tv_container').style.display = 'block';
             loadTV(id === 'TON' ? 'BINANCE:TONUSDT' : 'BINANCE:ASTRUSDT');
         }
         updateBtn();
     }
 
     function loadTV(symbol) {
-        document.getElementById('tv_frame').innerHTML = '';
+        document.getElementById('tv_container').innerHTML = '';
         new TradingView.widget({
             "autosize": true, "symbol": symbol, "interval": "15", "theme": "dark",
-            "container_id": "tv_frame", "hide_top_toolbar": true, "hide_legend": true
+            "container_id": "tv_container", "hide_top_toolbar": true, "hide_legend": true
         });
     }
 
-    // WebSocket для TON и ASTER
+    // WebSocket для цен TON/ASTER
     const ws = new WebSocket('wss://stream.binance.com:9443/ws/!ticker@arr');
     ws.onmessage = (e) => {
         const data = JSON.parse(e.data);
         data.forEach(t => {
             if (t.s === 'TONUSDT') {
-                tonPrice = parseFloat(t.c);
-                document.getElementById('p-TON').innerText = tonPrice.toFixed(4);
-                if(current === 'TON') updateUI(tonPrice);
+                document.getElementById('p-TON').innerText = parseFloat(t.c).toFixed(4);
+                if(current === 'TON') updateUI(t.c);
             }
             if (t.s === 'ASTRUSDT') {
-                asterPrice = parseFloat(t.c);
-                document.getElementById('p-ASTER').innerText = asterPrice.toFixed(4);
-                if(current === 'ASTER') updateUI(asterPrice);
+                document.getElementById('p-ASTER').innerText = parseFloat(t.c).toFixed(4);
+                if(current === 'ASTER') updateUI(t.c);
             }
         });
     };
@@ -178,7 +189,7 @@
         document.getElementById('topPrice').innerText = p;
         document.getElementById('midPrice').innerText = p;
         document.getElementById('iPrice').value = p;
-
+        
         const row = (clr) => `<div class="row"><div class="bar" style="width:${Math.random()*60}%; background:${clr}"></div><span>${(price * (1 + (Math.random()-0.5)*0.002)).toFixed(4)}</span><span>${(Math.random()*5).toFixed(1)}</span></div>`;
         let ah = '', bh = '';
         for(let i=0; i<6; i++) { ah += row('var(--red)'); bh += row('var(--green)'); }
@@ -203,10 +214,11 @@
         document.getElementById('mainBtn').innerText = (isBuy ? 'Buy ' : 'Sell ') + current;
     }
 
-    // Старт
-    initStratChart();
-    pick('STRAT');
-    setInterval(tickStrat, 2000); // Цена STRAT дергается каждые 2 сек
+    // Запуск
+    window.onload = () => {
+        pick('STRAT');
+        setInterval(updateStrat, 2000);
+    };
 </script>
 </body>
 </html>
