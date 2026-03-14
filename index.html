@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>STRATEX FIX</title>
+    <title>STRATEX Final Fix</title>
     <style>
         :root { --bg: #0b0e11; --panel: #171a1e; --input: #2b3139; --green: #0ecb81; --red: #f6465d; --text: #848e9c; --border: #2b2f36; }
         * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, sans-serif; }
@@ -12,12 +12,12 @@
         header { height: 50px; padding: 0 12px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border); flex-shrink: 0; }
         .brand-name { color: var(--green); font-weight: 900; font-size: 18px; }
         
-        .selector-zone { display: flex; align-items: center; gap: 8px; padding: 6px 12px; border-radius: 6px; background: var(--panel); cursor: pointer; border: 1px solid transparent; }
+        .selector-zone { display: flex; align-items: center; gap: 8px; padding: 6px 12px; border-radius: 6px; background: var(--panel); cursor: pointer; }
         .price-display { color: var(--green); font-weight: bold; font-family: monospace; font-size: 16px; min-width: 90px; text-align: right; }
 
-        #coinList { position: absolute; top: 55px; left: 10px; right: 10px; background: var(--panel); z-index: 2000; display: none; border-radius: 8px; border: 1px solid var(--border); }
+        #coinList { position: absolute; top: 55px; left: 10px; right: 10px; background: var(--panel); z-index: 2000; display: none; border-radius: 8px; border: 1px solid var(--border); box-shadow: 0 5px 20px rgba(0,0,0,0.5); }
         .coin-item { padding: 15px; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; }
-        .icon-svg { width: 24px; height: 24px; margin-right: 10px; }
+        .icon-svg { width: 22px; height: 22px; margin-right: 10px; display: flex; align-items: center; }
         
         #tv_wrapper { height: 260px; width: 100%; border-bottom: 1px solid var(--border); background: #000; }
 
@@ -45,7 +45,7 @@
 <header>
     <div class="brand-name">STRATEX</div>
     <div class="selector-zone" onclick="toggleCoins()">
-        <span id="activeIconWrap" style="display:flex;"></span>
+        <span id="activeIconWrap" style="display:flex; align-items:center; width:20px;"></span>
         <span id="activePair" style="font-weight: bold; font-size: 13px; margin: 0 5px;">STRAT/USDT</span>
         <span style="font-size: 10px; color: var(--text);">▼</span>
     </div>
@@ -95,26 +95,28 @@
 <script type="text/javascript" src="https://s3.tradingview.com/tv.js"></script>
 <script>
     const svgs = {
-        STRAT: `<svg viewBox="0 0 24 24" fill="#0ecb81"><path d="M12 2L4.5 20.29L5.21 21L12 18L18.79 21L19.5 20.29L12 2Z"/></svg>`,
-        TON: `<svg viewBox="0 0 24 24" fill="#0088cc"><path d="M12 24C18.6274 24 24 18.6274 24 12C24 5.37258 18.6274 0 12 0C5.37258 0 0 5.37258 0 12C0 18.6274 5.37258 24 12 24ZM15.7 7.3L17.1 8.7L10.4 15.4L6.9 11.9L8.3 10.5L10.4 12.6L15.7 7.3Z"/></svg>`,
-        ASTER: `<svg viewBox="0 0 24 24" fill="#ff0080"><circle cx="12" cy="12" r="10"/></svg>`
+        STRAT: `<svg viewBox="0 0 24 24" width="20" height="20"><path d="M12 2L4.5 20.29L5.21 21L12 18L18.79 21L19.5 20.29L12 2Z" fill="#0ecb81"/></svg>`,
+        TON: `<svg viewBox="0 0 24 24" width="20" height="20"><circle cx="12" cy="12" r="12" fill="#0088cc"/><path d="M5.5 8.5L12 18L18.5 8.5H5.5Z" fill="white"/></svg>`,
+        ASTER: `<svg viewBox="0 0 24 24" width="20" height="20"><circle cx="12" cy="12" r="11" fill="#ff0080"/><path d="M7 7L17 17M17 7L7 17" stroke="white" stroke-width="2"/></svg>`
     };
 
     const coins = {
-        STRAT: { s: 'TONUSDT', p: 17.3800, live: false },
-        TON: { s: 'TONUSDT', p: 0, live: true },
-        ASTER: { s: 'ASTRUSDT', p: 0, live: true }
+        // Чтобы графики не слипались, используем разных провайдеров (OKX и BINANCE)
+        STRAT: { s: 'OKX:TONUSDT', p: 17.3800, live: false },
+        TON: { s: 'BINANCE:TONUSDT', p: 0, live: true },
+        ASTER: { s: 'BINANCE:ASTRUSDT', p: 0, live: true }
     };
 
     let current = 'STRAT';
-    let chartIdCounter = 0;
-
     const ws = new WebSocket('wss://stream.binance.com:9443/ws/!ticker@arr');
+
     ws.onmessage = (e) => {
         const data = JSON.parse(e.data);
         data.forEach(t => {
             for (let key in coins) {
-                if (coins[key].s === t.s && coins[key].live) {
+                // Мапим стрим бинанса на наши объекты
+                let sym = coins[key].s.split(':')[1];
+                if (sym === t.s && coins[key].live) {
                     coins[key].p = parseFloat(t.c);
                     let el = document.getElementById('p-' + key);
                     if (el) el.innerText = coins[key].p.toFixed(4);
@@ -135,28 +137,21 @@
     }
 
     function loadChart(symbol) {
-        chartIdCounter++;
-        const newId = 'chart_' + chartIdCounter;
         const wrapper = document.getElementById('tv_wrapper');
-        wrapper.innerHTML = `<div id="${newId}" style="height:100%;"></div>`;
+        wrapper.innerHTML = `<div id="tv_container" style="height:100%;"></div>`;
         
         setTimeout(() => {
             new TradingView.widget({
                 "autosize": true,
-                "symbol": "BINANCE:" + symbol,
+                "symbol": symbol, // Теперь тут будет либо OKX:TON..., либо BINANCE:TON...
                 "interval": "15",
                 "theme": "dark",
-                "container_id": newId,
+                "container_id": "tv_container",
                 "hide_top_toolbar": true,
                 "hide_legend": true,
-                "locale": "ru",
-                "custom_css_url": "data:text/css;base64,LndpZGdldC1jb250YWluZXIgeyBiYWNrZ3JvdW5kOiBibGFjayBhaSAhaW1wb3J0YW50OyB9",
-                "overrides": {
-                    "mainSeriesProperties.showCountdown": true,
-                    "paneProperties.background": "#0b0e11"
-                }
+                "locale": "ru"
             });
-        }, 50);
+        }, 100);
     }
 
     function updateUI() {
@@ -189,13 +184,13 @@
         document.getElementById('mainBtn').innerText = (isBuy ? 'Buy ' : 'Sell ') + current;
     }
 
-    // Инициализация SVG и старт
+    // Инициализация
     document.getElementById('svg_STRAT').innerHTML = svgs.STRAT;
     document.getElementById('svg_TON').innerHTML = svgs.TON;
     document.getElementById('svg_ASTER').innerHTML = svgs.ASTER;
     document.getElementById('activeIconWrap').innerHTML = svgs.STRAT;
     
-    window.onload = () => loadChart('TONUSDT');
+    window.onload = () => loadChart('OKX:TONUSDT');
     setInterval(updateUI, 2000);
 </script>
 </body>
