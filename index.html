@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>STRATEX Pro Terminal</title>
+    <title>STRATEX Final Precision</title>
     <style>
         :root { --bg: #0b0e11; --panel: #171a1e; --input: #2b3139; --green: #0ecb81; --red: #f6465d; --text: #848e9c; --border: #2b2f36; }
         * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, system-ui, sans-serif; }
@@ -16,32 +16,31 @@
         #coinList { position: absolute; top: 55px; left: 10px; right: 10px; background: var(--panel); z-index: 3000; display: none; border-radius: 8px; border: 1px solid var(--border); }
         .coin-item { padding: 15px; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; }
 
-        /* График */
+        /* ГРАФИК */
         #chart_wrap { height: 300px; width: 100%; position: relative; background: #000; border-bottom: 1px solid var(--border); }
         #tv_container { width: 100%; height: 100%; }
         
-        /* ЖИВАЯ МАСКА ШКАЛЫ */
+        /* ПРОЗРАЧНАЯ МАСКА ШКАЛЫ */
         .price-mask { 
             position: absolute; right: 0; top: 0; bottom: 0; width: 55px; 
-            background: #0b0e11; z-index: 100; display: none; flex-direction: column; 
-            pointer-events: none; border-left: 1px solid var(--border);
-            overflow: hidden;
+            z-index: 100; display: none; pointer-events: none;
+            overflow: hidden; background: rgba(11, 14, 17, 0.9); /* Полупрозрачный фон для читаемости */
         }
         .mask-grid {
-            position: absolute; width: 100%; display: flex; flex-direction: column;
-            transition: top 0.3s ease-out;
+            position: absolute; width: 100%; top: 0; display: flex; flex-direction: column;
         }
         .mask-tick { 
-            height: 30px; color: #848e9c; font-size: 10px; display: flex; 
+            height: 34px; color: #848e9c; font-size: 10px; display: flex; 
             align-items: center; justify-content: center; width: 100%;
-            border-top: 1px solid rgba(43, 47, 54, 0.3); /* Имитация сетки */
+            border-bottom: 1px solid rgba(132, 142, 156, 0.05); /* Едва заметная сетка */
         }
         
+        /* ПЛАШКА ЦЕНЫ С ХВОСТИКОМ */
         .price-label {
-            position: absolute; right: 0; width: 55px; background: var(--green);
+            position: absolute; right: 0; width: 56px; background: var(--green);
             color: #000; font-weight: bold; font-size: 11px; height: 18px;
             display: flex; align-items: center; justify-content: center;
-            z-index: 110; pointer-events: none; top: 50%; transform: translateY(-50%);
+            z-index: 110; pointer-events: none; top: 50%;
         }
         .price-label::before {
             content: ''; position: absolute; left: -6px; border-top: 9px solid transparent;
@@ -69,8 +68,8 @@
 </head>
 <body>
 
-<header>
-    <div class="selector" onclick="toggleList()">
+<header onclick="toggleList()">
+    <div class="selector">
         <b id="activePair">STRAT/USDT</b> <span style="font-size: 10px; color: var(--text);">▼</span>
     </div>
     <div class="price-top" id="topPrice">17.3800</div>
@@ -120,7 +119,7 @@
         new TradingView.widget({
             "autosize": true, "symbol": symbol, "interval": "15", "theme": "dark",
             "container_id": "tv_container", "hide_top_toolbar": true, "hide_legend": true,
-            "style": "1", "locale": "ru", "toolbar_bg": "#0b0e11"
+            "style": "1", "locale": "ru"
         });
     }
 
@@ -132,7 +131,7 @@
                 prices.TON = parseFloat(t.c);
                 document.getElementById('p-TON').innerText = prices.TON.toFixed(4);
             }
-            if (t.s === 'ASTRUSDT') {
+            if (t.s === 'ASTRUSDT' && current === 'ASTER') {
                 prices.ASTER = 0.7000 + (parseFloat(t.c) % 0.01);
                 document.getElementById('p-ASTER').innerText = prices.ASTER.toFixed(4);
             }
@@ -141,7 +140,7 @@
     };
 
     function updateUI() {
-        if (current === 'STRAT') prices.STRAT = 17.3800 + (Math.sin(Date.now()/2000)*0.01);
+        if (current === 'STRAT') prices.STRAT = 17.3800 + (Math.sin(Date.now()/2500)*0.008);
         
         let p = prices[current];
         if(!p) return;
@@ -159,16 +158,16 @@
             label.style.display = 'flex';
             label.innerText = p.toFixed(current === 'ASTER' ? 3 : 2);
             
-            // Динамическая шкала: цифры плывут за ценой
+            // Смещение плашки по вертикали
+            let offset = (Math.sin(Date.now()/2500) * 10);
+            label.style.transform = `translateY(calc(-50% + ${offset}px))`;
+
             let html = '';
-            let startP = p * 1.01;
-            for(let i=0; i<15; i++) {
-                let tickVal = (startP - (i * p * 0.002)).toFixed(current === 'ASTER' ? 3 : 2);
-                html += `<div class="mask-tick">${tickVal}</div>`;
+            for(let i=0; i<12; i++) {
+                let val = (p * (1.008 - i*0.0015)).toFixed(current === 'ASTER' ? 3 : 2);
+                html += `<div class="mask-tick">${val}</div>`;
             }
             grid.innerHTML = html;
-            // Небольшое смещение для эффекта плавности
-            grid.style.top = (Math.sin(Date.now()/1000) * 5 - 50) + 'px';
         } else {
             mask.style.display = 'none';
             label.style.display = 'none';
@@ -190,7 +189,7 @@
         current = id;
         document.getElementById('activePair').innerText = id + '/USDT';
         document.getElementById('coinList').style.display = 'none';
-        loadChart('BINANCE:TONUSDT'); // Всегда стабильный график
+        loadChart('BINANCE:TONUSDT');
         document.getElementById('actionBtn').innerText = (document.getElementById('bBuy').classList.contains('active') ? 'BUY ' : 'SELL ') + id;
     }
 
