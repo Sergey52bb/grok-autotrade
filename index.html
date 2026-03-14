@@ -3,54 +3,62 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>STRATEX Pro Final Fix</title>
+    <title>STRATEX Elite Terminal</title>
     <style>
         :root { --bg: #0b0e11; --panel: #171a1e; --input: #2b3139; --green: #0ecb81; --red: #f6465d; --text: #848e9c; --border: #2b2f36; }
-        * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, sans-serif; }
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, system-ui, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
         body { background: var(--bg); color: white; height: 100vh; display: flex; flex-direction: column; overflow: hidden; }
 
-        header { height: 50px; padding: 0 12px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border); z-index: 100; }
-        .selector { display: flex; align-items: center; gap: 8px; padding: 6px 12px; border-radius: 6px; background: var(--panel); cursor: pointer; }
-        .price-top { color: var(--green); font-weight: bold; font-family: monospace; font-size: 16px; }
+        header { height: 50px; padding: 0 12px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border); position: relative; z-index: 1000; }
+        .selector { display: flex; align-items: center; gap: 8px; padding: 6px 12px; border-radius: 6px; background: var(--panel); cursor: pointer; border: 1px solid transparent; }
+        .selector:active { border-color: var(--green); }
+        .price-top { color: var(--green); font-weight: bold; font-family: 'Roboto Mono', monospace; font-size: 17px; }
 
-        #coinList { position: absolute; top: 55px; left: 10px; right: 10px; background: var(--panel); z-index: 2000; display: none; border-radius: 8px; border: 1px solid var(--border); box-shadow: 0 10px 40px #000; }
+        #coinList { position: absolute; top: 55px; left: 10px; right: 10px; background: var(--panel); z-index: 3000; display: none; border-radius: 8px; border: 1px solid var(--border); box-shadow: 0 10px 50px rgba(0,0,0,0.8); }
         .coin-item { padding: 15px; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; }
 
-        /* Контейнер графика */
-        #chart_wrap { height: 280px; width: 100%; position: relative; background: #000; overflow: hidden; border-bottom: 1px solid var(--border); }
+        /* График */
+        #chart_wrap { height: 300px; width: 100%; position: relative; background: #000; border-bottom: 1px solid var(--border); }
         #tv_container { width: 100%; height: 100%; }
         
-        /* УЛУЧШЕННАЯ МАСКА ЦЕНЫ */
+        /* ПРОФЕССИОНАЛЬНАЯ МАСКА ШКАЛЫ */
         .price-mask { 
-            position: absolute; right: 0; top: 0; bottom: 0; width: 52px; 
-            background: #0b0e11; z-index: 50; display: none; flex-direction: column; 
-            font-family: monospace; font-size: 10px; color: var(--text);
+            position: absolute; right: 0; top: 0; bottom: 0; width: 55px; 
+            background: #0b0e11; z-index: 100; display: none; flex-direction: column; 
+            justify-content: space-between; padding: 20px 0;
             pointer-events: none; border-left: 1px solid var(--border);
         }
-        .mask-item { height: 20px; display: flex; align-items: center; justify-content: center; width: 100%; opacity: 0.6; }
-        .active-label { 
-            position: absolute; right: 0; width: 100%; background: var(--green); 
-            color: black; font-weight: bold; height: 18px; display: flex; 
-            align-items: center; justify-content: center; z-index: 60;
-            border-radius: 2px 0 0 2px;
+        .mask-tick { color: #848e9c; font-size: 10px; font-family: Arial, sans-serif; width: 100%; text-align: center; }
+        
+        /* ПЛАШКА ЦЕНЫ (Один в один как на Скрине 1) */
+        .price-label {
+            position: absolute; right: 0; width: 55px; background: var(--green);
+            color: #000; font-weight: bold; font-size: 11px; height: 18px;
+            display: flex; align-items: center; justify-content: center;
+            z-index: 110; pointer-events: none;
+        }
+        .price-label::before {
+            content: ''; position: absolute; left: -6px; border-top: 9px solid transparent;
+            border-bottom: 9px solid transparent; border-right: 6px solid var(--green);
         }
 
+        /* Основной контент */
         .main-content { display: flex; flex: 1; overflow: hidden; }
-        .book { width: 42%; border-right: 1px solid var(--border); display: flex; flex-direction: column; padding: 5px; font-family: monospace; font-size: 11px; }
-        .ob-row { display: flex; justify-content: space-between; height: 18px; position: relative; align-items: center; }
-        .ob-bar { position: absolute; right: 0; height: 90%; opacity: 0.15; }
+        .book { width: 42%; border-right: 1px solid var(--border); display: flex; flex-direction: column; padding: 4px; font-family: 'Roboto Mono', monospace; font-size: 11px; }
+        .ob-row { display: flex; justify-content: space-between; height: 17px; position: relative; align-items: center; margin-bottom: 1px; }
+        .ob-bar { position: absolute; right: 0; height: 100%; opacity: 0.12; }
 
-        .trade { width: 58%; padding: 12px; display: flex; flex-direction: column; gap: 8px; }
-        .side-btns { display: flex; background: var(--input); border-radius: 6px; padding: 2px; }
-        .side-btn { flex: 1; border: none; padding: 10px; border-radius: 4px; font-size: 12px; font-weight: bold; color: var(--text); background: none; }
-        .side-btn.active.buy { background: var(--green); color: white; }
+        .trade { width: 58%; padding: 10px; display: flex; flex-direction: column; gap: 8px; }
+        .side-btns { display: flex; background: var(--input); border-radius: 4px; padding: 2px; }
+        .side-btn { flex: 1; border: none; padding: 10px; border-radius: 3px; font-size: 12px; font-weight: 800; color: var(--text); background: none; }
+        .side-btn.active.buy { background: var(--green); color: black; }
         .side-btn.active.sell { background: var(--red); color: white; }
 
-        .inp-group { background: var(--input); border-radius: 6px; padding: 6px 10px; }
-        .inp-group label { display: block; font-size: 8px; color: var(--text); }
-        .inp-group input { background: none; border: none; color: white; width: 100%; font-size: 16px; outline: none; font-weight: bold; }
+        .fld { background: var(--input); border-radius: 4px; padding: 6px 10px; border: 1px solid transparent; }
+        .fld label { display: block; font-size: 9px; color: var(--text); margin-bottom: 2px; }
+        .fld input { background: none; border: none; color: white; width: 100%; font-size: 16px; outline: none; font-weight: bold; }
 
-        .btn-action { background: var(--green); border: none; color: white; padding: 16px; border-radius: 8px; font-weight: bold; margin-top: auto; }
+        .buy-btn { background: var(--green); border: none; color: black; padding: 16px; border-radius: 6px; font-weight: 900; font-size: 15px; margin-top: auto; }
         nav { height: 55px; background: var(--panel); border-top: 1px solid var(--border); display: flex; justify-content: space-around; align-items: center; }
     </style>
 </head>
@@ -71,25 +79,24 @@
 
 <div id="chart_wrap">
     <div id="tv_container"></div>
-    <div class="price-mask" id="priceMask">
-        <div class="active-label" id="activeLabel">17.38</div>
-    </div>
+    <div class="price-mask" id="priceMask"></div>
+    <div class="price-label" id="priceLabel" style="display:none;">17.38</div>
 </div>
 
 <div class="main-content">
     <div class="book">
         <div id="asks" style="display:flex; flex-direction:column-reverse; color:var(--red);"></div>
-        <div id="midPrice" style="text-align:center; padding:10px 0; font-weight:bold; font-size:16px; color:var(--green); border-top:1px solid #222; border-bottom:1px solid #222; margin:4px 0;">0.0000</div>
+        <div id="midPrice" style="text-align:center; padding:8px 0; font-weight:bold; font-size:16px; color:var(--green); border-top:1px solid #222; border-bottom:1px solid #222; margin:4px 0;">0.0000</div>
         <div id="bids" style="color:var(--green);"></div>
     </div>
     <div class="trade">
         <div class="side-btns">
-            <button class="side-btn active buy" id="btnBuy" onclick="setSide('buy')">Buy</button>
-            <button class="side-btn" id="btnSell" onclick="setSide('sell')">Sell</button>
+            <button class="side-btn active buy" id="bBuy" onclick="setSide('buy')">BUY</button>
+            <button class="side-btn" id="bSell" onclick="setSide('sell')">SELL</button>
         </div>
-        <div class="inp-group"><label>Price (USDT)</label><input type="number" id="inputPrice" step="any"></div>
-        <div class="inp-group"><label>Amount</label><input type="number" placeholder="0.0"></div>
-        <button class="btn-action" id="actionBtn">Buy STRAT</button>
+        <div class="fld"><label>Price (USDT)</label><input type="number" id="iPrice" step="any"></div>
+        <div class="fld"><label>Amount</label><input type="number" placeholder="0.0"></div>
+        <button class="buy-btn" id="actionBtn">BUY STRAT</button>
     </div>
 </div>
 
@@ -101,14 +108,14 @@
 <script type="text/javascript" src="https://s3.tradingview.com/tv.js"></script>
 <script>
     let current = 'STRAT';
-    let livePrices = { STRAT: 17.3800, TON: 0, ASTER: 0.7000 };
+    let prices = { STRAT: 17.3800, TON: 0, ASTER: 0.7000 };
 
     function loadChart(symbol) {
         document.getElementById('tv_container').innerHTML = '';
         new TradingView.widget({
             "autosize": true, "symbol": symbol, "interval": "15", "theme": "dark",
             "container_id": "tv_container", "hide_top_toolbar": true, "hide_legend": true,
-            "library_path": "https://s3.tradingview.com/tv.js"
+            "style": "1", "save_image": false, "locale": "ru"
         });
     }
 
@@ -117,52 +124,53 @@
         const data = JSON.parse(e.data);
         data.forEach(t => {
             if (t.s === 'TONUSDT') {
-                livePrices.TON = parseFloat(t.c);
-                document.getElementById('p-TON').innerText = livePrices.TON.toFixed(4);
+                prices.TON = parseFloat(t.c);
+                document.getElementById('p-TON').innerText = prices.TON.toFixed(4);
             }
-            if (t.s === 'ASTRUSDT' && current === 'ASTER') {
-                // Плавная привязка к 0.70
-                livePrices.ASTER = 0.7000 + (parseFloat(t.c) % 0.01);
-                document.getElementById('p-ASTER').innerText = livePrices.ASTER.toFixed(4);
+            if (t.s === 'ASTRUSDT') {
+                prices.ASTER = 0.7000 + (parseFloat(t.c) % 0.01);
+                document.getElementById('p-ASTER').innerText = prices.ASTER.toFixed(4);
             }
         });
         updateUI();
     };
 
     function updateUI() {
-        if (current === 'STRAT') livePrices.STRAT = 17.3800 + (Math.random() - 0.5) * 0.012;
+        if (current === 'STRAT') prices.STRAT = 17.3800 + (Math.random() - 0.5) * 0.012;
         
-        let p = livePrices[current];
+        let p = prices[current];
         if(!p) return;
 
         let f = p.toFixed(4);
         document.getElementById('topPrice').innerText = f;
         document.getElementById('midPrice').innerText = f;
-        document.getElementById('inputPrice').value = f;
+        document.getElementById('iPrice').value = f;
 
-        // ОБНОВЛЕНИЕ МАСКИ И ПОДСВЕТКИ ЦЕНЫ
         const mask = document.getElementById('priceMask');
+        const label = document.getElementById('priceLabel');
+
         if(current !== 'TON') {
             mask.style.display = 'flex';
-            const label = document.getElementById('activeLabel');
+            label.style.display = 'flex';
             label.innerText = p.toFixed(current === 'ASTER' ? 3 : 2);
-            // Имитируем движение плашки в центре шкалы
-            label.style.top = (50 + (Math.random()*2 - 1)) + '%'; 
+            // Плавная анимация плашки (болтается в центре)
+            label.style.top = (145 + Math.sin(Date.now()/500)*2) + 'px';
             
             let ticks = '';
-            for(let i=0; i<15; i++) {
-                ticks += `<div class="mask-item">${(p * (1.008 - i*0.0012)).toFixed(current === 'ASTER' ? 3 : 2)}</div>`;
+            for(let i=0; i<10; i++) {
+                ticks += `<div class="mask-tick">${(p * (1.01 - i*0.0022)).toFixed(current === 'ASTER' ? 3 : 2)}</div>`;
             }
-            mask.innerHTML = ticks + `<div class="active-label" id="activeLabel" style="top:45%">${p.toFixed(current === 'ASTER' ? 3 : 2)}</div>`;
+            mask.innerHTML = ticks;
         } else {
             mask.style.display = 'none';
+            label.style.display = 'none';
         }
 
         const getRows = (clr) => {
             let h = '';
-            for(let i=0; i<7; i++) {
-                let rP = (p * (1 + (Math.random()-0.5)*0.004)).toFixed(4);
-                h += `<div class="ob-row"><div class="ob-bar" style="width:${Math.random()*75}%; background:${clr}"></div><span>${rP}</span><span>${(Math.random()*12).toFixed(1)}</span></div>`;
+            for(let i=0; i<8; i++) {
+                let rP = (p * (1 + (Math.random()-0.5)*0.005)).toFixed(4);
+                h += `<div class="ob-row"><div class="ob-bar" style="width:${Math.random()*70}%; background:${clr}"></div><span>${rP}</span><span>${(Math.random()*20).toFixed(1)}</span></div>`;
             }
             return h;
         };
@@ -174,20 +182,17 @@
         current = id;
         document.getElementById('activePair').innerText = id + '/USDT';
         document.getElementById('coinList').style.display = 'none';
-        
-        // СЕКРЕТ ПЛАВНОГО ГРАФИКА: 
-        // Мы всегда используем стабильный TONUSDT для STRAT и ASTER, 
-        // чтобы свечи были красивыми, а маска заменит цифры.
-        loadChart(id === 'TON' ? 'BINANCE:TONUSDT' : 'BINANCE:TONUSDT');
-        
-        document.getElementById('actionBtn').innerText = (document.getElementById('btnBuy').classList.contains('active') ? 'Buy ' : 'Sell ') + id;
+        // Используем ТОН как базу для всех, чтобы график был стабильным
+        loadChart('BINANCE:TONUSDT');
+        document.getElementById('actionBtn').innerText = (document.getElementById('bBuy').classList.contains('active') ? 'BUY ' : 'SELL ') + id;
     }
 
     function setSide(s) {
-        document.getElementById('btnBuy').className = 'side-btn' + (s==='buy' ? ' active buy' : '');
-        document.getElementById('btnSell').className = 'side-btn' + (s==='sell' ? ' active sell' : '');
+        document.getElementById('bBuy').className = 'side-btn' + (s==='buy' ? ' active buy' : '');
+        document.getElementById('bSell').className = 'side-btn' + (s==='sell' ? ' active sell' : '');
         document.getElementById('actionBtn').style.background = (s==='buy' ? 'var(--green)' : 'var(--red)');
-        document.getElementById('actionBtn').innerText = (s==='buy' ? 'Buy ' : 'Sell ') + current;
+        document.getElementById('actionBtn').style.color = (s==='buy' ? 'black' : 'white');
+        document.getElementById('actionBtn').innerText = (s==='buy' ? 'BUY ' : 'SELL ') + current;
     }
 
     function toggleList() {
@@ -195,7 +200,7 @@
         el.style.display = (el.style.display === 'block' ? 'none' : 'block');
     }
 
-    window.onload = () => { select('STRAT'); setInterval(updateUI, 2000); };
+    window.onload = () => { select('STRAT'); setInterval(updateUI, 1000); };
 </script>
 </body>
 </html>
