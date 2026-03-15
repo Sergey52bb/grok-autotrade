@@ -3,22 +3,22 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>STRATEX Pro Final Clean</title>
+    <title>STRATEX Pro AutoLoad Fix</title>
     <style>
         :root { --bg: #0b0e11; --panel: #171a1e; --input: #2b3139; --green: #0ecb81; --red: #f6465d; --text: #848e9c; --border: #2b2f36; }
         * { box-sizing: border-box; margin: 0; padding: 0; font-family: sans-serif; -webkit-tap-highlight-color: transparent; }
-        
         body { background: var(--bg); color: white; height: 100dvh; display: flex; flex-direction: column; overflow: hidden; }
-
+        
         header { height: 45px; padding: 0 12px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border); flex-shrink: 0; }
         .price-top { color: var(--green); font-weight: bold; font-family: monospace; font-size: 17px; }
 
         #main_content { flex: 1; position: relative; overflow: hidden; margin-bottom: 60px; }
-        .screen { display: none; height: 100%; width: 100%; flex-direction: column; }
         
-        /* ГРАФИК И ЗАЩИТНЫЙ СЛОЙ */
+        /* Исправление отображения: Trade активен сразу */
+        .screen { display: none; height: 100%; width: 100%; flex-direction: column; }
+        #screen_trade { display: flex; } 
+
         #chart_wrap { height: 38%; width: 100%; background: #000; flex-shrink: 0; position: relative; border-bottom: 1px solid var(--border); }
-        /* Этот слой блокирует нажатия, чтобы не вылезали списки токенов */
         .chart-overlay { position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 10; background: transparent; }
         
         .trade-area { display: flex; height: 190px; border-bottom: 1px solid var(--border); overflow: hidden; flex-shrink: 0; }
@@ -52,13 +52,14 @@
 </head>
 <body>
 
-<div id="toast">Success!</div>
+<div id="toast">Order Success!</div>
 
 <div id="main_content">
-    <div id="screen_trade" class="screen">
+    <div id="screen_trade" class="screen" style="display: flex;">
         <header><b id="pair_name">TON/USDT</b><div class="price-top" id="topPrice">0.0000</div></header>
         <div id="chart_wrap">
-            <div class="chart-overlay"></div> <div id="tv_container" style="width:100%; height:100%;"></div>
+            <div class="chart-overlay"></div>
+            <div id="tv_container" style="width:100%; height:100%;"></div>
         </div>
         
         <div class="trade-area">
@@ -77,12 +78,14 @@
                 <button class="action-btn" id="mainBtn" onclick="placeOrder()">BUY TON</button>
             </div>
         </div>
-
         <div class="orders-area">
             <div class="orders-tabs"><div class="order-tab active" id="openOrdersCount">Open Orders (0)</div><div class="order-tab">History</div></div>
             <div class="order-list" id="historyList"></div>
         </div>
     </div>
+
+    <div id="screen_market" class="screen" style="padding: 20px;"><h2>Markets</h2><div id="m_list"></div></div>
+    <div id="screen_wallet" class="screen" style="padding: 20px;"><h2>Wallet</h2><div id="w_val"></div></div>
 </div>
 
 <nav>
@@ -98,25 +101,30 @@
     let currentSide = 'buy';
     let history = [];
 
+    // Принудительная загрузка графика БЕЗ условий
     function loadChart(id) {
         const symbol = id === 'BTC' ? 'BINANCE:BTCUSDT' : 'BINANCE:TONUSDT';
         document.getElementById('tv_container').innerHTML = '';
-        new TradingView.widget({
-            "autosize": true,
-            "symbol": symbol,
-            "interval": "15",
-            "theme": "dark",
-            "style": "1",
-            "locale": "ru",
-            "container_id": "tv_container",
-            "hide_top_toolbar": true,
-            "hide_legend": true,
-            "save_image": false,
-            "enable_publishing": false,
-            "allow_symbol_change": false,
-            "preset": "mobile", // Оптимизация под мобилки
-            "disabled_features": ["header_symbol_search", "symbol_search_hot_key", "context_menus"]
-        });
+        
+        // Маленький таймаут, чтобы контейнер точно был отрисован в DOM
+        setTimeout(() => {
+            new TradingView.widget({
+                "autosize": true,
+                "symbol": symbol,
+                "interval": "15",
+                "theme": "dark",
+                "style": "1",
+                "locale": "ru",
+                "container_id": "tv_container",
+                "hide_top_toolbar": true,
+                "hide_legend": true,
+                "save_image": false,
+                "enable_publishing": false,
+                "allow_symbol_change": false,
+                "preset": "mobile",
+                "disabled_features": ["header_symbol_search", "context_menus"]
+            });
+        }, 100);
     }
 
     const ws = new WebSocket('wss://stream.binance.com:9443/ws/tonusdt@ticker/btcusdt@ticker');
@@ -166,7 +174,10 @@
 
     function showScreen(id, el) {
         document.querySelectorAll('.screen').forEach(s => s.style.display = 'none');
-        document.getElementById('screen_' + id).style.display = (id === 'trade' ? 'flex' : 'block');
+        const target = document.getElementById('screen_' + id);
+        if(id === 'trade') target.style.display = 'flex';
+        else target.style.display = 'block';
+        
         document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
         el.classList.add('active');
     }
@@ -181,7 +192,11 @@
         b.innerText = side.toUpperCase() + ' ' + currentCoin;
     }
 
-    window.onload = () => loadChart('TON');
+    // Запуск сразу при загрузке окна
+    window.onload = () => {
+        loadChart('TON');
+    };
 </script>
 </body>
 </html>
+
