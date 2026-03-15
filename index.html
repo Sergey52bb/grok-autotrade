@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>STRATEX Pro Terminal</title>
+    <title>STRATEX Pro Order System</title>
     <style>
         :root { --bg: #0b0e11; --panel: #171a1e; --input: #2b3139; --green: #0ecb81; --red: #f6465d; --text: #848e9c; --border: #2b2f36; }
         * { box-sizing: border-box; margin: 0; padding: 0; font-family: sans-serif; }
@@ -14,11 +14,12 @@
         .price-top { color: var(--green); font-weight: bold; font-family: monospace; font-size: 18px; }
 
         #main_content { flex: 1; position: relative; overflow: hidden; margin-bottom: 60px; }
-        .screen { display: none; height: 100%; width: 100%; flex-direction: column; overflow-y: auto; }
+        .screen { display: none; height: 100%; width: 100%; flex-direction: column; }
         
         #screen_trade { display: flex; overflow: hidden; }
-        #chart_wrap { height: 45%; width: 100%; background: #000; flex-shrink: 0; }
-        .trade-area { display: flex; flex: 1; border-top: 1px solid var(--border); overflow: hidden; }
+        #chart_wrap { height: 40%; width: 100%; background: #000; flex-shrink: 0; }
+        
+        .trade-area { display: flex; height: 35%; border-top: 1px solid var(--border); overflow: hidden; }
         .book { width: 45%; border-right: 1px solid var(--border); padding: 5px; font-family: monospace; font-size: 11px; overflow: hidden; }
         .ob-row { display: flex; justify-content: space-between; height: 16px; position: relative; }
         .ob-bar { position: absolute; right: 0; height: 100%; opacity: 0.15; }
@@ -32,29 +33,35 @@
         .fld { background: var(--input); border-radius: 4px; padding: 6px; }
         .fld label { display: block; font-size: 9px; color: var(--text); text-transform: uppercase; }
         .fld input { background: none; border: none; color: white; width: 100%; font-size: 14px; outline: none; }
-        .action-btn { background: var(--green); border: none; color: black; padding: 12px; border-radius: 6px; font-weight: bold; margin-top: auto; }
+        .action-btn { background: var(--green); border: none; color: black; padding: 12px; border-radius: 6px; font-weight: bold; }
 
-        .market-list { display: flex; flex-direction: column; gap: 10px; margin-top: 15px; }
-        .market-item { background: var(--panel); padding: 15px; border-radius: 12px; display: flex; justify-content: space-between; align-items: center; border: 1px solid transparent; cursor: pointer; }
-        .market-item:active { border-color: var(--green); }
-        .coin-logo { width: 32px; height: 32px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 12px; }
-        .change-badge { padding: 4px 8px; border-radius: 4px; font-size: 12px; font-weight: bold; }
-        .up { background: rgba(14, 203, 129, 0.15); color: var(--green); }
+        /* Система ордеров */
+        .orders-area { flex: 1; border-top: 1px solid var(--border); background: var(--bg); display: flex; flex-direction: column; overflow: hidden; }
+        .orders-tabs { display: flex; gap: 15px; padding: 10px 15px; border-bottom: 1px solid var(--border); }
+        .order-tab { font-size: 12px; color: var(--text); font-weight: bold; }
+        .order-tab.active { color: white; border-bottom: 2px solid var(--green); }
+        .order-list { flex: 1; overflow-y: auto; padding: 10px; }
+        .order-item { display: flex; justify-content: space-between; font-size: 11px; padding: 8px 0; border-bottom: 1px solid #1e2329; }
 
-        .wallet-card { background: var(--panel); padding: 20px; border-radius: 12px; border: 1px solid var(--border); margin-bottom: 15px; }
+        /* Уведомление */
+        #toast { position: fixed; top: 20px; left: 50%; transform: translateX(-50%); background: var(--green); color: black; padding: 10px 20px; border-radius: 8px; font-weight: bold; display: none; z-index: 10000; box-shadow: 0 4px 12px rgba(0,0,0,0.5); }
 
-        nav { height: 60px; background: var(--panel); border-top: 1px solid var(--border); display: flex; position: fixed; bottom: 0; left: 0; right: 0; z-index: 9999; padding-bottom: env(safe-area-inset-bottom); }
+        .market-list { display: flex; flex-direction: column; gap: 10px; margin: 15px; }
+        .market-item { background: var(--panel); padding: 15px; border-radius: 12px; display: flex; justify-content: space-between; align-items: center; cursor: pointer; }
         .nav-item { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; color: var(--text); font-size: 10px; }
         .nav-item.active { color: white; }
-        .nav-item span { font-size: 18px; margin-bottom: 2px; }
+        nav { height: 60px; background: var(--panel); border-top: 1px solid var(--border); display: flex; position: fixed; bottom: 0; left: 0; right: 0; z-index: 9999; }
     </style>
 </head>
 <body>
+
+<div id="toast">Order Executed!</div>
 
 <div id="main_content">
     <div id="screen_trade" class="screen">
         <header><b id="pair_name">TON/USDT</b><div class="price-top" id="topPrice">0.0000</div></header>
         <div id="chart_wrap"><div id="tv_container" style="width:100%; height:100%;"></div></div>
+        
         <div class="trade-area">
             <div class="book">
                 <div id="asks" style="color:var(--red); display:flex; flex-direction:column-reverse;"></div>
@@ -67,8 +74,18 @@
                     <button class="side-btn" onclick="setSide('sell', this)">SELL</button>
                 </div>
                 <div class="fld"><label>Price</label><input type="number" id="iPrice" step="any"></div>
-                <div class="fld"><label>Amount</label><input type="number" placeholder="0.0"></div>
-                <button class="action-btn" id="mainBtn">BUY TON</button>
+                <div class="fld"><label>Amount</label><input type="number" id="iAmount" placeholder="0.0"></div>
+                <button class="action-btn" id="mainBtn" onclick="placeOrder()">BUY TON</button>
+            </div>
+        </div>
+
+        <div class="orders-area">
+            <div class="orders-tabs">
+                <div class="order-tab active">Open Orders (0)</div>
+                <div class="order-tab">Order History</div>
+            </div>
+            <div class="order-list" id="historyList">
+                <div style="text-align:center; color:var(--text); font-size:12px; margin-top:20px;">No active orders</div>
             </div>
         </div>
     </div>
@@ -76,33 +93,14 @@
     <div id="screen_market" class="screen" style="padding: 20px;">
         <h2>Markets</h2>
         <div class="market-list">
-            <div class="market-item" onclick="selectCoin('TON')">
-                <div style="display:flex; align-items:center; gap:12px;">
-                    <div class="coin-logo" style="background:#0088cc">T</div>
-                    <div><b>TON</b><br><small style="color:var(--text)">Toncoin</small></div>
-                </div>
-                <div style="text-align:right;"><b id="mPriceTON">...</b><br><span class="change-badge up">+2.4%</span></div>
-            </div>
-            <div class="market-item" onclick="selectCoin('BTC')">
-                <div style="display:flex; align-items:center; gap:12px;">
-                    <div class="coin-logo" style="background:#f7931a">₿</div>
-                    <div><b>BTC</b><br><small style="color:var(--text)">Bitcoin</small></div>
-                </div>
-                <div style="text-align:right;"><b id="mPriceBTC">...</b><br><span class="change-badge up">+0.8%</span></div>
-            </div>
+            <div class="market-item" onclick="selectCoin('TON')"><b>TON</b> <span id="mPriceTON">...</span></div>
+            <div class="market-item" onclick="selectCoin('BTC')"><b>BTC</b> <span id="mPriceBTC">...</span></div>
         </div>
     </div>
 
     <div id="screen_wallet" class="screen" style="padding: 20px;">
         <h2 style="margin-bottom:15px;">Wallet</h2>
-        <div class="wallet-card">
-            <div style="color:var(--text); font-size:12px;">Estimated Balance</div>
-            <div style="font-size:26px; font-weight:bold; margin-top:5px;">$ <span id="total_val">0.00</span></div>
-        </div>
-        <div class="wallet-card" style="display:flex; justify-content:space-between; align-items:center;">
-            <div><b>TON</b><br><small style="color:var(--text);">150.00 TON</small></div>
-            <div id="wallet_ton_usd" style="font-weight:bold;">$0.00</div>
-        </div>
+        <div style="background:var(--panel); padding:20px; border-radius:12px;">$ <span id="total_val">0.00</span></div>
     </div>
 </div>
 
@@ -117,14 +115,12 @@
     let prices = { TON: 0, BTC: 0 };
     let currentCoin = 'TON';
     let currentSide = 'buy';
+    let history = [];
 
     function loadChart(id) {
         const symbol = id === 'BTC' ? 'BINANCE:BTCUSDT' : 'BINANCE:TONUSDT';
         document.getElementById('tv_container').innerHTML = '';
-        new TradingView.widget({
-            "autosize": true, "symbol": symbol, "interval": "15",
-            "theme": "dark", "container_id": "tv_container", "hide_top_toolbar": true, "locale": "ru"
-        });
+        new TradingView.widget({ "autosize": true, "symbol": symbol, "interval": "15", "theme": "dark", "container_id": "tv_container", "hide_top_toolbar": true, "locale": "ru" });
     }
 
     const ws = new WebSocket('wss://stream.binance.com:9443/ws/tonusdt@ticker/btcusdt@ticker');
@@ -138,25 +134,14 @@
     function updateUI() {
         const p = currentCoin === 'TON' ? prices.TON : prices.BTC;
         if(!p) return;
-
-        // Trade Screen
         document.getElementById('topPrice').innerText = p.toLocaleString();
         document.getElementById('midPrice').innerText = p.toLocaleString();
-        document.getElementById('iPrice').value = p;
-
-        // Market Screen
         if(prices.TON) document.getElementById('mPriceTON').innerText = '$' + prices.TON.toFixed(2);
         if(prices.BTC) document.getElementById('mPriceBTC').innerText = '$' + prices.BTC.toLocaleString();
 
-        // Wallet calculations
-        const tonVal = 150 * prices.TON;
-        document.getElementById('wallet_ton_usd').innerText = '$' + tonVal.toFixed(2);
-        document.getElementById('total_val').innerText = (tonVal + (1200 * 0.7)).toLocaleString();
-
-        // Orderbook simulation
         const genRows = (clr) => {
             let h = '';
-            for(let i=0; i<8; i++) {
+            for(let i=0; i<6; i++) {
                 let rP = (p * (1 + (Math.random()-0.5)*0.002)).toFixed(currentCoin === 'BTC' ? 1 : 4);
                 h += `<div class="ob-row"><div class="ob-bar" style="width:${Math.random()*70}%; background:${clr}"></div><span>${rP}</span><span>${(Math.random()*5).toFixed(1)}</span></div>`;
             }
@@ -164,6 +149,40 @@
         };
         document.getElementById('asks').innerHTML = genRows('var(--red)');
         document.getElementById('bids').innerHTML = genRows('var(--green)');
+    }
+
+    function placeOrder() {
+        const amt = document.getElementById('iAmount').value;
+        const prc = currentCoin === 'TON' ? prices.TON : prices.BTC;
+        if(!amt || amt <= 0) return alert("Enter amount");
+
+        const order = {
+            pair: currentCoin,
+            side: currentSide,
+            amount: amt,
+            price: prc.toFixed(2),
+            time: new Date().toLocaleTimeString()
+        };
+
+        history.unshift(order);
+        updateHistory();
+        
+        // Toast notification
+        const toast = document.getElementById('toast');
+        toast.style.display = 'block';
+        setTimeout(() => toast.style.display = 'none', 2000);
+        document.getElementById('iAmount').value = '';
+    }
+
+    function updateHistory() {
+        const list = document.getElementById('historyList');
+        list.innerHTML = history.map(o => `
+            <div class="order-item">
+                <span style="color:${o.side === 'buy' ? 'var(--green)' : 'var(--red)'}">${o.side.toUpperCase()} ${o.pair}</span>
+                <span>${o.amount} @ ${o.price}</span>
+                <span style="color:var(--text)">${o.time}</span>
+            </div>
+        `).join('');
     }
 
     function selectCoin(id) {
@@ -187,7 +206,6 @@
         btn.classList.add('active', side);
         const b = document.getElementById('mainBtn');
         b.style.background = side === 'buy' ? 'var(--green)' : 'var(--red)';
-        b.style.color = side === 'buy' ? 'black' : 'white';
         b.innerText = side.toUpperCase() + ' ' + currentCoin;
     }
 
