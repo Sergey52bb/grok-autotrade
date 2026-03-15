@@ -3,60 +3,68 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>STRATEX Pro AutoLoad Fix</title>
+    <title>STRATEX Pro Final Fix</title>
     <style>
         :root { --bg: #0b0e11; --panel: #171a1e; --input: #2b3139; --green: #0ecb81; --red: #f6465d; --text: #848e9c; --border: #2b2f36; }
         * { box-sizing: border-box; margin: 0; padding: 0; font-family: sans-serif; -webkit-tap-highlight-color: transparent; }
+        
         body { background: var(--bg); color: white; height: 100dvh; display: flex; flex-direction: column; overflow: hidden; }
-        
-        header { height: 45px; padding: 0 12px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border); flex-shrink: 0; }
-        .price-top { color: var(--green); font-weight: bold; font-family: monospace; font-size: 17px; }
 
-        #main_content { flex: 1; position: relative; overflow: hidden; margin-bottom: 60px; }
-        
-        /* Исправление отображения: Trade активен сразу */
+        header { height: 40px; padding: 0 12px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border); flex-shrink: 0; }
+        .price-top { color: var(--green); font-weight: bold; font-family: monospace; font-size: 16px; }
+
+        #main_content { flex: 1; position: relative; overflow: hidden; margin-bottom: 60px; display: flex; flex-direction: column; }
         .screen { display: none; height: 100%; width: 100%; flex-direction: column; }
-        #screen_trade { display: flex; } 
+        #screen_trade { display: flex; }
 
-        #chart_wrap { height: 38%; width: 100%; background: #000; flex-shrink: 0; position: relative; border-bottom: 1px solid var(--border); }
-        .chart-overlay { position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 10; background: transparent; }
+        /* График */
+        #chart_wrap { height: 35%; width: 100%; background: #000; flex-shrink: 0; position: relative; border-bottom: 1px solid var(--border); }
+        .chart-overlay { position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 10; }
         
-        .trade-area { display: flex; height: 190px; border-bottom: 1px solid var(--border); overflow: hidden; flex-shrink: 0; }
-        .book { width: 45%; border-right: 1px solid var(--border); padding: 4px; font-family: monospace; font-size: 11px; overflow: hidden; }
-        .ob-row { display: flex; justify-content: space-between; height: 16px; position: relative; }
-        .ob-bar { position: absolute; right: 0; height: 100%; opacity: 0.12; }
+        /* Торговая зона - ГИБКАЯ */
+        .trade-area { display: flex; flex: 1; min-height: 200px; border-bottom: 1px solid var(--border); overflow: hidden; }
         
+        /* Исправленный стакан */
+        .book { width: 45%; border-right: 1px solid var(--border); display: flex; flex-direction: column; padding: 4px 2px; font-family: monospace; font-size: 11px; }
+        .side-book { flex: 1; display: flex; flex-direction: column; overflow: hidden; justify-content: flex-end; }
+        .side-book.bids { justify-content: flex-start; }
+        
+        .ob-row { display: flex; justify-content: space-between; min-height: 14px; position: relative; width: 100%; padding: 0 4px; }
+        .ob-bar { position: absolute; right: 0; height: 100%; opacity: 0.15; z-index: 0; }
+        .ob-row span { z-index: 1; }
+        
+        #midPrice { text-align: center; padding: 4px 0; font-size: 14px; color: var(--green); font-weight: bold; margin: 2px 0; background: rgba(255,255,255,0.03); }
+        
+        /* Форма */
         .trade-form { width: 55%; padding: 8px; display: flex; flex-direction: column; gap: 6px; }
         .side-btns { display: flex; background: var(--input); border-radius: 4px; padding: 2px; }
-        .side-btn { flex: 1; border: none; padding: 7px; border-radius: 3px; color: var(--text); background: none; font-weight: bold; font-size: 11px; }
+        .side-btn { flex: 1; border: none; padding: 6px; border-radius: 3px; color: var(--text); background: none; font-weight: bold; font-size: 11px; }
         .side-btn.active.buy { background: var(--green); color: black; }
         .side-btn.active.sell { background: var(--red); color: white; }
         
         .fld { background: var(--input); border-radius: 4px; padding: 4px 8px; }
         .fld label { display: block; font-size: 8px; color: var(--text); text-transform: uppercase; }
         .fld input { background: none; border: none; color: white; width: 100%; font-size: 14px; outline: none; }
-        .action-btn { background: var(--green); border: none; color: black; padding: 12px; border-radius: 6px; font-weight: bold; font-size: 14px; margin-top: auto; }
+        .action-btn { background: var(--green); border: none; color: black; padding: 10px; border-radius: 6px; font-weight: bold; font-size: 13px; margin-top: auto; }
 
-        .orders-area { flex: 1; background: var(--bg); display: flex; flex-direction: column; overflow: hidden; }
-        .orders-tabs { display: flex; gap: 15px; padding: 10px 15px; border-bottom: 1px solid var(--border); }
-        .order-tab { font-size: 12px; color: var(--text); font-weight: bold; }
-        .order-tab.active { color: white; border-bottom: 2px solid var(--green); }
+        /* Ордера внизу */
+        .orders-area { height: 120px; background: var(--bg); display: flex; flex-direction: column; overflow: hidden; border-top: 4px solid var(--panel); }
+        .orders-tabs { display: flex; gap: 15px; padding: 8px 12px; border-bottom: 1px solid var(--border); }
+        .order-tab { font-size: 11px; color: var(--text); font-weight: bold; }
         .order-list { flex: 1; overflow-y: auto; padding: 0 12px; }
-        .order-item { display: flex; justify-content: space-between; font-size: 11px; padding: 8px 0; border-bottom: 1px solid #1e2329; }
+        .order-item { display: flex; justify-content: space-between; font-size: 10px; padding: 6px 0; border-bottom: 1px solid #1e2329; }
 
-        nav { height: 60px; background: var(--panel); border-top: 1px solid var(--border); display: flex; position: fixed; bottom: 0; left: 0; right: 0; z-index: 9999; }
+        nav { height: 55px; background: var(--panel); border-top: 1px solid var(--border); display: flex; position: fixed; bottom: 0; left: 0; right: 0; z-index: 9999; }
         .nav-item { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; color: var(--text); font-size: 10px; }
         .nav-item.active { color: white; }
-        #toast { position: fixed; top: 15px; left: 50%; transform: translateX(-50%); background: var(--green); color: black; padding: 8px 20px; border-radius: 20px; font-weight: bold; display: none; z-index: 10001; font-size: 12px; }
     </style>
 </head>
 <body>
 
-<div id="toast">Order Success!</div>
-
 <div id="main_content">
-    <div id="screen_trade" class="screen" style="display: flex;">
+    <div id="screen_trade" class="screen">
         <header><b id="pair_name">TON/USDT</b><div class="price-top" id="topPrice">0.0000</div></header>
+        
         <div id="chart_wrap">
             <div class="chart-overlay"></div>
             <div id="tv_container" style="width:100%; height:100%;"></div>
@@ -64,10 +72,11 @@
         
         <div class="trade-area">
             <div class="book">
-                <div id="asks" style="color:var(--red); display:flex; flex-direction:column-reverse;"></div>
-                <div id="midPrice" style="text-align:center; padding:4px 0; font-size:15px; color:var(--green); font-weight:bold; border-top:1px solid #1e2329; border-bottom:1px solid #1e2329;">0.0000</div>
-                <div id="bids" style="color:var(--green);"></div>
+                <div id="asks" class="side-book" style="color:var(--red);"></div>
+                <div id="midPrice">0.0000</div>
+                <div id="bids" class="side-book" style="color:var(--green);"></div>
             </div>
+            
             <div class="trade-form">
                 <div class="side-btns">
                     <button class="side-btn active buy" onclick="setSide('buy', this)">BUY</button>
@@ -78,20 +87,18 @@
                 <button class="action-btn" id="mainBtn" onclick="placeOrder()">BUY TON</button>
             </div>
         </div>
+
         <div class="orders-area">
-            <div class="orders-tabs"><div class="order-tab active" id="openOrdersCount">Open Orders (0)</div><div class="order-tab">History</div></div>
+            <div class="orders-tabs"><div class="order-tab">Open Orders (0)</div></div>
             <div class="order-list" id="historyList"></div>
         </div>
     </div>
-
-    <div id="screen_market" class="screen" style="padding: 20px;"><h2>Markets</h2><div id="m_list"></div></div>
-    <div id="screen_wallet" class="screen" style="padding: 20px;"><h2>Wallet</h2><div id="w_val"></div></div>
 </div>
 
 <nav>
-    <div class="nav-item active" onclick="showScreen('trade', this)"><span>📊</span>Trade</div>
-    <div class="nav-item" onclick="showScreen('market', this)"><span>📈</span>Market</div>
-    <div class="nav-item" onclick="showScreen('wallet', this)"><span>💼</span>Wallet</div>
+    <div class="nav-item active"><span>📊</span>Trade</div>
+    <div class="nav-item"><span>📈</span>Market</div>
+    <div class="nav-item"><span>💼</span>Wallet</div>
 </nav>
 
 <script type="text/javascript" src="https://s3.tradingview.com/tv.js"></script>
@@ -99,32 +106,18 @@
     let prices = { TON: 0, BTC: 0 };
     let currentCoin = 'TON';
     let currentSide = 'buy';
-    let history = [];
 
-    // Принудительная загрузка графика БЕЗ условий
     function loadChart(id) {
         const symbol = id === 'BTC' ? 'BINANCE:BTCUSDT' : 'BINANCE:TONUSDT';
         document.getElementById('tv_container').innerHTML = '';
-        
-        // Маленький таймаут, чтобы контейнер точно был отрисован в DOM
         setTimeout(() => {
             new TradingView.widget({
-                "autosize": true,
-                "symbol": symbol,
-                "interval": "15",
-                "theme": "dark",
-                "style": "1",
-                "locale": "ru",
-                "container_id": "tv_container",
-                "hide_top_toolbar": true,
-                "hide_legend": true,
-                "save_image": false,
-                "enable_publishing": false,
-                "allow_symbol_change": false,
-                "preset": "mobile",
+                "autosize": true, "symbol": symbol, "interval": "15", "theme": "dark", "style": "1",
+                "locale": "ru", "container_id": "tv_container", "hide_top_toolbar": true, "hide_legend": true,
+                "save_image": false, "enable_publishing": false, "preset": "mobile",
                 "disabled_features": ["header_symbol_search", "context_menus"]
             });
-        }, 100);
+        }, 50);
     }
 
     const ws = new WebSocket('wss://stream.binance.com:9443/ws/tonusdt@ticker/btcusdt@ticker');
@@ -138,48 +131,20 @@
     function updateUI() {
         const p = currentCoin === 'TON' ? prices.TON : prices.BTC;
         if(!p) return;
-        document.getElementById('topPrice').innerText = p.toLocaleString(undefined, {minimumFractionDigits: 2});
-        document.getElementById('midPrice').innerText = p.toLocaleString(undefined, {minimumFractionDigits: 2});
+        const fmt = { minimumFractionDigits: currentCoin === 'BTC' ? 1 : 3 };
+        document.getElementById('topPrice').innerText = p.toLocaleString(undefined, fmt);
+        document.getElementById('midPrice').innerText = p.toLocaleString(undefined, fmt);
         
-        const genRows = (clr) => {
+        const genRows = (clr, isRev) => {
             let h = '';
-            for(let i=0; i<6; i++) {
-                let rP = (p * (1 + (Math.random()-0.5)*0.0012)).toFixed(currentCoin === 'BTC' ? 1 : 4);
-                h += `<div class="ob-row"><div class="ob-bar" style="width:${Math.random()*60}%; background:${clr}"></div><span>${rP}</span><span style="color:var(--text)">${(Math.random()*2).toFixed(2)}</span></div>`;
+            for(let i=0; i<7; i++) {
+                let rP = (p * (1 + (Math.random()-0.5)*0.0015)).toFixed(currentCoin === 'BTC' ? 1 : 3);
+                h += `<div class="ob-row"><div class="ob-bar" style="width:${Math.random()*70}%; background:${clr}"></div><span>${rP}</span><span style="color:var(--text)">${(Math.random()*1.5).toFixed(1)}</span></div>`;
             }
             return h;
         };
         document.getElementById('asks').innerHTML = genRows('var(--red)');
         document.getElementById('bids').innerHTML = genRows('var(--green)');
-    }
-
-    function placeOrder() {
-        const amt = document.getElementById('iAmount').value;
-        if(!amt || amt <= 0) return;
-        const prc = currentCoin === 'TON' ? prices.TON : prices.BTC;
-        history.unshift({ pair: currentCoin, side: currentSide, amount: amt, price: prc.toLocaleString(), time: new Date().toLocaleTimeString() });
-        updateHistory();
-        const toast = document.getElementById('toast');
-        toast.style.display = 'block';
-        setTimeout(() => toast.style.display = 'none', 1500);
-        document.getElementById('iAmount').value = '';
-    }
-
-    function updateHistory() {
-        document.getElementById('openOrdersCount').innerText = `Open Orders (${history.length})`;
-        document.getElementById('historyList').innerHTML = history.map(o => `
-            <div class="order-item"><span style="color:${o.side === 'buy' ? 'var(--green)' : 'var(--red)'}">${o.side.toUpperCase()}</span><b>${o.pair}</b><span>${o.amount} @ ${o.price}</span></div>
-        `).join('');
-    }
-
-    function showScreen(id, el) {
-        document.querySelectorAll('.screen').forEach(s => s.style.display = 'none');
-        const target = document.getElementById('screen_' + id);
-        if(id === 'trade') target.style.display = 'flex';
-        else target.style.display = 'block';
-        
-        document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
-        el.classList.add('active');
     }
 
     function setSide(side, btn) {
@@ -192,11 +157,7 @@
         b.innerText = side.toUpperCase() + ' ' + currentCoin;
     }
 
-    // Запуск сразу при загрузке окна
-    window.onload = () => {
-        loadChart('TON');
-    };
+    window.onload = () => loadChart('TON');
 </script>
 </body>
 </html>
-
