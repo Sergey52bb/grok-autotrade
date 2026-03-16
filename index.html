@@ -3,11 +3,12 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>STRATEX Pro Live</title>
+    <title>STRATEX Crypto Terminal</title>
     <style>
         :root { --bg: #0b0e11; --panel: #171a1e; --input: #2b3139; --green: #0ecb81; --red: #f6465d; --text: #848e9c; --border: #2b2f36; }
         * { box-sizing: border-box; margin: 0; padding: 0; font-family: sans-serif; }
         body { background: var(--bg); color: white; height: 100vh; display: flex; flex-direction: column; overflow: hidden; }
+        
         header { height: 45px; padding: 0 12px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border); flex-shrink: 0; }
         .price-top { color: var(--green); font-weight: bold; font-family: monospace; font-size: 17px; }
 
@@ -29,14 +30,11 @@
         .fld { background: var(--input); border-radius: 4px; padding: 6px 10px; }
         .fld label { display: block; font-size: 9px; color: var(--text); text-transform: uppercase; }
         .fld input { background: none; border: none; color: white; width: 100%; font-size: 14px; outline: none; }
-        .action-btn { background: var(--green); border: none; color: black; padding: 14px; border-radius: 6px; font-weight: bold; font-size: 14px; margin-top: auto; transition: 0.2s; }
-        .action-btn:active { opacity: 0.7; transform: scale(0.98); }
+        .action-btn { background: var(--green); border: none; color: black; padding: 14px; border-radius: 6px; font-weight: bold; font-size: 14px; margin-top: auto; }
 
-        /* Панель ордеров */
-        .orders-bar { height: 120px; background: var(--bg); overflow-y: auto; flex-shrink: 0; border-top: 1px solid var(--border); }
-        .orders-title { padding: 8px 12px; font-size: 11px; color: var(--text); border-bottom: 1px solid var(--border); position: sticky; top: 0; background: var(--bg); }
-        .order-item { display: flex; justify-content: space-between; padding: 8px 12px; font-size: 12px; border-bottom: 1px solid #1e2329; animation: slideIn 0.3s ease; }
-        @keyframes slideIn { from { opacity: 0; transform: translateY(-10px); } to { opacity: 1; transform: translateY(0); } }
+        .orders-bar { height: 100px; background: var(--bg); overflow-y: auto; flex-shrink: 0; }
+        .orders-title { padding: 8px 12px; font-size: 11px; color: var(--text); border-bottom: 1px solid var(--border); position: sticky; top: 0; background: var(--bg); z-index: 5; }
+        .order-item { display: flex; justify-content: space-between; padding: 8px 12px; font-size: 12px; border-bottom: 1px solid #1e2329; }
 
         nav { height: 60px; background: var(--panel); border-top: 1px solid var(--border); display: flex; flex-shrink: 0; }
         .nav-item { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; color: var(--text); font-size: 11px; }
@@ -91,10 +89,18 @@
         new TradingView.MediumWidget({
             "container_id": "tv_container",
             "symbols": [["BINANCE:TONUSDT", "TON/USDT"]],
-            "greyText": "Default", "gridLineColor": "rgba(43, 47, 54, 1)",
-            "fontColor": "rgba(132, 142, 156, 1)", "underLineColor": "rgba(11, 14, 17, 1)",
-            "trendLineColor": "rgba(14, 203, 129, 1)", "width": "100%", "height": "100%",
-            "locale": "ru", "colorTheme": "dark", "autosize": true, "chartType": "area"
+            "greyText": "Default",
+            "gridLineColor": "rgba(43, 47, 54, 1)",
+            "fontColor": "rgba(132, 142, 156, 1)",
+            "underLineColor": "rgba(11, 14, 17, 1)",
+            "trendLineColor": "rgba(14, 203, 129, 1)",
+            "width": "100%",
+            "height": "100%",
+            "locale": "ru",
+            "colorTheme": "dark",
+            "autosize": true,
+            "chartType": "area",
+            "session": "24x7" // ФИКС: Указываем круглосуточную сессию
         });
     }
 
@@ -138,17 +144,22 @@
         const price = document.getElementById('iPrice').value;
         const amount = document.getElementById('iAmount').value || "1.0";
         const list = document.getElementById('ordersList');
-        
         ordersCount++;
         const item = document.createElement('div');
         item.className = 'order-item';
         item.innerHTML = `
-            <span style="color:${currentSide === 'buy' ? 'var(--green)' : 'var(--red)'}">${currentSide.toUpperCase()}</span>
+            <b style="color:${currentSide === 'buy' ? 'var(--green)' : 'var(--red)'}">${currentSide.toUpperCase()}</b>
             <span>${price}</span>
             <span>${amount} TON</span>
-            <span style="color:var(--text)" onclick="this.parentElement.remove()">✕</span>
+            <span style="color:var(--text)" onclick="cancelOrder(this)">✕</span>
         `;
         list.appendChild(item);
+        document.querySelector('.orders-title').innerText = `Open Orders (${ordersCount})`;
+    }
+
+    function cancelOrder(el) {
+        el.parentElement.remove();
+        ordersCount--;
         document.querySelector('.orders-title').innerText = `Open Orders (${ordersCount})`;
     }
 
