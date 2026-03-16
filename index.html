@@ -3,59 +3,58 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>STRATEX Pro Simulator</title>
+    <title>STRATEX Stable Sim</title>
     <style>
         :root { --bg: #0b0e11; --panel: #171a1e; --input: #2b3139; --green: #0ecb81; --red: #f6465d; --text: #848e9c; --border: #2b2f36; }
         * { box-sizing: border-box; margin: 0; padding: 0; font-family: sans-serif; }
         body { background: var(--bg); color: white; height: 100vh; display: flex; flex-direction: column; overflow: hidden; }
         
-        header { height: 45px; padding: 0 12px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border); flex-shrink: 0; }
-        .price-top { color: var(--green); font-weight: bold; font-family: monospace; font-size: 17px; }
+        header { height: 40px; padding: 0 12px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border); flex-shrink: 0; }
+        .price-top { color: var(--green); font-weight: bold; font-family: monospace; font-size: 16px; }
 
-        /* Панель баланса */
-        .wallet-bar { background: var(--panel); padding: 8px 12px; display: flex; justify-content: space-around; font-size: 12px; border-bottom: 1px solid var(--border); flex-shrink: 0; }
-        .wallet-item span { color: var(--text); font-size: 10px; display: block; margin-bottom: 2px; }
-        .wallet-item b { font-family: monospace; font-size: 13px; }
+        .wallet-bar { background: var(--panel); padding: 6px 12px; display: flex; justify-content: space-around; border-bottom: 1px solid var(--border); flex-shrink: 0; }
+        .wallet-item { text-align: center; }
+        .wallet-item span { color: var(--text); font-size: 9px; display: block; }
+        .wallet-item b { font-family: monospace; font-size: 12px; color: #fff; }
 
-        #chart_wrap { flex: 1; min-height: 200px; background: #000; position: relative; overflow: hidden; border-bottom: 2px solid var(--border); }
+        #chart_wrap { flex: 1; min-height: 200px; background: #000; position: relative; border-bottom: 1px solid var(--border); }
         
-        .trade-area { height: 230px; display: flex; flex-shrink: 0; background: var(--bg); border-bottom: 1px solid var(--border); }
-        .book { width: 45%; border-right: 1px solid var(--border); display: flex; flex-direction: column; padding: 5px 2px; font-family: monospace; font-size: 11px; }
+        .trade-area { height: 220px; display: flex; flex-shrink: 0; background: var(--bg); border-bottom: 1px solid var(--border); }
+        .book { width: 42%; border-right: 1px solid var(--border); display: flex; flex-direction: column; padding: 2px; font-family: monospace; font-size: 10px; }
         .side-book { flex: 1; display: flex; flex-direction: column; overflow: hidden; justify-content: space-between; }
-        .ob-row { display: flex; justify-content: space-between; height: 16px; position: relative; width: 100%; padding: 0 4px; }
-        .ob-bar { position: absolute; right: 0; height: 100%; opacity: 0.15; }
-        #midPrice { text-align: center; padding: 6px 0; font-size: 15px; color: var(--green); font-weight: bold; margin: 3px 0; background: rgba(255,255,255,0.03); }
+        .ob-row { display: flex; justify-content: space-between; height: 14px; position: relative; padding: 0 4px; }
+        #midPrice { text-align: center; padding: 4px 0; font-size: 14px; color: var(--green); font-weight: bold; background: rgba(255,255,255,0.03); }
 
-        .trade-form { width: 55%; padding: 10px; display: flex; flex-direction: column; gap: 8px; }
+        .trade-form { width: 58%; padding: 8px; display: flex; flex-direction: column; gap: 6px; }
         .side-btns { display: flex; background: var(--input); border-radius: 4px; padding: 2px; }
-        .side-btn { flex: 1; border: none; padding: 8px; border-radius: 3px; color: var(--text); background: none; font-weight: bold; font-size: 11px; }
+        .side-btn { flex: 1; border: none; padding: 6px; border-radius: 3px; color: var(--text); background: none; font-weight: bold; font-size: 10px; }
         .side-btn.active.buy { background: var(--green); color: black; }
         .side-btn.active.sell { background: var(--red); color: white; }
         
-        .fld { background: var(--input); border-radius: 4px; padding: 6px 10px; }
-        .fld label { display: block; font-size: 9px; color: var(--text); text-transform: uppercase; }
+        .fld { background: var(--input); border-radius: 4px; padding: 4px 8px; }
+        .fld label { display: block; font-size: 8px; color: var(--text); text-transform: uppercase; }
         .fld input { background: none; border: none; color: white; width: 100%; font-size: 14px; outline: none; }
-        .action-btn { background: var(--green); border: none; color: black; padding: 14px; border-radius: 6px; font-weight: bold; font-size: 14px; margin-top: auto; }
+        .action-btn { background: var(--green); border: none; color: black; padding: 12px; border-radius: 6px; font-weight: bold; font-size: 13px; margin-top: auto; }
 
-        .orders-bar { height: 80px; background: var(--bg); overflow-y: auto; flex-shrink: 0; }
-        .orders-title { padding: 8px 12px; font-size: 11px; color: var(--text); border-bottom: 1px solid var(--border); position: sticky; top: 0; background: var(--bg); z-index: 5; }
-        .order-item { display: flex; justify-content: space-between; padding: 8px 12px; font-size: 11px; border-bottom: 1px solid #1e2329; }
+        .orders-bar { height: 80px; background: var(--bg); overflow-y: auto; flex-shrink: 0; font-size: 11px; }
+        .orders-title { padding: 6px 12px; color: var(--text); border-bottom: 1px solid var(--border); position: sticky; top: 0; background: var(--bg); }
+        .order-item { display: flex; justify-content: space-between; padding: 6px 12px; border-bottom: 1px solid #1e2329; }
 
-        nav { height: 60px; background: var(--panel); border-top: 1px solid var(--border); display: flex; flex-shrink: 0; }
-        .nav-item { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; color: var(--text); font-size: 11px; }
+        nav { height: 55px; background: var(--panel); border-top: 1px solid var(--border); display: flex; flex-shrink: 0; }
+        .nav-item { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; color: var(--text); font-size: 10px; }
         .nav-item.active { color: white; }
     </style>
 </head>
 <body>
 
 <header>
-    <b id="pair_name">TON/USDT</b>
+    <b>TON/USDT</b>
     <div class="price-top" id="topPrice">0.000</div>
 </header>
 
 <div class="wallet-bar">
-    <div class="wallet-item"><span>Available USDT</span><b id="balUSDT">1000.00</b></div>
-    <div class="wallet-item"><span>Available TON</span><b id="balTON">0.00</b></div>
+    <div class="wallet-item"><span>USDT</span><b id="balUSDT">1000.00</b></div>
+    <div class="wallet-item"><span>TON</span><b id="balTON">0.00</b></div>
 </div>
 
 <div id="chart_wrap">
@@ -80,7 +79,7 @@
 </div>
 
 <div class="orders-bar" id="ordersList">
-    <div class="orders-title">Open Orders (0)</div>
+    <div class="orders-title">History (0)</div>
 </div>
 
 <nav>
@@ -98,17 +97,20 @@
     let ordersCount = 0;
 
     function loadChart() {
-        new TradingView.widget({
-            "autosize": true,
-            "symbol": "BINANCE:TONUSDT",
-            "interval": "15",
-            "timezone": "Etc/UTC",
-            "theme": "dark",
-            "style": "1",
-            "locale": "ru",
-            "hide_top_toolbar": true,
-            "hide_legend": true,
+        new TradingView.MediumWidget({
             "container_id": "tv_container",
+            "symbols": [["BINANCE:TONUSDT", "TON/USDT"]],
+            "greyText": "Default",
+            "gridLineColor": "rgba(43, 47, 54, 1)",
+            "fontColor": "rgba(132, 142, 156, 1)",
+            "underLineColor": "rgba(11, 14, 17, 1)",
+            "trendLineColor": "rgba(14, 203, 129, 1)",
+            "width": "100%",
+            "height": "100%",
+            "locale": "ru",
+            "colorTheme": "dark",
+            "autosize": true,
+            "chartType": "area"
         });
     }
 
@@ -126,12 +128,11 @@
         document.getElementById('midPrice').innerText = pStr;
         if(!document.getElementById('iPrice').value) document.getElementById('iPrice').value = pStr;
         
-        // Обновление стакана (имитация)
         const genRows = (clr) => {
             let h = '';
-            for(let i=0; i<6; i++) {
+            for(let i=0; i<5; i++) {
                 let rP = (currentPrice * (1 + (Math.random()-0.5)*0.001)).toFixed(3);
-                h += `<div class="ob-row"><div class="ob-bar" style="width:${Math.random()*60}%; background:${clr}"></div><span>${rP}</span><span style="color:var(--text)">${(Math.random()*2).toFixed(1)}</span></div>`;
+                h += `<div class="ob-row"><span>${rP}</span><span style="color:var(--text)">${(Math.random()*2).toFixed(1)}</span></div>`;
             }
             return h;
         };
@@ -152,34 +153,24 @@
     function placeOrder() {
         const price = parseFloat(document.getElementById('iPrice').value);
         const amount = parseFloat(document.getElementById('iAmount').value) || 0;
-        
-        if (amount <= 0) return alert("Введите количество");
+        if (amount <= 0) return;
 
         if (currentSide === 'buy') {
             const cost = price * amount;
-            if (cost > balanceUSDT) return alert("Недостаточно USDT!");
-            balanceUSDT -= cost;
-            balanceTON += amount;
+            if (cost > balanceUSDT) return alert("No USDT!");
+            balanceUSDT -= cost; balanceTON += amount;
         } else {
-            if (amount > balanceTON) return alert("Недостаточно TON!");
-            balanceUSDT += price * amount;
-            balanceTON -= amount;
+            if (amount > balanceTON) return alert("No TON!");
+            balanceUSDT += price * amount; balanceTON -= amount;
         }
 
-        // Обновляем цифры на экране
         document.getElementById('balUSDT').innerText = balanceUSDT.toFixed(2);
         document.getElementById('balTON').innerText = balanceTON.toFixed(2);
 
-        // Добавляем в историю
         ordersCount++;
         const item = document.createElement('div');
         item.className = 'order-item';
-        item.innerHTML = `
-            <b style="color:${currentSide === 'buy' ? 'var(--green)' : 'var(--red)'}">${currentSide.toUpperCase()}</b>
-            <span>${price.toFixed(3)}</span>
-            <span>${amount.toFixed(1)} TON</span>
-            <span style="color:var(--text)">Filled</span>
-        `;
+        item.innerHTML = `<b>${currentSide.toUpperCase()}</b> <span>${price.toFixed(3)}</span> <span>${amount} TON</span>`;
         document.getElementById('ordersList').appendChild(item);
         document.querySelector('.orders-title').innerText = `History (${ordersCount})`;
     }
