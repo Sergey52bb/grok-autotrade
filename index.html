@@ -3,120 +3,141 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Grok AutoTrade</title>
+    <title>Grok AutoTrade Pro</title>
     <style>
-        body { background: #0b0e11; color: white; margin: 0; font-family: sans-serif; overflow: hidden; }
-        .app-container { display: flex; flex-direction: column; height: 100vh; }
+        :root { --bg: #0b0e11; --panel: #171a1e; --text: #848e9c; --green: #0ecb81; --red: #f6465d; --border: #2b2f36; }
+        body { background: var(--bg); color: white; margin: 0; font-family: sans-serif; overflow: hidden; height: 100vh; }
         
-        /* Вкладки */
-        .tab-content { display: none; height: calc(100vh - 70px); overflow-y: auto; }
-        .tab-content.active { display: block; }
-        
-        /* График и Торговля */
-        #tv_chart { height: 300px; width: 100%; background: #171a1e; }
-        .trade-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; padding: 10px; border-top: 1px solid #2b2f36; }
-        .order-book { font-family: monospace; font-size: 12px; line-height: 1.4; }
-        input { width: 100%; background: #2b3139; border: 1px solid #444; color: white; padding: 10px; margin: 5px 0; border-radius: 4px; box-sizing: border-box; }
-        .buy-btn { width: 100%; background: #0ecb81; border: none; padding: 12px; font-weight: bold; border-radius: 4px; margin-top: 5px; }
-        
-        /* Список Маркета */
-        .m-item { display: flex; justify-content: space-between; padding: 15px; border-bottom: 1px solid #2b2f36; }
-        .m-price { color: #0ecb81; font-weight: bold; }
+        /* Навигация сверху */
+        header { padding: 10px 15px; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; }
+        .price-up { color: var(--green); font-weight: bold; font-family: monospace; }
 
-        /* Навигация */
-        .nav { position: fixed; bottom: 0; width: 100%; background: #181a20; display: flex; height: 70px; border-top: 1px solid #2b2f36; }
-        .nav-btn { flex: 1; text-align: center; padding: 12px 0; color: #848e9c; font-size: 11px; cursor: pointer; }
-        .nav-btn.active { color: white; }
+        /* Контент вкладок */
+        .tab-content { display: none; height: calc(100vh - 110px); overflow-y: auto; }
+        .tab-content.active { display: block; }
+
+        /* График */
+        #tv_chart { height: 280px; width: 100%; background: #000; }
+
+        /* Секция торговли (Стакан + Форма) */
+        .trade-section { display: flex; padding: 10px; gap: 15px; border-top: 1px solid var(--border); background: var(--bg); }
+        .order-book { flex: 1.2; font-family: monospace; font-size: 12px; }
+        .trade-form { flex: 1; }
+
+        .ob-row { display: flex; justify-content: space-between; padding: 2px 0; }
+        .ob-val { color: var(--text); }
+
+        input { width: 100%; background: #2b3139; border: 1px solid #444; color: white; padding: 12px; margin: 8px 0; border-radius: 6px; box-sizing: border-box; font-size: 14px; }
+        .buy-btn { width: 100%; background: var(--green); color: black; border: none; padding: 15px; font-weight: bold; border-radius: 6px; cursor: pointer; }
+
+        /* Маркет */
+        .market-row { display: flex; justify-content: space-between; padding: 15px; border-bottom: 1px solid var(--border); align-items: center; }
+        .coin-name { font-weight: bold; font-size: 16px; }
+
+        /* Нижнее меню */
+        .bottom-nav { position: fixed; bottom: 0; width: 100%; background: #181a20; display: flex; height: 65px; border-top: 1px solid var(--border); }
+        .nav-item { flex: 1; text-align: center; padding: 10px 0; color: var(--text); font-size: 11px; }
+        .nav-item.active { color: white; }
         .nav-icon { font-size: 20px; display: block; margin-bottom: 4px; }
     </style>
 </head>
 <body>
 
-<div class="app-container">
+<header>
+    <span><b>TON/USDT</b></span>
+    <span class="price-up" id="live-price">0.0000</span>
+</header>
+
+<div class="app-body">
     <div id="trade" class="tab-content active">
-        <div style="padding: 10px; display: flex; justify-content: space-between;"><b>TON/USDT</b> <span id="top-price" style="color: #0ecb81;">1.3350</span></div>
         <div id="tv_chart"></div>
-        <div class="trade-grid">
-            <div class="order-book">
-                <div style="color:#f6465d">1.3341 <span style="float:right">3.6</span></div>
-                <div style="color:#f6465d">1.3368 <span style="float:right">1.8</span></div>
-                <div style="padding: 5px 0; font-weight: bold; color: #0ecb81; text-align: center; font-size: 16px;">1.3350</div>
-                <div style="color:#0ecb81">1.3360 <span style="float:right">4.3</span></div>
-                <div style="color:#0ecb81">1.3356 <span style="float:right">4.8</span></div>
+        <div class="trade-section">
+            <div class="order-book" id="order-book">
+                <div style="color:var(--red)" class="ob-row"><span>1.3368</span><span>1.5K</span></div>
+                <div style="color:var(--red)" class="ob-row"><span>1.3365</span><span>0.8K</span></div>
+                <div style="color:var(--red)" class="ob-row"><span>1.3360</span><span>2.1K</span></div>
+                <div style="text-align:center; padding: 5px 0; font-weight:bold; font-size:16px;" id="mid-price">1.3350</div>
+                <div style="color:var(--green)" class="ob-row"><span>1.3345</span><span>1.2K</span></div>
+                <div style="color:var(--green)" class="ob-row"><span>1.3340</span><span>3.4K</span></div>
+                <div style="color:var(--green)" class="ob-row"><span>1.3335</span><span>0.9K</span></div>
             </div>
-            <div>
-                <div style="font-size: 11px; color: #848e9c;">Цена (USDT)</div>
-                <input type="number" id="buy-price" value="1.3350">
-                <div style="font-size: 11px; color: #848e9c;">Кол-во (TON)</div>
-                <input type="number" placeholder="0.0">
-                <button class="buy-btn">КУПИТЬ TON</button>
+            <div class="trade-form">
+                <input type="number" id="price-input" placeholder="Цена">
+                <input type="number" placeholder="Количество">
+                <button class="buy-btn">BUY TON</button>
             </div>
         </div>
     </div>
 
     <div id="market" class="tab-content">
-        <h2 style="padding: 15px; margin: 0;">Рынки</h2>
         <div id="market-list">
-            <p style="padding: 20px; color: #848e9c;">Загрузка котировок...</p>
+            <p style="padding:20px; color:var(--text)">Обновление цен...</p>
         </div>
     </div>
 
     <div id="wallet" class="tab-content">
         <div style="padding: 20px;">
-            <div style="background: #1e2329; padding: 20px; border-radius: 12px;">
-                <div style="color: #848e9c;">Общий баланс</div>
-                <div style="font-size: 28px; font-weight: bold; margin: 10px 0;">$ 1 040,25</div>
+            <div style="background: var(--panel); padding: 20px; border-radius: 15px; border: 1px solid var(--border);">
+                <div style="color: var(--text); margin-bottom: 10px;">Total Balance</div>
+                <div style="font-size: 32px; font-weight: bold;">$ 1,040.25</div>
             </div>
         </div>
     </div>
-
-    <div class="nav">
-        <div class="nav-btn active" onclick="switchTab('trade')"><span class="nav-icon">📊</span>Trade</div>
-        <div class="nav-btn" onclick="switchTab('market')"><span class="nav-icon">📈</span>Market</div>
-        <div class="nav-btn" onclick="switchTab('wallet')"><span class="nav-icon">💼</span>Wallet</div>
-        <div class="nav-btn" onclick="switchTab('profile')"><span class="nav-icon">👤</span>Profile</div>
-    </div>
 </div>
+
+<nav class="bottom-nav">
+    <div class="nav-item active" onclick="showTab('trade')"><span class="nav-icon">📊</span>Trade</div>
+    <div class="nav-item" onclick="showTab('market')"><span class="nav-icon">📈</span>Market</div>
+    <div class="nav-item" onclick="showTab('wallet')"><span class="nav-icon">💼</span>Wallet</div>
+    <div class="nav-item" onclick="showTab('profile')"><span class="nav-icon">👤</span>Profile</div>
+</nav>
 
 <script src="https://s3.tradingview.com/tv.js"></script>
 <script>
-    // График
+    // Инициализация нормального графика
     new TradingView.widget({
-        "autosize": true, "symbol": "BINANCE:TONUSDT", "interval": "60", "theme": "dark",
+        "autosize": true, "symbol": "BINANCE:TONUSDT", "interval": "15", "theme": "dark",
         "style": "1", "locale": "ru", "container_id": "tv_chart", "hide_top_toolbar": true
     });
 
     // Переключение вкладок
-    function switchTab(id) {
+    function showTab(id) {
         document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
-        document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+        document.querySelectorAll('.nav-item').forEach(i => i.classList.remove('active'));
         document.getElementById(id).classList.add('active');
         event.currentTarget.classList.add('active');
-        if(id === 'market') loadPrices();
+        if(id === 'market') fetchMarket();
     }
 
-    // Загрузка реальных цен
-    async function loadPrices() {
-        const coins = ['TONUSDT', 'BTCUSDT', 'ETHUSDT', 'SOLUSDT'];
+    // Реальный маркет с Binance
+    async function fetchMarket() {
         const list = document.getElementById('market-list');
         try {
-            const res = await fetch('https://api.binance.com/api/3/ticker/price');
-            const data = await res.json();
-            const filtered = data.filter(p => coins.includes(p.symbol));
+            const r = await fetch('https://api.binance.com/api/3/ticker/price');
+            const data = await r.json();
+            const pairs = ['TONUSDT', 'BTCUSDT', 'ETHUSDT', 'SOLUSDT', 'BNBUSDT'];
+            const filtered = data.filter(i => pairs.includes(i.symbol));
             
             list.innerHTML = filtered.map(c => `
-                <div class="m-item">
-                    <div><b>${c.symbol.replace('USDT', '')}</b><span style="color:#848e9c;font-size:12px">/USDT</span></div>
-                    <div class="m-price">${parseFloat(c.price).toFixed(c.symbol==='TONUSDT'?4:2)}</div>
+                <div class="market-row">
+                    <div><span class="coin-name">${c.symbol.replace('USDT','')}</span><span style="color:var(--text); font-size:12px"> / USDT</span></div>
+                    <div style="color:var(--green); font-weight:bold">${parseFloat(c.price).toFixed(c.symbol==='TONUSDT'?4:2)}</div>
                 </div>
             `).join('');
-        } catch (e) {
-            list.innerHTML = '<p style="padding:20px;color:red">Ошибка сети</p>';
-        }
+        } catch(e) { list.innerHTML = '<p style="padding:20px; color:red">Ошибка данных</p>'; }
     }
-    
-    // Обновление раз в 5 сек
-    setInterval(() => { if(document.getElementById('market').classList.contains('active')) loadPrices(); }, 5000);
+
+    // WebSocket для цены
+    const ws = new WebSocket('wss://stream.binance.com:9443/ws/tonusdt@ticker');
+    ws.onmessage = (e) => {
+        const d = JSON.parse(e.data);
+        const p = parseFloat(d.c).toFixed(4);
+        document.getElementById('live-price').innerText = p;
+        document.getElementById('mid-price').innerText = p;
+        if(!document.getElementById('price-input').value) document.getElementById('price-input').value = p;
+    };
+
+    setInterval(() => { if(document.getElementById('market').classList.contains('active')) fetchMarket(); }, 5000);
 </script>
 </body>
 </html>
