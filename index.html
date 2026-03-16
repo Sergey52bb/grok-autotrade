@@ -3,44 +3,45 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>STRATEX Terminal Final</title>
+    <title>STRATEX Pro Final</title>
     <style>
         :root { --bg: #0b0e11; --panel: #171a1e; --input: #2b3139; --green: #0ecb81; --red: #f6465d; --text: #848e9c; --border: #2b2f36; }
         * { box-sizing: border-box; margin: 0; padding: 0; font-family: sans-serif; }
         
-        body { background: var(--bg); color: white; height: 100dvh; display: flex; flex-direction: column; overflow: hidden; }
+        body { background: var(--bg); color: white; height: 100vh; display: flex; flex-direction: column; overflow: hidden; }
 
-        header { height: 40px; padding: 0 12px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border); flex-shrink: 0; }
-        .price-top { color: var(--green); font-weight: bold; font-family: monospace; font-size: 16px; }
+        header { height: 45px; padding: 0 12px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border); flex-shrink: 0; }
+        .price-top { color: var(--green); font-weight: bold; font-family: monospace; font-size: 17px; }
 
-        /* Контейнер графика забирает всё свободное место сверху */
-        #chart_wrap { flex: 1; width: 100%; background: #000; position: relative; overflow: hidden; }
+        /* Контейнер для графика — занимает свободное место, но не более 40% */
+        #chart_wrap { flex: 1; min-height: 250px; background: #000; position: relative; overflow: hidden; border-bottom: 2px solid var(--border); }
         
-        /* Торговая зона - ТЕПЕРЬ ФИКСИРОВАННОЙ ВЫСОТЫ */
-        .trade-area { height: 210px; display: flex; border-top: 1px solid var(--border); border-bottom: 1px solid var(--border); flex-shrink: 0; background: var(--bg); }
+        /* Торговая зона — ЖЕСТКАЯ ВЫСОТА, чтобы ничего не ползло */
+        .trade-area { height: 230px; display: flex; flex-shrink: 0; background: var(--bg); position: relative; z-index: 10; }
         
-        .book { width: 45%; border-right: 1px solid var(--border); display: flex; flex-direction: column; padding: 2px; font-family: monospace; font-size: 11px; }
-        .side-book { flex: 1; display: flex; flex-direction: column; overflow: hidden; }
-        .ob-row { display: flex; justify-content: space-between; height: 14px; position: relative; padding: 0 4px; line-height: 14px; }
+        .book { width: 45%; border-right: 1px solid var(--border); display: flex; flex-direction: column; padding: 5px 2px; font-family: monospace; font-size: 11px; }
+        .side-book { flex: 1; display: flex; flex-direction: column; overflow: hidden; justify-content: space-between; }
+        .ob-row { display: flex; justify-content: space-between; height: 16px; position: relative; padding: 0 4px; }
         .ob-bar { position: absolute; right: 0; height: 100%; opacity: 0.15; }
-        #midPrice { text-align: center; padding: 4px 0; font-size: 14px; color: var(--green); font-weight: bold; }
+        #midPrice { text-align: center; padding: 6px 0; font-size: 15px; color: var(--green); font-weight: bold; margin: 3px 0; background: rgba(255,255,255,0.03); }
 
-        .trade-form { width: 55%; padding: 8px; display: flex; flex-direction: column; gap: 6px; }
+        .trade-form { width: 55%; padding: 10px; display: flex; flex-direction: column; gap: 8px; }
         .side-btns { display: flex; background: var(--input); border-radius: 4px; padding: 2px; }
-        .side-btn { flex: 1; border: none; padding: 7px; border-radius: 3px; color: var(--text); background: none; font-weight: bold; font-size: 10px; }
+        .side-btn { flex: 1; border: none; padding: 8px; border-radius: 3px; color: var(--text); background: none; font-weight: bold; font-size: 11px; }
         .side-btn.active.buy { background: var(--green); color: black; }
         .side-btn.active.sell { background: var(--red); color: white; }
         
-        .fld { background: var(--input); border-radius: 4px; padding: 4px 8px; }
-        .fld label { display: block; font-size: 8px; color: var(--text); text-transform: uppercase; }
+        .fld { background: var(--input); border-radius: 4px; padding: 6px 10px; }
+        .fld label { display: block; font-size: 9px; color: var(--text); text-transform: uppercase; margin-bottom: 2px; }
         .fld input { background: none; border: none; color: white; width: 100%; font-size: 14px; outline: none; }
-        .action-btn { background: var(--green); border: none; color: black; padding: 12px; border-radius: 6px; font-weight: bold; font-size: 14px; margin-top: auto; }
+        
+        .action-btn { background: var(--green); border: none; color: black; padding: 14px; border-radius: 6px; font-weight: bold; font-size: 14px; margin-top: auto; }
 
-        /* Нижняя панель */
-        .orders-bar { height: 35px; background: var(--bg); display: flex; align-items: center; padding: 0 12px; font-size: 11px; color: var(--text); flex-shrink: 0; }
+        /* Нижняя инфо-плашка */
+        .orders-bar { height: 35px; background: var(--bg); display: flex; align-items: center; padding: 0 15px; font-size: 12px; color: var(--text); border-top: 1px solid var(--border); flex-shrink: 0; }
 
         nav { height: 60px; background: var(--panel); border-top: 1px solid var(--border); display: flex; flex-shrink: 0; }
-        .nav-item { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; color: var(--text); font-size: 10px; }
+        .nav-item { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; color: var(--text); font-size: 11px; }
         .nav-item.active { color: white; }
     </style>
 </head>
@@ -57,16 +58,17 @@
 
 <div class="trade-area">
     <div class="book">
-        <div id="asks" class="side-book" style="color:var(--red); justify-content: flex-end;"></div>
+        <div id="asks" class="side-book" style="color:var(--red);"></div>
         <div id="midPrice">0.000</div>
         <div id="bids" class="side-book" style="color:var(--green);"></div>
     </div>
+    
     <div class="trade-form">
         <div class="side-btns">
             <button class="side-btn active buy" onclick="setSide('buy', this)">BUY</button>
             <button class="side-btn" onclick="setSide('sell', this)">SELL</button>
         </div>
-        <div class="fld"><label>Price</label><input type="number" id="iPrice" step="any"></div>
+        <div class="fld"><label>Price</label><input type="number" id="iPrice" value="0.000"></div>
         <div class="fld"><label>Amount</label><input type="number" id="iAmount" placeholder="0.0"></div>
         <button class="action-btn" id="mainBtn">BUY TON</button>
     </div>
@@ -84,6 +86,7 @@
 <script>
     let currentPrice = 0;
 
+    // Используем твой рабочий метод загрузки из вчерашнего кода
     function loadChart() {
         new TradingView.MediumWidget({
             "container_id": "tv_container",
@@ -111,14 +114,15 @@
 
     function updateUI() {
         if(!currentPrice) return;
-        document.getElementById('topPrice').innerText = currentPrice.toFixed(3);
-        document.getElementById('midPrice').innerText = currentPrice.toFixed(3);
+        const pStr = currentPrice.toFixed(3);
+        document.getElementById('topPrice').innerText = pStr;
+        document.getElementById('midPrice').innerText = pStr;
         
         const genRows = (clr) => {
             let h = '';
             for(let i=0; i<6; i++) {
                 let rP = (currentPrice * (1 + (Math.random()-0.5)*0.001)).toFixed(3);
-                h += `<div class="ob-row"><div class="ob-bar" style="width:${Math.random()*60}%; background:${clr}"></div><span>${rP}</span><span style="color:var(--text)">${(Math.random()*2).toFixed(1)}</span></div>`;
+                h += `<div class="ob-row"><div class="ob-bar" style="width:${Math.random()*60}%; background:${clr}"></div><span>${rP}</span><span style="color:var(--text)">${(Math.random()*1.5).toFixed(1)}</span></div>`;
             }
             return h;
         };
