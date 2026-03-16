@@ -2,25 +2,26 @@
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>STRATEX Custom Engine</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>STRATEX Pro Engine</title>
+    <script src="https://unpkg.com/lightweight-charts/dist/lightweight-charts.standalone.production.js"></script>
     <style>
         :root { --bg: #0b0e11; --panel: #171a1e; --input: #2b3139; --green: #0ecb81; --red: #f6465d; --text: #848e9c; --border: #2b2f36; }
         * { box-sizing: border-box; margin: 0; padding: 0; font-family: sans-serif; }
         body { background: var(--bg); color: white; height: 100vh; display: flex; flex-direction: column; overflow: hidden; }
         
-        header { height: 40px; padding: 0 12px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border); }
+        header { height: 40px; padding: 0 12px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border); flex-shrink: 0; }
         .price-top { color: var(--green); font-weight: bold; font-family: monospace; font-size: 16px; }
 
-        .wallet-bar { background: var(--panel); padding: 6px 12px; display: flex; justify-content: space-around; border-bottom: 1px solid var(--border); }
+        .wallet-bar { background: var(--panel); padding: 6px 12px; display: flex; justify-content: space-around; border-bottom: 1px solid var(--border); flex-shrink: 0; }
+        .wallet-item { text-align: center; }
         .wallet-item span { color: var(--text); font-size: 9px; display: block; }
         .wallet-item b { font-family: monospace; font-size: 13px; }
 
-        /* Наш собственный холст для графика */
-        #chart_container { flex: 1; background: #000; position: relative; cursor: crosshair; }
-        canvas { width: 100%; height: 100%; }
-
-        .trade-area { height: 220px; display: flex; background: var(--bg); border-top: 1px solid var(--border); }
+        /* Контейнер для графика */
+        #chart_container { flex: 1; min-height: 200px; background: #000; position: relative; }
+        
+        .trade-area { height: 220px; display: flex; flex-shrink: 0; background: var(--bg); border-top: 1px solid var(--border); }
         .book { width: 42%; border-right: 1px solid var(--border); display: flex; flex-direction: column; padding: 2px; font-family: monospace; font-size: 10px; }
         .side-book { flex: 1; display: flex; flex-direction: column; justify-content: space-around; }
         #midPrice { text-align: center; padding: 4px 0; font-size: 14px; color: var(--green); font-weight: bold; background: rgba(255,255,255,0.03); }
@@ -32,11 +33,11 @@
         .side-btn.active.sell { background: var(--red); color: white; }
         
         .fld { background: var(--input); border-radius: 4px; padding: 4px 8px; }
-        .fld label { display: block; font-size: 8px; color: var(--text); }
+        .fld label { display: block; font-size: 8px; color: var(--text); text-transform: uppercase; }
         .fld input { background: none; border: none; color: white; width: 100%; font-size: 14px; outline: none; }
-        .action-btn { background: var(--green); border: none; color: black; padding: 12px; border-radius: 6px; font-weight: bold; margin-top: auto; }
+        .action-btn { background: var(--green); border: none; color: black; padding: 12px; border-radius: 6px; font-weight: bold; font-size: 13px; margin-top: auto; }
 
-        .history { height: 70px; overflow-y: auto; font-size: 10px; border-top: 1px solid var(--border); padding: 5px; }
+        .history { height: 60px; background: var(--bg); overflow-y: auto; font-size: 10px; border-top: 1px solid var(--border); padding: 5px; color: var(--text); }
     </style>
 </head>
 <body>
@@ -47,13 +48,11 @@
 </header>
 
 <div class="wallet-bar">
-    <div class="wallet-item"><span>USDT Balance</span><b id="balUSDT">1000.00</b></div>
-    <div class="wallet-item"><span>TON Balance</span><b id="balTON">0.00</b></div>
+    <div class="wallet-item"><span>Balance USDT</span><b id="balUSDT">1000.00</b></div>
+    <div class="wallet-item"><span>Balance TON</span><b id="balTON">0.00</b></div>
 </div>
 
-<div id="chart_container">
-    <canvas id="mainChart"></canvas>
-</div>
+<div id="chart_container"></div>
 
 <div class="trade-area">
     <div class="book">
@@ -72,65 +71,46 @@
     </div>
 </div>
 
-<div class="history" id="orderHistory"></div>
+<div class="history" id="orderHistory">История сделок пуста</div>
 
 <script>
     let currentPrice = 0;
-    let prices = []; // Тут храним историю для нашего графика
     let balanceUSDT = 1000;
     let balanceTON = 0;
     let currentSide = 'buy';
 
-    const canvas = document.getElementById('mainChart');
-    const ctx = canvas.getContext('2d');
+    // 1. Настройка графика
+    const chart = LightweightCharts.createChart(document.getElementById('chart_container'), {
+        layout: { backgroundColor: '#000000', textColor: '#848e9c' },
+        grid: { vertLines: { color: '#171a1e' }, horzLines: { color: '#171a1e' } },
+        crosshair: { mode: LightweightCharts.CrosshairMode.Normal },
+        priceScale: { borderColor: '#2b2f36' },
+        timeScale: { borderColor: '#2b2f36', timeVisible: true, secondsVisible: false }
+    });
+    const candleSeries = chart.addCandlestickSeries({
+        upColor: '#0ecb81', downColor: '#f6465d', borderVisible: false,
+        wickUpColor: '#0ecb81', wickDownColor: '#f6465d'
+    });
 
-    function resize() {
-        canvas.width = canvas.offsetWidth;
-        canvas.height = canvas.offsetHeight;
-    }
-    window.onresize = resize;
-    resize();
-
-    // Наш легкий движок отрисовки графика
-    function drawChart() {
-        ctx.clearRect(0, 0, canvas.width, canvas.height);
-        if (prices.length < 2) return;
-
-        const min = Math.min(...prices) * 0.999;
-        const max = Math.max(...prices) * 1.001;
-        const range = max - min;
-        const step = canvas.width / 50;
-
-        ctx.beginPath();
-        ctx.strokeStyle = '#0ecb81';
-        ctx.lineWidth = 2;
-
-        prices.forEach((p, i) => {
-            const x = canvas.width - (prices.length - 1 - i) * step;
-            const y = canvas.height - ((p - min) / range) * canvas.height;
-            if (i === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y);
-        });
-        ctx.stroke();
-        
-        // Сетка
-        ctx.strokeStyle = '#2b2f36';
-        ctx.lineWidth = 0.5;
-        for(let i=0; i<4; i++) {
-            let y = (canvas.height / 4) * i;
-            ctx.moveTo(0, y); ctx.lineTo(canvas.width, y);
-        }
-        ctx.stroke();
-    }
-
-    const ws = new WebSocket('wss://stream.binance.com:9443/ws/tonusdt@ticker');
+    // 2. Логика данных
+    let lastCandle = null;
+    const ws = new WebSocket('wss://stream.binance.com:9443/ws/tonusdt@kline_1m');
+    
     ws.onmessage = (e) => {
         const data = JSON.parse(e.data);
-        currentPrice = parseFloat(data.c);
-        prices.push(currentPrice);
-        if (prices.length > 60) prices.shift(); // Храним последние 60 точек
+        const k = data.k;
+        currentPrice = parseFloat(k.c);
         
+        const candle = {
+            time: k.t / 1000,
+            open: parseFloat(k.o),
+            high: parseFloat(k.h),
+            low: parseFloat(k.l),
+            close: parseFloat(k.c)
+        };
+        
+        candleSeries.update(candle);
         updateUI();
-        drawChart();
     };
 
     function updateUI() {
@@ -141,8 +121,8 @@
         
         const genRows = () => {
             let h = '';
-            for(let i=0; i<5; i++) {
-                h += `<div style="display:flex; justify-content:space-between; padding:0 4px"><span>${(currentPrice * (1 + (Math.random()-0.5)*0.001)).toFixed(3)}</span><span>${(Math.random()*2).toFixed(1)}</span></div>`;
+            for(let i=0; i<4; i++) {
+                h += `<div style="display:flex; justify-content:space-between; padding:0 4px"><span>${(currentPrice * (1 + (Math.random()-0.5)*0.001)).toFixed(3)}</span><span>${(Math.random()*1.5).toFixed(1)}</span></div>`;
             }
             return h;
         };
@@ -164,10 +144,10 @@
         if (a <= 0) return;
 
         if (currentSide === 'buy') {
-            if (p * a > balanceUSDT) return alert("No USDT");
+            if (p * a > balanceUSDT) return alert("Недостаточно USDT");
             balanceUSDT -= p * a; balanceTON += a;
         } else {
-            if (a > balanceTON) return alert("No TON");
+            if (a > balanceTON) return alert("Недостаточно TON");
             balanceUSDT += p * a; balanceTON -= a;
         }
 
@@ -175,9 +155,17 @@
         document.getElementById('balTON').innerText = balanceTON.toFixed(2);
         
         const log = document.createElement('div');
-        log.innerHTML = `${currentSide.toUpperCase()} ${a} TON @ ${p}`;
-        document.getElementById('orderHistory').prepend(log);
+        log.style.color = currentSide === 'buy' ? 'var(--green)' : 'var(--red)';
+        log.innerHTML = `• ${currentSide.toUpperCase()} ${a} TON по цене ${p.toFixed(3)}`;
+        const hist = document.getElementById('orderHistory');
+        if (hist.innerText === 'История сделок пуста') hist.innerHTML = '';
+        hist.prepend(log);
     }
+
+    // Авто-размер
+    window.addEventListener('resize', () => {
+        chart.resize(document.getElementById('chart_container').offsetWidth, document.getElementById('chart_container').offsetHeight);
+    });
 </script>
 </body>
 </html>
