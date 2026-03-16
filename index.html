@@ -184,5 +184,45 @@
 
     window.onload = loadChart;
 </script>
+// Функция для получения реальных цен с Binance
+async function updateMarketPrices() {
+    const symbols = ['TONUSDT', 'BTCUSDT', 'ETHUSDT', 'SOLUSDT', 'BNBUSDT'];
+    const marketContainer = document.getElementById('market-list'); // Убедись, что у тебя есть такой ID во вкладке Market
+    
+    if (!marketContainer) return;
+
+    try {
+        const response = await fetch('https://api.binance.com/api/3/ticker/price');
+        const allPrices = await response.json();
+        
+        // Фильтруем только нужные нам монеты
+        const filteredPrices = allPrices.filter(p => symbols.includes(p.symbol));
+        
+        // Очищаем и наполняем список
+        marketContainer.innerHTML = filteredPrices.map(coin => `
+            <div style="display: flex; justify-content: space-between; padding: 15px; border-bottom: 1px solid #2b2f36;">
+                <div>
+                    <b style="font-size: 16px;">${coin.symbol.replace('USDT', '')}</b>
+                    <span style="color: #848e9c; font-size: 12px;"> / USDT</span>
+                </div>
+                <div style="text-align: right;">
+                    <div style="font-weight: bold; color: #0ecb81;">${parseFloat(coin.price).toFixed(coin.symbol === 'TONUSDT' ? 3 : 2)}</div>
+                </div>
+            </div>
+        `).join('');
+    } catch (error) {
+        console.error('Ошибка загрузки цен:', error);
+        marketContainer.innerHTML = '<p style="padding: 20px; color: red;">Ошибка связи с биржей</p>';
+    }
+}
+
+// Запускаем обновление каждые 5 секунд, если открыта вкладка Маркет
+setInterval(() => {
+    // Здесь можно добавить проверку: если активна вкладка маркет — обновлять
+    updateMarketPrices();
+}, 5000);
+
+// Первый запуск
+updateMarketPrices();
 </body>
 </html>
