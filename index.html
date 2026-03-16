@@ -2,43 +2,21 @@
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>STRATEX Final Build</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>STRATEX Pro Chart</title>
+    <script src="https://unpkg.com/lightweight-charts/dist/lightweight-charts.standalone.production.js"></script>
     <style>
-        :root { --bg: #0b0e11; --panel: #171a1e; --input: #2b3139; --green: #0ecb81; --red: #f6465d; --text: #848e9c; --border: #2b2f36; }
-        * { box-sizing: border-box; margin: 0; padding: 0; font-family: sans-serif; }
-        body { background: var(--bg); color: white; height: 100vh; display: flex; flex-direction: column; overflow: hidden; }
-        
-        header { height: 45px; padding: 0 15px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border); background: var(--panel); }
+        :root { --bg: #0b0e11; --panel: #171a1e; --green: #0ecb81; --red: #f6465d; --text: #848e9c; --border: #2b2f36; }
+        body { background: var(--bg); color: white; margin: 0; font-family: sans-serif; height: 100vh; display: flex; flex-direction: column; overflow: hidden; }
+        header { height: 45px; padding: 0 15px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border); }
         .price-top { color: var(--green); font-weight: bold; font-family: monospace; font-size: 18px; }
-
-        .wallet-bar { background: var(--panel); padding: 8px 15px; display: flex; justify-content: space-around; border-bottom: 1px solid var(--border); }
-        .wallet-item { text-align: center; }
-        .wallet-item span { color: var(--text); font-size: 10px; display: block; text-transform: uppercase; }
-        .wallet-item b { font-family: monospace; font-size: 14px; color: #fff; }
-
-        /* Контейнер для графика через iframe */
-        #chart_wrap { flex: 1; min-height: 250px; background: #000; position: relative; }
-        
-        .trade-area { height: 230px; display: flex; background: var(--bg); border-top: 1px solid var(--border); }
-        .book { width: 40%; border-right: 1px solid var(--border); display: flex; flex-direction: column; padding: 2px; font-family: monospace; font-size: 11px; }
-        .side-book { flex: 1; display: flex; flex-direction: column; justify-content: space-around; }
-        #midPrice { text-align: center; padding: 5px 0; font-size: 15px; color: var(--green); font-weight: bold; background: rgba(255,255,255,0.03); }
-
-        .trade-form { width: 60%; padding: 10px; display: flex; flex-direction: column; gap: 8px; }
-        .side-btns { display: flex; background: var(--input); border-radius: 6px; padding: 3px; }
-        .side-btn { flex: 1; border: none; padding: 8px; border-radius: 4px; color: var(--text); background: none; font-weight: bold; font-size: 12px; }
-        .side-btn.active.buy { background: var(--green); color: black; }
-        .side-btn.active.sell { background: var(--red); color: white; }
-        
-        .fld { background: var(--input); border-radius: 6px; padding: 5px 10px; }
-        .fld label { display: block; font-size: 9px; color: var(--text); text-transform: uppercase; margin-bottom: 2px; }
-        .fld input { background: none; border: none; color: white; width: 100%; font-size: 16px; outline: none; font-family: monospace; }
-        
-        .action-btn { background: var(--green); border: none; color: black; padding: 14px; border-radius: 8px; font-weight: bold; font-size: 14px; margin-top: auto; transition: 0.2s; }
-        .action-btn:active { opacity: 0.7; }
-
-        .history { height: 60px; background: #000; overflow-y: auto; font-size: 11px; border-top: 1px solid var(--border); padding: 5px 12px; color: var(--text); }
+        .wallet { background: var(--panel); padding: 8px 15px; display: flex; justify-content: space-around; border-bottom: 1px solid var(--border); font-size: 12px; }
+        #chart_container { flex: 1; min-height: 250px; position: relative; }
+        .trade-form { height: 220px; padding: 12px; background: var(--bg); border-top: 1px solid var(--border); display: flex; flex-direction: column; gap: 10px; }
+        .fld { background: #2b3139; padding: 8px; border-radius: 6px; }
+        .fld label { display: block; font-size: 10px; color: var(--text); }
+        .fld input { background: none; border: none; color: white; width: 100%; font-size: 16px; outline: none; }
+        .buy-btn { background: var(--green); color: black; border: none; padding: 15px; border-radius: 8px; font-weight: bold; font-size: 16px; }
     </style>
 </head>
 <body>
@@ -48,118 +26,57 @@
     <div class="price-top" id="topPrice">0.000</div>
 </header>
 
-<div class="wallet-bar">
-    <div class="wallet-item"><span>USDT Balance</span><b id="balUSDT">1000.00</b></div>
-    <div class="wallet-item"><span>TON Balance</span><b id="balTON">0.00</b></div>
+<div class="wallet">
+    <div>USDT: <b id="balUSDT">1000.00</b></div>
+    <div>TON: <b id="balTON">0.00</b></div>
 </div>
 
-<div id="chart_wrap">
-    <iframe 
-        id="tv_chart"
-        style="width: 100%; height: 100%; border: none;" 
-        src="https://s.tradingview.com/widgetembed/?symbol=BINANCE%3ATONUSDT&interval=15&theme=dark&style=1&locale=ru&timezone=Etc%2FUTC&hide_top_toolbar=1&hidesidetoolbar=1">
-    </iframe>
-</div>
+<div id="chart_container"></div>
 
-<div class="trade-area">
-    <div class="book">
-        <div id="asks" class="side-book" style="color:var(--red);"></div>
-        <div id="midPrice">0.000</div>
-        <div id="bids" class="side-book" style="color:var(--green);"></div>
-    </div>
-    <div class="trade-form">
-        <div class="side-btns">
-            <button class="side-btn active buy" onclick="setSide('buy', this)">BUY</button>
-            <button class="side-btn" onclick="setSide('sell', this)">SELL</button>
-        </div>
-        <div class="fld">
-            <label>Price (USDT)</label>
-            <input type="number" id="iPrice" step="any">
-        </div>
-        <div class="fld">
-            <label>Amount (TON)</label>
-            <input type="number" id="iAmount" placeholder="0.00">
-        </div>
-        <button class="action-btn" id="mainBtn" onclick="placeOrder()">BUY TON</button>
-    </div>
+<div class="trade-form">
+    <div class="fld"><label>ЦЕНА</label><input type="number" id="iPrice" step="any"></div>
+    <div class="fld"><label>КОЛИЧЕСТВО</label><input type="number" id="iAmount" placeholder="0.0"></div>
+    <button class="buy-btn">КУПИТЬ TON</button>
 </div>
-
-<div class="history" id="orderHistory">История сделок пуста</div>
 
 <script>
-    let currentPrice = 0;
-    let balanceUSDT = 1000.00;
-    let balanceTON = 0.00;
-    let currentSide = 'buy';
+    // 1. Создаем график
+    const chart = LightweightCharts.createChart(document.getElementById('chart_container'), {
+        layout: { backgroundColor: '#0b0e11', textColor: '#d1d4dc' },
+        grid: { vertLines: { color: '#1f2226' }, horzLines: { color: '#1f2226' } },
+        crosshair: { mode: LightweightCharts.CrosshairMode.Normal },
+        rightPriceScale: { borderColor: '#2b2f36' },
+        timeScale: { borderColor: '#2b2f36', timeVisible: true },
+    });
 
-    // Подключаем живые данные по WebSocket
-    const ws = new WebSocket('wss://stream.binance.com:9443/ws/tonusdt@ticker');
-    ws.onmessage = (e) => {
-        const data = JSON.parse(e.data);
-        currentPrice = parseFloat(data.c);
-        updateUI();
+    const candleSeries = chart.addCandlestickSeries({
+        upColor: '#0ecb81', downColor: '#f6465d', borderDownColor: '#f6465d',
+        borderUpColor: '#0ecb81', wickDownColor: '#f6465d', wickUpColor: '#0ecb81',
+    });
+
+    // 2. WebSocket для живых данных Binance
+    const ws = new WebSocket('wss://stream.binance.com:9443/ws/tonusdt@kline_1m');
+    ws.onmessage = (event) => {
+        const data = JSON.parse(event.data);
+        const candle = data.k;
+        
+        const price = parseFloat(candle.c);
+        document.getElementById('topPrice').innerText = price.toFixed(3);
+        if(!document.getElementById('iPrice').value) document.getElementById('iPrice').value = price.toFixed(3);
+
+        candleSeries.update({
+            time: candle.t / 1000,
+            open: parseFloat(candle.o),
+            high: parseFloat(candle.h),
+            low: parseFloat(candle.l),
+            close: price,
+        });
     };
 
-    function updateUI() {
-        if(!currentPrice) return;
-        const pStr = currentPrice.toFixed(3);
-        document.getElementById('topPrice').innerText = pStr;
-        document.getElementById('midPrice').innerText = pStr;
-        
-        // Автоподстановка цены, если поле пустое
-        const priceInput = document.getElementById('iPrice');
-        if(!priceInput.value) priceInput.value = pStr;
-        
-        // Простая имитация стакана (для красоты)
-        const genRows = () => {
-            let h = '';
-            for(let i=0; i<5; i++) {
-                let randP = (currentPrice * (1 + (Math.random()-0.5)*0.002)).toFixed(3);
-                h += `<div style="display:flex;justify-content:space-between;padding:0 5px"><span>${randP}</span><span style="color:var(--text)">${(Math.random()*3).toFixed(1)}</span></div>`;
-            }
-            return h;
-        };
-        document.getElementById('asks').innerHTML = genRows();
-        document.getElementById('bids').innerHTML = genRows();
-    }
-
-    function setSide(side, btn) {
-        currentSide = side;
-        document.querySelectorAll('.side-btn').forEach(b => b.classList.remove('active', 'buy', 'sell'));
-        btn.classList.add('active', side);
-        const b = document.getElementById('mainBtn');
-        b.style.background = side === 'buy' ? 'var(--green)' : 'var(--red)';
-        b.style.color = side === 'buy' ? 'black' : 'white';
-        b.innerText = side.toUpperCase() + ' TON';
-    }
-
-    function placeOrder() {
-        const p = parseFloat(document.getElementById('iPrice').value);
-        const a = parseFloat(document.getElementById('iAmount').value) || 0;
-        if (a <= 0) return alert("Введите количество!");
-
-        if (currentSide === 'buy') {
-            const cost = p * a;
-            if (cost > balanceUSDT) return alert("Недостаточно USDT!");
-            balanceUSDT -= cost; balanceTON += a;
-        } else {
-            if (a > balanceTON) return alert("Недостаточно TON!");
-            balanceUSDT += p * a; balanceTON -= a;
-        }
-
-        // Обновляем кошелек
-        document.getElementById('balUSDT').innerText = balanceUSDT.toFixed(2);
-        document.getElementById('balTON').innerText = balanceTON.toFixed(2);
-
-        // Добавляем в историю
-        const hist = document.getElementById('orderHistory');
-        if (hist.innerText.includes('пуста')) hist.innerHTML = '';
-        const item = document.createElement('div');
-        item.style.borderBottom = "1px solid #1e2329";
-        item.style.padding = "3px 0";
-        item.innerHTML = `<span style="color:${currentSide === 'buy' ? 'var(--green)' : 'var(--red)'}">${currentSide.toUpperCase()}</span> ${a} TON @ ${p.toFixed(3)}`;
-        hist.prepend(item);
-    }
+    // Авто-изменение размера графика
+    window.addEventListener('resize', () => {
+        chart.resize(window.innerWidth, document.getElementById('chart_container').clientHeight);
+    });
 </script>
 </body>
 </html>
