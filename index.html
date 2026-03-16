@@ -3,25 +3,20 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>STRATEX Pro Final</title>
+    <title>STRATEX Pro Live</title>
     <style>
         :root { --bg: #0b0e11; --panel: #171a1e; --input: #2b3139; --green: #0ecb81; --red: #f6465d; --text: #848e9c; --border: #2b2f36; }
         * { box-sizing: border-box; margin: 0; padding: 0; font-family: sans-serif; }
-        
         body { background: var(--bg); color: white; height: 100vh; display: flex; flex-direction: column; overflow: hidden; }
-
         header { height: 45px; padding: 0 12px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border); flex-shrink: 0; }
         .price-top { color: var(--green); font-weight: bold; font-family: monospace; font-size: 17px; }
 
-        /* Контейнер для графика — занимает свободное место, но не более 40% */
         #chart_wrap { flex: 1; min-height: 250px; background: #000; position: relative; overflow: hidden; border-bottom: 2px solid var(--border); }
         
-        /* Торговая зона — ЖЕСТКАЯ ВЫСОТА, чтобы ничего не ползло */
-        .trade-area { height: 230px; display: flex; flex-shrink: 0; background: var(--bg); position: relative; z-index: 10; }
-        
+        .trade-area { height: 230px; display: flex; flex-shrink: 0; background: var(--bg); border-bottom: 1px solid var(--border); }
         .book { width: 45%; border-right: 1px solid var(--border); display: flex; flex-direction: column; padding: 5px 2px; font-family: monospace; font-size: 11px; }
         .side-book { flex: 1; display: flex; flex-direction: column; overflow: hidden; justify-content: space-between; }
-        .ob-row { display: flex; justify-content: space-between; height: 16px; position: relative; padding: 0 4px; }
+        .ob-row { display: flex; justify-content: space-between; height: 16px; position: relative; width: 100%; padding: 0 4px; }
         .ob-bar { position: absolute; right: 0; height: 100%; opacity: 0.15; }
         #midPrice { text-align: center; padding: 6px 0; font-size: 15px; color: var(--green); font-weight: bold; margin: 3px 0; background: rgba(255,255,255,0.03); }
 
@@ -32,13 +27,16 @@
         .side-btn.active.sell { background: var(--red); color: white; }
         
         .fld { background: var(--input); border-radius: 4px; padding: 6px 10px; }
-        .fld label { display: block; font-size: 9px; color: var(--text); text-transform: uppercase; margin-bottom: 2px; }
+        .fld label { display: block; font-size: 9px; color: var(--text); text-transform: uppercase; }
         .fld input { background: none; border: none; color: white; width: 100%; font-size: 14px; outline: none; }
-        
-        .action-btn { background: var(--green); border: none; color: black; padding: 14px; border-radius: 6px; font-weight: bold; font-size: 14px; margin-top: auto; }
+        .action-btn { background: var(--green); border: none; color: black; padding: 14px; border-radius: 6px; font-weight: bold; font-size: 14px; margin-top: auto; transition: 0.2s; }
+        .action-btn:active { opacity: 0.7; transform: scale(0.98); }
 
-        /* Нижняя инфо-плашка */
-        .orders-bar { height: 35px; background: var(--bg); display: flex; align-items: center; padding: 0 15px; font-size: 12px; color: var(--text); border-top: 1px solid var(--border); flex-shrink: 0; }
+        /* Панель ордеров */
+        .orders-bar { height: 120px; background: var(--bg); overflow-y: auto; flex-shrink: 0; border-top: 1px solid var(--border); }
+        .orders-title { padding: 8px 12px; font-size: 11px; color: var(--text); border-bottom: 1px solid var(--border); position: sticky; top: 0; background: var(--bg); }
+        .order-item { display: flex; justify-content: space-between; padding: 8px 12px; font-size: 12px; border-bottom: 1px solid #1e2329; animation: slideIn 0.3s ease; }
+        @keyframes slideIn { from { opacity: 0; transform: translateY(-10px); } to { opacity: 1; transform: translateY(0); } }
 
         nav { height: 60px; background: var(--panel); border-top: 1px solid var(--border); display: flex; flex-shrink: 0; }
         .nav-item { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; color: var(--text); font-size: 11px; }
@@ -62,19 +60,20 @@
         <div id="midPrice">0.000</div>
         <div id="bids" class="side-book" style="color:var(--green);"></div>
     </div>
-    
     <div class="trade-form">
         <div class="side-btns">
             <button class="side-btn active buy" onclick="setSide('buy', this)">BUY</button>
             <button class="side-btn" onclick="setSide('sell', this)">SELL</button>
         </div>
-        <div class="fld"><label>Price</label><input type="number" id="iPrice" value="0.000"></div>
+        <div class="fld"><label>Price</label><input type="number" id="iPrice" step="any"></div>
         <div class="fld"><label>Amount</label><input type="number" id="iAmount" placeholder="0.0"></div>
-        <button class="action-btn" id="mainBtn">BUY TON</button>
+        <button class="action-btn" id="mainBtn" onclick="placeOrder()">BUY TON</button>
     </div>
 </div>
 
-<div class="orders-bar">Open Orders (0)</div>
+<div class="orders-bar" id="ordersList">
+    <div class="orders-title">Open Orders (0)</div>
+</div>
 
 <nav>
     <div class="nav-item active"><span>📊</span>Trade</div>
@@ -85,23 +84,17 @@
 <script type="text/javascript" src="https://s3.tradingview.com/tv.js"></script>
 <script>
     let currentPrice = 0;
+    let currentSide = 'buy';
+    let ordersCount = 0;
 
-    // Используем твой рабочий метод загрузки из вчерашнего кода
     function loadChart() {
         new TradingView.MediumWidget({
             "container_id": "tv_container",
             "symbols": [["BINANCE:TONUSDT", "TON/USDT"]],
-            "greyText": "Default",
-            "gridLineColor": "rgba(43, 47, 54, 1)",
-            "fontColor": "rgba(132, 142, 156, 1)",
-            "underLineColor": "rgba(11, 14, 17, 1)",
-            "trendLineColor": "rgba(14, 203, 129, 1)",
-            "width": "100%",
-            "height": "100%",
-            "locale": "ru",
-            "colorTheme": "dark",
-            "autosize": true,
-            "chartType": "area"
+            "greyText": "Default", "gridLineColor": "rgba(43, 47, 54, 1)",
+            "fontColor": "rgba(132, 142, 156, 1)", "underLineColor": "rgba(11, 14, 17, 1)",
+            "trendLineColor": "rgba(14, 203, 129, 1)", "width": "100%", "height": "100%",
+            "locale": "ru", "colorTheme": "dark", "autosize": true, "chartType": "area"
         });
     }
 
@@ -117,6 +110,7 @@
         const pStr = currentPrice.toFixed(3);
         document.getElementById('topPrice').innerText = pStr;
         document.getElementById('midPrice').innerText = pStr;
+        if(!document.getElementById('iPrice').value) document.getElementById('iPrice').value = pStr;
         
         const genRows = (clr) => {
             let h = '';
@@ -131,12 +125,31 @@
     }
 
     function setSide(side, btn) {
+        currentSide = side;
         document.querySelectorAll('.side-btn').forEach(b => b.classList.remove('active', 'buy', 'sell'));
         btn.classList.add('active', side);
         const b = document.getElementById('mainBtn');
         b.style.background = side === 'buy' ? 'var(--green)' : 'var(--red)';
         b.style.color = side === 'buy' ? 'black' : 'white';
         b.innerText = side.toUpperCase() + ' TON';
+    }
+
+    function placeOrder() {
+        const price = document.getElementById('iPrice').value;
+        const amount = document.getElementById('iAmount').value || "1.0";
+        const list = document.getElementById('ordersList');
+        
+        ordersCount++;
+        const item = document.createElement('div');
+        item.className = 'order-item';
+        item.innerHTML = `
+            <span style="color:${currentSide === 'buy' ? 'var(--green)' : 'var(--red)'}">${currentSide.toUpperCase()}</span>
+            <span>${price}</span>
+            <span>${amount} TON</span>
+            <span style="color:var(--text)" onclick="this.parentElement.remove()">✕</span>
+        `;
+        list.appendChild(item);
+        document.querySelector('.orders-title').innerText = `Open Orders (${ordersCount})`;
     }
 
     window.onload = loadChart;
