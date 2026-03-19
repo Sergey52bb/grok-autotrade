@@ -1,43 +1,65 @@
-DOCTYPE html>
+<!DOCTYPE html>
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>Grok AutoTrade v3.0</title>
+    <title>Grok AutoTrade Final</title>
     <style>
-        :root { --bg: #0b0e11; --panel: #171a1e; --text: #848e9c; --green: #0ecb81; --red: #f6465d; --border: #2b3139; }
-        * { box-sizing: border-box; }
-        body { background: var(--bg); color: white; margin: 0; font-family: -apple-system, sans-serif; height: 100vh; display: flex; flex-direction: column; overflow: hidden; }
+        :root { --bg: #0b0e11; --panel: #171a1e; --text: #848e9c; --green: #0ecb81; --red: #f6465d; --border: #2b2f36; }
+        * { box-sizing: border-box; margin: 0; padding: 0; outline: none; }
+        body { background: var(--bg); color: white; font-family: -apple-system, system-ui, sans-serif; height: 100vh; display: flex; flex-direction: column; overflow: hidden; }
         
-        header { padding: 12px 15px; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; background: var(--bg); }
+        /* Исправление п.1 и п.4: Убираем мусор из хедера */
+        header { height: 50px; padding: 0 15px; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; background: var(--bg); z-index: 10; }
         .live-p { color: var(--green); font-weight: bold; font-family: monospace; font-size: 18px; }
 
-        .tab-content { display: none; flex: 1; overflow-y: auto; padding-bottom: 80px; }
-        .tab-content.active { display: block; }
+        /* Контент вкладок */
+        .tab-content { display: none; flex: 1; overflow-y: auto; padding-bottom: 75px; position: relative; }
+        .tab-content.active { display: flex; flex-direction: column; }
+        
+        #tv_chart_container { height: 320px; width: 100%; background: #000; position: relative; }
 
-        #tv_chart_container { height: 280px; width: 100%; background: #000; }
+        /* ИСПРАВЛЕНИЕ п.3: Железобетонный стакан (Order Book) */
+        .trade-block { 
+            display: flex; 
+            flex: 1; /* Занимает всё оставшееся место */
+            padding: 10px; 
+            gap: 12px; 
+            border-top: 1px solid var(--border); 
+            background: var(--bg); 
+            min-height: 220px; /* Гарантируем высоту */
+        }
+        
+        .order-book-clean { 
+            flex: 1; 
+            display: flex; 
+            flex-direction: column; 
+            justify-content: space-between; 
+            font-family: 'Roboto Mono', monospace; 
+            font-size: 12px;
+            color: var(--text);
+            padding-right: 5px;
+        }
 
-        /* Торговля: Стакан слева, форма справа */
-        .trade-ui { display: flex; padding: 10px; gap: 12px; border-top: 1px solid var(--border); background: var(--bg); }
-        .order-book { flex: 1; font-family: 'Roboto Mono', monospace; font-size: 11px; display: flex; flex-direction: column; justify-content: space-between; height: 180px; }
-        .inputs-side { flex: 1.1; display: flex; flex-direction: column; gap: 8px; }
+        .inputs-side-clean { flex: 1.1; display: flex; flex-direction: column; gap: 8px; }
 
-        .ob-row { display: flex; justify-content: space-between; padding: 1px 0; }
-        .mid-p { text-align: center; font-size: 15px; font-weight: bold; color: var(--green); padding: 4px 0; border-top: 1px solid #23272e; border-bottom: 1px solid #23272e; margin: 4px 0; }
+        .ob-row-clean { display: flex; justify-content: space-between; padding: 1.5px 0; width: 100%; }
+        .ob-mid { text-align: center; font-size: 16px; font-weight: bold; color: var(--green); padding: 5px 0; border-top: 1px solid #23272e; border-bottom: 1px solid #23272e; margin: 4px 0; }
 
-        .fld { background: #2b3139; border-radius: 6px; padding: 6px 10px; }
-        .fld label { display: block; font-size: 9px; color: var(--text); text-transform: uppercase; }
-        .fld input { background: transparent; border: none; color: white; width: 100%; font-size: 15px; outline: none; margin-top: 2px; }
-        .action-btn { background: var(--green); color: black; border: none; padding: 14px; border-radius: 8px; font-weight: bold; font-size: 14px; margin-top: auto; }
+        .fld-clean { background: #2b3139; border-radius: 6px; padding: 6px 10px; width: 100%; }
+        .fld-clean label { display: block; font-size: 9px; color: var(--text); text-transform: uppercase; }
+        .fld-clean input { background: transparent; border: none; color: white; width: 100%; font-size: 15px; margin-top: 2px; }
+        .buy-btn-clean { background: var(--green); color: black; border: none; padding: 14px; border-radius: 8px; font-weight: bold; font-size: 14px; cursor: pointer; margin-top: auto; width: 100%; }
 
-        /* Маркет лист с процентами */
-        .m-item { display: flex; justify-content: space-between; padding: 15px; border-bottom: 1px solid var(--border); align-items: center; }
-        .m-coin { font-weight: bold; font-size: 15px; }
+        /* Markets */
+        .m-item-clean { display: flex; justify-content: space-between; padding: 16px; border-bottom: 1px solid var(--border); align-items: center; }
+        .m-coin-clean { font-weight: bold; font-size: 15px; }
 
-        .nav { position: fixed; bottom: 0; width: 100%; background: #181a20; display: flex; height: 70px; border-top: 1px solid var(--border); padding-bottom: env(safe-area-inset-bottom); }
-        .nav-btn { flex: 1; text-align: center; padding-top: 10px; color: var(--text); font-size: 10px; cursor: pointer; }
-        .nav-btn.active { color: white; }
-        .nav-icon { font-size: 20px; display: block; margin-bottom: 4px; }
+        /* Меню внизу */
+        .nav-clean { position: fixed; bottom: 0; width: 100%; background: #181a20; display: flex; height: 70px; border-top: 1px solid var(--border); padding-bottom: env(safe-area-inset-bottom); z-index: 10; }
+        .nav-btn-clean { flex: 1; text-align: center; padding-top: 10px; color: var(--text); font-size: 10px; cursor: pointer; background: none; border: none;}
+        .nav-btn-clean.active { color: white; }
+        .nav-icon-clean { font-size: 20px; display: block; margin-bottom: 4px; }
     </style>
 </head>
 <body>
@@ -49,30 +71,32 @@ DOCTYPE html>
 
 <div id="trade" class="tab-content active">
     <div id="tv_chart_container"></div>
-    <div class="trade-ui">
-        <div class="order-book">
+    
+    <div class="trade-block">
+        <div class="order-book-clean" id="ob-list">
             <div style="color:var(--red)">
-                <div class="ob-row"><span>1.3368</span><span>1.5K</span></div>
-                <div class="ob-row"><span>1.3365</span><span>0.8K</span></div>
+                <div class="ob-row-clean"><span>1.2368</span><span>1.5K</span></div>
+                <div class="ob-row-clean"><span>1.2365</span><span>0.8K</span></div>
             </div>
-            <div class="mid-p" id="inner-price">1.3350</div>
+            <div class="ob-mid" id="mid-price">1.2350</div>
             <div style="color:var(--green)">
-                <div class="ob-row"><span>1.3345</span><span>1.2K</span></div>
-                <div class="ob-row"><span>1.3340</span><span>3.4K</span></div>
+                <div class="ob-row-clean"><span>1.2345</span><span>1.2K</span></div>
+                <div class="ob-row-clean"><span>1.2340</span><span>3.4K</span></div>
             </div>
         </div>
-        <div class="inputs-side">
-            <div class="fld"><label>Цена</label><input type="number" id="price-input" step="any"></div>
-            <div class="fld"><label>Кол-во</label><input type="number" placeholder="0.0"></div>
-            <button class="action-btn">BUY TON</button>
+        
+        <div class="inputs-side-clean">
+            <div class="fld-clean"><label>Цена</label><input type="number" id="price-input" step="any"></div>
+            <div class="fld-clean"><label>Кол-во (TON)</label><input type="number" placeholder="0.0"></div>
+            <button class="buy-btn-clean">КУПИТЬ TON</button>
         </div>
     </div>
 </div>
 
 <div id="market" class="tab-content">
-    <h2 style="padding: 15px 15px 5px 15px; margin: 0; font-size: 18px;">Рынки</h2>
+    <h2 style="padding: 15px; margin: 0; font-size: 18px;">Рынки</h2>
     <div id="market-list">
-        <p style="padding: 20px; color: var(--text);">Загрузка котировок...</p>
+        <p style="padding: 20px; color: var(--text);">Синхронизация цен...</p>
     </div>
 </div>
 
@@ -85,11 +109,11 @@ DOCTYPE html>
     </div>
 </div>
 
-<nav class="nav">
-    <div class="nav-btn active" onclick="tab('trade')"><span class="nav-icon">📊</span>Trade</div>
-    <div class="nav-btn" onclick="tab('market')"><span class="nav-icon">📈</span>Market</div>
-    <div class="nav-btn" onclick="tab('wallet')"><span class="nav-icon">💼</span>Wallet</div>
-    <div class="nav-btn" onclick="tab('profile')"><span class="nav-icon">👤</span>Profile</div>
+<nav class="nav-clean">
+    <div class="nav-btn-clean active" onclick="tab('trade')"><span class="nav-icon-clean">📊</span>Trade</div>
+    <div class="nav-btn-clean" onclick="tab('market')"><span class="nav-icon-clean">📈</span>Market</div>
+    <div class="nav-btn-clean" onclick="tab('wallet')"><span class="nav-icon-clean">💼</span>Wallet</div>
+    <div class="nav-btn-clean" onclick="tab('profile')"><span class="nav-icon-clean">👤</span>Profile</div>
 </nav>
 
 <script src="https://s3.tradingview.com/tv.js"></script>
@@ -103,18 +127,21 @@ DOCTYPE html>
     // 2. Навигация
     function tab(id) {
         document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
-        document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+        document.querySelectorAll('.nav-btn-clean').forEach(b => b.classList.remove('active'));
         document.getElementById(id).classList.add('active');
         event.currentTarget.classList.add('active');
         if(id === 'market') updateMarkets();
     }
 
-    // 3. Улучшенный Маркет
+    // 3. Рынки (Решение п.2)
     async function updateMarkets() {
         const list = document.getElementById('market-list');
         const favs = ['TONUSDT', 'BTCUSDT', 'ETHUSDT', 'SOLUSDT', 'BNBUSDT'];
+        const url = 'https://api.binance.com/api/3/ticker/24hr'; // Этот эндпоинт стабильнее
+
         try {
-            const res = await fetch('https://api.binance.com/api/3/ticker/24hr');
+            const res = await fetch(url);
+            if (!res.ok) throw new Error('Api error');
             const data = await res.json();
             const filtered = data.filter(c => favs.includes(c.symbol));
             
@@ -122,8 +149,8 @@ DOCTYPE html>
                 const change = parseFloat(item.priceChangePercent);
                 const color = change >= 0 ? 'var(--green)' : 'var(--red)';
                 return `
-                    <div class="m-item">
-                        <div><span class="m-coin">${item.symbol.replace('USDT','')}</span><span style="color:var(--text);font-size:11px"> / USDT</span></div>
+                    <div class="m-item-clean">
+                        <div><span class="m-coin-clean">${item.symbol.replace('USDT','')}</span><span style="color:var(--text);font-size:11px"> / USDT</span></div>
                         <div style="text-align: right;">
                             <div style="font-weight:bold; font-family:monospace;">${parseFloat(item.lastPrice).toFixed(item.symbol==='TONUSDT'?4:2)}</div>
                             <div style="color:${color}; font-size:11px;">${change >= 0 ? '+' : ''}${change.toFixed(2)}%</div>
@@ -132,21 +159,23 @@ DOCTYPE html>
                 `;
             }).join('');
         } catch(e) { 
-            list.innerHTML = '<p style="padding:20px;color:red">Ошибка сети. Попробуйте VPN или обновите страницу.</p>'; 
+            console.error(e);
+            list.innerHTML = '<p style="padding:20px;color:red;font-size:12px;">Ошибка данных Binance. Проверьте VPN или обновите страницу.</p>'; 
         }
     }
 
-    // 4. WebSocket для цены
+    // 4. WebSocket
     const socket = new WebSocket('wss://stream.binance.com:9443/ws/tonusdt@ticker');
     socket.onmessage = (e) => {
         const d = JSON.parse(e.data);
         const p = parseFloat(d.c).toFixed(4);
         document.getElementById('header-price').innerText = p;
-        document.getElementById('inner-price').innerText = p;
-        if(!document.getElementById('price-input').value) document.getElementById('price-input').value = p;
+        document.getElementById('mid-price').innerText = p;
+        if(!document.getElementById('price-input').value) document.getElementById('price-input').value = d.c;
     };
-
-    setInterval(() => { if(document.getElementById('market').classList.contains('active')) updateMarkets(); }, 5000);
+    
+    // Автообновление маркета раз в 10 сек
+    setInterval(() => { if(document.getElementById('market').classList.contains('active')) updateMarkets(); }, 10000);
 </script>
 </body>
-                    </html>
+</html>
