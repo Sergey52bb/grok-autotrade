@@ -2,55 +2,63 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>SYN TERMINAL</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <!-- TradingView -->
+  <script src="https://s3.tradingview.com/tv.js"></script>
 
   <style>
     body {
       margin: 0;
-      background: #0f172a;
-      color: white;
       font-family: Arial, sans-serif;
+      background: #0b1220;
+      color: white;
     }
 
-    .header {
-      padding: 15px;
+    header {
       text-align: center;
-      font-size: 20px;
-      font-weight: bold;
-      background: #020617;
-      border-bottom: 1px solid #1e293b;
+      padding: 15px;
+      background: #0f1a2e;
+      border-bottom: 1px solid #1f2a44;
+    }
+
+    h1 {
+      margin: 0;
+      font-size: 22px;
+    }
+
+    .subtitle {
+      font-size: 14px;
+      color: #aaa;
+      margin-top: 4px;
     }
 
     .balance {
-      padding: 15px;
       text-align: center;
-      font-size: 16px;
+      padding: 10px;
+      font-size: 14px;
+      color: #ccc;
     }
 
-    .chart {
-      height: 260px;
-      background: #020617;
+    #chart {
+      height: 400px;
     }
 
-    #tradingview_chart {
-      height: 100%;
-      width: 100%;
-    }
-
-    .actions {
+    .buttons {
       display: flex;
       gap: 10px;
       padding: 15px;
     }
 
-    button {
+    .btn {
       flex: 1;
       padding: 15px;
-      font-size: 16px;
+      font-size: 18px;
       border: none;
       border-radius: 10px;
       color: white;
+      cursor: pointer;
     }
 
     .buy {
@@ -61,123 +69,65 @@
       background: #dc2626;
     }
 
-    .footer {
+    .nav {
       position: fixed;
       bottom: 0;
       width: 100%;
       display: flex;
-      background: #020617;
-      border-top: 1px solid #1e293b;
+      background: #0f1a2e;
+      border-top: 1px solid #1f2a44;
     }
 
-    .footer div {
+    .nav div {
       flex: 1;
-      padding: 10px;
       text-align: center;
-      font-size: 14px;
-      color: #94a3b8;
+      padding: 10px;
+      font-size: 12px;
+      color: #aaa;
     }
   </style>
 </head>
 
 <body>
 
-  <div class="header">
-    💎 SYN TERMINAL
-  </div>
+  <header>
+    <h1>💎 SYN TERMINAL</h1>
+    <div class="subtitle">AI Trading System</div>
+  </header>
 
-  <div class="balance" id="balance">
+  <div class="balance">
     Loading balance...
   </div>
 
-  <div class="chart">
-    <div id="tradingview_chart"></div>
+  <div id="chart"></div>
+
+  <div class="buttons">
+    <button class="btn buy">BUY</button>
+    <button class="btn sell">SELL</button>
   </div>
 
-  <div class="actions">
-    <button class="buy" onclick="buy()">BUY</button>
-    <button class="sell" onclick="sell()">SELL</button>
-  </div>
-
-  <div class="footer">
+  <div class="nav">
     <div>Home</div>
     <div>Trade</div>
     <div>Wallet</div>
     <div>Settings</div>
   </div>
 
-  <!-- Telegram WebApp -->
-  <script src="https://telegram.org/js/telegram-web-app.js"></script>
-
-  <!-- TradingView -->
-  <script src="https://s3.tradingview.com/tv.js"></script>
-
   <script>
-    const tg = window.Telegram.WebApp;
-    tg.expand();
-
-    const user = tg.initDataUnsafe?.user;
-
-    // 📊 ГРАФИК
     new TradingView.widget({
+      "container_id": "chart",
       "width": "100%",
-      "height": 260,
+      "height": 400,
       "symbol": "BINANCE:TONUSDT",
       "interval": "5",
-      "timezone": "Etc/UTC",
       "theme": "dark",
       "style": "1",
       "locale": "en",
-      "toolbar_bg": "#020617",
+      "toolbar_bg": "#0f1a2e",
       "enable_publishing": false,
-      "hide_top_toolbar": false,
-      "container_id": "tradingview_chart"
+      "hide_side_toolbar": false,
+      "allow_symbol_change": true
     });
-
-    // 💰 БАЛАНС
-    async function loadBalance() {
-      if (!user) return;
-
-      try {
-        const res = await fetch('https://ton-wallet-api.onrender.com/balance?userId=' + user.id);
-        const data = await res.json();
-
-        document.getElementById('balance').innerText =
-          '💰 TON: ' + data.ton + ' | USDT: ' + data.usdt;
-      } catch (e) {
-        document.getElementById('balance').innerText = 'Error loading balance';
-      }
-    }
-
-    // 🟢 BUY
-    async function buy() {
-      if (!user) return;
-
-      await fetch('https://ton-wallet-api.onrender.com/buy', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ userId: user.id, amount: 10 })
-      });
-
-      alert('BUY executed 🚀');
-      loadBalance();
-    }
-
-    // 🔴 SELL
-    async function sell() {
-      if (!user) return;
-
-      await fetch('https://ton-wallet-api.onrender.com/sell', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ userId: user.id, amount: 10 })
-      });
-
-      alert('SELL executed 🔻');
-      loadBalance();
-    }
-
-    loadBalance();
   </script>
 
 </body>
