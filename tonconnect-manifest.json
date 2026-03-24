@@ -1,6 +1,11 @@
-{
-  "url": "https://sergey52bb.github.io/grok-autotrade/",
-  "name": "Grok AutoTrade",
-  "iconUrl": "https://ton.org/static/my_dest/apple-touch-icon.png"
-}
+app.get('/balance', (req, res) => {
+  res.json({ ton: 10, usdt: 100 });
+});
 
+app.post('/buy', (req, res) => {
+  res.json({ success: true });
+});
+
+app.post('/sell', (req, res) => {
+  res.json({ success: true });
+});
