@@ -1,11 +1,5 @@
-app.get('/balance', (req, res) => {
-  res.json({ ton: 10, usdt: 100 });
-});
-
-app.post('/buy', (req, res) => {
-  res.json({ success: true });
-});
-
-app.post('/sell', (req, res) => {
-  res.json({ success: true });
-});
+{
+  "url": "https://sergey52bb.github.io/grok-autotrade/",
+  "name": "SYN TERMINAL",
+  "iconUrl": "https://sergey52bb.github.io/grok-autotrade/icon.png"
+}
