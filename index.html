@@ -1,188 +1,161 @@
 <!DOCTYPE html>
-<html lang="ru">
+<html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>STRATEX Mobile Fix</title>
-    <style>
-        :root { --bg: #0b0e11; --panel: #171a1e; --input: #2b3139; --green: #0ecb81; --red: #f6465d; --text: #848e9c; --border: #2b2f36; }
-        * { box-sizing: border-box; margin: 0; padding: 0; font-family: sans-serif; }
-        
-        body { 
-            background: var(--bg); 
-            color: white; 
-            height: 100dvh; /* Динамическая высота для мобилок */
-            display: flex; 
-            flex-direction: column; 
-            overflow: hidden; 
-        }
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SYN TERMINAL</title>
 
-        header { height: 50px; padding: 0 12px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border); flex-shrink: 0; }
-        .price-top { color: var(--green); font-weight: bold; font-family: monospace; font-size: 18px; }
+  <style>
+    body {
+      margin: 0;
+      background: #0f172a;
+      color: white;
+      font-family: Arial, sans-serif;
+    }
 
-        /* Контейнер для экранов с отступом под навигацию */
-        #main_content { 
-            flex: 1; 
-            position: relative; 
-            overflow: hidden; 
-            margin-bottom: 60px; /* Место для меню */
-        }
+    .header {
+      padding: 15px;
+      text-align: center;
+      font-size: 20px;
+      font-weight: bold;
+      background: #020617;
+      border-bottom: 1px solid #1e293b;
+    }
 
-        .screen { display: none; height: 100%; width: 100%; flex-direction: column; overflow-y: auto; }
-        #screen_trade { display: flex; overflow: hidden; }
+    .balance {
+      padding: 15px;
+      text-align: center;
+      font-size: 16px;
+    }
 
-        #chart_wrap { height: 45%; width: 100%; background: #000; flex-shrink: 0; }
-        
-        .trade-area { display: flex; flex: 1; border-top: 1px solid var(--border); overflow: hidden; }
-        .book { width: 45%; border-right: 1px solid var(--border); padding: 5px; font-family: monospace; font-size: 11px; overflow: hidden; }
-        .ob-row { display: flex; justify-content: space-between; height: 16px; position: relative; }
-        .ob-bar { position: absolute; right: 0; height: 100%; opacity: 0.15; }
+    .chart {
+      height: 250px;
+      background: #020617;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #64748b;
+    }
 
-        .trade-form { width: 55%; padding: 10px; display: flex; flex-direction: column; gap: 6px; }
-        .side-btns { display: flex; background: var(--input); border-radius: 4px; padding: 2px; }
-        .side-btn { flex: 1; border: none; padding: 8px; border-radius: 3px; color: var(--text); background: none; font-weight: bold; font-size: 12px; }
-        .side-btn.active.buy { background: var(--green); color: black; }
-        .side-btn.active.sell { background: var(--red); color: white; }
+    .actions {
+      display: flex;
+      gap: 10px;
+      padding: 15px;
+    }
 
-        .fld { background: var(--input); border-radius: 4px; padding: 6px; }
-        .fld label { display: block; font-size: 9px; color: var(--text); text-transform: uppercase; }
-        .fld input { background: none; border: none; color: white; width: 100%; font-size: 14px; outline: none; }
+    button {
+      flex: 1;
+      padding: 15px;
+      font-size: 16px;
+      border: none;
+      border-radius: 10px;
+      color: white;
+    }
 
-        .action-btn { background: var(--green); border: none; color: black; padding: 12px; border-radius: 6px; font-weight: bold; margin-top: auto; }
+    .buy {
+      background: #16a34a;
+    }
 
-        /* Фиксированная навигация */
-        nav { 
-            height: 60px; 
-            background: var(--panel); 
-            border-top: 1px solid var(--border); 
-            display: flex; 
-            position: fixed; 
-            bottom: 0; 
-            left: 0; 
-            right: 0; 
-            z-index: 9999;
-            padding-bottom: env(safe-area-inset-bottom); /* Учет "челки" снизу на iPhone */
-        }
-        .nav-item { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; color: var(--text); font-size: 10px; cursor: pointer; }
-        .nav-item.active { color: white; }
-        .nav-item span { font-size: 18px; margin-bottom: 2px; }
+    .sell {
+      background: #dc2626;
+    }
 
-        /* Стили кошелька */
-        #screen_wallet { padding: 20px; }
-        .wallet-card { background: var(--panel); padding: 20px; border-radius: 12px; border: 1px solid var(--border); margin-bottom: 15px; }
-    </style>
+    .footer {
+      position: fixed;
+      bottom: 0;
+      width: 100%;
+      display: flex;
+      background: #020617;
+      border-top: 1px solid #1e293b;
+    }
+
+    .footer div {
+      flex: 1;
+      padding: 10px;
+      text-align: center;
+      font-size: 14px;
+      color: #94a3b8;
+    }
+  </style>
 </head>
+
 <body>
 
-<div id="main_content">
-    <div id="screen_trade" class="screen">
-        <header>
-            <b>TON/USDT</b>
-            <div class="price-top" id="topPrice">0.0000</div>
-        </header>
-        <div id="chart_wrap">
-            <div id="tv_container" style="width:100%; height:100%;"></div>
-        </div>
-        <div class="trade-area">
-            <div class="book">
-                <div id="asks" style="color:var(--red); display:flex; flex-direction:column-reverse;"></div>
-                <div id="midPrice" style="text-align:center; padding:5px 0; font-size:15px; color:var(--green); font-weight:bold;">0.0000</div>
-                <div id="bids" style="color:var(--green);"></div>
-            </div>
-            <div class="trade-form">
-                <div class="side-btns">
-                    <button class="side-btn active buy" onclick="setSide('buy', this)">BUY</button>
-                    <button class="side-btn" onclick="setSide('sell', this)">SELL</button>
-                </div>
-                <div class="fld"><label>Price</label><input type="number" id="iPrice" step="any"></div>
-                <div class="fld"><label>Amount (TON)</label><input type="number" placeholder="0.0"></div>
-                <button class="action-btn" id="mainBtn">BUY TON</button>
-            </div>
-        </div>
-    </div>
+  <div class="header">
+    💎 SYN TERMINAL
+  </div>
 
-    <div id="screen_wallet" class="screen">
-        <h2 style="margin-bottom:15px;">Wallet</h2>
-        <div class="wallet-card">
-            <div style="color:var(--text); font-size:12px;">Total Assets</div>
-            <div style="font-size:26px; font-weight:bold; margin-top:5px;">$ <span id="total_val">0.00</span></div>
-        </div>
-        <div class="wallet-card" style="display:flex; justify-content:space-between; align-items:center; padding:15px;">
-            <div><b>TON</b><br><small style="color:var(--text);">Balance: 150.0</small></div>
-            <div id="wallet_ton_usd" style="font-weight:bold;">$0.00</div>
-        </div>
-    </div>
+  <div class="balance" id="balance">
+    Loading balance...
+  </div>
 
-    <div id="screen_market" class="screen" style="padding:20px;"><h2>Markets</h2><p>List of pairs...</p></div>
-    <div id="screen_profile" class="screen" style="padding:20px;"><h2>Profile</h2><p>Settings...</p></div>
-</div>
+  <div class="chart">
+    📊 Chart (soon TradingView)
+  </div>
 
-<nav>
-    <div class="nav-item active" onclick="showScreen('trade', this)"><span>📊</span>Trade</div>
-    <div class="nav-item" onclick="showScreen('market', this)"><span>📈</span>Market</div>
-    <div class="nav-item" onclick="showScreen('wallet', this)"><span>💼</span>Wallet</div>
-    <div class="nav-item" onclick="showScreen('profile', this)"><span>👤</span>Profile</div>
-</nav>
+  <div class="actions">
+    <button class="buy" onclick="buy()">BUY</button>
+    <button class="sell" onclick="sell()">SELL</button>
+  </div>
 
-<script type="text/javascript" src="https://s3.tradingview.com/tv.js"></script>
-<script>
-    let priceTON = 0;
+  <div class="footer">
+    <div>Home</div>
+    <div>Trade</div>
+    <div>Wallet</div>
+    <div>Settings</div>
+  </div>
 
-    function loadChart() {
-        new TradingView.widget({
-            "autosize": true, "symbol": "BINANCE:TONUSDT", "interval": "15",
-            "theme": "dark", "container_id": "tv_container", "hide_top_toolbar": true, "locale": "ru"
-        });
+  <!-- Telegram SDK -->
+  <script src="https://telegram.org/js/telegram-web-app.js"></script>
+
+  <script>
+    const tg = window.Telegram.WebApp;
+    tg.expand();
+
+    const user = tg.initDataUnsafe?.user;
+
+    async function loadBalance() {
+      if (!user) return;
+
+      try {
+        const res = await fetch('https://ton-wallet-api.onrender.com/balance?userId=' + user.id);
+        const data = await res.json();
+
+        document.getElementById('balance').innerText =
+          '💰 TON: ' + data.ton + ' | USDT: ' + data.usdt;
+      } catch (e) {
+        document.getElementById('balance').innerText = 'Error loading balance';
+      }
     }
 
-    const ws = new WebSocket('wss://stream.binance.com:9443/ws/tonusdt@ticker');
-    ws.onmessage = (e) => {
-        const data = JSON.parse(e.data);
-        priceTON = parseFloat(data.c);
-        updateUI();
-    };
+    async function buy() {
+      if (!user) return;
 
-    function updateUI() {
-        if(!priceTON) return;
-        document.getElementById('topPrice').innerText = priceTON.toFixed(4);
-        document.getElementById('midPrice').innerText = priceTON.toFixed(4);
-        document.getElementById('iPrice').value = priceTON.toFixed(4);
+      await fetch('https://ton-wallet-api.onrender.com/buy', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ userId: user.id, amount: 10 })
+      });
 
-        // Расчеты кошелька
-        const tonVal = 150 * priceTON;
-        const asterVal = 1200 * 0.7; // Фикс ASTER
-        document.getElementById('wallet_ton_usd').innerText = '$' + tonVal.toFixed(2);
-        document.getElementById('total_val').innerText = (tonVal + asterVal).toLocaleString(undefined, {minimumFractionDigits: 2});
-
-        const genRows = (clr) => {
-            let h = '';
-            for(let i=0; i<8; i++) {
-                let rP = (priceTON * (1 + (Math.random()-0.5)*0.003)).toFixed(4);
-                h += `<div class="ob-row"><div class="ob-bar" style="width:${Math.random()*70}%; background:${clr}"></div><span>${rP}</span><span>${(Math.random()*5).toFixed(1)}</span></div>`;
-            }
-            return h;
-        };
-        document.getElementById('asks').innerHTML = genRows('var(--red)');
-        document.getElementById('bids').innerHTML = genRows('var(--green)');
+      alert('BUY executed 🚀');
+      loadBalance();
     }
 
-    function showScreen(id, el) {
-        document.querySelectorAll('.screen').forEach(s => s.style.display = 'none');
-        document.getElementById('screen_' + id).style.display = (id === 'trade' ? 'flex' : 'block');
-        document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
-        el.classList.add('active');
+    async function sell() {
+      if (!user) return;
+
+      await fetch('https://ton-wallet-api.onrender.com/sell', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ userId: user.id, amount: 10 })
+      });
+
+      alert('SELL executed 🔻');
+      loadBalance();
     }
 
-    function setSide(side, btn) {
-        document.querySelectorAll('.side-btn').forEach(b => b.classList.remove('active', 'buy', 'sell'));
-        btn.classList.add('active', side);
-        const b = document.getElementById('mainBtn');
-        b.style.background = side === 'buy' ? 'var(--green)' : 'var(--red)';
-        b.style.color = side === 'buy' ? 'black' : 'white';
-        b.innerText = side.toUpperCase() + ' TON';
-    }
+    loadBalance();
+  </script>
 
-    window.onload = loadChart;
-</script>
 </body>
 </html>
