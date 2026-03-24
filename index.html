@@ -29,12 +29,13 @@
     }
 
     .chart {
-      height: 250px;
+      height: 260px;
       background: #020617;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      color: #64748b;
+    }
+
+    #tradingview_chart {
+      height: 100%;
+      width: 100%;
     }
 
     .actions {
@@ -90,7 +91,7 @@
   </div>
 
   <div class="chart">
-    📊 Chart (soon TradingView)
+    <div id="tradingview_chart"></div>
   </div>
 
   <div class="actions">
@@ -105,8 +106,11 @@
     <div>Settings</div>
   </div>
 
-  <!-- Telegram SDK -->
+  <!-- Telegram WebApp -->
   <script src="https://telegram.org/js/telegram-web-app.js"></script>
+
+  <!-- TradingView -->
+  <script src="https://s3.tradingview.com/tv.js"></script>
 
   <script>
     const tg = window.Telegram.WebApp;
@@ -114,6 +118,23 @@
 
     const user = tg.initDataUnsafe?.user;
 
+    // 📊 ГРАФИК
+    new TradingView.widget({
+      "width": "100%",
+      "height": 260,
+      "symbol": "BINANCE:TONUSDT",
+      "interval": "5",
+      "timezone": "Etc/UTC",
+      "theme": "dark",
+      "style": "1",
+      "locale": "en",
+      "toolbar_bg": "#020617",
+      "enable_publishing": false,
+      "hide_top_toolbar": false,
+      "container_id": "tradingview_chart"
+    });
+
+    // 💰 БАЛАНС
     async function loadBalance() {
       if (!user) return;
 
@@ -128,6 +149,7 @@
       }
     }
 
+    // 🟢 BUY
     async function buy() {
       if (!user) return;
 
@@ -141,6 +163,7 @@
       loadBalance();
     }
 
+    // 🔴 SELL
     async function sell() {
       if (!user) return;
 
