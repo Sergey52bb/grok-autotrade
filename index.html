@@ -1,118 +1,147 @@
 <!DOCTYPE html>
 <html lang="ru">
 <head>
-  <meta charset="UTF-8">
-  <title>SYN TERMINAL</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SYN TERMINAL</title>
 
-  <style>
-    html, body {
-      margin: 0;
-      height: 100%;
-      overflow: hidden;
-      font-family: Arial;
-      background: #081221;
-      color: white;
-    }
+<script src="https://s3.tradingview.com/tv.js"></script>
 
-    header {
-      text-align: center;
-      padding: 10px;
-      background: #0d1b2a;
-    }
+<style>
+body {
+  margin: 0;
+  background: #0b1622;
+  font-family: Arial;
+  color: white;
+}
 
-    #chart {
-      height: 220px;
-    }
+/* ограничение как в приложении */
+.container {
+  max-width: 500px;
+  margin: auto;
+}
 
-    .orderbook {
-      height: calc(100vh - 360px);
-      margin: 8px;
-      background: #0d1b2a;
-      border-radius: 10px;
-      overflow-y: auto;
-      padding: 5px;
-    }
+/* HEADER */
+.header {
+  text-align: center;
+  padding: 15px;
+  background: #0f2235;
+}
 
-    .order {
-      position: relative;
-      display: flex;
-      justify-content: space-between;
-      font-size: 12px;
-      padding: 2px 6px;
-      margin: 1px 0;
-      border-radius: 4px;
-    }
+.header h1 {
+  margin: 0;
+}
 
-    .order::before {
-      content: "";
-      position: absolute;
-      top: 0;
-      bottom: 0;
-      right: 0;
-      width: var(--depth);
-      opacity: 0.25;
-    }
+.sub {
+  opacity: 0.6;
+}
 
-    .sell::before { background: red; }
-    .buy::before { background: lime; }
+/* CHART */
+#chart {
+  height: 250px;
+}
 
-    .sell { color: #ff4d4d; }
-    .buy { color: #00c853; }
+/* ORDER BOOK */
+.orderbook {
+  height: 300px;
+  overflow-y: auto;
+  padding: 5px;
+}
 
-    .price {
-      text-align: center;
-      font-weight: bold;
-      padding: 6px;
-      background: #081221;
-      margin: 4px 0;
-      border-radius: 6px;
-    }
+/* строки */
+.row {
+  display: flex;
+  justify-content: space-between;
+  font-size: 13px;
+  padding: 2px 6px;
+  position: relative;
+}
 
-    .buttons {
-      display: flex;
-      justify-content: space-around;
-      margin: 10px;
-    }
+/* фон глубины */
+.row::before {
+  content: "";
+  position: absolute;
+  right: 0;
+  top: 0;
+  bottom: 0;
+  opacity: 0.2;
+  z-index: 0;
+}
 
-    .btn {
-      width: 45%;
-      padding: 12px;
-      font-size: 16px;
-      border-radius: 10px;
-      border: none;
-      color: white;
-    }
+.sell::before {
+  background: red;
+}
 
-    .buy-btn { background: green; }
-    .sell-btn { background: red; }
+.buy::before {
+  background: lime;
+}
 
-    .menu {
-      position: fixed;
-      bottom: 0;
-      width: 100%;
-      display: flex;
-      justify-content: space-around;
-      background: #0d1b2a;
-      padding: 8px 0;
-    }
-  </style>
+.price, .amount {
+  position: relative;
+  z-index: 1;
+}
+
+.sell .price { color: #ff4d4d; }
+.buy .price { color: #00ff99; }
+
+/* текущая цена */
+.middle {
+  text-align: center;
+  padding: 6px;
+  font-weight: bold;
+  background: #08121c;
+}
+
+/* BUTTONS */
+.buttons {
+  display: flex;
+  gap: 10px;
+  padding: 10px;
+}
+
+.buy-btn {
+  flex: 1;
+  background: green;
+  padding: 15px;
+  text-align: center;
+  border-radius: 10px;
+}
+
+.sell-btn {
+  flex: 1;
+  background: red;
+  padding: 15px;
+  text-align: center;
+  border-radius: 10px;
+}
+
+/* MENU */
+.menu {
+  display: flex;
+  justify-content: space-around;
+  padding: 10px;
+  background: #0f2235;
+  font-size: 14px;
+}
+</style>
 </head>
 
 <body>
 
-<header>
-  <h3>💎 SYN TERMINAL</h3>
-  <small>AI Trading System</small>
-</header>
+<div class="container">
+
+<div class="header">
+  <h1>💎 SYN TERMINAL</h1>
+  <div class="sub">AI Trading System</div>
+</div>
 
 <div id="chart"></div>
 
 <div class="orderbook" id="orderbook"></div>
 
 <div class="buttons">
-  <button class="btn buy-btn">BUY</button>
-  <button class="btn sell-btn">SELL</button>
+  <div class="buy-btn">BUY</div>
+  <div class="sell-btn">SELL</div>
 </div>
 
 <div class="menu">
@@ -122,74 +151,73 @@
   <div>Settings</div>
 </div>
 
-<script src="https://s3.tradingview.com/tv.js"></script>
+</div>
 
 <script>
-document.body.style.height = window.innerHeight + "px";
-
 new TradingView.widget({
-  width: "100%",
-  height: 220,
-  symbol: "BINANCE:TONUSDT",
-  interval: "5",
-  theme: "dark",
-  container_id: "chart"
+  "container_id": "chart",
+  "width": "100%",
+  "height": 250,
+  "symbol": "BINANCE:TONUSDT",
+  "interval": "5",
+  "theme": "dark",
+  "style": "1",
+  "hide_top_toolbar": true,
+  "hide_legend": true
 });
 
-async function loadOrderBook() {
-  const res = await fetch('https://api.binance.com/api/v3/depth?symbol=TONUSDT&limit=40');
-  const data = await res.json();
+/* генерация живого стакана */
+function generateOrders() {
+  const ob = document.getElementById("orderbook");
+  ob.innerHTML = "";
 
-  const asks = data.asks.slice(0, 20);
-  const bids = data.bids.slice(0, 20);
+  let price = 1.300;
 
-  const container = document.getElementById('orderbook');
-  container.innerHTML = '';
+  // 🔴 SELL (сверху)
+  for (let i = 0; i < 15; i++) {
+    price += Math.random() * 0.002;
 
-  let maxVolume = 0;
-  [...asks, ...bids].forEach(o => {
-    const v = parseFloat(o[1]);
-    if (v > maxVolume) maxVolume = v;
-  });
+    const amount = Math.floor(Math.random() * 60000);
 
-  // SELL (верх)
-  for (let i = asks.length - 1; i >= 0; i--) {
-    const price = parseFloat(asks[i][0]).toFixed(3);
-    const vol = parseFloat(asks[i][1]);
-    const depth = (vol / maxVolume) * 100;
+    const row = document.createElement("div");
+    row.className = "row sell";
 
-    container.innerHTML += `
-      <div class="order sell" style="--depth:${depth}%">
-        <span>${price}</span>
-        <span>${vol.toFixed(0)}</span>
-      </div>
+    row.innerHTML = `
+      <span class="price">${price.toFixed(3)}</span>
+      <span class="amount">${amount}</span>
     `;
+
+    row.style.setProperty('--depth', amount);
+
+    ob.appendChild(row);
   }
 
-  // ЦЕНА ПО ЦЕНТРУ
-  container.innerHTML += `
-    <div class="price">
-      ${parseFloat(bids[0][0]).toFixed(3)}
-    </div>
-  `;
+  // текущая цена
+  const mid = document.createElement("div");
+  mid.className = "middle";
+  mid.innerText = price.toFixed(3);
+  ob.appendChild(mid);
 
-  // BUY (низ)
-  bids.forEach(o => {
-    const price = parseFloat(o[0]).toFixed(3);
-    const vol = parseFloat(o[1]);
-    const depth = (vol / maxVolume) * 100;
+  // 🟢 BUY (снизу)
+  for (let i = 0; i < 15; i++) {
+    price -= Math.random() * 0.002;
 
-    container.innerHTML += `
-      <div class="order buy" style="--depth:${depth}%">
-        <span>${price}</span>
-        <span>${vol.toFixed(0)}</span>
-      </div>
+    const amount = Math.floor(Math.random() * 60000);
+
+    const row = document.createElement("div");
+    row.className = "row buy";
+
+    row.innerHTML = `
+      <span class="price">${price.toFixed(3)}</span>
+      <span class="amount">${amount}</span>
     `;
-  });
+
+    ob.appendChild(row);
+  }
 }
 
-loadOrderBook();
-setInterval(loadOrderBook, 3000);
+setInterval(generateOrders, 1500);
+generateOrders();
 </script>
 
 </body>
