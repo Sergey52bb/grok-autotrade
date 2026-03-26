@@ -8,7 +8,7 @@
   <style>
     body {
       margin: 0;
-      font-family: Arial, sans-serif;
+      font-family: Arial;
       background: #081221;
       color: white;
     }
@@ -27,7 +27,6 @@
     header p {
       margin: 5px 0 0;
       color: #aaa;
-      font-size: 14px;
     }
 
     #chart {
@@ -44,28 +43,51 @@
     }
 
     .orderbook-title {
-      margin-bottom: 8px;
+      margin-bottom: 10px;
       font-size: 14px;
     }
 
     .order {
+      position: relative;
       display: flex;
       justify-content: space-between;
       font-size: 12px;
-      padding: 2px 0;
+      padding: 3px 6px;
+      margin: 2px 0;
+      overflow: hidden;
+      border-radius: 4px;
     }
 
-    .red {
+    /* ГЛУБИНА (ПОЛОСЫ) */
+    .order::before {
+      content: "";
+      position: absolute;
+      top: 0;
+      bottom: 0;
+      right: 0;
+      width: var(--depth);
+      opacity: 0.2;
+    }
+
+    .sell::before {
+      background: red;
+    }
+
+    .buy::before {
+      background: lime;
+    }
+
+    .sell {
       color: #ff4d4d;
     }
 
-    .green {
+    .buy {
       color: #00c853;
     }
 
     .price {
       text-align: center;
-      margin: 6px 0;
+      margin: 8px 0;
       font-weight: bold;
     }
 
@@ -86,15 +108,15 @@
       color: white;
     }
 
-    .buy {
+    .buy-btn {
       background: green;
     }
 
-    .sell {
+    .sell-btn {
       background: red;
     }
 
-    /* ===== BOTTOM MENU ===== */
+    /* ===== MENU ===== */
 
     .menu {
       position: fixed;
@@ -115,65 +137,76 @@
 
 <body>
 
-  <header>
-    <h1>💎 SYN TERMINAL</h1>
-    <p>AI Trading System</p>
-  </header>
+<header>
+  <h1>💎 SYN TERMINAL</h1>
+  <p>AI Trading System</p>
+</header>
 
-  <!-- ГРАФИК -->
-  <div id="chart"></div>
+<div id="chart"></div>
 
-  <!-- СТАКАН -->
-  <div class="orderbook">
-    <div class="orderbook-title">Order Book</div>
+<!-- СТАКАН -->
+<div class="orderbook">
+  <div class="orderbook-title">Order Book</div>
 
-    <!-- SELL -->
-    <div class="order red"><span>1.308</span><span>120</span></div>
-    <div class="order red"><span>1.307</span><span>95</span></div>
-    <div class="order red"><span>1.306</span><span>210</span></div>
-
-    <!-- PRICE -->
-    <div class="price">1.307</div>
-
-    <!-- BUY -->
-    <div class="order green"><span>1.306</span><span>150</span></div>
-    <div class="order green"><span>1.305</span><span>80</span></div>
-    <div class="order green"><span>1.304</span><span>200</span></div>
+  <!-- SELL -->
+  <div class="order sell" style="--depth: 80%;">
+    <span>1.308</span><span>320</span>
   </div>
 
-  <!-- КНОПКИ -->
-  <div class="buttons">
-    <button class="btn buy">BUY</button>
-    <button class="btn sell">SELL</button>
+  <div class="order sell" style="--depth: 60%;">
+    <span>1.307</span><span>210</span>
   </div>
 
-  <!-- МЕНЮ -->
-  <div class="menu">
-    <div>Home</div>
-    <div>Trade</div>
-    <div>Wallet</div>
-    <div>Settings</div>
+  <div class="order sell" style="--depth: 40%;">
+    <span>1.306</span><span>150</span>
   </div>
 
-  <!-- TradingView Chart -->
-  <script src="https://s3.tradingview.com/tv.js"></script>
+  <!-- CURRENT PRICE -->
+  <div class="price">1.307</div>
 
-  <script>
-    new TradingView.widget({
-      "width": "100%",
-      "height": 300,
-      "symbol": "BINANCE:TONUSDT",
-      "interval": "5",
-      "timezone": "Etc/UTC",
-      "theme": "dark",
-      "style": "1",
-      "locale": "en",
-      "toolbar_bg": "#0d1b2a",
-      "enable_publishing": false,
-      "hide_top_toolbar": false,
-      "container_id": "chart"
-    });
-  </script>
+  <!-- BUY -->
+  <div class="order buy" style="--depth: 70%;">
+    <span>1.306</span><span>280</span>
+  </div>
+
+  <div class="order buy" style="--depth: 50%;">
+    <span>1.305</span><span>190</span>
+  </div>
+
+  <div class="order buy" style="--depth: 30%;">
+    <span>1.304</span><span>120</span>
+  </div>
+
+</div>
+
+<!-- КНОПКИ -->
+<div class="buttons">
+  <button class="btn buy-btn">BUY</button>
+  <button class="btn sell-btn">SELL</button>
+</div>
+
+<!-- МЕНЮ -->
+<div class="menu">
+  <div>Home</div>
+  <div>Trade</div>
+  <div>Wallet</div>
+  <div>Settings</div>
+</div>
+
+<!-- TradingView -->
+<script src="https://s3.tradingview.com/tv.js"></script>
+
+<script>
+  new TradingView.widget({
+    width: "100%",
+    height: 300,
+    symbol: "BINANCE:TONUSDT",
+    interval: "5",
+    theme: "dark",
+    style: "1",
+    container_id: "chart"
+  });
+</script>
 
 </body>
 </html>
