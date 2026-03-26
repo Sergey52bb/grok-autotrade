@@ -33,18 +33,13 @@
       height: 300px;
     }
 
-    /* ===== ORDER BOOK ===== */
-
     .orderbook {
       margin: 15px;
       background: #0d1b2a;
       padding: 10px;
       border-radius: 10px;
-    }
-
-    .orderbook-title {
-      margin-bottom: 10px;
-      font-size: 14px;
+      max-height: 300px;
+      overflow: hidden;
     }
 
     .order {
@@ -53,12 +48,11 @@
       justify-content: space-between;
       font-size: 12px;
       padding: 3px 6px;
-      margin: 2px 0;
-      overflow: hidden;
+      margin: 1px 0;
       border-radius: 4px;
+      overflow: hidden;
     }
 
-    /* ГЛУБИНА (ПОЛОСЫ) */
     .order::before {
       content: "";
       position: absolute;
@@ -66,7 +60,7 @@
       bottom: 0;
       right: 0;
       width: var(--depth);
-      opacity: 0.2;
+      opacity: 0.25;
     }
 
     .sell::before {
@@ -77,21 +71,15 @@
       background: lime;
     }
 
-    .sell {
-      color: #ff4d4d;
-    }
-
-    .buy {
-      color: #00c853;
-    }
+    .sell { color: #ff4d4d; }
+    .buy { color: #00c853; }
 
     .price {
       text-align: center;
-      margin: 8px 0;
+      margin: 6px 0;
       font-weight: bold;
+      font-size: 14px;
     }
-
-    /* ===== BUTTONS ===== */
 
     .buttons {
       display: flex;
@@ -108,15 +96,8 @@
       color: white;
     }
 
-    .buy-btn {
-      background: green;
-    }
-
-    .sell-btn {
-      background: red;
-    }
-
-    /* ===== MENU ===== */
+    .buy-btn { background: green; }
+    .sell-btn { background: red; }
 
     .menu {
       position: fixed;
@@ -144,48 +125,13 @@
 
 <div id="chart"></div>
 
-<!-- СТАКАН -->
-<div class="orderbook">
-  <div class="orderbook-title">Order Book</div>
+<div class="orderbook" id="orderbook"></div>
 
-  <!-- SELL -->
-  <div class="order sell" style="--depth: 80%;">
-    <span>1.308</span><span>320</span>
-  </div>
-
-  <div class="order sell" style="--depth: 60%;">
-    <span>1.307</span><span>210</span>
-  </div>
-
-  <div class="order sell" style="--depth: 40%;">
-    <span>1.306</span><span>150</span>
-  </div>
-
-  <!-- CURRENT PRICE -->
-  <div class="price">1.307</div>
-
-  <!-- BUY -->
-  <div class="order buy" style="--depth: 70%;">
-    <span>1.306</span><span>280</span>
-  </div>
-
-  <div class="order buy" style="--depth: 50%;">
-    <span>1.305</span><span>190</span>
-  </div>
-
-  <div class="order buy" style="--depth: 30%;">
-    <span>1.304</span><span>120</span>
-  </div>
-
-</div>
-
-<!-- КНОПКИ -->
 <div class="buttons">
   <button class="btn buy-btn">BUY</button>
   <button class="btn sell-btn">SELL</button>
 </div>
 
-<!-- МЕНЮ -->
 <div class="menu">
   <div>Home</div>
   <div>Trade</div>
@@ -193,7 +139,6 @@
   <div>Settings</div>
 </div>
 
-<!-- TradingView -->
 <script src="https://s3.tradingview.com/tv.js"></script>
 
 <script>
@@ -206,6 +151,67 @@
     style: "1",
     container_id: "chart"
   });
+
+  async function loadOrderBook() {
+    try {
+      const res = await fetch('https://api.binance.com/api/v3/depth?symbol=TONUSDT&limit=20');
+      const data = await res.json();
+
+      const asks = data.asks; // SELL
+      const bids = data.bids; // BUY
+
+      const container = document.getElementById('orderbook');
+      container.innerHTML = '';
+
+      let maxVolume = 0;
+
+      [...asks, ...bids].forEach(o => {
+        const vol = parseFloat(o[1]);
+        if (vol > maxVolume) maxVolume = vol;
+      });
+
+      // SELL (сверху)
+      asks.reverse().forEach(order => {
+        const price = parseFloat(order[0]).toFixed(3);
+        const volume = parseFloat(order[1]);
+
+        const depth = (volume / maxVolume) * 100;
+
+        container.innerHTML += `
+          <div class="order sell" style="--depth:${depth}%">
+            <span>${price}</span>
+            <span>${volume.toFixed(0)}</span>
+          </div>
+        `;
+      });
+
+      // CURRENT PRICE
+      const mid = parseFloat(bids[0][0]).toFixed(3);
+
+      container.innerHTML += `<div class="price">${mid}</div>`;
+
+      // BUY (снизу)
+      bids.forEach(order => {
+        const price = parseFloat(order[0]).toFixed(3);
+        const volume = parseFloat(order[1]);
+
+        const depth = (volume / maxVolume) * 100;
+
+        container.innerHTML += `
+          <div class="order buy" style="--depth:${depth}%">
+            <span>${price}</span>
+            <span>${volume.toFixed(0)}</span>
+          </div>
+        `;
+      });
+
+    } catch (e) {
+      console.log('Ошибка стакана:', e);
+    }
+  }
+
+  loadOrderBook();
+  setInterval(loadOrderBook, 3000);
 </script>
 
 </body>
