@@ -1,205 +1,226 @@
 <!DOCTYPE html>
 <html lang="ru">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Grok-Auto Trade Interface</title>
+    <style>
+        :root {
+            --bg-color: #0b121e;
+            --card-bg: #1a2230;
+            --text-main: #ffffff;
+            --text-dim: #8e96a3;
+            --green: #2ebd85;
+            --red: #f6465d;
+            --blue: #2a6df3;
+            --orange: #f0b90b;
+        }
 
-<title>SYN TERMINAL</title>
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            margin: 0;
+            padding: 15px;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            font-size: 14px;
+        }
 
-<style>
+        /* Header */
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .pair-info { font-size: 18px; font-weight: bold; }
+        .change { color: var(--green); font-size: 14px; margin-left: 5px; }
 
-/* ОСНОВА */
-body {
-  margin: 0;
-  background: #071326;
-  font-family: Arial;
-  color: white;
-}
+        /* Main Grid */
+        .main-container {
+            display: grid;
+            grid-template-columns: 58% 40%;
+            gap: 2%;
+        }
 
-/* HEADER */
-.header {
-  height: 60px;
-  padding-top: 44px;
-  text-align: center;
-  font-size: 18px;
-  font-weight: bold;
-}
+        /* Left Side: Trade Form */
+        .trade-form { display: flex; flex-direction: column; gap: 10px; }
+        
+        .tabs {
+            display: flex;
+            background: var(--card-bg);
+            border-radius: 8px;
+            padding: 2px;
+        }
+        .tab {
+            flex: 1;
+            padding: 8px;
+            text-align: center;
+            border-radius: 6px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+        .tab.buy { background: var(--blue); }
+        .tab.sell { color: var(--orange); }
 
-/* MAIN */
-.main {
-  height: calc(100vh - 60px - 40px - 44px - 64px - 34px);
-  display: flex;
-  flex-direction: column;
-}
+        .input-group {
+            background: var(--card-bg);
+            padding: 12px;
+            border-radius: 10px;
+            display: flex;
+            justify-content: space-between;
+        }
+        .label { color: var(--text-dim); }
 
-/* ГРАФИК (СВЕРНУТ) */
-.chart {
-  height: 44px;
-  background: #0c1f3a;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 12px;
-}
+        .btn-main {
+            background: var(--green);
+            color: white;
+            border: none;
+            padding: 15px;
+            border-radius: 12px;
+            font-size: 16px;
+            font-weight: bold;
+            margin-top: 5px;
+        }
 
-/* СТАКАН */
-.orderbook {
-  flex: 1;
-  overflow-y: auto;
-}
+        /* Right Side: Order Book (Swap Depth) */
+        .order-book {
+            background: #161d2a;
+            border-radius: 10px;
+            padding: 10px 5px;
+            border: 1px solid #252d3a;
+        }
+        .ob-title { font-size: 11px; color: var(--text-dim); margin-bottom: 8px; padding-left: 5px; }
+        
+        .row {
+            position: relative;
+            display: flex;
+            justify-content: space-between;
+            height: 22px;
+            align-items: center;
+            font-size: 11px;
+            padding: 0 5px;
+            overflow: hidden;
+        }
+        .fill {
+            position: absolute;
+            right: 0;
+            top: 0;
+            bottom: 0;
+            z-index: 1;
+            opacity: 0.2;
+        }
+        .row span { z-index: 2; }
+        .price-red { color: var(--red); }
+        .price-green { color: var(--green); }
 
-/* СТРОКИ */
-.row {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  padding: 2px 10px;
-  font-size: 12px;
-  position: relative;
-}
-
-.row span {
-  position: relative;
-  z-index: 2;
-}
-
-/* ГЛУБИНА */
-.row::before {
-  content: '';
-  position: absolute;
-  right: 0;
-  top: 0;
-  height: 100%;
-  width: var(--depth);
-  opacity: 0.2;
-  z-index: 1;
-}
-
-.sell { color: #ff4d4d; }
-.sell::before { background: red; }
-
-.buy { color: #00ff9c; }
-.buy::before { background: #00ff9c; }
-
-/* ЦЕНА */
-.price {
-  text-align: center;
-  padding: 6px;
-  font-size: 14px;
-  font-weight: bold;
-  background: #0c1f3a;
-  position: sticky;
-  top: 0;
-  z-index: 5;
-}
-
-/* WALLET */
-.wallet {
-  height: 40px;
-  font-size: 11px;
-  display: flex;
-  align-items: center;
-  justify-content: space-around;
-  background: #0c1f3a;
-}
-
-/* BOTTOM */
-.bottom {
-  height: 64px;
-  padding-bottom: 34px;
-  display: flex;
-  justify-content: space-around;
-  align-items: center;
-  background: #0c1f3a;
-}
-
-</style>
+        /* Chart Section */
+        .chart-section {
+            border-top: 1px solid #252d3a;
+            padding-top: 15px;
+        }
+        .chart-placeholder {
+            height: 150px;
+            background: #121926;
+            border-radius: 10px;
+            margin-top: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #444;
+            border: 1px dashed #333;
+        }
+    </style>
 </head>
-
 <body>
 
-<!-- HEADER -->
-<div class="header">
-  💎 SYN TERMINAL<br>
-  <span style="font-size:12px; opacity:0.7;">AI Trading System</span>
-</div>
+    <!-- Header -->
+    <div class="header">
+        <div class="pair-info">TON / USDT <span class="change">+0.62%</span></div>
+        <div style="color: #555;">⚙️ &nbsp; ••• </div>
+    </div>
 
-<!-- MAIN -->
-<div class="main">
+    <!-- Main Content -->
+    <div class="main-container">
+        
+        <!-- Левая часть: Форма -->
+        <div class="trade-form">
+            <div class="tabs">
+                <div class="tab buy">Buy</div>
+                <div class="tab sell">Sell</div>
+            </div>
+            
+            <div class="input-group">
+                <span class="label">Amount</span>
+                <span>25 TON</span>
+            </div>
 
-  <!-- ГРАФИК ПОЛОСКА -->
-  <div class="chart">📉 Развернуть график</div>
+            <div class="input-group">
+                <span class="label">You Receive</span>
+                <span>133.25 USDT</span>
+            </div>
 
-  <!-- СТАКАН -->
-  <div class="orderbook" id="orderbook"></div>
+            <div class="input-group">
+                <span class="label">DEX Fee</span>
+                <span style="font-size: 12px;">0.25% ; 33 TON</span>
+            </div>
 
-</div>
+            <button class="btn-main">Buy TON</button>
+        </div>
 
-<!-- WALLET -->
-<div class="wallet">
-  Balance: 1200 USDT | Fee: 0.25%
-</div>
+        <!-- Правая часть: Стакан -->
+        <div class="order-book">
+            <div class="ob-title">Swap Depth</div>
+            
+            <!-- Продажи (Red) -->
+            <div class="row">
+                <div class="fill" style="width: 45%; background: var(--red);"></div>
+                <span class="price-red">5.33</span>
+                <span>353</span>
+            </div>
+            <div class="row">
+                <div class="fill" style="width: 80%; background: var(--red);"></div>
+                <span class="price-red">5.31</span>
+                <span>791</span>
+            </div>
+            <div class="row">
+                <div class="fill" style="width: 25%; background: var(--red);"></div>
+                <span class="price-red">5.30</span>
+                <span>119</span>
+            </div>
 
-<!-- BOTTOM NAV -->
-<div class="bottom">
-  <div>Home</div>
-  <div>Trade</div>
-  <div>Wallet</div>
-</div>
+            <hr style="border: 0; border-top: 1px solid #333; margin: 5px 0;">
 
-<script>
+            <!-- Покупки (Green) -->
+            <div class="row">
+                <div class="fill" style="width: 65%; background: var(--green);"></div>
+                <span class="price-green">5.25</span>
+                <span>361</span>
+            </div>
+            <div class="row">
+                <div class="fill" style="width: 50%; background: var(--green);"></div>
+                <span class="price-green">5.23</span>
+                <span>347</span>
+            </div>
+            <div class="row">
+                <div class="fill" style="width: 40%; background: var(--green);"></div>
+                <span class="price-green">5.21</span>
+                <span>107</span>
+            </div>
+        </div>
+    </div>
 
-const orderbook = document.getElementById('orderbook');
-
-function generateOrders() {
-  orderbook.innerHTML = '';
-
-  let price = 100;
-
-  // SELL (красные)
-  for (let i = 0; i < 20; i++) {
-    let amount = Math.random() * 5;
-    let depth = Math.random() * 100;
-
-    const row = document.createElement('div');
-    row.className = 'row sell';
-    row.style.setProperty('--depth', depth + '%');
-
-    row.innerHTML = `
-      <span>${(price + i * 0.2).toFixed(2)}</span>
-      <span>${amount.toFixed(3)}</span>
-    `;
-
-    orderbook.appendChild(row);
-  }
-
-  // PRICE
-  const priceRow = document.createElement('div');
-  priceRow.className = 'price';
-  priceRow.innerText = price.toFixed(2);
-  orderbook.appendChild(priceRow);
-
-  // BUY (зелёные)
-  for (let i = 0; i < 20; i++) {
-    let amount = Math.random() * 5;
-    let depth = Math.random() * 100;
-
-    const row = document.createElement('div');
-    row.className = 'row buy';
-    row.style.setProperty('--depth', depth + '%');
-
-    row.innerHTML = `
-      <span>${(price - i * 0.2).toFixed(2)}</span>
-      <span>${amount.toFixed(3)}</span>
-    `;
-
-    orderbook.appendChild(row);
-  }
-}
-
-generateOrders();
-setInterval(generateOrders, 2000);
-
-</script>
+    <!-- Chart -->
+    <div class="chart-section">
+        <div style="display: flex; justify-content: space-between; font-size: 12px; color: var(--text-dim);">
+            <span>TON / USDT Chart</span>
+            <span>˄</span>
+        </div>
+        <div class="chart-placeholder">
+            [ TradingView Chart Placeholder ]
+        </div>
+    </div>
 
 </body>
 </html>
