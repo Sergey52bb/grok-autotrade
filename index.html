@@ -30,12 +30,6 @@
       margin: 8px;
       background: #0d1b2a;
       border-radius: 10px;
-      display: flex;
-      flex-direction: column;
-    }
-
-    .orders {
-      flex: 1;
       overflow-y: auto;
       padding: 5px;
     }
@@ -69,8 +63,10 @@
     .price {
       text-align: center;
       font-weight: bold;
-      padding: 5px;
+      padding: 6px;
       background: #081221;
+      margin: 4px 0;
+      border-radius: 6px;
     }
 
     .buttons {
@@ -112,11 +108,7 @@
 
 <div id="chart"></div>
 
-<div class="orderbook">
-  <div class="orders" id="sellOrders"></div>
-  <div class="price" id="price">--</div>
-  <div class="orders" id="buyOrders"></div>
-</div>
+<div class="orderbook" id="orderbook"></div>
 
 <div class="buttons">
   <button class="btn buy-btn">BUY</button>
@@ -145,17 +137,14 @@ new TradingView.widget({
 });
 
 async function loadOrderBook() {
-  const res = await fetch('https://api.binance.com/api/v3/depth?symbol=TONUSDT&limit=30');
+  const res = await fetch('https://api.binance.com/api/v3/depth?symbol=TONUSDT&limit=40');
   const data = await res.json();
 
-  const asks = data.asks.slice(0, 15);
-  const bids = data.bids.slice(0, 15);
+  const asks = data.asks.slice(0, 20);
+  const bids = data.bids.slice(0, 20);
 
-  const sellBox = document.getElementById('sellOrders');
-  const buyBox = document.getElementById('buyOrders');
-
-  sellBox.innerHTML = '';
-  buyBox.innerHTML = '';
+  const container = document.getElementById('orderbook');
+  container.innerHTML = '';
 
   let maxVolume = 0;
   [...asks, ...bids].forEach(o => {
@@ -169,7 +158,7 @@ async function loadOrderBook() {
     const vol = parseFloat(asks[i][1]);
     const depth = (vol / maxVolume) * 100;
 
-    sellBox.innerHTML += `
+    container.innerHTML += `
       <div class="order sell" style="--depth:${depth}%">
         <span>${price}</span>
         <span>${vol.toFixed(0)}</span>
@@ -177,9 +166,12 @@ async function loadOrderBook() {
     `;
   }
 
-  // цена
-  document.getElementById('price').innerText =
-    parseFloat(bids[0][0]).toFixed(3);
+  // ЦЕНА ПО ЦЕНТРУ
+  container.innerHTML += `
+    <div class="price">
+      ${parseFloat(bids[0][0]).toFixed(3)}
+    </div>
+  `;
 
   // BUY (низ)
   bids.forEach(o => {
@@ -187,7 +179,7 @@ async function loadOrderBook() {
     const vol = parseFloat(o[1]);
     const depth = (vol / maxVolume) * 100;
 
-    buyBox.innerHTML += `
+    container.innerHTML += `
       <div class="order buy" style="--depth:${depth}%">
         <span>${price}</span>
         <span>${vol.toFixed(0)}</span>
