@@ -8,105 +8,89 @@
 <style>
 body {
   margin: 0;
-  font-family: Arial;
   background: #071326;
+  font-family: Arial;
   color: white;
 }
 
-/* Контейнер как приложение */
 .app {
   max-width: 420px;
   margin: auto;
 }
 
-/* Header */
+/* HEADER */
 .header {
   text-align: center;
   padding: 15px;
-  background: linear-gradient(180deg, #0c1f3a, #071326);
 }
 
 .header h1 {
   margin: 0;
-  font-size: 22px;
 }
 
 .header p {
-  margin: 3px 0 0;
-  font-size: 13px;
+  margin: 5px 0;
   color: #aaa;
 }
 
-/* Chart */
+/* CHART */
 .chart {
   height: 220px;
-  background: black;
 }
 
 /* ORDERBOOK */
 .orderbook {
-  height: 300px;
-  display: flex;
-  flex-direction: column;
-  overflow: hidden;
+  height: 320px;
+  overflow-y: auto;
   border-top: 1px solid #111;
   border-bottom: 1px solid #111;
 }
 
-/* ОДИН скролл */
-.orderbook-inner {
-  flex: 1;
-  overflow-y: auto;
-}
-
-/* Общие строки */
+/* ROW */
 .row {
   display: flex;
   justify-content: space-between;
-  padding: 2px 8px;
+  padding: 2px 10px;
   font-size: 13px;
   position: relative;
 }
 
-/* Красные */
+/* DEPTH BAR */
+.row::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  right: 0;
+  height: 100%;
+  width: var(--depth);
+  z-index: 0;
+}
+
+/* SELL */
 .sell {
   color: #ff4d4d;
 }
-
 .sell::before {
-  content: '';
-  position: absolute;
-  right: 0;
-  top: 0;
-  height: 100%;
-  width: var(--size);
-  background: rgba(255, 0, 0, 0.2);
+  background: rgba(255,0,0,0.2);
 }
 
-/* Зелёные */
+/* BUY */
 .buy {
   color: #00ff9c;
 }
-
 .buy::before {
-  content: '';
-  position: absolute;
-  right: 0;
-  top: 0;
-  height: 100%;
-  width: var(--size);
-  background: rgba(0, 255, 156, 0.2);
+  background: rgba(0,255,156,0.2);
 }
 
-/* Цена по центру */
-.price-center {
+/* PRICE CENTER */
+.price {
   text-align: center;
   padding: 6px;
-  font-weight: bold;
   background: #0c1f3a;
+  font-weight: bold;
 }
 
-/* Buttons */
+/* BUTTONS */
 .buttons {
   display: flex;
   gap: 10px;
@@ -121,21 +105,15 @@ button {
   font-size: 16px;
 }
 
-.buy-btn {
-  background: green;
-}
+.buy-btn { background: green; }
+.sell-btn { background: red; }
 
-.sell-btn {
-  background: red;
-}
-
-/* Bottom nav */
+/* NAV */
 .nav {
   display: flex;
   justify-content: space-around;
   padding: 10px;
   background: #0c1f3a;
-  font-size: 14px;
 }
 </style>
 </head>
@@ -149,11 +127,9 @@ button {
   <p>AI Trading System</p>
 </div>
 
-<div class="chart" id="chart"></div>
+<div id="chart" class="chart"></div>
 
-<div class="orderbook">
-  <div class="orderbook-inner" id="orderbook"></div>
-</div>
+<div class="orderbook" id="orderbook"></div>
 
 <div class="buttons">
   <button class="buy-btn">BUY</button>
@@ -169,65 +145,62 @@ button {
 
 </div>
 
-<!-- TradingView -->
 <script src="https://s3.tradingview.com/tv.js"></script>
 <script>
 new TradingView.widget({
-  "container_id": "chart",
-  "width": "100%",
-  "height": 220,
-  "symbol": "BINANCE:TONUSDT",
-  "interval": "5",
-  "theme": "dark",
-  "style": "1",
-  "hide_top_toolbar": true,
-  "hide_legend": true
+  container_id: "chart",
+  width: "100%",
+  height: 220,
+  symbol: "BINANCE:TONUSDT",
+  interval: "5",
+  theme: "dark",
+  style: "1",
+  hide_top_toolbar: true,
+  hide_legend: true
 });
 </script>
 
 <script>
-const orderbook = document.getElementById("orderbook");
+const el = document.getElementById("orderbook");
 
-function generateOrders() {
-  orderbook.innerHTML = "";
+function updateBook() {
+  el.innerHTML = "";
 
-  let base = 1.288;
+  let mid = 1.288;
 
-  // SELL (красные)
-  for (let i = 0; i < 15; i++) {
-    let price = (base + i * 0.001).toFixed(3);
-    let volume = Math.floor(Math.random() * 60000);
+  // SELL
+  for (let i = 15; i > 0; i--) {
+    let price = (mid + i * 0.001).toFixed(3);
+    let vol = Math.random() * 60000;
 
     let row = document.createElement("div");
     row.className = "row sell";
-    row.style.setProperty('--size', volume / 600 + "%");
-
-    row.innerHTML = `<span>${price}</span><span>${volume}</span>`;
-    orderbook.appendChild(row);
+    row.style.setProperty("--depth", (vol / 600) + "%");
+    row.innerHTML = `<span>${price}</span><span>${Math.floor(vol)}</span>`;
+    el.appendChild(row);
   }
 
-  // Цена
-  let center = document.createElement("div");
-  center.className = "price-center";
-  center.innerText = base.toFixed(3);
-  orderbook.appendChild(center);
+  // MID PRICE
+  let midRow = document.createElement("div");
+  midRow.className = "price";
+  midRow.innerText = mid.toFixed(3);
+  el.appendChild(midRow);
 
-  // BUY (зелёные)
-  for (let i = 0; i < 15; i++) {
-    let price = (base - i * 0.001).toFixed(3);
-    let volume = Math.floor(Math.random() * 60000);
+  // BUY
+  for (let i = 1; i <= 15; i++) {
+    let price = (mid - i * 0.001).toFixed(3);
+    let vol = Math.random() * 60000;
 
     let row = document.createElement("div");
     row.className = "row buy";
-    row.style.setProperty('--size', volume / 600 + "%");
-
-    row.innerHTML = `<span>${price}</span><span>${volume}</span>`;
-    orderbook.appendChild(row);
+    row.style.setProperty("--depth", (vol / 600) + "%");
+    row.innerHTML = `<span>${price}</span><span>${Math.floor(vol)}</span>`;
+    el.appendChild(row);
   }
 }
 
-setInterval(generateOrders, 2000);
-generateOrders();
+setInterval(updateBook, 2000);
+updateBook();
 </script>
 
 </body>
