@@ -1,43 +1,84 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="ru">
 <head>
   <meta charset="UTF-8">
   <title>SYN TERMINAL</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-  <script src="https://s3.tradingview.com/tv.js"></script>
-
   <style>
     body {
       margin: 0;
-      background: #0b1220;
+      font-family: Arial, sans-serif;
+      background: #081221;
       color: white;
-      font-family: Arial;
     }
 
     header {
       text-align: center;
       padding: 15px;
-      background: #0f1a2e;
+      background: #0d1b2a;
     }
 
-    .subtitle {
+    header h1 {
+      margin: 0;
+      font-size: 22px;
+    }
+
+    header p {
+      margin: 5px 0 0;
       color: #aaa;
       font-size: 14px;
     }
 
     #chart {
-      height: 350px;
+      height: 300px;
     }
+
+    /* ===== ORDER BOOK ===== */
+
+    .orderbook {
+      margin: 15px;
+      background: #0d1b2a;
+      padding: 10px;
+      border-radius: 10px;
+    }
+
+    .orderbook-title {
+      margin-bottom: 8px;
+      font-size: 14px;
+    }
+
+    .order {
+      display: flex;
+      justify-content: space-between;
+      font-size: 12px;
+      padding: 2px 0;
+    }
+
+    .red {
+      color: #ff4d4d;
+    }
+
+    .green {
+      color: #00c853;
+    }
+
+    .price {
+      text-align: center;
+      margin: 6px 0;
+      font-weight: bold;
+    }
+
+    /* ===== BUTTONS ===== */
 
     .buttons {
       display: flex;
-      gap: 10px;
-      padding: 15px;
+      justify-content: space-around;
+      margin: 20px;
     }
 
     .btn {
-      flex: 1;
+      width: 45%;
       padding: 15px;
       font-size: 18px;
       border: none;
@@ -45,8 +86,15 @@
       color: white;
     }
 
-    .buy { background: green; }
-    .sell { background: red; }
+    .buy {
+      background: green;
+    }
+
+    .sell {
+      background: red;
+    }
+
+    /* ===== BOTTOM MENU ===== */
 
     .menu {
       position: fixed;
@@ -54,45 +102,78 @@
       width: 100%;
       display: flex;
       justify-content: space-around;
-      background: #0f1a2e;
+      background: #0d1b2a;
       padding: 10px 0;
+    }
+
+    .menu div {
+      color: #aaa;
+      font-size: 14px;
     }
   </style>
 </head>
 
 <body>
 
-<header>
-  <h1>💎 SYN TERMINAL</h1>
-  <div class="subtitle">AI Trading System</div>
-</header>
+  <header>
+    <h1>💎 SYN TERMINAL</h1>
+    <p>AI Trading System</p>
+  </header>
 
-<div id="chart"></div>
+  <!-- ГРАФИК -->
+  <div id="chart"></div>
 
-<div class="buttons">
-  <button class="btn buy">BUY</button>
-  <button class="btn sell">SELL</button>
-</div>
+  <!-- СТАКАН -->
+  <div class="orderbook">
+    <div class="orderbook-title">Order Book</div>
 
-<div class="menu">
-  <div>Home</div>
-  <div>Trade</div>
-  <div>Wallet</div>
-  <div>Settings</div>
-</div>
+    <!-- SELL -->
+    <div class="order red"><span>1.308</span><span>120</span></div>
+    <div class="order red"><span>1.307</span><span>95</span></div>
+    <div class="order red"><span>1.306</span><span>210</span></div>
 
-<script>
-window.onload = function () {
-  new TradingView.widget({
-    container_id: "chart",
-    width: "100%",
-    height: 350,
-    symbol: "BINANCE:TONUSDT",
-    interval: "5",
-    theme: "dark"
-  });
-};
-</script>
+    <!-- PRICE -->
+    <div class="price">1.307</div>
+
+    <!-- BUY -->
+    <div class="order green"><span>1.306</span><span>150</span></div>
+    <div class="order green"><span>1.305</span><span>80</span></div>
+    <div class="order green"><span>1.304</span><span>200</span></div>
+  </div>
+
+  <!-- КНОПКИ -->
+  <div class="buttons">
+    <button class="btn buy">BUY</button>
+    <button class="btn sell">SELL</button>
+  </div>
+
+  <!-- МЕНЮ -->
+  <div class="menu">
+    <div>Home</div>
+    <div>Trade</div>
+    <div>Wallet</div>
+    <div>Settings</div>
+  </div>
+
+  <!-- TradingView Chart -->
+  <script src="https://s3.tradingview.com/tv.js"></script>
+
+  <script>
+    new TradingView.widget({
+      "width": "100%",
+      "height": 300,
+      "symbol": "BINANCE:TONUSDT",
+      "interval": "5",
+      "timezone": "Etc/UTC",
+      "theme": "dark",
+      "style": "1",
+      "locale": "en",
+      "toolbar_bg": "#0d1b2a",
+      "enable_publishing": false,
+      "hide_top_toolbar": false,
+      "container_id": "chart"
+    });
+  </script>
 
 </body>
 </html>
