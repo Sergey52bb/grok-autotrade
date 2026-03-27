@@ -3,216 +3,221 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
 <title>SYN TERMINAL</title>
 
 <style>
 :root {
-    --bg: #0b121e;
-    --card: #1a2230;
+    --bg: #0b1220;
+    --card: #141c2b;
     --text: #fff;
     --dim: #8e96a3;
-    --green: #00ff9c;
-    --red: #ff4d4d;
+    --green: #16c784;
+    --red: #ea3943;
 }
 
-/* ОСНОВА */
 body {
     margin: 0;
     background: var(--bg);
-    font-family: Arial;
     color: var(--text);
+    font-family: Arial;
 }
 
 /* HEADER */
 .header {
     padding: 15px;
-    font-size: 16px;
-    font-weight: bold;
+    text-align: center;
+    background: #0f1a2e;
+}
+
+.header h1 {
+    margin: 0;
+    font-size: 20px;
 }
 
 .sub {
-    font-size: 12px;
     color: var(--dim);
+    font-size: 12px;
+}
+
+/* PAIR */
+.pair {
+    padding: 10px 15px;
+    font-size: 16px;
 }
 
 /* MAIN */
-.main {
-    display: flex;
-    flex-direction: column;
-    height: calc(100vh - 140px);
+.container {
+    padding: 10px;
 }
 
-/* CHART BAR */
-.chart-bar {
-    height: 40px;
-    background: #121926;
+/* BUY SELL */
+.tabs {
     display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 12px;
+    background: var(--card);
+    border-radius: 10px;
+    overflow: hidden;
+    margin-bottom: 10px;
 }
 
-/* ORDERBOOK */
-.orderbook {
+.tab {
     flex: 1;
-    overflow-y: auto;
+    text-align: center;
+    padding: 10px;
 }
 
-/* ROW */
+.buy { background: #2f6df6; }
+.sell { color: orange; }
+
+/* INPUTS */
+.box {
+    background: var(--card);
+    padding: 12px;
+    border-radius: 10px;
+    margin-bottom: 8px;
+    display: flex;
+    justify-content: space-between;
+}
+
+/* BUTTON */
+.btn {
+    background: var(--green);
+    padding: 14px;
+    text-align: center;
+    border-radius: 12px;
+    font-weight: bold;
+    margin-top: 10px;
+}
+
+/* ORDER BOOK */
+.orderbook {
+    margin-top: 15px;
+    background: #101826;
+    border-radius: 10px;
+    padding: 8px;
+}
+
 .row {
     position: relative;
     display: flex;
     justify-content: space-between;
-    padding: 2px 10px;
+    font-size: 12px;
+    padding: 3px 5px;
+}
+
+.fill {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    right: 0;
+    opacity: 0.2;
+}
+
+.red { color: var(--red); }
+.green { color: var(--green); }
+
+.mid {
+    text-align: center;
+    padding: 5px;
+    color: #aaa;
+}
+
+/* BOTTOM NAV */
+.nav {
+    position: fixed;
+    bottom: 0;
+    width: 100%;
+    background: #0f1a2e;
+    display: flex;
+    justify-content: space-around;
+    padding: 10px 0;
     font-size: 12px;
 }
 
-.row span {
-    z-index: 2;
-}
-
-/* DEPTH */
-.fill {
-    position: absolute;
-    right: 0;
-    top: 0;
-    height: 100%;
-    opacity: 0.2;
-    z-index: 1;
-}
-
-/* COLORS */
-.sell span:first-child { color: var(--red); }
-.buy span:first-child { color: var(--green); }
-
-/* PRICE CENTER */
-.price {
-    text-align: center;
-    padding: 6px;
-    background: #121926;
-    font-weight: bold;
-}
-
-/* TRADE */
-.trade {
-    padding: 10px;
-    background: var(--card);
-}
-
-.input {
-    background: #121926;
-    padding: 10px;
-    border-radius: 8px;
-    margin-bottom: 8px;
-}
-
-.btn {
-    width: 100%;
-    padding: 12px;
-    background: var(--green);
-    border: none;
-    border-radius: 10px;
-    font-weight: bold;
-}
-
-/* BOTTOM */
-.bottom {
-    height: 60px;
-    background: #121926;
-    display: flex;
-    justify-content: space-around;
-    align-items: center;
-}
 </style>
 </head>
 
 <body>
 
+<!-- HEADER -->
 <div class="header">
-💎 SYN TERMINAL<br>
-<span class="sub">AI Trading System</span>
+    <h1>💎 SYN TERMINAL</h1>
+    <div class="sub">AI Trading System</div>
 </div>
 
-<div class="main">
+<!-- PAIR -->
+<div class="pair">
+    TON / USDT <span style="color: var(--green)">+0.62%</span>
+</div>
 
-<div class="chart-bar">📉 Chart (скоро TradingView)</div>
+<div class="container">
 
-<div class="orderbook" id="orderbook"></div>
+    <!-- BUY / SELL -->
+    <div class="tabs">
+        <div class="tab buy">Buy</div>
+        <div class="tab sell">Sell</div>
+    </div>
+
+    <div class="box">
+        <span>Amount</span>
+        <span>25 TON</span>
+    </div>
+
+    <div class="box">
+        <span>You Receive</span>
+        <span>133.25 USDT</span>
+    </div>
+
+    <div class="box">
+        <span>DEX Fee</span>
+        <span>0.25%</span>
+    </div>
+
+    <div class="btn">Buy TON</div>
+
+    <!-- ORDER BOOK -->
+    <div class="orderbook">
+
+        <!-- RED (SELL) -->
+        <div class="row red">
+            <div class="fill" style="width:80%;background:red"></div>
+            <span>1.308</span><span>603</span>
+        </div>
+        <div class="row red">
+            <div class="fill" style="width:60%;background:red"></div>
+            <span>1.307</span><span>406</span>
+        </div>
+        <div class="row red">
+            <div class="fill" style="width:90%;background:red"></div>
+            <span>1.306</span><span>1756</span>
+        </div>
+
+        <div class="mid">1.288</div>
+
+        <!-- GREEN (BUY) -->
+        <div class="row green">
+            <div class="fill" style="width:70%;background:green"></div>
+            <span>1.287</span><span>17889</span>
+        </div>
+        <div class="row green">
+            <div class="fill" style="width:50%;background:green"></div>
+            <span>1.286</span><span>68963</span>
+        </div>
+        <div class="row green">
+            <div class="fill" style="width:30%;background:green"></div>
+            <span>1.285</span><span>5783</span>
+        </div>
+
+    </div>
 
 </div>
 
-<div class="trade">
-<div class="input">Amount: 25 TON</div>
-<div class="input">Receive: 133 USDT</div>
-<div class="input">Fee: 0.25%</div>
-<button class="btn">BUY TON</button>
+<!-- NAV -->
+<div class="nav">
+    <div>Home</div>
+    <div>Trade</div>
+    <div>Wallet</div>
+    <div>Settings</div>
 </div>
-
-<div class="bottom">
-<div>Home</div>
-<div>Trade</div>
-<div>Wallet</div>
-</div>
-
-<script>
-const orderbook = document.getElementById('orderbook');
-
-function generate() {
-    orderbook.innerHTML = '';
-
-    let base = 5.30;
-
-    // SELL
-    for (let i = 0; i < 20; i++) {
-        let price = base + i * 0.01;
-        let amount = Math.random() * 500;
-        let depth = Math.random() * 100;
-
-        let row = document.createElement('div');
-        row.className = 'row sell';
-
-        let fill = document.createElement('div');
-        fill.className = 'fill';
-        fill.style.width = depth + '%';
-        fill.style.background = 'red';
-
-        row.innerHTML = `<span>${price.toFixed(2)}</span><span>${amount.toFixed(0)}</span>`;
-        row.appendChild(fill);
-
-        orderbook.appendChild(row);
-    }
-
-    // PRICE
-    let priceRow = document.createElement('div');
-    priceRow.className = 'price';
-    priceRow.innerText = base.toFixed(2);
-    orderbook.appendChild(priceRow);
-
-    // BUY
-    for (let i = 0; i < 20; i++) {
-        let price = base - i * 0.01;
-        let amount = Math.random() * 500;
-        let depth = Math.random() * 100;
-
-        let row = document.createElement('div');
-        row.className = 'row buy';
-
-        let fill = document.createElement('div');
-        fill.className = 'fill';
-        fill.style.width = depth + '%';
-        fill.style.background = '#00ff9c';
-
-        row.innerHTML = `<span>${price.toFixed(2)}</span><span>${amount.toFixed(0)}</span>`;
-        row.appendChild(fill);
-
-        orderbook.appendChild(row);
-    }
-}
-
-generate();
-setInterval(generate, 2000);
-</script>
 
 </body>
 </html>
