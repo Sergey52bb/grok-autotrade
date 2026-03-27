@@ -2,122 +2,133 @@
 <html lang="ru">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
 <title>SYN TERMINAL</title>
 
 <style>
 :root {
-    --bg:#0d1424;
-    --card:#151d30;
-    --text:#fff;
-    --dim:#848e9c;
-    --green:#2ebd85;
-    --red:#f6465d;
+    --bg: #0b121e;
+    --card: #151c28;
+    --border: #222c3a;
+    --text: #fff;
+    --dim: #8e96a3;
+    --green: #00ff9c;
+    --red: #ff4d4d;
 }
 
-body{
-    margin:0;
-    background:var(--bg);
-    color:var(--text);
-    font-family:system-ui;
-    padding:10px;
+/* BASE */
+body {
+    margin: 0;
+    background: var(--bg);
+    font-family: Arial;
+    color: var(--text);
 }
 
 /* HEADER */
-.header{
-    text-align:center;
-    margin-bottom:10px;
+.header {
+    padding: 16px;
+    text-align: center;
+    font-weight: bold;
 }
-.header h1{margin:0;font-size:18px;}
-.header p{margin:0;color:var(--dim);font-size:12px;}
-
-/* GRID */
-.layout{
-    display:grid;
-    grid-template-columns:55% 45%;
-    gap:8px;
+.sub {
+    font-size: 12px;
+    color: var(--dim);
 }
 
-/* LEFT */
-.controls{
-    display:flex;
-    flex-direction:column;
-    gap:8px;
+/* LAYOUT */
+.container {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    padding: 10px;
 }
 
-.box{
-    background:var(--card);
-    padding:12px;
-    border-radius:10px;
-    display:flex;
-    justify-content:space-between;
+/* CARD */
+.card {
+    background: var(--card);
+    border-radius: 14px;
+    padding: 12px;
+    border: 1px solid var(--border);
 }
 
-.btn{
-    background:var(--green);
-    border:none;
-    padding:14px;
-    border-radius:10px;
-    font-weight:bold;
+/* SWAP BLOCK */
+.swap-title {
+    font-size: 13px;
+    color: var(--dim);
+    margin-bottom: 8px;
+}
+
+.input-block {
+    background: #0f1622;
+    border-radius: 10px;
+    padding: 12px;
+    margin-bottom: 8px;
+    display: flex;
+    justify-content: space-between;
+}
+
+.token {
+    font-weight: bold;
+}
+
+.btn {
+    width: 100%;
+    padding: 14px;
+    border-radius: 12px;
+    border: none;
+    font-weight: bold;
+    background: var(--green);
+    color: black;
 }
 
 /* ORDERBOOK */
-.orderbook{
-    background:var(--card);
-    border-radius:10px;
-    padding:6px;
-    height:380px;
-    display:flex;
-    flex-direction:column;
+.orderbook {
+    height: 300px;
+    overflow: hidden;
 }
 
-.book{
-    flex:1;
-    overflow:hidden;
+.ob-scroll {
+    height: 100%;
+    overflow-y: auto;
 }
 
-.row{
-    position:relative;
-    display:flex;
-    justify-content:space-between;
-    font-size:11px;
-    height:18px;
-    align-items:center;
-    padding:0 4px;
+/* ROW */
+.row {
+    position: relative;
+    display: flex;
+    justify-content: space-between;
+    padding: 3px 6px;
+    font-size: 11px;
 }
 
-.fill{
-    position:absolute;
-    right:0;
-    height:100%;
-    opacity:0.2;
+.fill {
+    position: absolute;
+    right: 0;
+    top: 0;
+    height: 100%;
+    opacity: 0.2;
 }
 
-/* CENTER PRICE */
-.mid{
-    text-align:center;
-    padding:4px;
-    font-weight:bold;
-    border-top:1px solid #222;
-    border-bottom:1px solid #222;
+/* COLORS */
+.sell span:first-child { color: var(--red); }
+.buy span:first-child { color: var(--green); }
+
+/* PRICE CENTER */
+.price {
+    text-align: center;
+    padding: 6px;
+    font-weight: bold;
 }
 
-/* CHART */
-.chart{
-    margin-top:10px;
-    height:100px;
-    background:#111;
-    border-radius:10px;
-}
-
-/* FIX MOBILE */
-@media(max-width:480px){
-    .layout{
-        grid-template-columns:1fr;
-    }
-    .orderbook{
-        height:300px;
-    }
+/* BOTTOM */
+.bottom {
+    height: 60px;
+    background: #0f1622;
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
+    border-top: 1px solid var(--border);
 }
 </style>
 </head>
@@ -125,71 +136,102 @@ body{
 <body>
 
 <div class="header">
-    <h1>💎 SYN TERMINAL</h1>
-    <p>AI Trading System</p>
+💎 SYN TERMINAL<br>
+<span class="sub">AI Trading System</span>
 </div>
 
-<div class="layout">
+<div class="container">
 
-<!-- LEFT -->
-<div class="controls">
-    <div class="box"><span>Amount</span><span>25 TON</span></div>
-    <div class="box"><span>Receive</span><span>133 USDT</span></div>
-    <div class="box"><span>Fee</span><span>0.25%</span></div>
-    <button class="btn">BUY TON</button>
+<!-- SWAP -->
+<div class="card">
+<div class="swap-title">Swap</div>
+
+<div class="input-block">
+<span class="token">TON</span>
+<span>25</span>
 </div>
 
-<!-- RIGHT ORDERBOOK -->
-<div class="orderbook">
+<div class="input-block">
+<span class="token">USDT</span>
+<span>133.2</span>
+</div>
 
-<div class="book" id="asks"></div>
+<div style="font-size:11px; color:var(--dim); margin-bottom:8px;">
+Fee: 0.25%
+</div>
 
-<div class="mid">1.288</div>
+<button class="btn">Swap</button>
+</div>
 
-<div class="book" id="bids"></div>
-
+<!-- ORDERBOOK -->
+<div class="card orderbook">
+<div class="ob-scroll" id="orderbook"></div>
 </div>
 
 </div>
 
-<div class="chart"></div>
+<div class="bottom">
+<div>Home</div>
+<div>Trade</div>
+<div>Wallet</div>
+</div>
 
 <script>
-function generate(){
-    const asks = document.getElementById('asks');
-    const bids = document.getElementById('bids');
+const ob = document.getElementById('orderbook');
 
-    asks.innerHTML='';
-    bids.innerHTML='';
+function renderOB() {
+    ob.innerHTML = '';
+    let base = 5.30;
 
-    for(let i=0;i<12;i++){
-        let price=(1.30 + i*0.001).toFixed(3);
-        let vol=Math.floor(Math.random()*60000);
+    // SELL
+    for (let i = 0; i < 15; i++) {
+        let p = base + i * 0.01;
+        let a = Math.random() * 300;
+        let d = Math.random() * 100;
 
-        asks.innerHTML+=`
-        <div class="row">
-            <div class="fill" style="width:${Math.random()*100}%;background:#f6465d"></div>
-            <span style="color:#f6465d">${price}</span>
-            <span>${vol}</span>
-        </div>`;
+        let row = document.createElement('div');
+        row.className = 'row sell';
+
+        let fill = document.createElement('div');
+        fill.className = 'fill';
+        fill.style.width = d + '%';
+        fill.style.background = 'red';
+
+        row.innerHTML = `<span>${p.toFixed(2)}</span><span>${a.toFixed(0)}</span>`;
+        row.appendChild(fill);
+
+        ob.appendChild(row);
     }
 
-    for(let i=0;i<12;i++){
-        let price=(1.288 - i*0.001).toFixed(3);
-        let vol=Math.floor(Math.random()*60000);
+    let price = document.createElement('div');
+    price.className = 'price';
+    price.innerText = base.toFixed(2);
+    ob.appendChild(price);
 
-        bids.innerHTML+=`
-        <div class="row">
-            <div class="fill" style="width:${Math.random()*100}%;background:#2ebd85"></div>
-            <span style="color:#2ebd85">${price}</span>
-            <span>${vol}</span>
-        </div>`;
+    // BUY
+    for (let i = 0; i < 15; i++) {
+        let p = base - i * 0.01;
+        let a = Math.random() * 300;
+        let d = Math.random() * 100;
+
+        let row = document.createElement('div');
+        row.className = 'row buy';
+
+        let fill = document.createElement('div');
+        fill.className = 'fill';
+        fill.style.width = d + '%';
+        fill.style.background = '#00ff9c';
+
+        row.innerHTML = `<span>${p.toFixed(2)}</span><span>${a.toFixed(0)}</span>`;
+        row.appendChild(fill);
+
+        ob.appendChild(row);
     }
 }
 
-generate();
-setInterval(generate,2000);
+renderOB();
+setInterval(renderOB, 2000);
 </script>
 
 </body>
-    </html>
+</html>
