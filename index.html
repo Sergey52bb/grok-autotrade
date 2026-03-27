@@ -1,220 +1,195 @@
 <!DOCTYPE html>
 <html lang="ru">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Grok-Auto Full Interface</title>
+    <style>
+        :root {
+            --bg: #0d1424;
+            --card: #151d30;
+            --text: #ffffff;
+            --dim: #848e9c;
+            --buy-blue: #2a6df3;
+            --sell-gradient: linear-gradient(90deg, #f0b90b 0%, #d9a506 100%);
+            --btn-green: #2ebd85;
+            --ask-red: #f6465d;
+            --bid-green: #2ebd85;
+        }
 
-<title>SYN TERMINAL</title>
+        body {
+            background-color: var(--bg);
+            color: var(--text);
+            font-family: -apple-system, system-ui, sans-serif;
+            margin: 0; padding: 12px;
+            font-size: 13px;
+            line-height: 1.2;
+        }
 
-<style>
-:root {
-    --bg: #0b121e;
-    --card: #1a2230;
-    --text: #fff;
-    --dim: #8e96a3;
-    --green: #00ff9c;
-    --red: #ff4d4d;
-}
+        /* Top Bar */
+        .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; }
+        .logo { font-weight: bold; letter-spacing: 1px; font-size: 14px; }
+        .pair-title { font-size: 20px; font-weight: 700; margin-bottom: 15px; }
+        .pair-title span { color: var(--bid-green); font-size: 14px; margin-left: 8px; }
 
-body {
-    margin: 0;
-    background: var(--bg);
-    font-family: Arial;
-    color: var(--text);
-}
+        /* Main Grid */
+        .trade-layout { display: grid; grid-template-columns: 55% 42%; gap: 3%; align-items: start; }
 
-/* HEADER */
-.header {
-    padding: 15px;
-    font-size: 16px;
-    font-weight: bold;
-}
+        /* Left Column */
+        .controls { display: flex; flex-direction: column; gap: 8px; }
+        
+        .tab-switcher { display: flex; background: #090f1d; border-radius: 10px; padding: 3px; position: relative; }
+        .tab { flex: 1; padding: 10px; text-align: center; font-weight: bold; border-radius: 8px; cursor: pointer; transition: 0.3s; }
+        .tab.active-buy { background: var(--buy-blue); }
+        .tab.active-sell { background: var(--sell-gradient); color: black; }
 
-.sub {
-    font-size: 12px;
-    color: var(--dim);
-}
+        .input-field { background: var(--card); padding: 14px; border-radius: 10px; display: flex; justify-content: space-between; }
+        .input-field .label { color: var(--dim); }
 
-/* MAIN */
-.main {
-    display: flex;
-    flex-direction: column;
-    height: calc(100vh - 140px);
-}
+        .fees { font-size: 11px; color: var(--dim); margin-top: 5px; }
+        .fee-item { display: flex; justify-content: space-between; margin-bottom: 4px; }
 
-/* CHART BAR */
-.chart-bar {
-    height: 40px;
-    background: #121926;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 12px;
-}
+        .wallet-info { border-bottom: 1px solid #252d3a; padding: 12px 0; display: flex; justify-content: space-between; margin-bottom: 10px; }
 
-/* ORDERBOOK */
-.orderbook {
-    flex: 1;
-    overflow-y: auto;
-}
+        .action-btn { 
+            background: var(--btn-green); color: white; border: none; padding: 16px; 
+            border-radius: 12px; font-size: 16px; font-weight: bold; cursor: pointer;
+            box-shadow: 0 4px 15px rgba(46, 189, 133, 0.2);
+        }
 
-/* ROW */
-.row {
-    position: relative;
-    display: flex;
-    justify-content: space-between;
-    padding: 2px 10px;
-    font-size: 12px;
-}
+        /* Right Column: Swap Depth */
+        .swap-depth { background: var(--card); border-radius: 12px; padding: 10px 6px; }
+        .depth-header { font-size: 12px; font-weight: bold; margin-bottom: 10px; padding-left: 4px; }
+        .ob-labels { display: flex; justify-content: space-between; color: var(--dim); font-size: 10px; margin-bottom: 5px; padding: 0 4px; }
 
-.row span {
-    z-index: 2;
-}
+        .order-row { position: relative; display: flex; justify-content: space-between; height: 19px; align-items: center; font-size: 10px; overflow: hidden; padding: 0 4px; }
+        .fill { position: absolute; right: 0; height: 100%; opacity: 0.2; z-index: 1; }
+        .order-row span { z-index: 2; }
 
-/* DEPTH */
-.fill {
-    position: absolute;
-    right: 0;
-    top: 0;
-    height: 100%;
-    opacity: 0.2;
-    z-index: 1;
-}
+        /* Walls & Stats */
+        .walls { margin-top: 10px; padding: 0 4px; }
+        .wall-progress { height: 4px; background: #252d3a; border-radius: 2px; display: flex; overflow: hidden; margin: 8px 0; }
+        .p-ask { background: var(--ask-red); transition: 0.5s; }
+        .p-bid { background: var(--bid-green); transition: 0.5s; }
+        
+        .stat-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; }
+        .stat-box { background: rgba(255,255,255,0.05); padding: 8px; border-radius: 6px; text-align: center; font-size: 11px; }
 
-/* COLORS */
-.sell span:first-child { color: var(--red); }
-.buy span:first-child { color: var(--green); }
+        /* Chart */
+        .chart-container { margin-top: 20px; border-top: 1px solid #252d3a; padding-top: 15px; }
+        .chart-mock { height: 120px; width: 100%; background: linear-gradient(180deg, rgba(46,189,133,0.1) 0%, rgba(13,20,36,0) 100%); position: relative; border-radius: 8px; }
+        /* Простая имитация графика */
+        .chart-mock::after { content: ""; position: absolute; top: 40%; left: 0; width: 100%; height: 2px; background: var(--btn-green); box-shadow: 0 0 10px var(--btn-green); }
 
-/* PRICE CENTER */
-.price {
-    text-align: center;
-    padding: 6px;
-    background: #121926;
-    font-weight: bold;
-}
-
-/* TRADE */
-.trade {
-    padding: 10px;
-    background: var(--card);
-}
-
-.input {
-    background: #121926;
-    padding: 10px;
-    border-radius: 8px;
-    margin-bottom: 8px;
-}
-
-.btn {
-    width: 100%;
-    padding: 12px;
-    background: var(--green);
-    border: none;
-    border-radius: 10px;
-    font-weight: bold;
-}
-
-/* BOTTOM */
-.bottom {
-    height: 60px;
-    background: #121926;
-    display: flex;
-    justify-content: space-around;
-    align-items: center;
-}
-</style>
+        .footer-nav { position: fixed; bottom: 0; left: 0; right: 0; background: var(--bg); display: flex; justify-content: space-around; padding: 15px; border-top: 1px solid #1a2230; font-size: 20px; }
+    </style>
 </head>
-
 <body>
 
-<div class="header">
-💎 SYN TERMINAL<br>
-<span class="sub">AI Trading System</span>
-</div>
+    <div class="header">
+        <div class="logo">🌀 GROK-AUTO <span style="font-weight: 300; opacity: 0.7;">TRADE</span></div>
+        <div style="font-size: 18px;">⚖️ •••</div>
+    </div>
 
-<div class="main">
+    <div class="pair-title">TON / USDT <span>+0.62%</span></div>
 
-<div class="chart-bar">📉 Chart (скоро TradingView)</div>
+    <div class="trade-layout">
+        <!-- Левая часть -->
+        <div class="controls">
+            <div class="tab-switcher" id="switcher">
+                <div class="tab active-buy" id="buyTab" onclick="setMode('buy')">Buy</div>
+                <div class="tab" id="sellTab" onclick="setMode('sell')">Sell</div>
+            </div>
 
-<div class="orderbook" id="orderbook"></div>
+            <div class="input-field">
+                <span class="label">Amount</span>
+                <span class="val">25 TON</span>
+            </div>
+            <div class="input-field">
+                <span class="label">You Receive</span>
+                <span class="val">133.25 USDT</span>
+            </div>
 
-</div>
+            <div class="fees">
+                <div class="fee-item"><span>DEX Fee</span><span>0.25% ; 33 TON</span></div>
+                <div class="fee-item"><span>GROK Fee</span><span>0.35% ; 33 TON</span></div>
+            </div>
 
-<div class="trade">
-<div class="input">Amount: 25 TON</div>
-<div class="input">Receive: 133 USDT</div>
-<div class="input">Fee: 0.25%</div>
-<button class="btn">BUY TON</button>
-</div>
+            <div class="wallet-info">
+                <span class="label">Wallet</span>
+                <span class="val">23.1 TON</span>
+            </div>
 
-<div class="bottom">
-<div>Home</div>
-<div>Trade</div>
-<div>Wallet</div>
-</div>
+            <button class="action-btn" id="mainBtn">Buy TON</button>
+        </div>
 
-<script>
+        <!-- Правая часть (Стакан) -->
+        <div class="swap-depth">
+            <div class="depth-header">Swap Depth</div>
+            <div class="ob-labels"><span>Amount</span><span>Price</span></div>
+            
+            <div id="ask-side">
+                <!-- Продавцы (Red) -->
+                <div class="order-row"><div class="fill" style="width: 80%; background: var(--ask-red);"></div><span style="color:var(--ask-red)">5.33</span><span>353 TON</span></div>
+                <div class="order-row"><div class="fill" style="width: 60%; background: var(--ask-red);"></div><span style="color:var(--ask-red)">5.31</span><span>791 TON</span></div>
+                <div class="order-row"><div class="fill" style="width: 30%; background: var(--ask-red);"></div><span style="color:var(--ask-red)">5.30</span><span>119 TON</span></div>
+                <div class="order-row"><div class="fill" style="width: 90%; background: var(--ask-red);"></div><span style="color:var(--ask-red)">5.28</span><span>401 TON</span></div>
+                <div class="order-row"><div class="fill" style="width: 50%; background: var(--ask-red);"></div><span style="color:var(--ask-red)">5.27</span><span>347 TON</span></div>
+            </div>
 
-const orderbook = document.getElementById('orderbook');
+            <div id="bid-side" style="margin-top: 4px;">
+                <!-- Покупатели (Green) -->
+                <div class="order-row"><div class="fill" style="width: 45%; background: var(--bid-green);"></div><span style="color:var(--bid-green)">5.25</span><span>361 TON</span></div>
+                <div class="order-row"><div class="fill" style="width: 75%; background: var(--bid-green);"></div><span style="color:var(--bid-green)">5.23</span><span>347 TON</span></div>
+                <div class="order-row"><div class="fill" style="width: 20%; background: var(--bid-green);"></div><span style="color:var(--bid-green)">5.22</span><span>252 TON</span></div>
+                <div class="order-row"><div class="fill" style="width: 55%; background: var(--bid-green);"></div><span style="color:var(--bid-green)">5.21</span><span>107 TON</span></div>
+                <div class="order-row"><div class="fill" style="width: 15%; background: var(--bid-green);"></div><span style="color:var(--bid-green)">5.20</span><span>98 TON</span></div>
+            </div>
 
-function generate() {
-    orderbook.innerHTML = '';
+            <div class="walls">
+                <div class="wall-progress">
+                    <div class="p-ask" style="width: 57%;"></div>
+                    <div class="p-bid" style="width: 43%;"></div>
+                </div>
+                <div class="stat-grid">
+                    <div class="stat-box"><span style="color: var(--ask-red);">●</span> 57%</div>
+                    <div class="stat-box"><span style="color: var(--bid-green);">●</span> 43%</div>
+                </div>
+            </div>
+        </div>
+    </div>
 
-    let base = 5.30;
+    <!-- Chart Mock -->
+    <div class="chart-container">
+        <div style="display:flex; justify-content:space-between; font-size:12px; color:var(--dim); margin-bottom:10px;">
+            <span>TON / USDT Chart</span>
+            <span>︿</span>
+        </div>
+        <div class="chart-mock"></div>
+    </div>
 
-    // SELL (красные)
-    for (let i = 0; i < 20; i++) {
-        let price = base + i * 0.01;
-        let amount = Math.random() * 500;
-        let depth = Math.random() * 100;
+    <div class="footer-nav">
+        <span>🏠</span><span>📊</span><span style="color: var(--buy-blue);">🔄</span><span>🕒</span><span>👤</span>
+    </div>
 
-        let row = document.createElement('div');
-        row.className = 'row sell';
+    <script>
+        function setMode(mode) {
+            const buyTab = document.getElementById('buyTab');
+            const sellTab = document.getElementById('sellTab');
+            const mainBtn = document.getElementById('mainBtn');
 
-        let fill = document.createElement('div');
-        fill.className = 'fill';
-        fill.style.width = depth + '%';
-        fill.style.background = 'red';
-
-        row.innerHTML = `<span>${price.toFixed(2)}</span><span>${amount.toFixed(0)}</span>`;
-        row.appendChild(fill);
-
-        orderbook.appendChild(row);
-    }
-
-    // ЦЕНА
-    let priceRow = document.createElement('div');
-    priceRow.className = 'price';
-    priceRow.innerText = base.toFixed(2);
-    orderbook.appendChild(priceRow);
-
-    // BUY (зелёные)
-    for (let i = 0; i < 20; i++) {
-        let price = base - i * 0.01;
-        let amount = Math.random() * 500;
-        let depth = Math.random() * 100;
-
-        let row = document.createElement('div');
-        row.className = 'row buy';
-
-        let fill = document.createElement('div');
-        fill.className = 'fill';
-        fill.style.width = depth + '%';
-        fill.style.background = '#00ff9c';
-
-        row.innerHTML = `<span>${price.toFixed(2)}</span><span>${amount.toFixed(0)}</span>`;
-        row.appendChild(fill);
-
-        orderbook.appendChild(row);
-    }
-}
-
-// запуск
-generate();
-setInterval(generate, 2000);
-
-</script>
-
+            if(mode === 'buy') {
+                buyTab.className = 'tab active-buy';
+                sellTab.className = 'tab';
+                mainBtn.style.background = 'var(--btn-green)';
+                mainBtn.innerText = 'Buy TON';
+            } else {
+                sellTab.className = 'tab active-sell';
+                buyTab.className = 'tab';
+                mainBtn.style.background = '#f6465d'; // Красный для продажи
+                mainBtn.innerText = 'Sell TON';
+            }
+        }
+    </script>
 </body>
 </html>
