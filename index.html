@@ -6,118 +6,77 @@
 
 <title>SYN TERMINAL</title>
 
-<style>
-:root {
-    --bg: #0b121e;
-    --card: #1a2230;
-    --text: #fff;
-    --dim: #8e96a3;
-    --green: #00ff9c;
-    --red: #ff4d4d;
-}
+<script src="https://unpkg.com/@tonconnect/ui@latest/dist/tonconnect-ui.min.js"></script>
 
-/* ОСНОВА */
+<style>
 body {
     margin: 0;
-    background: var(--bg);
+    background: #0b121e;
+    color: white;
     font-family: Arial;
-    color: var(--text);
 }
 
 /* HEADER */
 .header {
-    padding: 15px;
-    font-size: 16px;
+    text-align: center;
+    padding: 20px;
+    font-size: 18px;
     font-weight: bold;
 }
 
 .sub {
     font-size: 12px;
-    color: var(--dim);
+    opacity: 0.7;
 }
 
-/* MAIN */
-.main {
-    display: flex;
-    flex-direction: column;
-    height: calc(100vh - 140px);
+/* WALLET CARD */
+.wallet {
+    background: #1a2230;
+    margin: 15px;
+    padding: 15px;
+    border-radius: 15px;
 }
 
-/* CHART BAR */
-.chart-bar {
-    height: 40px;
-    background: #121926;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 12px;
-}
-
-/* ORDERBOOK */
-.orderbook {
-    flex: 1;
-    overflow-y: auto;
-}
-
-/* ROW */
-.row {
-    position: relative;
-    display: flex;
-    justify-content: space-between;
-    padding: 2px 10px;
-    font-size: 12px;
-}
-
-.row span {
-    z-index: 2;
-}
-
-/* DEPTH */
-.fill {
-    position: absolute;
-    right: 0;
-    top: 0;
-    height: 100%;
-    opacity: 0.2;
-    z-index: 1;
-}
-
-/* COLORS */
-.sell span:first-child { color: var(--red); }
-.buy span:first-child { color: var(--green); }
-
-/* PRICE CENTER */
-.price {
-    text-align: center;
-    padding: 6px;
-    background: #121926;
+.balance {
+    font-size: 24px;
     font-weight: bold;
 }
 
-/* TRADE */
-.trade {
-    padding: 10px;
-    background: var(--card);
+.address {
+    font-size: 12px;
+    opacity: 0.6;
+    word-break: break-all;
 }
 
-.input {
-    background: #121926;
-    padding: 10px;
-    border-radius: 8px;
-    margin-bottom: 8px;
+/* BUTTONS */
+.actions {
+    display: flex;
+    gap: 10px;
+    margin-top: 15px;
 }
 
 .btn {
-    width: 100%;
-    padding: 12px;
-    background: var(--green);
-    border: none;
+    flex: 1;
+    padding: 10px;
     border-radius: 10px;
+    border: none;
     font-weight: bold;
+}
+
+.send { background: #ff4d4d; }
+.receive { background: #00ff9c; }
+
+/* CONNECT */
+.connect {
+    margin: 15px;
+    text-align: center;
 }
 
 /* BOTTOM */
 .bottom {
+    position: fixed;
+    bottom: 0;
+    width: 100%;
     height: 60px;
     background: #121926;
     display: flex;
@@ -134,19 +93,20 @@ body {
 <span class="sub">AI Trading System</span>
 </div>
 
-<div class="main">
-
-<div class="chart-bar">📉 Chart (скоро TradingView)</div>
-
-<div class="orderbook" id="orderbook"></div>
-
+<div class="connect">
+<div id="ton-connect"></div>
 </div>
 
-<div class="trade">
-<div class="input">Amount: 25 TON</div>
-<div class="input">Receive: 133 USDT</div>
-<div class="input">Fee: 0.25%</div>
-<button class="btn">BUY TON</button>
+<div class="wallet">
+<div>Balance</div>
+<div class="balance" id="balance">0 TON</div>
+
+<div class="address" id="address">Not connected</div>
+
+<div class="actions">
+<button class="btn send">Send</button>
+<button class="btn receive">Receive</button>
+</div>
 </div>
 
 <div class="bottom">
@@ -156,63 +116,23 @@ body {
 </div>
 
 <script>
-const orderbook = document.getElementById('orderbook');
+const tonConnectUI = new TON_CONNECT_UI.TonConnectUI({
+    manifestUrl: 'https://sergey52bb.github.io/grok-autotrade/tonconnect-manifest.json',
+    buttonRootId: 'ton-connect'
+});
 
-function generate() {
-    orderbook.innerHTML = '';
+tonConnectUI.onStatusChange(wallet => {
+    if (wallet) {
+        document.getElementById('address').innerText = wallet.account.address;
+        document.getElementById('balance').innerText = 'Loading...';
 
-    let base = 5.30;
-
-    // SELL
-    for (let i = 0; i < 20; i++) {
-        let price = base + i * 0.01;
-        let amount = Math.random() * 500;
-        let depth = Math.random() * 100;
-
-        let row = document.createElement('div');
-        row.className = 'row sell';
-
-        let fill = document.createElement('div');
-        fill.className = 'fill';
-        fill.style.width = depth + '%';
-        fill.style.background = 'red';
-
-        row.innerHTML = `<span>${price.toFixed(2)}</span><span>${amount.toFixed(0)}</span>`;
-        row.appendChild(fill);
-
-        orderbook.appendChild(row);
+        // позже подключим реальный баланс
+        setTimeout(() => {
+            document.getElementById('balance').innerText = '2.45 TON';
+        }, 1000);
     }
-
-    // PRICE
-    let priceRow = document.createElement('div');
-    priceRow.className = 'price';
-    priceRow.innerText = base.toFixed(2);
-    orderbook.appendChild(priceRow);
-
-    // BUY
-    for (let i = 0; i < 20; i++) {
-        let price = base - i * 0.01;
-        let amount = Math.random() * 500;
-        let depth = Math.random() * 100;
-
-        let row = document.createElement('div');
-        row.className = 'row buy';
-
-        let fill = document.createElement('div');
-        fill.className = 'fill';
-        fill.style.width = depth + '%';
-        fill.style.background = '#00ff9c';
-
-        row.innerHTML = `<span>${price.toFixed(2)}</span><span>${amount.toFixed(0)}</span>`;
-        row.appendChild(fill);
-
-        orderbook.appendChild(row);
-    }
-}
-
-generate();
-setInterval(generate, 2000);
+});
 </script>
 
 </body>
-                                 </html>
+</html>
