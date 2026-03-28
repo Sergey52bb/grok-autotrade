@@ -1,125 +1,218 @@
 <!DOCTYPE html>
 <html lang="ru">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-    <title>Grok-Auto Trade</title>
-    <!-- Подключаем TON Connect SDK -->
-    <script src="https://unpkg.com"></script>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <style>
-        body { background-color: #0b121e; color: white; -webkit-tap-highlight-color: transparent; }
-        .tab-active { background: #2a6df3 !important; color: white; }
-        .nav-item.active { color: #2a6df3; }
-        .glass { background: rgba(26, 34, 48, 0.95); backdrop-filter: blur(10px); }
-        /* Полоски в стакане */
-        .depth-row { position: relative; overflow: hidden; height: 24px; display: flex; align-items: center; padding: 0 8px; font-size: 12px; }
-        .depth-fill { position: absolute; right: 0; top: 0; bottom: 0; opacity: 0.2; z-index: 0; transition: width 0.3s; }
-    </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>SYN TERMINAL</title>
+
+<style>
+:root {
+    --bg: #0b121e;
+    --card: #1a2230;
+    --text: #fff;
+    --dim: #8e96a3;
+    --green: #00ff9c;
+    --red: #ff4d4d;
+}
+
+/* ОСНОВА */
+body {
+    margin: 0;
+    background: var(--bg);
+    font-family: Arial;
+    color: var(--text);
+}
+
+/* HEADER */
+.header {
+    padding: 15px;
+    font-size: 16px;
+    font-weight: bold;
+}
+
+.sub {
+    font-size: 12px;
+    color: var(--dim);
+}
+
+/* MAIN */
+.main {
+    display: flex;
+    flex-direction: column;
+    height: calc(100vh - 140px);
+}
+
+/* CHART BAR */
+.chart-bar {
+    height: 40px;
+    background: #121926;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 12px;
+}
+
+/* ORDERBOOK */
+.orderbook {
+    flex: 1;
+    overflow-y: auto;
+}
+
+/* ROW */
+.row {
+    position: relative;
+    display: flex;
+    justify-content: space-between;
+    padding: 2px 10px;
+    font-size: 12px;
+}
+
+.row span {
+    z-index: 2;
+}
+
+/* DEPTH */
+.fill {
+    position: absolute;
+    right: 0;
+    top: 0;
+    height: 100%;
+    opacity: 0.2;
+    z-index: 1;
+}
+
+/* COLORS */
+.sell span:first-child { color: var(--red); }
+.buy span:first-child { color: var(--green); }
+
+/* PRICE CENTER */
+.price {
+    text-align: center;
+    padding: 6px;
+    background: #121926;
+    font-weight: bold;
+}
+
+/* TRADE */
+.trade {
+    padding: 10px;
+    background: var(--card);
+}
+
+.input {
+    background: #121926;
+    padding: 10px;
+    border-radius: 8px;
+    margin-bottom: 8px;
+}
+
+.btn {
+    width: 100%;
+    padding: 12px;
+    background: var(--green);
+    border: none;
+    border-radius: 10px;
+    font-weight: bold;
+}
+
+/* BOTTOM */
+.bottom {
+    height: 60px;
+    background: #121926;
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
+}
+</style>
 </head>
-<body class="flex flex-col min-h-screen pb-20">
 
-    <!-- HEADER -->
-    <header class="p-4 flex justify-between items-center border-b border-gray-800 sticky top-0 bg-[#0b121e] z-50">
-        <div class="flex flex-col">
-            <span class="text-xs text-gray-400 font-bold">GROK-AUTO</span>
-            <span class="text-lg font-bold">TON / USDT <span class="text-green-400 text-sm">+0.62%</span></span>
-        </div>
-        <!-- Кнопка кошелька -->
-        <div id="ton-connect-button"></div>
-    </header>
+<body>
 
-    <!-- CONTENT SECTIONS -->
-    <main id="main-content" class="flex-1 p-4">
-        <!-- Секция СПОТ (По умолчанию) -->
-        <section id="section-spot" class="space-y-4">
-            <div class="grid grid-cols-12 gap-3">
-                <!-- Левая колонка (Форма) -->
-                <div class="col-span-7 space-y-3">
-                    <div class="flex bg-[#1a2230] p-1 rounded-xl">
-                        <button class="flex-1 py-2 rounded-lg tab-active font-bold">Buy</button>
-                        <button class="flex-1 py-2 rounded-lg text-orange-400 font-bold">Sell</button>
-                    </div>
-                    <div class="bg-[#1a2230] p-3 rounded-xl flex justify-between items-center border border-gray-800">
-                        <span class="text-gray-400 text-xs uppercase">Amount</span>
-                        <span class="font-bold">25 TON</span>
-                    </div>
-                    <div class="bg-[#1a2230] p-3 rounded-xl flex justify-between items-center border border-gray-800">
-                        <span class="text-gray-400 text-xs uppercase">Receive</span>
-                        <span class="font-bold">133.25 USDT</span>
-                    </div>
-                    <div class="text-[10px] text-gray-500 space-y-1 px-1">
-                        <div class="flex justify-between"><span>DEX Fee</span><span>0.25% ; 33 TON</span></div>
-                        <div class="flex justify-between"><span>GROK Fee</span><span>0.35% ; 33 TON</span></div>
-                    </div>
-                    <button class="w-full bg-green-500 hover:bg-green-600 py-4 rounded-2xl font-bold shadow-lg shadow-green-900/20">Buy TON</button>
-                </div>
+<div class="header">
+💎 SYN TERMINAL<br>
+<span class="sub">AI Trading System</span>
+</div>
 
-                <!-- Правая колонка (Стакан) -->
-                <div class="col-span-5 bg-[#161d2a] rounded-xl border border-gray-800 overflow-hidden py-2">
-                    <div class="px-2 pb-2 text-[10px] text-gray-500 font-bold flex justify-between">
-                        <span>PRICE</span><span>AMOUNT</span>
-                    </div>
-                    <!-- Продажи -->
-                    <div class="depth-row text-red-500">
-                        <div class="depth-fill bg-red-500" style="width: 70%"></div><span class="z-10">5.33</span><span class="z-10 ml-auto text-gray-300">353</span>
-                    </div>
-                    <div class="depth-row text-red-500">
-                        <div class="depth-fill bg-red-500" style="width: 40%"></div><span class="z-10">5.31</span><span class="z-10 ml-auto text-gray-300">791</span>
-                    </div>
-                    <div class="h-[1px] bg-gray-800 my-1"></div>
-                    <!-- Покупки -->
-                    <div class="depth-row text-green-500">
-                        <div class="depth-fill bg-green-500" style="width: 60%"></div><span class="z-10">5.25</span><span class="z-10 ml-auto text-gray-300">361</span>
-                    </div>
-                    <div class="depth-row text-green-500">
-                        <div class="depth-fill bg-green-500" style="width: 30%"></div><span class="z-10">5.23</span><span class="z-10 ml-auto text-gray-300">347</span>
-                    </div>
-                </div>
-            </div>
-        </section>
+<div class="main">
 
-        <!-- Пустые секции для навигации -->
-        <section id="section-market" class="hidden py-20 text-center text-gray-500">Список торговых пар (Market)</section>
-        <section id="section-profile" class="hidden py-20 text-center text-gray-500">Ваш профиль и история сделок</section>
-        <section id="section-settings" class="hidden py-20 text-center text-gray-500">Настройки интерфейса и API</section>
-    </main>
+<div class="chart-bar">📉 Chart (скоро TradingView)</div>
 
-    <!-- BOTTOM NAVIGATION -->
-    <nav class="fixed bottom-0 left-0 right-0 glass border-t border-gray-800 flex justify-around p-3 z-50">
-        <button onclick="showSection('market')" class="nav-item flex flex-col items-center text-gray-500">
-            <span class="text-xl">📊</span><span class="text-[10px]">Market</span>
-        </button>
-        <button onclick="showSection('spot')" class="nav-item active flex flex-col items-center">
-            <span class="text-xl">🔄</span><span class="text-[10px]">Spot</span>
-        </button>
-        <button onclick="showSection('profile')" class="nav-item flex flex-col items-center text-gray-500">
-            <span class="text-xl">👤</span><span class="text-[10px]">Profile</span>
-        </button>
-        <button onclick="showSection('settings')" class="nav-item flex flex-col items-center text-gray-500">
-            <span class="text-xl">⚙️</span><span class="text-[10px]">Settings</span>
-        </button>
-    </nav>
+<div class="orderbook" id="orderbook"></div>
 
-    <script>
-        // Инициализация TON Connect
-        const tonConnectUI = new TON_CONNECT_UI.TonConnectUI({
-            manifestUrl: 'https://ton-connect.github.io', // Замени на свой манифест
-            buttonRootId: 'ton-connect-button'
-        });
+</div>
 
-        // Простая логика переключения разделов
-        function showSection(name) {
-            // Скрываем все
-            document.querySelectorAll('main section').forEach(s => s.classList.add('hidden'));
-            document.querySelectorAll('nav button').forEach(b => b.classList.remove('active', 'text-blue-500'));
-            document.querySelectorAll('nav button').forEach(b => b.classList.add('text-gray-500'));
+<div class="trade">
+<div class="input">Amount: 25 TON</div>
+<div class="input">Receive: 133 USDT</div>
+<div class="input">Fee: 0.25%</div>
+<button class="btn">BUY TON</button>
+</div>
 
-            // Показываем нужный
-            document.getElementById('section-' + name).classList.remove('hidden');
-            event.currentTarget.classList.add('active', 'text-blue-500');
-        }
-    </script>
+<div class="bottom">
+<div>Home</div>
+<div>Trade</div>
+<div>Wallet</div>
+</div>
+
+<script>
+const orderbook = document.getElementById('orderbook');
+
+function generate() {
+    orderbook.innerHTML = '';
+
+    let base = 5.30;
+
+    // SELL
+    for (let i = 0; i < 20; i++) {
+        let price = base + i * 0.01;
+        let amount = Math.random() * 500;
+        let depth = Math.random() * 100;
+
+        let row = document.createElement('div');
+        row.className = 'row sell';
+
+        let fill = document.createElement('div');
+        fill.className = 'fill';
+        fill.style.width = depth + '%';
+        fill.style.background = 'red';
+
+        row.innerHTML = `<span>${price.toFixed(2)}</span><span>${amount.toFixed(0)}</span>`;
+        row.appendChild(fill);
+
+        orderbook.appendChild(row);
+    }
+
+    // PRICE
+    let priceRow = document.createElement('div');
+    priceRow.className = 'price';
+    priceRow.innerText = base.toFixed(2);
+    orderbook.appendChild(priceRow);
+
+    // BUY
+    for (let i = 0; i < 20; i++) {
+        let price = base - i * 0.01;
+        let amount = Math.random() * 500;
+        let depth = Math.random() * 100;
+
+        let row = document.createElement('div');
+        row.className = 'row buy';
+
+        let fill = document.createElement('div');
+        fill.className = 'fill';
+        fill.style.width = depth + '%';
+        fill.style.background = '#00ff9c';
+
+        row.innerHTML = `<span>${price.toFixed(2)}</span><span>${amount.toFixed(0)}</span>`;
+        row.appendChild(fill);
+
+        orderbook.appendChild(row);
+    }
+}
+
+generate();
+setInterval(generate, 2000);
+</script>
+
 </body>
-</html>
-
+                                 </html>
