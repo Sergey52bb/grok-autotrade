@@ -3,155 +3,140 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
 <title>SYN TERMINAL</title>
 
 <style>
-:root {
-    --bg: #0b121e;
-    --card: #161d2a;
-    --text: #fff;
-    --dim: #8e96a3;
-    --green: #00ff9c;
-    --red: #ff4d4d;
-}
-
 body {
     margin: 0;
-    background: var(--bg);
+    background: #0b1220;
     font-family: Arial;
-    color: var(--text);
+    color: white;
 }
 
 /* HEADER */
 .header {
-    padding: 10px;
-    font-size: 16px;
+    padding: 15px;
+    background: #0f1a2e;
+}
+.title {
+    font-size: 20px;
     font-weight: bold;
 }
+.pair {
+    color: #888;
+    font-size: 14px;
+}
 
-/* MAIN GRID */
-.main {
-    display: grid;
-    grid-template-columns: 55% 45%;
-    height: calc(100vh - 120px);
+/* LAYOUT */
+.container {
+    display: flex;
+    height: calc(100vh - 90px);
 }
 
 /* ORDERBOOK */
-.order-book {
-    background: #0f1722;
-    border-radius: 10px;
-    overflow: hidden;
-    font-size: 12px;
-    .order-book {
-    max-height: 400px;
-    overflow: hidden;
-    }
+.orderbook {
+    width: 50%;
+    display: flex;
+    flex-direction: column;
+    background: #0d1626;
 }
 
-/* строка ордера */
-.ob-row {
+/* ОБЩИЕ СТРОКИ */
+.row {
     position: relative;
     display: flex;
     justify-content: space-between;
-    align-items: center;
-    height: 18px; /* 👈 плотность */
-    padding: 0 6px;
+    padding: 2px 8px;
+    font-size: 12px;
+    height: 18px;
+    overflow: hidden;
 }
 
-/* заливка глубины */
-.ob-fill {
+.fill {
     position: absolute;
     top: 0;
     bottom: 0;
+    opacity: 0.2;
+}
+
+/* RED (SELL) */
+.sell .fill {
     right: 0;
-    opacity: 0.25;
-    z-index: 1;
+    background: #ff4d4d;
+}
+.sell .price {
+    color: #ff4d4d;
 }
 
-/* текст поверх */
-.ob-row span {
-    z-index: 2;
+/* GREEN (BUY) */
+.buy .fill {
+    left: 0;
+    background: #00c087;
+}
+.buy .price {
+    color: #00c087;
 }
 
-.red { color: #ff4d4f; }
-.green { color: #00c087; }
-
-/* текущая цена */
-.mid-price {
-    text-align: center;
-    font-weight: bold;
-    padding: 6px 0;
-    background: #111a27;
-    }
-
-/* COLORS */
-.sell span:first-child { color: var(--red); }
-.buy span:first-child { color: var(--green); }
-
-/* PRICE */
-.price {
+/* CENTER PRICE */
+.price-center {
     text-align: center;
     padding: 6px;
-    background: #121926;
+    font-size: 16px;
     font-weight: bold;
-    position: sticky;
-    top: 0;
+    background: #111b2e;
 }
 
-/* TRADE PANEL */
-.trade {
-    background: var(--card);
-    padding: 10px;
-    display: flex;
-    flex-direction: column;
-    gap: 8px;
-}
-
-.tabs {
-    display: flex;
-}
-
-.tab {
+/* SECTIONS */
+.asks {
     flex: 1;
-    text-align: center;
-    padding: 8px;
-    border-radius: 6px;
-}
-
-.buy-tab { background: var(--green); }
-.sell-tab { background: #333; }
-
-.input {
-    background: #0f1622;
-    padding: 10px;
-    border-radius: 8px;
-    font-size: 12px;
-}
-
-.btn-buy {
-    background: var(--green);
-    padding: 12px;
-    border: none;
-    border-radius: 10px;
-    font-weight: bold;
-}
-
-.btn-sell {
-    background: var(--red);
-    padding: 12px;
-    border: none;
-    border-radius: 10px;
-    font-weight: bold;
-}
-
-/* BOTTOM */
-.bottom {
-    height: 60px;
-    background: #121926;
     display: flex;
-    justify-content: space-around;
-    align-items: center;
+    flex-direction: column-reverse;
+}
+.bids {
+    flex: 1;
+}
+
+/* RIGHT PANEL */
+.trade {
+    width: 50%;
+    padding: 10px;
+    background: #0f1a2e;
+}
+
+.box {
+    background: #1a2230;
+    padding: 12px;
+    margin-bottom: 10px;
+    border-radius: 10px;
+}
+
+.btn {
+    width: 100%;
+    padding: 14px;
+    border: none;
+    border-radius: 10px;
+    font-weight: bold;
+    margin-top: 5px;
+    font-size: 16px;
+}
+
+.buy-btn {
+    background: #00c087;
+}
+
+.sell-btn {
+    background: #ff4d4d;
+}
+
+/* FIX MOBILE */
+@media(max-width: 768px){
+    .container {
+        flex-direction: column;
+    }
+    .orderbook, .trade {
+        width: 100%;
+        height: 50%;
+    }
 }
 </style>
 </head>
@@ -159,89 +144,81 @@ body {
 <body>
 
 <div class="header">
-💎 SYN TERMINAL<br>
-<span style="font-size:12px;color:#8e96a3;">TON / USDT</span>
+    <div class="title">💎 SYN TERMINAL</div>
+    <div class="pair">TON / USDT</div>
 </div>
 
-<div class="main">
+<div class="container">
 
-<!-- ORDERBOOK -->
-<div class="orderbook" id="orderbook"></div>
+    <!-- ORDER BOOK -->
+    <div class="orderbook">
 
-<!-- TRADE -->
-<div class="order-book">
+        <!-- SELL -->
+        <div class="asks" id="asks"></div>
 
-    <!-- SELL (верх) -->
-    <div id="sellOrders"></div>
+        <!-- CENTER PRICE -->
+        <div class="price-center" id="price">1.288</div>
 
-    <!-- Текущая цена -->
-    <div class="mid-price">1.288</div>
-
-    <!-- BUY (низ) -->
-    <div id="buyOrders"></div>
+        <!-- BUY -->
+        <div class="bids" id="bids"></div>
 
     </div>
 
-<div class="input">Amount: 25 TON</div>
-<div class="input">Receive: 133 USDT</div>
-<div class="input">Fee: 0.25%</div>
+    <!-- TRADE PANEL -->
+    <div class="trade">
+        <div class="box">Amount: 25 TON</div>
+        <div class="box">Receive: 133 USDT</div>
+        <div class="box">Fee: 0.25%</div>
 
-<button class="btn-buy">BUY</button>
-<button class="btn-sell">SELL</button>
+        <button class="btn buy-btn">BUY</button>
+        <button class="btn sell-btn">SELL</button>
+    </div>
 
-</div>
-
-</div>
-
-<div class="bottom">
-<div>Home</div>
-<div>Trade</div>
-<div>Wallet</div>
 </div>
 
 <script>
-function generateOrders(type) {
-    const container = document.getElementById(type === 'buy' ? 'buyOrders' : 'sellOrders');
-    container.innerHTML = '';
 
-    let basePrice = 1.288;
+// генерация нормального стакана (как у биржи)
+function generateOrderBook() {
+    const asks = document.getElementById("asks");
+    const bids = document.getElementById("bids");
 
-    for (let i = 0; i < 20; i++) {
-        let price = type === 'buy'
-            ? (basePrice - i * 0.001).toFixed(3)
-            : (basePrice + i * 0.001).toFixed(3);
+    asks.innerHTML = "";
+    bids.innerHTML = "";
 
-        let volume = Math.floor(Math.random() * 1000) + 50;
+    let base = 1.288;
 
-        let maxVolume = 1000;
-        let width = (volume / maxVolume) * 100;
+    // SELL (красные)
+    for (let i = 0; i < 15; i++) {
+        let price = (base + i * 0.001).toFixed(3);
+        let vol = Math.floor(Math.random() * 10000);
+        let width = Math.random() * 100;
 
-        const row = document.createElement('div');
-        row.className = 'ob-row';
+        asks.innerHTML += `
+        <div class="row sell">
+            <div class="fill" style="width:${width}%"></div>
+            <span class="price">${price}</span>
+            <span>${vol}</span>
+        </div>`;
+    }
 
-        row.innerHTML = `
-            <div class="ob-fill" style="
-                width: ${width}%;
-                background: ${type === 'buy' ? '#00c087' : '#ff4d4f'};
-            "></div>
+    // BUY (зеленые)
+    for (let i = 0; i < 15; i++) {
+        let price = (base - i * 0.001).toFixed(3);
+        let vol = Math.floor(Math.random() * 10000);
+        let width = Math.random() * 100;
 
-            <span class="${type === 'buy' ? 'green' : 'red'}">${price}</span>
-            <span>${volume}</span>
-        `;
-
-        container.appendChild(row);
+        bids.innerHTML += `
+        <div class="row buy">
+            <div class="fill" style="width:${width}%"></div>
+            <span class="price">${price}</span>
+            <span>${vol}</span>
+        </div>`;
     }
 }
 
-// обновление
-setInterval(() => {
-    generateOrders('buy');
-    generateOrders('sell');
-}, 1000);
+generateOrderBook();
 
-// первый запуск
-generateOrders('buy');
-generateOrders('sell');
 </script>
 
 </body>
