@@ -1,225 +1,168 @@
 <!DOCTYPE html>
 <html lang="ru">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>SYN TERMINAL</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Pro Exchange | Spot</title>
+    <script src="https://unpkg.com"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @import url('https://fonts.googleapis.com');
+        body { background-color: #060606; color: #eaecef; font-family: -apple-system, sans-serif; overflow-x: hidden; }
+        .mono { font-family: 'Roboto Mono', monospace; }
+        .bg-card { background-color: #12151c; }
+        .bg-input { background-color: #1e2329; }
+        .text-gray { color: #848e9c; }
+        .border-gray { border-color: #2b3139; }
+        
+        /* Стакан: полоски объема */
+        .depth-row { position: relative; height: 22px; display: flex; align-items: center; padding: 0 4px; font-size: 11px; }
+        .depth-fill { position: absolute; right: 0; top: 1px; bottom: 1px; opacity: 0.15; z-index: 0; }
+        
+        /* Кастомный ползунок % */
+        .range-dot { width: 8px; height: 8px; background: #474d57; border-radius: 50%; }
+        .range-line { height: 2px; background: #2b3139; flex-grow: 1; }
 
-<style>
-body {
-    margin: 0;
-    background: #0b1220;
-    font-family: Arial;
-    color: white;
-}
-
-/* HEADER */
-.header {
-    padding: 15px;
-    background: #0f1a2e;
-}
-.title {
-    font-size: 20px;
-    font-weight: bold;
-}
-.pair {
-    color: #888;
-    font-size: 14px;
-}
-
-/* LAYOUT */
-.container {
-    display: flex;
-    height: calc(100vh - 90px);
-}
-
-/* ORDERBOOK */
-.orderbook {
-    width: 50%;
-    display: flex;
-    flex-direction: column;
-    background: #0d1626;
-}
-
-/* ОБЩИЕ СТРОКИ */
-.row {
-    position: relative;
-    display: flex;
-    justify-content: space-between;
-    padding: 2px 8px;
-    font-size: 12px;
-    height: 18px;
-    overflow: hidden;
-}
-
-.fill {
-    position: absolute;
-    top: 0;
-    bottom: 0;
-    opacity: 0.2;
-}
-
-/* RED (SELL) */
-.sell .fill {
-    right: 0;
-    background: #ff4d4d;
-}
-.sell .price {
-    color: #ff4d4d;
-}
-
-/* GREEN (BUY) */
-.buy .fill {
-    left: 0;
-    background: #00c087;
-}
-.buy .price {
-    color: #00c087;
-}
-
-/* CENTER PRICE */
-.price-center {
-    text-align: center;
-    padding: 6px;
-    font-size: 16px;
-    font-weight: bold;
-    background: #111b2e;
-}
-
-/* SECTIONS */
-.asks {
-    flex: 1;
-    display: flex;
-    flex-direction: column-reverse;
-}
-.bids {
-    flex: 1;
-}
-
-/* RIGHT PANEL */
-.trade {
-    width: 50%;
-    padding: 10px;
-    background: #0f1a2e;
-}
-
-.box {
-    background: #1a2230;
-    padding: 12px;
-    margin-bottom: 10px;
-    border-radius: 10px;
-}
-
-.btn {
-    width: 100%;
-    padding: 14px;
-    border: none;
-    border-radius: 10px;
-    font-weight: bold;
-    margin-top: 5px;
-    font-size: 16px;
-}
-
-.buy-btn {
-    background: #00c087;
-}
-
-.sell-btn {
-    background: #ff4d4d;
-}
-
-/* FIX MOBILE */
-@media(max-width: 768px){
-    .container {
-        flex-direction: column;
-    }
-    .orderbook, .trade {
-        width: 100%;
-        height: 50%;
-    }
-}
-</style>
+        /* Табы Buy/Sell */
+        .btn-tab { transition: all 0.2s; border-bottom: 2px solid transparent; }
+        .active-buy { background-color: #2ebd85 !important; color: white !important; }
+        .active-sell { background-color: #f6465d !important; color: white !important; }
+    </style>
 </head>
+<body class="pb-20">
 
-<body>
-
-<div class="header">
-    <div class="title">💎 SYN TERMINAL</div>
-    <div class="pair">TON / USDT</div>
-</div>
-
-<div class="container">
-
-    <!-- ORDER BOOK -->
-    <div class="orderbook">
-
-        <!-- SELL -->
-        <div class="asks" id="asks"></div>
-
-        <!-- CENTER PRICE -->
-        <div class="price-center" id="price">1.288</div>
-
-        <!-- BUY -->
-        <div class="bids" id="bids"></div>
-
+    <!-- Top Bar -->
+    <div class="p-4 flex justify-between items-center border-b border-gray">
+        <div class="flex items-center gap-2">
+            <span class="text-xl font-bold">ETH/USDT</span>
+            <span class="text-green-500 text-sm font-medium">+3.89%</span>
+        </div>
+        <div id="ton-connect-button"></div>
     </div>
 
-    <!-- TRADE PANEL -->
-    <div class="trade">
-        <div class="box">Amount: 25 TON</div>
-        <div class="box">Receive: 133 USDT</div>
-        <div class="box">Fee: 0.25%</div>
+    <!-- Main Content -->
+    <main class="p-3 grid grid-cols-12 gap-3">
+        
+        <!-- Left: Trade Form (55%) -->
+        <section class="col-span-7 space-y-3">
+            <!-- Buy/Sell Switch -->
+            <div class="flex bg-input rounded-md p-1">
+                <button class="flex-1 py-1.5 rounded active-buy text-sm font-bold">Купить</button>
+                <button class="flex-1 py-1.5 rounded text-gray text-sm font-bold">Продать</button>
+            </div>
 
-        <button class="btn buy-btn">BUY</button>
-        <button class="btn sell-btn">SELL</button>
-    </div>
+            <!-- Order Type -->
+            <div class="flex justify-between items-center text-sm px-1">
+                <span class="font-medium text-gray">Лимитная</span>
+                <span class="text-xs">▼</span>
+            </div>
 
-</div>
+            <!-- Price Input -->
+            <div class="bg-input rounded p-2 flex items-center border border-transparent focus-within:border-yellow-500">
+                <span class="text-gray text-lg px-2">—</span>
+                <div class="flex-1 text-center">
+                    <div class="text-[10px] text-gray uppercase">Цена</div>
+                    <div class="mono font-bold text-sm">2063.22</div>
+                </div>
+                <span class="text-gray text-lg px-2">+</span>
+            </div>
 
-<script>
+            <!-- Amount Input -->
+            <div class="bg-input rounded p-2 flex flex-col items-center">
+                <div class="w-full flex justify-between px-2">
+                    <span class="text-[10px] text-gray uppercase">Количество</span>
+                    <span class="text-[10px] text-white">ETH</span>
+                </div>
+                <div class="mono font-bold text-sm py-1 text-gray-500">Всего</div>
+            </div>
 
-// генерация нормального стакана (как у биржи)
-function generateOrderBook() {
-    const asks = document.getElementById("asks");
-    const bids = document.getElementById("bids");
+            <!-- Range Selector (Dots) -->
+            <div class="flex items-center justify-between px-1 py-2">
+                <div class="range-dot bg-gray-500"></div>
+                <div class="range-line"></div>
+                <div class="range-dot"></div>
+                <div class="range-line"></div>
+                <div class="range-dot"></div>
+                <div class="range-line"></div>
+                <div class="range-dot"></div>
+                <div class="range-line"></div>
+                <div class="range-dot"></div>
+            </div>
 
-    asks.innerHTML = "";
-    bids.innerHTML = "";
+            <!-- Total Info -->
+            <div class="bg-input rounded p-2 flex justify-between items-center">
+                <span class="text-[10px] text-gray uppercase px-1 text-white">Всего</span>
+                <span class="text-[10px] text-gray uppercase px-1">USDT</span>
+            </div>
 
-    let base = 1.288;
+            <div class="text-[10px] text-gray px-1 space-y-1">
+                <div class="flex justify-between"><span>Дост.</span><span class="text-white">0 USDT <span class="text-yellow-500">+</span></span></div>
+            </div>
 
-    // SELL (красные)
-    for (let i = 0; i < 15; i++) {
-        let price = (base + i * 0.001).toFixed(3);
-        let vol = Math.floor(Math.random() * 10000);
-        let width = Math.random() * 100;
+            <!-- Main Button -->
+            <button class="w-full bg-[#2ebd85] text-white py-3 rounded-md font-bold text-sm active:opacity-80">
+                Купить ETH
+            </button>
+        </section>
 
-        asks.innerHTML += `
-        <div class="row sell">
-            <div class="fill" style="width:${width}%"></div>
-            <span class="price">${price}</span>
-            <span>${vol}</span>
-        </div>`;
-    }
+        <!-- Right: Order Book (45%) -->
+        <section class="col-span-5 flex flex-col">
+            <div class="flex justify-between text-[9px] text-gray mb-2 font-bold uppercase">
+                <span>Цена</span>
+                <span>Сумма</span>
+            </div>
 
-    // BUY (зеленые)
-    for (let i = 0; i < 15; i++) {
-        let price = (base - i * 0.001).toFixed(3);
-        let vol = Math.floor(Math.random() * 10000);
-        let width = Math.random() * 100;
+            <!-- Asks (Sells) -->
+            <div class="flex flex-col-reverse">
+                <div class="depth-row text-[#f6465d]"><div class="depth-fill bg-[#f6465d]" style="width: 20%"></div><span class="mono">2064.00</span><span class="ml-auto text-white mono">0.0019</span></div>
+                <div class="depth-row text-[#f6465d]"><div class="depth-fill bg-[#f6465d]" style="width: 65%"></div><span class="mono">2063.99</span><span class="ml-auto text-white mono">0.0162</span></div>
+                <div class="depth-row text-[#f6465d]"><div class="depth-fill bg-[#f6465d]" style="width: 15%"></div><span class="mono">2063.98</span><span class="ml-auto text-white mono">0.0019</span></div>
+                <div class="depth-row text-[#f6465d]"><div class="depth-fill bg-[#f6465d]" style="width: 40%"></div><span class="mono">2063.97</span><span class="ml-auto text-white mono">0.0020</span></div>
+            </div>
 
-        bids.innerHTML += `
-        <div class="row buy">
-            <div class="fill" style="width:${width}%"></div>
-            <span class="price">${price}</span>
-            <span>${vol}</span>
-        </div>`;
-    }
-}
+            <!-- Current Price -->
+            <div class="py-2 flex flex-col items-center border-y border-gray my-1">
+                <span class="text-green-500 text-lg mono font-bold leading-none">2063.38</span>
+                <span class="text-[10px] text-gray">≈ $2,061.98</span>
+            </div>
 
-generateOrderBook();
+            <!-- Bids (Buys) -->
+            <div class="flex flex-col">
+                <div class="depth-row text-[#2ebd85]"><div class="depth-fill bg-[#2ebd85]" style="width: 85%"></div><span class="mono">2063.38</span><span class="ml-auto text-white mono">0.2350</span></div>
+                <div class="depth-row text-[#2ebd85]"><div class="depth-fill bg-[#2ebd85]" style="width: 95%"></div><span class="mono">2062.84</span><span class="ml-auto text-white mono">50.14</span></div>
+                <div class="depth-row text-[#2ebd85]"><div class="depth-fill bg-[#2ebd85]" style="width: 40%"></div><span class="mono">2062.83</span><span class="ml-auto text-white mono">9.39</span></div>
+            </div>
 
-</script>
+            <!-- Volume Progress Bar -->
+            <div class="flex h-1 gap-[2px] mt-4">
+                <div class="h-full bg-green-500" style="width: 97%"></div>
+                <div class="h-full bg-red-500" style="width: 3%"></div>
+            </div>
+        </section>
+    </main>
 
+    <!-- Bottom Nav -->
+    <nav class="fixed bottom-0 left-0 right-0 bg-[#12151c] border-t border-gray flex justify-around py-2">
+        <div class="flex flex-col items-center gap-1 text-gray">
+            <span class="text-lg">🏠</span><span class="text-[9px]">Главная</span>
+        </div>
+        <div class="flex flex-col items-center gap-1 text-gray">
+            <span class="text-lg">📈</span><span class="text-[9px]">Рынки</span>
+        </div>
+        <div class="flex flex-col items-center gap-1 text-blue-500">
+            <span class="text-lg">⚖️</span><span class="text-[9px]">Спот</span>
+        </div>
+        <div class="flex flex-col items-center gap-1 text-gray">
+            <span class="text-lg">💰</span><span class="text-[9px]">Активы</span>
+        </div>
+    </nav>
+
+    <script>
+        const tonConnectUI = new TON_CONNECT_UI.TonConnectUI({
+            manifestUrl: 'https://ton-connect.github.io',
+            buttonRootId: 'ton-connect-button'
+        });
+    </script>
 </body>
 </html>
+
