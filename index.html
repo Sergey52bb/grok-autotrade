@@ -38,27 +38,48 @@ body {
 }
 
 /* ORDERBOOK */
-.orderbook {
-    background: #101722;
-    overflow-y: auto;
+.order-book {
+    background: #0f1722;
+    border-radius: 10px;
+    overflow: hidden;
+    font-size: 12px;
 }
 
-/* ROW */
-.row {
+/* строка ордера */
+.ob-row {
     position: relative;
     display: flex;
     justify-content: space-between;
-    padding: 3px 8px;
-    font-size: 11px;
+    align-items: center;
+    height: 18px; /* 👈 плотность */
+    padding: 0 6px;
 }
 
-.fill {
+/* заливка глубины */
+.ob-fill {
     position: absolute;
-    right: 0;
     top: 0;
-    height: 100%;
-    opacity: 0.2;
+    bottom: 0;
+    right: 0;
+    opacity: 0.25;
+    z-index: 1;
 }
+
+/* текст поверх */
+.ob-row span {
+    z-index: 2;
+}
+
+.red { color: #ff4d4f; }
+.green { color: #00c087; }
+
+/* текущая цена */
+.mid-price {
+    text-align: center;
+    font-weight: bold;
+    padding: 6px 0;
+    background: #111a27;
+    }
 
 /* COLORS */
 .sell span:first-child { color: var(--red); }
@@ -144,12 +165,18 @@ body {
 <div class="orderbook" id="orderbook"></div>
 
 <!-- TRADE -->
-<div class="trade">
+<div class="order-book">
 
-<div class="tabs">
-<div class="tab buy-tab">BUY</div>
-<div class="tab sell-tab">SELL</div>
-</div>
+    <!-- SELL (верх) -->
+    <div id="sellOrders"></div>
+
+    <!-- Текущая цена -->
+    <div class="mid-price">1.288</div>
+
+    <!-- BUY (низ) -->
+    <div id="buyOrders"></div>
+
+    </div>
 
 <div class="input">Amount: 25 TON</div>
 <div class="input">Receive: 133 USDT</div>
@@ -169,61 +196,48 @@ body {
 </div>
 
 <script>
-const ob = document.getElementById('orderbook');
+function generateOrders(type) {
+    const container = document.getElementById(type === 'buy' ? 'buyOrders' : 'sellOrders');
+    container.innerHTML = '';
 
-function generate() {
-    ob.innerHTML = '';
-    let base = 5.30;
+    let basePrice = 1.288;
 
-    // SELL
-    for (let i = 0; i < 25; i++) {
-        let price = base + i * 0.01;
-        let amount = Math.random() * 1000;
-        let depth = Math.random() * 100;
+    for (let i = 0; i < 20; i++) {
+        let price = type === 'buy'
+            ? (basePrice - i * 0.001).toFixed(3)
+            : (basePrice + i * 0.001).toFixed(3);
 
-        let row = document.createElement('div');
-        row.className = 'row sell';
+        let volume = Math.floor(Math.random() * 1000) + 50;
 
-        let fill = document.createElement('div');
-        fill.className = 'fill';
-        fill.style.width = depth + '%';
-        fill.style.background = 'red';
+        let maxVolume = 1000;
+        let width = (volume / maxVolume) * 100;
 
-        row.innerHTML = `<span>${price.toFixed(2)}</span><span>${amount.toFixed(0)}</span>`;
-        row.appendChild(fill);
+        const row = document.createElement('div');
+        row.className = 'ob-row';
 
-        ob.appendChild(row);
-    }
+        row.innerHTML = `
+            <div class="ob-fill" style="
+                width: ${width}%;
+                background: ${type === 'buy' ? '#00c087' : '#ff4d4f'};
+            "></div>
 
-    // PRICE
-    let price = document.createElement('div');
-    price.className = 'price';
-    price.innerText = base.toFixed(2);
-    ob.appendChild(price);
+            <span class="${type === 'buy' ? 'green' : 'red'}">${price}</span>
+            <span>${volume}</span>
+        `;
 
-    // BUY
-    for (let i = 0; i < 25; i++) {
-        let price = base - i * 0.01;
-        let amount = Math.random() * 1000;
-        let depth = Math.random() * 100;
-
-        let row = document.createElement('div');
-        row.className = 'row buy';
-
-        let fill = document.createElement('div');
-        fill.className = 'fill';
-        fill.style.width = depth + '%';
-        fill.style.background = '#00ff9c';
-
-        row.innerHTML = `<span>${price.toFixed(2)}</span><span>${amount.toFixed(0)}</span>`;
-        row.appendChild(fill);
-
-        ob.appendChild(row);
+        container.appendChild(row);
     }
 }
 
-generate();
-setInterval(generate, 2000);
+// обновление
+setInterval(() => {
+    generateOrders('buy');
+    generateOrders('sell');
+}, 1000);
+
+// первый запуск
+generateOrders('buy');
+generateOrders('sell');
 </script>
 
 </body>
