@@ -8,55 +8,25 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
         @import url('https://fonts.googleapis.com');
-        
-        body { 
-            background-color: #060606; 
-            color: #eaecef; 
-            font-family: 'Inter', sans-serif; 
-            overflow-x: hidden; 
-        }
-        
+        body { background-color: #060606; color: #eaecef; font-family: 'Inter', sans-serif; overflow: hidden; height: 100vh; }
         .mono { font-family: 'Roboto Mono', monospace; }
-        .bg-card { background-color: #12151c; }
         .bg-input { background-color: #1e2329; }
         .text-gray { color: #848e9c; }
-        .border-gray { border-color: #2b3139; }
-        
-        /* Стилизация названия проекта */
-        .brand-logo {
-            background: linear-gradient(90deg, #00d2ff 0%, #3a7bd5 100%);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            text-shadow: 0 0 15px rgba(58, 123, 213, 0.3);
-        }
-
-        .ai-badge {
-            font-size: 8px;
-            padding: 1px 4px;
-            border: 1px solid #3a7bd5;
-            border-radius: 4px;
-            color: #3a7bd5;
-            vertical-align: middle;
-            margin-left: 4px;
-        }
-
-        /* Стакан: полоски объема */
-        .depth-row { position: relative; height: 22px; display: flex; align-items: center; padding: 0 4px; font-size: 11px; }
-        .depth-fill { position: absolute; right: 0; top: 1px; bottom: 1px; opacity: 0.15; z-index: 0; }
-        
-        /* Кнопки Buy/Sell */
+        .brand-logo { background: linear-gradient(90deg, #00d2ff 0%, #3a7bd5 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+        .depth-row { position: relative; height: 20px; display: flex; align-items: center; padding: 0 4px; font-size: 11px; transition: all 0.3s; }
+        .depth-fill { position: absolute; right: 0; top: 1px; bottom: 1px; opacity: 0.15; z-index: 0; transition: width 0.5s ease-in-out; }
         .active-buy { background-color: #2ebd85 !important; color: white !important; }
         .active-sell { background-color: #f6465d !important; color: white !important; }
+        .hidden { display: none; }
     </style>
 </head>
-<body class="pb-20">
+<body class="flex flex-col">
 
-    <!-- Top Bar -->
-    <div class="p-4 flex justify-between items-center border-b border-gray sticky top-0 bg-[#060606] z-50">
+    <!-- Header -->
+    <header class="p-4 flex justify-between items-center border-b border-[#2b3139]">
         <div class="flex flex-col">
             <div class="flex items-center">
                 <span class="text-sm font-bold brand-logo">💎 SYN TERMINAL</span>
-                <span class="ai-badge">AI SYSTEM</span>
             </div>
             <div class="flex items-center gap-2 mt-0.5">
                 <span class="text-xs font-bold">TON/USDT</span>
@@ -64,123 +34,133 @@
             </div>
         </div>
         <div id="ton-connect-button"></div>
-    </div>
+    </header>
 
-    <!-- Main Content -->
-    <main class="p-3 grid grid-cols-12 gap-3">
-        
-        <!-- Left: Trade Form (55%) -->
-        <section class="col-span-7 space-y-3">
-            <div class="flex bg-input rounded-md p-1">
-                <button class="flex-1 py-1.5 rounded active-buy text-sm font-bold">Купить</button>
-                <button class="flex-1 py-1.5 rounded text-gray text-sm font-bold">Продать</button>
-            </div>
-
-            <div class="flex justify-between items-center text-[11px] px-1 text-gray">
-                <span class="font-medium">Лимитная ордер</span>
-                <span>▼</span>
-            </div>
-
-            <!-- Price Input -->
-            <div class="bg-input rounded p-2 flex items-center border border-transparent border-gray">
-                <span class="text-gray text-lg px-2">—</span>
-                <div class="flex-1 text-center">
-                    <div class="text-[9px] text-gray uppercase">Цена (USDT)</div>
-                    <div class="mono font-bold text-sm">5.3322</div>
+    <!-- Main View (Sections) -->
+    <main class="flex-1 overflow-y-auto pb-20">
+        <!-- Section: SPOT (Main Trading) -->
+        <section id="view-spot" class="p-3 grid grid-cols-12 gap-3">
+            <!-- Left: Trade Form -->
+            <div class="col-span-7 space-y-3">
+                <div class="flex bg-input rounded-md p-1">
+                    <button id="tab-buy" onclick="setSide('buy')" class="flex-1 py-1.5 rounded active-buy text-sm font-bold">Купить</button>
+                    <button id="tab-sell" onclick="setSide('sell')" class="flex-1 py-1.5 rounded text-gray text-sm font-bold">Продать</button>
                 </div>
-                <span class="text-gray text-lg px-2">+</span>
-            </div>
-
-            <!-- Amount Input -->
-            <div class="bg-input rounded p-2 flex flex-col items-center">
-                <div class="w-full flex justify-between px-2">
-                    <span class="text-[9px] text-gray uppercase">Количество</span>
-                    <span class="text-[9px] text-white">TON</span>
+                
+                <div class="bg-input rounded p-2 border border-[#2b3139]">
+                    <div class="text-[9px] text-gray uppercase text-center">Цена (USDT)</div>
+                    <div class="mono font-bold text-center text-sm" id="display-price">5.3322</div>
                 </div>
-                <div class="mono font-bold text-sm py-1 text-gray-500 italic">AI Optimized</div>
-            </div>
 
-            <!-- Total Input -->
-            <div class="bg-input rounded p-2 flex justify-between items-center border border-gray">
-                <span class="text-[10px] text-gray uppercase px-1">Всего</span>
-                <span class="text-[10px] text-gray uppercase px-1">USDT</span>
-            </div>
+                <div class="bg-input rounded p-2 border border-[#2b3139]">
+                    <div class="flex justify-between px-1"><span class="text-[9px] text-gray uppercase">Количество</span><span class="text-[9px] text-white">TON</span></div>
+                    <input type="number" placeholder="AI Optimized" class="bg-transparent w-full text-center mono font-bold text-sm focus:outline-none py-1">
+                </div>
 
-            <!-- Balance Info -->
-            <div class="text-[10px] text-gray px-1 space-y-1">
-                <div class="flex justify-between">
+                <button id="main-action-btn" class="w-full bg-[#2ebd85] text-white py-4 rounded-md font-bold text-sm shadow-lg active:scale-95 transition-all">
+                    Купить TON
+                </button>
+                
+                <div class="text-[10px] text-gray px-1 flex justify-between">
                     <span>Доступно</span>
-                    <span class="text-white font-bold">0.00 USDT <span class="text-blue-500">+</span></span>
+                    <span class="text-white font-bold">0.00 USDT</span>
                 </div>
             </div>
 
-            <!-- Main Action Button -->
-            <button class="w-full bg-[#2ebd85] text-white py-3.5 rounded-md font-bold text-sm shadow-lg shadow-green-900/10 active:scale-95 transition-transform">
-                Купить TON
-            </button>
-        </section>
-
-        <!-- Right: Order Book (45%) -->
-        <section class="col-span-5 flex flex-col">
-            <div class="flex justify-between text-[8px] text-gray mb-2 font-bold uppercase tracking-wider">
-                <span>Цена</span>
-                <span>Сумма</span>
-            </div>
-
-            <!-- Asks (Sells) -->
-            <div class="flex flex-col-reverse">
-                <div class="depth-row text-[#f6465d]"><div class="depth-fill bg-[#f6465d]" style="width: 25%"></div><span class="mono">5.3340</span><span class="ml-auto text-white mono">120</span></div>
-                <div class="depth-row text-[#f6465d]"><div class="depth-fill bg-[#f6465d]" style="width: 80%"></div><span class="mono">5.3339</span><span class="ml-auto text-white mono">1.5k</span></div>
-                <div class="depth-row text-[#f6465d]"><div class="depth-fill bg-[#f6465d]" style="width: 45%"></div><span class="mono">5.3338</span><span class="ml-auto text-white mono">840</span></div>
-            </div>
-
-            <!-- Current Price -->
-            <div class="py-2 flex flex-col items-center border-y border-gray my-1 bg-[#12151c66]">
-                <span class="text-green-500 text-base mono font-bold">5.3322</span>
-                <span class="text-[9px] text-gray">≈ $5.33</span>
-            </div>
-
-            <!-- Bids (Buys) -->
-            <div class="flex flex-col">
-                <div class="depth-row text-[#2ebd85]"><div class="depth-fill bg-[#2ebd85]" style="width: 90%"></div><span class="mono">5.3321</span><span class="ml-auto text-white mono">2.1k</span></div>
-                <div class="depth-row text-[#2ebd85]"><div class="depth-fill bg-[#2ebd85]" style="width: 30%"></div><span class="mono">5.3319</span><span class="ml-auto text-white mono">450</span></div>
-                <div class="depth-row text-[#2ebd85]"><div class="depth-fill bg-[#2ebd85]" style="width: 55%"></div><span class="mono">5.3318</span><span class="ml-auto text-white mono">921</span></div>
-            </div>
-
-            <!-- Market Sentiment Bar -->
-            <div class="flex h-1 gap-[2px] mt-4 rounded-full overflow-hidden">
-                <div class="h-full bg-green-500" style="width: 72%"></div>
-                <div class="h-full bg-red-500" style="width: 28%"></div>
-            </div>
-            <div class="flex justify-between text-[8px] text-gray mt-1 font-bold">
-                <span>72% BUY</span>
-                <span>28% SELL</span>
+            <!-- Right: Order Book -->
+            <div class="col-span-5 flex flex-col">
+                <div id="order-book-asks" class="flex flex-col-reverse tracking-tighter"></div>
+                <div class="py-2 flex flex-col items-center border-y border-[#2b3139] my-1">
+                    <span class="text-green-500 text-sm mono font-bold" id="mid-price">5.3322</span>
+                </div>
+                <div id="order-book-bids" class="flex flex-col tracking-tighter"></div>
             </div>
         </section>
+
+        <!-- Other Views (Placeholders) -->
+        <section id="view-terminal" class="hidden p-10 text-center text-gray">AI Dashboard coming soon...</section>
+        <section id="view-market" class="hidden p-10 text-center text-gray">Market Pairs List</section>
+        <section id="view-assets" class="hidden p-10 text-center text-gray">Your Wallet Assets</section>
     </main>
 
-    <!-- Bottom Nav -->
-    <nav class="fixed bottom-0 left-0 right-0 bg-[#12151c] border-t border-gray flex justify-around py-3 z-50">
-        <div class="flex flex-col items-center gap-1 text-gray">
-            <span class="text-base">💎</span><span class="text-[9px]">Terminal</span>
-        </div>
-        <div class="flex flex-col items-center gap-1 text-gray">
-            <span class="text-base">📊</span><span class="text-[9px]">Market</span>
-        </div>
-        <div class="flex flex-col items-center gap-1 text-[#3a7bd5]">
-            <span class="text-base">🔄</span><span class="text-[9px]">Spot</span>
-        </div>
-        <div class="flex flex-col items-center gap-1 text-gray">
-            <span class="text-base">👤</span><span class="text-[9px]">Assets</span>
-        </div>
+    <!-- Navigation -->
+    <nav class="fixed bottom-0 left-0 right-0 bg-[#12151c] border-t border-[#2b3139] flex justify-around py-3 z-50">
+        <button onclick="changeView('terminal')" class="nav-btn flex flex-col items-center gap-1 text-gray">
+            <span class="text-lg">💎</span><span class="text-[9px]">Terminal</span>
+        </button>
+        <button onclick="changeView('market')" class="nav-btn flex flex-col items-center gap-1 text-gray">
+            <span class="text-lg">📊</span><span class="text-[9px]">Market</span>
+        </button>
+        <button onclick="changeView('spot')" class="nav-btn flex flex-col items-center gap-1 text-[#3a7bd5]">
+            <span class="text-lg">🔄</span><span class="text-[9px]">Spot</span>
+        </button>
+        <button onclick="changeView('assets')" class="nav-btn flex flex-col items-center gap-1 text-gray">
+            <span class="text-lg">👤</span><span class="text-[9px]">Assets</span>
+        </button>
     </nav>
 
     <script>
+        // 1. Инициализация TON Connect
         const tonConnectUI = new TON_CONNECT_UI.TonConnectUI({
             manifestUrl: 'https://ton-connect.github.io',
             buttonRootId: 'ton-connect-button'
         });
+
+        // 2. Логика переключения Buy/Sell
+        function setSide(side) {
+            const btn = document.getElementById('main-action-btn');
+            const tabBuy = document.getElementById('tab-buy');
+            const tabSell = document.getElementById('tab-sell');
+
+            if (side === 'buy') {
+                btn.className = "w-full bg-[#2ebd85] text-white py-4 rounded-md font-bold text-sm shadow-lg active:scale-95 transition-all";
+                btn.innerText = "Купить TON";
+                tabBuy.classList.add('active-buy');
+                tabSell.classList.remove('active-sell');
+                tabSell.classList.add('text-gray');
+            } else {
+                btn.className = "w-full bg-[#f6465d] text-white py-4 rounded-md font-bold text-sm shadow-lg active:scale-95 transition-all";
+                btn.innerText = "Продать TON";
+                tabSell.classList.add('active-sell');
+                tabBuy.classList.remove('active-buy');
+                tabBuy.classList.add('text-gray');
+            }
+        }
+
+        // 3. Логика навигации
+        function changeView(viewId) {
+            document.querySelectorAll('main section').forEach(s => s.classList.add('hidden'));
+            document.getElementById('view-' + viewId).classList.remove('hidden');
+            
+            document.querySelectorAll('.nav-btn').forEach(b => b.classList.replace('text-[#3a7bd5]', 'text-gray'));
+            event.currentTarget.classList.replace('text-gray', 'text-[#3a7bd5]');
+        }
+
+        // 4. Оживление стакана (Генерация данных)
+        function updateOrderBook() {
+            const createRow = (price, amount, colorClass) => `
+                <div class="depth-row ${colorClass}">
+                    <div class="depth-fill ${colorClass === 'text-[#f6465d]' ? 'bg-[#f6465d]' : 'bg-[#2ebd85]'}" style="width: ${Math.random() * 90}%"></div>
+                    <span class="mono z-10">${price.toFixed(4)}</span>
+                    <span class="ml-auto text-white mono z-10">${(Math.random() * 2000).toFixed(0)}</span>
+                </div>`;
+
+            let basePrice = 5.3322 + (Math.random() * 0.01 - 0.005);
+            document.getElementById('mid-price').innerText = basePrice.toFixed(4);
+            document.getElementById('display-price').innerText = basePrice.toFixed(4);
+
+            let asksHtml = "";
+            let bidsHtml = "";
+            for (let i = 1; i <= 8; i++) {
+                asksHtml += createRow(basePrice + (i * 0.0005), 0, 'text-[#f6465d]');
+                bidsHtml += createRow(basePrice - (i * 0.0005), 0, 'text-[#2ebd85]');
+            }
+            document.getElementById('order-book-asks').innerHTML = asksHtml;
+            document.getElementById('order-book-bids').innerHTML = bidsHtml;
+        }
+
+        setInterval(updateOrderBook, 2000);
+        updateOrderBook();
     </script>
 </body>
 </html>
-
