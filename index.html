@@ -3,164 +3,171 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>SYN TERMINAL | AI Trading</title>
+    <title>SYN TERMINAL</title>
     <script src="https://unpkg.com"></script>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
         @import url('https://fonts.googleapis.com');
-        body { background-color: #060606; color: #eaecef; font-family: 'Inter', sans-serif; overflow: hidden; height: 100vh; }
+        body { background-color: #060606; color: #eaecef; font-family: sans-serif; overflow: hidden; height: 100vh; }
         .mono { font-family: 'Roboto Mono', monospace; }
-        .bg-input { background-color: #1e2329; }
-        .text-gray { color: #848e9c; }
         .brand-logo { background: linear-gradient(90deg, #00d2ff 0%, #3a7bd5 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
-        .depth-row { position: relative; height: 20px; display: flex; align-items: center; padding: 0 4px; font-size: 11px; transition: all 0.3s; }
-        .depth-fill { position: absolute; right: 0; top: 1px; bottom: 1px; opacity: 0.15; z-index: 0; transition: width 0.5s ease-in-out; }
+        
+        /* Сетка: Форма (лево) и Стакан (право) */
+        .trade-container { display: flex; gap: 10px; width: 100%; }
+        .form-side { flex: 0 0 58%; }
+        .book-side { flex: 0 0 40%; }
+
+        /* Полоски объема */
+        .depth-row { position: relative; height: 20px; display: flex; align-items: center; font-size: 10px; overflow: hidden; }
+        .depth-fill { position: absolute; right: 0; top: 1px; bottom: 1px; opacity: 0.15; z-index: 0; }
+        
         .active-buy { background-color: #2ebd85 !important; color: white !important; }
         .active-sell { background-color: #f6465d !important; color: white !important; }
+        .nav-active { color: #3a7bd5 !important; }
         .hidden { display: none; }
     </style>
 </head>
 <body class="flex flex-col">
 
     <!-- Header -->
-    <header class="p-4 flex justify-between items-center border-b border-[#2b3139]">
+    <header class="p-4 flex justify-between items-center border-b border-[#1e2329]">
         <div class="flex flex-col">
-            <div class="flex items-center">
-                <span class="text-sm font-bold brand-logo">💎 SYN TERMINAL</span>
-            </div>
-            <div class="flex items-center gap-2 mt-0.5">
-                <span class="text-xs font-bold">TON/USDT</span>
-                <span class="text-green-500 text-[10px] font-medium">+3.89%</span>
+            <span class="text-sm font-bold brand-logo uppercase">💎 SYN TERMINAL</span>
+            <div class="flex items-center gap-2">
+                <span class="text-[10px] font-bold">TON/USDT</span>
+                <span class="text-green-500 text-[9px]">+3.89%</span>
             </div>
         </div>
         <div id="ton-connect-button"></div>
     </header>
 
-    <!-- Main View (Sections) -->
-    <main class="flex-1 overflow-y-auto pb-20">
-        <!-- Section: SPOT (Main Trading) -->
-        <section id="view-spot" class="p-3 grid grid-cols-12 gap-3">
-            <!-- Left: Trade Form -->
-            <div class="col-span-7 space-y-3">
-                <div class="flex bg-input rounded-md p-1">
-                    <button id="tab-buy" onclick="setSide('buy')" class="flex-1 py-1.5 rounded active-buy text-sm font-bold">Купить</button>
-                    <button id="tab-sell" onclick="setSide('sell')" class="flex-1 py-1.5 rounded text-gray text-sm font-bold">Продать</button>
+    <!-- Основной контент -->
+    <main class="flex-1 overflow-hidden p-3">
+        
+        <!-- Секция ТОРГОВЛЯ (SPOT) -->
+        <div id="view-spot" class="trade-container">
+            
+            <!-- ЛЕВО: Форма -->
+            <div class="form-side space-y-3">
+                <div class="flex bg-[#1e2329] rounded p-1">
+                    <button id="tab-buy" onclick="setSide('buy')" class="flex-1 py-1.5 rounded active-buy text-xs font-bold">Купить</button>
+                    <button id="tab-sell" onclick="setSide('sell')" class="flex-1 py-1.5 rounded text-gray-500 text-xs font-bold">Продать</button>
                 </div>
                 
-                <div class="bg-input rounded p-2 border border-[#2b3139]">
-                    <div class="text-[9px] text-gray uppercase text-center">Цена (USDT)</div>
-                    <div class="mono font-bold text-center text-sm" id="display-price">5.3322</div>
+                <div class="bg-[#1e2329] rounded p-2 border border-[#2b3139] text-center">
+                    <div class="text-[8px] text-gray-500 uppercase">Цена</div>
+                    <div class="mono font-bold text-sm text-green-500" id="price-val">5.3322</div>
                 </div>
 
-                <div class="bg-input rounded p-2 border border-[#2b3139]">
-                    <div class="flex justify-between px-1"><span class="text-[9px] text-gray uppercase">Количество</span><span class="text-[9px] text-white">TON</span></div>
-                    <input type="number" placeholder="AI Optimized" class="bg-transparent w-full text-center mono font-bold text-sm focus:outline-none py-1">
+                <div class="bg-[#1e2329] rounded p-2 border border-[#2b3139]">
+                    <div class="flex justify-between text-[8px] text-gray-500 uppercase px-1">
+                        <span>Количество</span><span>TON</span>
+                    </div>
+                    <input type="text" placeholder="AI Optimized" class="bg-transparent w-full text-center mono font-bold text-xs py-1 focus:outline-none">
                 </div>
 
-                <button id="main-action-btn" class="w-full bg-[#2ebd85] text-white py-4 rounded-md font-bold text-sm shadow-lg active:scale-95 transition-all">
+                <button id="action-btn" class="w-full bg-[#2ebd85] text-white py-3.5 rounded font-bold text-xs shadow-lg active:scale-95 transition-all">
                     Купить TON
                 </button>
-                
-                <div class="text-[10px] text-gray px-1 flex justify-between">
-                    <span>Доступно</span>
-                    <span class="text-white font-bold">0.00 USDT</span>
+
+                <div class="text-[9px] text-gray-500 flex justify-between px-1">
+                    <span>Доступно</span><span class="text-white">0.00 USDT</span>
                 </div>
             </div>
 
-            <!-- Right: Order Book -->
-            <div class="col-span-5 flex flex-col">
-                <div id="order-book-asks" class="flex flex-col-reverse tracking-tighter"></div>
-                <div class="py-2 flex flex-col items-center border-y border-[#2b3139] my-1">
-                    <span class="text-green-500 text-sm mono font-bold" id="mid-price">5.3322</span>
+            <!-- ПРАВО: Стакан -->
+            <div class="book-side flex flex-col">
+                <div class="flex justify-between text-[8px] text-gray-500 mb-1 px-1 font-bold uppercase">
+                    <span>Цена</span><span>Сумма</span>
                 </div>
-                <div id="order-book-bids" class="flex flex-col tracking-tighter"></div>
+                <div id="asks-list" class="flex flex-col-reverse"></div>
+                <div class="py-1.5 border-y border-[#1e2329] my-1 text-center">
+                    <span class="text-green-500 text-xs mono font-bold" id="mid-price">5.3322</span>
+                </div>
+                <div id="bids-list"></div>
             </div>
-        </section>
 
-        <!-- Other Views (Placeholders) -->
-        <section id="view-terminal" class="hidden p-10 text-center text-gray">AI Dashboard coming soon...</section>
-        <section id="view-market" class="hidden p-10 text-center text-gray">Market Pairs List</section>
-        <section id="view-assets" class="hidden p-10 text-center text-gray">Your Wallet Assets</section>
+        </div>
+
+        <!-- Заглушки других вкладок -->
+        <div id="view-terminal" class="hidden text-center py-20 text-gray-500 text-sm">💎 AI Модуль аналитики</div>
+        <div id="view-market" class="hidden text-center py-20 text-gray-500 text-sm">📈 Рыночные пары</div>
+        <div id="view-assets" class="hidden text-center py-20 text-gray-500 text-sm">👤 Ваши активы</div>
+
     </main>
 
-    <!-- Navigation -->
-    <nav class="fixed bottom-0 left-0 right-0 bg-[#12151c] border-t border-[#2b3139] flex justify-around py-3 z-50">
-        <button onclick="changeView('terminal')" class="nav-btn flex flex-col items-center gap-1 text-gray">
-            <span class="text-lg">💎</span><span class="text-[9px]">Terminal</span>
+    <!-- Навигация (Footer) -->
+    <nav class="fixed bottom-0 left-0 right-0 bg-[#0e0e0e] border-t border-[#1e2329] flex justify-around py-3 z-50">
+        <button onclick="navTo('terminal')" class="nav-btn flex flex-col items-center gap-1 text-gray-500">
+            <span class="text-lg">💎</span><span class="text-[8px]">Terminal</span>
         </button>
-        <button onclick="changeView('market')" class="nav-btn flex flex-col items-center gap-1 text-gray">
-            <span class="text-lg">📊</span><span class="text-[9px]">Market</span>
+        <button onclick="navTo('market')" class="nav-btn flex flex-col items-center gap-1 text-gray-500">
+            <span class="text-lg">📊</span><span class="text-[8px]">Market</span>
         </button>
-        <button onclick="changeView('spot')" class="nav-btn flex flex-col items-center gap-1 text-[#3a7bd5]">
-            <span class="text-lg">🔄</span><span class="text-[9px]">Spot</span>
+        <button onclick="navTo('spot')" class="nav-btn flex flex-col items-center gap-1 nav-active">
+            <span class="text-lg">🔄</span><span class="text-[8px]">Spot</span>
         </button>
-        <button onclick="changeView('assets')" class="nav-btn flex flex-col items-center gap-1 text-gray">
-            <span class="text-lg">👤</span><span class="text-[9px]">Assets</span>
+        <button onclick="navTo('assets')" class="nav-btn flex flex-col items-center gap-1 text-gray-500">
+            <span class="text-lg">👤</span><span class="text-[8px]">Assets</span>
         </button>
     </nav>
 
     <script>
-        // 1. Инициализация TON Connect
-        const tonConnectUI = new TON_CONNECT_UI.TonConnectUI({
+        // Инициализация кошелька
+        const tc = new TON_CONNECT_UI.TonConnectUI({
             manifestUrl: 'https://ton-connect.github.io',
             buttonRootId: 'ton-connect-button'
         });
 
-        // 2. Логика переключения Buy/Sell
-        function setSide(side) {
-            const btn = document.getElementById('main-action-btn');
-            const tabBuy = document.getElementById('tab-buy');
-            const tabSell = document.getElementById('tab-sell');
-
-            if (side === 'buy') {
-                btn.className = "w-full bg-[#2ebd85] text-white py-4 rounded-md font-bold text-sm shadow-lg active:scale-95 transition-all";
-                btn.innerText = "Купить TON";
-                tabBuy.classList.add('active-buy');
-                tabSell.classList.remove('active-sell');
-                tabSell.classList.add('text-gray');
-            } else {
-                btn.className = "w-full bg-[#f6465d] text-white py-4 rounded-md font-bold text-sm shadow-lg active:scale-95 transition-all";
-                btn.innerText = "Продать TON";
-                tabSell.classList.add('active-sell');
-                tabBuy.classList.remove('active-buy');
-                tabBuy.classList.add('text-gray');
-            }
-        }
-
-        // 3. Логика навигации
-        function changeView(viewId) {
-            document.querySelectorAll('main section').forEach(s => s.classList.add('hidden'));
-            document.getElementById('view-' + viewId).classList.remove('hidden');
+        // Навигация
+        function navTo(id) {
+            document.querySelectorAll('main > div').forEach(v => v.classList.add('hidden'));
+            document.getElementById('view-' + id).classList.remove('hidden');
+            if (id === 'spot') document.getElementById('view-spot').classList.add('trade-container');
             
-            document.querySelectorAll('.nav-btn').forEach(b => b.classList.replace('text-[#3a7bd5]', 'text-gray'));
-            event.currentTarget.classList.replace('text-gray', 'text-[#3a7bd5]');
+            document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('nav-active', 'text-gray-500'));
+            event.currentTarget.classList.add('nav-active');
         }
 
-        // 4. Оживление стакана (Генерация данных)
-        function updateOrderBook() {
-            const createRow = (price, amount, colorClass) => `
-                <div class="depth-row ${colorClass}">
-                    <div class="depth-fill ${colorClass === 'text-[#f6465d]' ? 'bg-[#f6465d]' : 'bg-[#2ebd85]'}" style="width: ${Math.random() * 90}%"></div>
-                    <span class="mono z-10">${price.toFixed(4)}</span>
-                    <span class="ml-auto text-white mono z-10">${(Math.random() * 2000).toFixed(0)}</span>
-                </div>`;
-
-            let basePrice = 5.3322 + (Math.random() * 0.01 - 0.005);
-            document.getElementById('mid-price').innerText = basePrice.toFixed(4);
-            document.getElementById('display-price').innerText = basePrice.toFixed(4);
-
-            let asksHtml = "";
-            let bidsHtml = "";
-            for (let i = 1; i <= 8; i++) {
-                asksHtml += createRow(basePrice + (i * 0.0005), 0, 'text-[#f6465d]');
-                bidsHtml += createRow(basePrice - (i * 0.0005), 0, 'text-[#2ebd85]');
+        // Переключение сторон
+        function setSide(s) {
+            const b = document.getElementById('action-btn');
+            if(s === 'buy') {
+                b.className = "w-full bg-[#2ebd85] text-white py-3.5 rounded font-bold text-xs active:scale-95";
+                b.innerText = "Купить TON";
+                document.getElementById('tab-buy').className = "flex-1 py-1.5 rounded active-buy text-xs font-bold";
+                document.getElementById('tab-sell').className = "flex-1 py-1.5 rounded text-gray-500 text-xs font-bold";
+            } else {
+                b.className = "w-full bg-[#f6465d] text-white py-3.5 rounded font-bold text-xs active:scale-95";
+                b.innerText = "Продать TON";
+                document.getElementById('tab-sell').className = "flex-1 py-1.5 rounded active-sell text-xs font-bold";
+                document.getElementById('tab-buy').className = "flex-1 py-1.5 rounded text-gray-500 text-xs font-bold";
             }
-            document.getElementById('order-book-asks').innerHTML = asksHtml;
-            document.getElementById('order-book-bids').innerHTML = bidsHtml;
         }
 
-        setInterval(updateOrderBook, 2000);
-        updateOrderBook();
+        // Оживление стакана
+        function drawBook() {
+            const row = (p, c) => `<div class="depth-row ${c}">
+                <div class="depth-fill ${c==='text-red-500'?'bg-red-500':'bg-green-500'}" style="width:${Math.random()*80}%"></div>
+                <span class="mono z-10">${p.toFixed(4)}</span>
+                <span class="ml-auto text-white mono z-10">${(Math.random()*500).toFixed(1)}</span>
+            </div>`;
+            
+            let base = 5.3322 + (Math.random()*0.004-0.002);
+            document.getElementById('mid-price').innerText = base.toFixed(4);
+            document.getElementById('price-val').innerText = base.toFixed(4);
+            
+            let a="", b="";
+            for(let i=1; i<=10; i++) {
+                a += row(base + i*0.0006, 'text-red-500');
+                b += row(base - i*0.0006, 'text-green-500');
+            }
+            document.getElementById('asks-list').innerHTML = a;
+            document.getElementById('bids-list').innerHTML = b;
+        }
+
+        setInterval(drawBook, 1500);
+        drawBook();
     </script>
 </body>
 </html>
