@@ -67,115 +67,116 @@ body {
 }
 
 /* RIGHT (ORDER BOOK) */
-.right {
-    background: #111827;
-    padding: 5px;
+.order-book {
+    background: #161d2a;
+    border-radius: 10px;
+    padding: 8px;
     display: flex;
     flex-direction: column;
-    overflow: hidden;
+    justify-content: space-between;
 }
 
-.orderbook {
-    display: flex;
-    flex-direction: column;
-    height: 100%;
-}
-
-/* RED / GREEN BLOCK */
-.section {
-    flex: 1;
-    overflow: hidden;
-}
-
+/* Общие строки */
 .row {
     position: relative;
     display: flex;
     justify-content: space-between;
     font-size: 12px;
-    padding: 2px 5px;
+    padding: 3px 6px;
+    height: 20px;
+    align-items: center;
+    overflow: hidden;
 }
 
+/* Заливка */
 .fill {
     position: absolute;
-    right: 0;
     top: 0;
     bottom: 0;
+    right: 0;
     opacity: 0.2;
 }
 
-/* COLORS */
-.red { color: #f6465d; }
-.green { color: #2ebd85; }
-
-/* CENTER PRICE */
-.price {
-    text-align: center;
-    padding: 5px;
-    font-weight: bold;
-    background: #0f172a;
+.fill.red {
+    background: #f6465d;
 }
 
-</style>
-</head>
+.fill.green {
+    background: #2ebd85;
+}
 
-<body>
+/* Цвета текста */
+.price-red {
+    color: #f6465d;
+}
 
-<div class="header">💎 SYN TERMINAL</div>
+.price-green {
+    color: #2ebd85;
+}
 
-<div class="main">
+/* Центр (цена) */
+.current-price {
+    text-align: center;
+    font-weight: bold;
+    padding: 6px 0;
+    font-size: 14px;
+    color: #fff;
+    border-top: 1px solid #2a3445;
+    border-bottom: 1px solid #2a3445;
+    margin: 4px 0;
+}
 
-    <!-- LEFT -->
-    <div class="left">
-        <div class="tabs">
-            <div class="tab buy">Купить</div>
-            <div class="tab sell">Продать</div>
+/* Блоки */
+.orders {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    }
+            <!-- PRICE -->
+            <div class="order-book">
+
+    <!-- SELL (красные) -->
+    <div class="orders sell">
+        <div class="row">
+            <div class="fill red" style="width: 70%"></div>
+            <span class="price-red">1.302</span>
+            <span>5256</span>
         </div>
-
-        <div class="box">Цена: 1.288</div>
-        <div class="box">Количество: 25 TON</div>
-        <div class="box">Комиссия: 0.25%</div>
-
-        <div class="btn">Купить TON</div>
+        <div class="row">
+            <div class="fill red" style="width: 50%"></div>
+            <span class="price-red">1.301</span>
+            <span>7724</span>
+        </div>
+        <div class="row">
+            <div class="fill red" style="width: 90%"></div>
+            <span class="price-red">1.300</span>
+            <span>8865</span>
+        </div>
     </div>
 
-    <!-- RIGHT -->
-    <div class="right">
-        <div class="orderbook">
+    <!-- ЦЕНА -->
+    <div class="current-price">1.288</div>
 
-            <!-- RED -->
-            <div class="section">
-                <div class="row red">
-                    <div class="fill" style="width:80%; background:#f6465d;"></div>
-                    <span>1.302</span><span>5256</span>
-                </div>
-                <div class="row red">
-                    <div class="fill" style="width:60%; background:#f6465d;"></div>
-                    <span>1.301</span><span>7724</span>
-                </div>
-                <div class="row red">
-                    <div class="fill" style="width:90%; background:#f6465d;"></div>
-                    <span>1.300</span><span>8865</span>
-                </div>
-            </div>
+    <!-- BUY (зелёные) -->
+    <div class="orders buy">
+        <div class="row">
+            <div class="fill green" style="width: 60%"></div>
+            <span class="price-green">1.287</span>
+            <span>8741</span>
+        </div>
+        <div class="row">
+            <div class="fill green" style="width: 45%"></div>
+            <span class="price-green">1.286</span>
+            <span>6541</span>
+        </div>
+        <div class="row">
+            <div class="fill green" style="width: 30%"></div>
+            <span class="price-green">1.285</span>
+            <span>4300</span>
+        </div>
+    </div>
 
-            <!-- PRICE -->
-            <div class="price">1.288</div>
-
-            <!-- GREEN -->
-            <div class="section">
-                <div class="row green">
-                    <div class="fill" style="width:70%; background:#2ebd85;"></div>
-                    <span>1.287</span><span>8741</span>
-                </div>
-                <div class="row green">
-                    <div class="fill" style="width:50%; background:#2ebd85;"></div>
-                    <span>1.286</span><span>6541</span>
-                </div>
-                <div class="row green">
-                    <div class="fill" style="width:85%; background:#2ebd85;"></div>
-                    <span>1.285</span><span>4300</span>
-                </div>
-            </div>
+</div>
 
         </div>
     </div>
