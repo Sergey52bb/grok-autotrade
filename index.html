@@ -91,44 +91,63 @@ body {
 }
 
 /* ORDERBOOK */
-.order-book {
-    background: #161d2a;
-    border-radius: 10px;
-    padding: 5px;
-    border: 1px solid #252d3a;
+.orderbook {
+    background: #0f1722;
+    border-radius: 12px;
+    overflow: hidden;
+    padding: 6px;
     height: 320px;
-    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
 }
 
-.ob-title {
-    font-size: 11px;
-    color: var(--text-dim);
-    margin-bottom: 5px;
+#asks, #bids {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
 }
 
-/* ROW */
+.price-line {
+    text-align: center;
+    font-weight: bold;
+    padding: 6px;
+    background: #111827;
+    font-size: 14px;
+    border-top: 1px solid #1f2937;
+    border-bottom: 1px solid #1f2937;
+}
+
 .row {
     position: relative;
     display: flex;
     justify-content: space-between;
-    height: 20px;
-    align-items: center;
-    font-size: 11px;
-    padding: 0 5px;
-}
-
-.row span {
-    z-index: 2;
+    font-size: 12px;
+    padding: 2px 6px;
+    height: 18px;
 }
 
 .fill {
     position: absolute;
-    right: 0;
     top: 0;
-    height: 100%;
+    bottom: 0;
     opacity: 0.2;
     z-index: 1;
 }
+
+.ask .fill {
+    right: 0;
+    background: #f6465d;
+}
+
+.bid .fill {
+    left: 0;
+    background: #2ebd85;
+}
+
+.row span {
+    z-index: 2;
+        }
 
 .price-red { color: var(--red); }
 .price-green { color: var(--green); }
@@ -197,8 +216,17 @@ body {
 </div>
 
 <!-- ORDERBOOK -->
-<div class="order-book" id="orderbook">
-    <div class="ob-title">Swap Depth</div>
+<div class="orderbook">
+
+  <!-- SELL (верх) -->
+  <div id="asks"></div>
+
+  <!-- ТЕКУЩАЯ ЦЕНА -->
+  <div class="price-line">5.30</div>
+
+  <!-- BUY (низ) -->
+  <div id="bids"></div>
+
 </div>
 
 <!-- CHART -->
@@ -210,68 +238,52 @@ body {
 </div>
 
 <script>
-const ob = document.getElementById('orderbook');
+const asksEl = document.getElementById('asks');
+const bidsEl = document.getElementById('bids');
 
-function render() {
-    ob.innerHTML = '<div class="ob-title">Swap Depth</div>';
+function randomVolume() {
+    return Math.floor(Math.random() * 50000) + 500;
+}
 
-    let base = 5.30;
+function generateOrderBook() {
+    asksEl.innerHTML = '';
+    bidsEl.innerHTML = '';
 
-    // SELL
-    for (let i = 15; i > 0; i--) {
-        let price = base + i * 0.01;
-        let amount = Math.random() * 500;
-        let depth = Math.random() * 100;
+    let basePrice = 5.30;
 
-        let row = document.createElement('div');
-        row.className = 'row';
+    // SELL (красные)
+    for (let i = 0; i < 12; i++) {
+        let price = (basePrice + i * 0.01).toFixed(2);
+        let volume = randomVolume();
+        let width = Math.min(volume / 600, 100);
 
-        let fill = document.createElement('div');
-        fill.className = 'fill';
-        fill.style.width = depth + '%';
-        fill.style.background = 'var(--red)';
-
-        row.innerHTML = `
-            <span class="price-red">${price.toFixed(2)}</span>
-            <span>${amount.toFixed(0)}</span>
+        asksEl.innerHTML += `
+            <div class="row ask">
+                <div class="fill" style="width:${width}%"></div>
+                <span style="color:#f6465d">${price}</span>
+                <span>${volume}</span>
+            </div>
         `;
-
-        row.appendChild(fill);
-        ob.appendChild(row);
     }
 
-    // PRICE
-    let price = document.createElement('div');
-    price.className = 'price-center';
-    price.innerText = base.toFixed(2);
-    ob.appendChild(price);
+    // BUY (зеленые)
+    for (let i = 0; i < 12; i++) {
+        let price = (basePrice - i * 0.01).toFixed(2);
+        let volume = randomVolume();
+        let width = Math.min(volume / 600, 100);
 
-    // BUY
-    for (let i = 0; i < 15; i++) {
-        let price = base - i * 0.01;
-        let amount = Math.random() * 500;
-        let depth = Math.random() * 100;
-
-        let row = document.createElement('div');
-        row.className = 'row';
-
-        let fill = document.createElement('div');
-        fill.className = 'fill';
-        fill.style.width = depth + '%';
-        fill.style.background = 'var(--green)';
-
-        row.innerHTML = `
-            <span class="price-green">${price.toFixed(2)}</span>
-            <span>${amount.toFixed(0)}</span>
+        bidsEl.innerHTML += `
+            <div class="row bid">
+                <div class="fill" style="width:${width}%"></div>
+                <span style="color:#2ebd85">${price}</span>
+                <span>${volume}</span>
+            </div>
         `;
-
-        row.appendChild(fill);
-        ob.appendChild(row);
     }
 }
 
-render();
-setInterval(render, 2000);
+generateOrderBook();
+setInterval(generateOrderBook, 2000);
 </script>
 
 </body>
