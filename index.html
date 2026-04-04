@@ -238,48 +238,75 @@ body {
 </div>
 
 <script>
-const asksEl = document.getElementById('asks');
-const bidsEl = document.getElementById('bids');
-
-function randomVolume() {
-    return Math.floor(Math.random() * 50000) + 500;
-}
+const orderbook = document.getElementById('orderbook');
 
 function generateOrderBook() {
-    asksEl.innerHTML = '';
-    bidsEl.innerHTML = '';
+    orderbook.innerHTML = '';
 
     let basePrice = 5.30;
 
+    let rows = [];
+
     // SELL (красные)
-    for (let i = 0; i < 12; i++) {
-        let price = (basePrice + i * 0.01).toFixed(2);
-        let volume = randomVolume();
-        let width = Math.min(volume / 600, 100);
+    for (let i = 20; i > 0; i--) {
+        let price = basePrice + i * 0.01;
+        let amount = Math.random() * 500;
+        let depth = Math.random() * 100;
 
-        asksEl.innerHTML += `
-            <div class="row ask">
-                <div class="fill" style="width:${width}%"></div>
-                <span style="color:#f6465d">${price}</span>
-                <span>${volume}</span>
-            </div>
-        `;
+        rows.push({
+            type: 'sell',
+            price,
+            amount,
+            depth
+        });
     }
 
-    // BUY (зеленые)
-    for (let i = 0; i < 12; i++) {
-        let price = (basePrice - i * 0.01).toFixed(2);
-        let volume = randomVolume();
-        let width = Math.min(volume / 600, 100);
+    // PRICE (центр)
+    rows.push({
+        type: 'price',
+        price: basePrice
+    });
 
-        bidsEl.innerHTML += `
-            <div class="row bid">
-                <div class="fill" style="width:${width}%"></div>
-                <span style="color:#2ebd85">${price}</span>
-                <span>${volume}</span>
-            </div>
-        `;
+    // BUY (зелёные)
+    for (let i = 1; i <= 20; i++) {
+        let price = basePrice - i * 0.01;
+        let amount = Math.random() * 500;
+        let depth = Math.random() * 100;
+
+        rows.push({
+            type: 'buy',
+            price,
+            amount,
+            depth
+        });
     }
+
+    // РЕНДЕР ОДНИМ ПОТОКОМ
+    rows.forEach(item => {
+        if (item.type === 'price') {
+            const priceRow = document.createElement('div');
+            priceRow.className = 'price';
+            priceRow.innerText = item.price.toFixed(2);
+            orderbook.appendChild(priceRow);
+            return;
+        }
+
+        const row = document.createElement('div');
+        row.className = 'row ' + item.type;
+
+        const fill = document.createElement('div');
+        fill.className = 'fill';
+        fill.style.width = item.depth + '%';
+        fill.style.background = item.type === 'sell' ? 'red' : '#00ff9c';
+
+        row.innerHTML = `
+            <span>${item.price.toFixed(2)}</span>
+            <span>${item.amount.toFixed(0)}</span>
+        `;
+
+        row.appendChild(fill);
+        orderbook.appendChild(row);
+    });
 }
 
 generateOrderBook();
