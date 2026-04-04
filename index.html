@@ -1,317 +1,224 @@
 <!DOCTYPE html>
 <html lang="ru">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-
-<title>SYN TERMINAL</title>
-
-<style>
-:root {
-    --bg-color: #0b121e;
-    --card-bg: #1a2230;
-    --text-main: #ffffff;
-    --text-dim: #8e96a3;
-    --green: #2ebd85;
-    --red: #f6465d;
-    --blue: #2a6df3;
-    --orange: #f0b90b;
-}
-
-body {
-    background-color: var(--bg-color);
-    color: var(--text-main);
-    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-    margin: 0;
-    padding: 10px;
-    font-size: 14px;
-}
-
-/* HEADER */
-.header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-}
-.pair-info {
-    font-size: 18px;
-    font-weight: bold;
-}
-.change {
-    color: var(--green);
-    font-size: 14px;
-}
-
-/* MAIN */
-.main-container {
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
-}
-
-/* TRADE */
-.trade-form {
-    display: flex;
-    flex-direction: column;
-    gap: 8px;
-}
-
-.tabs {
-    display: flex;
-    background: var(--card-bg);
-    border-radius: 8px;
-    padding: 2px;
-}
-.tab {
-    flex: 1;
-    padding: 8px;
-    text-align: center;
-    border-radius: 6px;
-    font-weight: bold;
-}
-.tab.buy { background: var(--blue); }
-.tab.sell { color: var(--orange); }
-
-.input-group {
-    background: var(--card-bg);
-    padding: 10px;
-    border-radius: 10px;
-    display: flex;
-    justify-content: space-between;
-}
-
-.btn-main {
-    background: var(--green);
-    color: white;
-    border: none;
-    padding: 14px;
-    border-radius: 12px;
-    font-size: 15px;
-    font-weight: bold;
-}
-
-/* ORDERBOOK */
-.orderbook {
-    background: #0f1722;
-    border-radius: 12px;
-    overflow: hidden;
-    padding: 6px;
-    height: 320px;
-    display: flex;
-    flex-direction: column;
-}
-
-#asks, #bids {
-    flex: 1;
-    display: flex;
-    flex-direction: column;
-    justify-content: flex-end;
-}
-
-.price-line {
-    text-align: center;
-    font-weight: bold;
-    padding: 6px;
-    background: #111827;
-    font-size: 14px;
-    border-top: 1px solid #1f2937;
-    border-bottom: 1px solid #1f2937;
-}
-
-.row {
-    position: relative;
-    display: flex;
-    justify-content: space-between;
-    font-size: 12px;
-    padding: 2px 6px;
-    height: 18px;
-}
-
-.fill {
-    position: absolute;
-    top: 0;
-    bottom: 0;
-    opacity: 0.2;
-    z-index: 1;
-}
-
-.ask .fill {
-    right: 0;
-    background: #f6465d;
-}
-
-.bid .fill {
-    left: 0;
-    background: #2ebd85;
-}
-
-.row span {
-    z-index: 2;
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>SYN TERMINAL AI</title>
+    <script src="https://unpkg.com/@tonconnect/ui@latest/dist/tonconnect-ui.min.js"></script>
+    <style>
+        :root { --bg: #0b0e11; --panel: #171a1e; --input: #2b3139; --green: #0ecb81; --red: #f6465d; --text: #848e9c; --border: #2b2f36; }
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: sans-serif; }
+        
+        body { 
+            background: var(--bg); 
+            color: white; 
+            height: 100dvh; 
+            display: flex; 
+            flex-direction: column; 
+            overflow: hidden; 
         }
 
-.price-red { color: var(--red); }
-.price-green { color: var(--green); }
+        header { height: 50px; padding: 0 12px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border); flex-shrink: 0; }
+        .price-top { color: var(--green); font-weight: bold; font-family: monospace; font-size: 18px; }
 
-/* PRICE */
-.price-center {
-    text-align: center;
-    font-weight: bold;
-    padding: 5px;
-}
+        #main_content { 
+            flex: 1; 
+            position: relative; 
+            overflow: hidden; 
+            margin-bottom: 60px; 
+        }
 
-/* CHART */
-.chart-section {
-    border-top: 1px solid #252d3a;
-    padding-top: 10px;
-}
-.chart-placeholder {
-    height: 120px;
-    background: #121926;
-    border-radius: 10px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    color: #444;
-}
-</style>
+        .screen { display: none; height: 100%; width: 100%; flex-direction: column; overflow-y: auto; }
+        #screen_trade { display: flex; overflow: hidden; }
+
+        #chart_wrap { height: 45%; width: 100%; background: #000; flex-shrink: 0; }
+        
+        .trade-area { display: flex; flex: 1; border-top: 1px solid var(--border); overflow: hidden; }
+        .book { width: 40%; border-right: 1px solid var(--border); padding: 5px; font-family: monospace; font-size: 11px; overflow: hidden; }
+        .ob-row { display: flex; justify-content: space-between; height: 16px; position: relative; }
+        .ob-bar { position: absolute; right: 0; height: 100%; opacity: 0.15; }
+
+        .trade-form { width: 60%; padding: 10px; display: flex; flex-direction: column; gap: 6px; }
+        .side-btns { display: flex; background: var(--input); border-radius: 4px; padding: 2px; }
+        .side-btn { flex: 1; border: none; padding: 8px; border-radius: 3px; color: var(--text); background: none; font-weight: bold; font-size: 12px; }
+        .side-btn.active.buy { background: var(--green); color: black; }
+        .side-btn.active.sell { background: var(--red); color: white; }
+
+        .fld { background: var(--input); border-radius: 4px; padding: 6px; }
+        .fld label { display: block; font-size: 9px; color: var(--text); text-transform: uppercase; }
+        .fld input { background: none; border: none; color: white; width: 100%; font-size: 14px; outline: none; }
+
+        .action-btn { background: var(--green); border: none; color: black; padding: 12px; border-radius: 6px; font-weight: bold; margin-top: auto; cursor: pointer; }
+
+        nav { 
+            height: 60px; 
+            background: var(--panel); 
+            border-top: 1px solid var(--border); 
+            display: flex; 
+            position: fixed; 
+            bottom: 0; 
+            left: 0; 
+            right: 0; 
+            z-index: 9999;
+            padding-bottom: env(safe-area-inset-bottom);
+        }
+        .nav-item { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; color: var(--text); font-size: 10px; cursor: pointer; }
+        .nav-item.active { color: white; }
+        .nav-item span { font-size: 18px; margin-bottom: 2px; }
+
+        /* Wallet Styles */
+        #screen_wallet { padding: 20px; }
+        .wallet-card { background: var(--panel); padding: 20px; border-radius: 12px; border: 1px solid var(--border); margin-bottom: 15px; }
+        #ton-connect-btn { margin-bottom: 15px; display: flex; justify-content: center; }
+    </style>
 </head>
-
 <body>
 
-<!-- HEADER -->
-<div class="header">
-    <div class="pair-info">
-        💎 SYN TERMINAL<br>
-        <span style="font-size:12px;color:#8e96a3;">AI Trading System</span>
+<div id="main_content">
+    <div id="screen_trade" class="screen">
+        <header>
+            <b>TON/USDT</b>
+            <div class="price-top" id="topPrice">0.0000</div>
+        </header>
+        <div id="chart_wrap">
+            <div id="tv_container" style="width:100%; height:100%;"></div>
+        </div>
+        <div class="trade-area">
+            <div class="book">
+                <div id="asks" style="color:var(--red); display:flex; flex-direction:column-reverse;"></div>
+                <div id="midPrice" style="text-align:center; padding:5px 0; font-size:15px; color:var(--green); font-weight:bold;">0.0000</div>
+                <div id="bids" style="color:var(--green);"></div>
+            </div>
+            <div class="trade-form">
+                <div class="side-btns">
+                    <button class="side-btn active buy" onclick="setSide('buy', this)">BUY</button>
+                    <button class="side-btn" onclick="setSide('sell', this)">SELL</button>
+                </div>
+                <div class="fld"><label>Price</label><input type="number" id="iPrice" step="any"></div>
+                <div class="fld"><label>Amount (TON)</label><input type="number" id="sendAmount" placeholder="0.0"></div>
+                <button class="action-btn" id="mainBtn" onclick="handleTrade()">BUY TON</button>
+            </div>
+        </div>
     </div>
+
+    <div id="screen_wallet" class="screen">
+        <h2 style="margin-bottom:15px;">SYN Wallet</h2>
+        
+        <div id="ton-connect-btn"></div>
+
+        <div class="wallet-card">
+            <div style="color:var(--text); font-size:12px;">Total Assets</div>
+            <div style="font-size:26px; font-weight:bold; margin-top:5px;">$ <span id="total_val">0.00</span></div>
+        </div>
+
+        <div class="wallet-card">
+            <div style="margin-bottom: 10px;"><b>Quick Send (1% Fee)</b></div>
+            <div class="fld" style="margin-bottom: 10px;"><label>Recipient Address</label><input type="text" id="wallet_dest" placeholder="UQ..."></div>
+            <div class="fld" style="margin-bottom: 10px;"><label>Amount TON</label><input type="number" id="wallet_amt" placeholder="0.0"></div>
+            <button class="action-btn" style="width: 100%;" onclick="sendWithCommission()">SEND TON</button>
+        </div>
+    </div>
+
+    <div id="screen_market" class="screen" style="padding:20px;"><h2>Markets</h2><p>AI Analysis Active...</p></div>
+    <div id="screen_profile" class="screen" style="padding:20px;"><h2>Profile</h2><p>SYN Terminal v1.0.4</p></div>
 </div>
 
-<div class="main-container">
+<nav>
+    <div class="nav-item active" onclick="showScreen('trade', this)"><span>📊</span>Trade</div>
+    <div class="nav-item" onclick="showScreen('market', this)"><span>📈</span>Market</div>
+    <div class="nav-item" onclick="showScreen('wallet', this)"><span>💼</span>Wallet</div>
+    <div class="nav-item" onclick="showScreen('profile', this)"><span>👤</span>Profile</div>
+</nav>
 
-<!-- TRADE -->
-<div class="trade-form">
-
-<div class="tabs">
-    <div class="tab buy">Buy</div>
-    <div class="tab sell">Sell</div>
-</div>
-
-<div class="input-group">
-    <span>Amount</span>
-    <span>25 TON</span>
-</div>
-
-<div class="input-group">
-    <span>Receive</span>
-    <span>133 USDT</span>
-</div>
-
-<div class="input-group">
-    <span>DEX Fee</span>
-    <span>0.25%</span>
-</div>
-
-<button class="btn-main">Buy TON</button>
-
-</div>
-
-<!-- ORDERBOOK -->
-<div class="orderbook">
-
-  <!-- SELL (верх) -->
-  <div id="asks"></div>
-
-  <!-- ТЕКУЩАЯ ЦЕНА -->
-  <div class="price-line">5.30</div>
-
-  <!-- BUY (низ) -->
-  <div id="bids"></div>
-
-</div>
-
-<!-- CHART -->
-<div class="chart-section">
-    <div style="font-size:12px;color:#8e96a3;">TON / USDT</div>
-    <div class="chart-placeholder">Chart скоро</div>
-</div>
-
-</div>
-
+<script type="text/javascript" src="https://s3.tradingview.com/tv.js"></script>
 <script>
-const orderbook = document.getElementById('orderbook');
+    // --- НАСТРОЙКИ КОШЕЛЬКА ---
+    const MY_WALLET = "UQCn_CdyczBzPjhjBfQgEJzoNWlVTLx4rbftix2Oyq3-Okyb; // ВСТАВЬ СВОЙ АДРЕС СЮДА
+    const FEE_PERCENT = 0.01; // 1% комиссия
 
-function generateOrderBook() {
-    orderbook.innerHTML = '';
-
-    let basePrice = 5.30;
-
-    let rows = [];
-
-    // SELL (красные)
-    for (let i = 20; i > 0; i--) {
-        let price = basePrice + i * 0.01;
-        let amount = Math.random() * 500;
-        let depth = Math.random() * 100;
-
-        rows.push({
-            type: 'sell',
-            price,
-            amount,
-            depth
-        });
-    }
-
-    // PRICE (центр)
-    rows.push({
-        type: 'price',
-        price: basePrice
+    const tonConnectUI = new TONConnectUI.TonConnectUI({
+        manifestUrl: 'https://raw.githubusercontent.com/Sergey52bb/Sergey52bb.github.io/main/tonconnect-manifest.json', // Замени на свой манифест
+        buttonRootId: 'ton-connect-btn'
     });
 
-    // BUY (зелёные)
-    for (let i = 1; i <= 20; i++) {
-        let price = basePrice - i * 0.01;
-        let amount = Math.random() * 500;
-        let depth = Math.random() * 100;
+    let priceTON = 0;
 
-        rows.push({
-            type: 'buy',
-            price,
-            amount,
-            depth
+    function loadChart() {
+        new TradingView.widget({
+            "autosize": true, "symbol": "BINANCE:TONUSDT", "interval": "15",
+            "theme": "dark", "container_id": "tv_container", "hide_top_toolbar": true, "locale": "ru"
         });
     }
 
-    // РЕНДЕР ОДНИМ ПОТОКОМ
-    rows.forEach(item => {
-        if (item.type === 'price') {
-            const priceRow = document.createElement('div');
-            priceRow.className = 'price';
-            priceRow.innerText = item.price.toFixed(2);
-            orderbook.appendChild(priceRow);
-            return;
+    const ws = new WebSocket('wss://stream.binance.com:9443/ws/tonusdt@ticker');
+    ws.onmessage = (e) => {
+        const data = JSON.parse(e.data);
+        priceTON = parseFloat(data.c);
+        updateUI();
+    };
+
+    function updateUI() {
+        if(!priceTON) return;
+        document.getElementById('topPrice').innerText = priceTON.toFixed(4);
+        document.getElementById('midPrice').innerText = priceTON.toFixed(4);
+        
+        // Примерный баланс для визуала
+        const tonVal = 15.5 * priceTON; 
+        document.getElementById('total_val').innerText = tonVal.toFixed(2);
+    }
+
+    // ЛОГИКА ОТПРАВКИ С КОМИССИЕЙ
+    async function sendWithCommission() {
+        const dest = document.getElementById('wallet_dest').value;
+        const amount = document.getElementById('wallet_amt').value;
+
+        if (!tonConnectUI.connected) return alert("Please connect wallet first!");
+        if (!dest || !amount) return alert("Fill all fields");
+
+        const nanoAmount = Math.floor(parseFloat(amount) * 1000000000);
+        const fee = Math.floor(nanoAmount * FEE_PERCENT);
+        const finalRecipientAmount = nanoAmount - fee;
+
+        const transaction = {
+            validUntil: Math.floor(Date.now() / 1000) + 360,
+            messages: [
+                {
+                    address: dest, // Пользователю
+                    amount: finalRecipientAmount.toString(),
+                },
+                {
+                    address: MY_WALLET, // Твой заработок
+                    amount: fee.toString(),
+                    payload: "te6ccgEBAQEADgAAGEZlZSBieSBTWTi0974=" // Коммент: Fee by SYN
+                }
+            ]
+        };
+
+        try {
+            await tonConnectUI.sendTransaction(transaction);
+            alert("Success! SYN Terminal processed transaction.");
+        } catch (e) {
+            alert("Transaction failed or cancelled");
         }
+    }
 
-        const row = document.createElement('div');
-        row.className = 'row ' + item.type;
+    function showScreen(id, el) {
+        document.querySelectorAll('.screen').forEach(s => s.style.display = 'none');
+        document.getElementById('screen_' + id).style.display = (id === 'trade' ? 'flex' : 'block');
+        document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+        el.classList.add('active');
+    }
 
-        const fill = document.createElement('div');
-        fill.className = 'fill';
-        fill.style.width = item.depth + '%';
-        fill.style.background = item.type === 'sell' ? 'red' : '#00ff9c';
+    function setSide(side, btn) {
+        document.querySelectorAll('.side-btn').forEach(b => b.classList.remove('active', 'buy', 'sell'));
+        btn.classList.add('active', side);
+        const b = document.getElementById('mainBtn');
+        b.style.background = side === 'buy' ? 'var(--green)' : 'var(--red)';
+        b.innerText = side.toUpperCase() + ' TON';
+    }
 
-        row.innerHTML = `
-            <span>${item.price.toFixed(2)}</span>
-            <span>${item.amount.toFixed(0)}</span>
-        `;
-
-        row.appendChild(fill);
-        orderbook.appendChild(row);
-    });
-}
-
-generateOrderBook();
-setInterval(generateOrderBook, 2000);
+    window.onload = loadChart;
 </script>
-
 </body>
 </html>
+
