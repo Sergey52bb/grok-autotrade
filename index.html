@@ -3,11 +3,11 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>Grok Avto Trade V3.3</title>
+    <title>Grok Avto Trade V3.4</title>
     
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     
-    <script src="tonconnect-ui.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/tonconnect-ui/2.0.9/tonconnect-ui.min.js"></script>
     
     <style>
         :root { --bg: #05070a; --panel: #12151c; --green: #00ff95; --text: #94a3b8; --border: #2b2f36; }
@@ -30,7 +30,7 @@
 </head>
 <body>
 
-<header>💎 GROK AVTO TRADE <span style="font-size: 10px; color: var(--green);">V3.3</span></header>
+<header>💎 GROK AVTO TRADE <span style="font-size: 10px; color: var(--green);">V3.4</span></header>
 
 <div id="main_content">
     <div id="scr_wallet" class="screen active">
@@ -73,8 +73,12 @@
     // ТВОЙ АДРЕС
     const MY_ADDR = "UQCn_CdyczBzPjhjBfQgEJzoNWlVTLx4rbftix2Oyq3-Okyb";
 
-    // Ссылка на твой манифест
-    const manifestUrl = 'https://sergey52bb.github.io/grok-autotrade/tonconnect-manifest.json';
+    // Прямой манифест в коде (чтобы не создавать лишних файлов)
+    const manifestContent = {
+        url: "https://sergey52bb.github.io/grok-autotrade/",
+        name: "Grok Avto Trade"
+    };
+    const manifestUrl = 'data:application/json,' + encodeURIComponent(JSON.stringify(manifestContent));
 
     let tonConnectUI;
 
@@ -87,15 +91,14 @@
                 });
             } else {
                 document.getElementById('ton-connect-btn').innerHTML = 
-                    '<p style="color:orange; font-size:10px;">Ошибка загрузки SDK. Убедитесь, что файл tonconnect-ui.min.js на месте.</p>';
+                    '<p style="color:orange; font-size:12px;">Сеть блокирует подключение. Попробуйте VPN или другой браузер.</p>';
             }
         } catch (e) {
-            console.error("Ошибка инициализации:", e);
+            console.error(e);
         }
     }
 
-    // Запуск через полсекунды
-    setTimeout(initApp, 500);
+    window.addEventListener('load', initApp);
 
     function showTab(id, el) {
         document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
@@ -106,18 +109,13 @@
     }
 
     function doDeposit() {
-        // Если кошелек подключен, берем его адрес, иначе — твой MY_ADDR
         const addr = (tonConnectUI && tonConnectUI.account) ? tonConnectUI.account.address : MY_ADDR;
         tg.showAlert("Адрес для депозита: " + addr);
     }
 
     async function updatePrices() {
         const list = document.getElementById('market_list');
-        const pairs = [
-            { n: 'TON/USDT', s: 'TONUSDT' },
-            { n: 'BTC/USDT', s: 'BTCUSDT' },
-            { n: 'ETH/USDT', s: 'ETHUSDT' }
-        ];
+        const pairs = [{ n: 'TON/USDT', s: 'TONUSDT' }, { n: 'BTC/USDT', s: 'BTCUSDT' }, { n: 'ETH/USDT', s: 'ETHUSDT' }];
         let html = '';
         for (let p of pairs) {
             try {
@@ -132,9 +130,7 @@
         }
         list.innerHTML = html;
     }
-
     updatePrices();
 </script>
 </body>
 </html>
-
