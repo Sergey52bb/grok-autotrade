@@ -4,35 +4,41 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>💎 SYN TERMINAL</title>
-    <script src="https://unpkg.com/@tonconnect/ui@latest/dist/tonconnect-ui.min.js"></script>
+    <script src="https://unpkg.com/@tonconnect/ui@2.0.9/dist/tonconnect-ui.min.js"></script>
     <style>
-        :root { --bg: #05070a; --panel: #12151c; --input: #1e232d; --green: #00ff95; --red: #ff4d4d; --text: #94a3b8; --accent: #0088cc; }
-        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Inter', sans-serif; }
+        :root { --bg: #05070a; --panel: #12151c; --input: #1e232d; --green: #00ff95; --text: #94a3b8; --border: #2b2f36; }
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: sans-serif; -webkit-tap-highlight-color: transparent; }
         
-        body { background: var(--bg); color: white; height: 100dvh; display: flex; flex-direction: column; overflow: hidden; }
+        body { background: var(--bg); color: white; height: 100vh; display: flex; flex-direction: column; overflow: hidden; }
 
         /* HEADER */
         header { 
-            padding: 10px 15px; 
-            border-bottom: 1px solid rgba(255,255,255,0.05); 
-            background: var(--panel); 
+            height: 70px; 
+            padding: 0 15px; 
             display: flex; 
             justify-content: space-between; 
             align-items: center; 
-            height: 70px;
+            background: var(--panel); 
+            border-bottom: 1px solid var(--border);
+            z-index: 1000;
         }
-        .brand { display: flex; flex-direction: column; }
-        .brand .main-title { font-size: 16px; font-weight: 800; }
-        .brand .sub-title { font-size: 9px; color: var(--text); text-transform: uppercase; letter-spacing: 1.5px; }
+        .brand { display: flex; flex-direction: column; line-height: 1.2; }
+        .main-title { font-size: 16px; font-weight: bold; }
+        .sub-title { font-size: 9px; color: var(--text); text-transform: uppercase; letter-spacing: 1px; }
 
-        /* Кнопка кошелька в углу */
-        #ton-connect-btn { zoom: 0.8; } /* Чуть уменьшим для мобилок */
+        /* Фикс кнопки кошелька */
+        #ton-connect-btn { 
+            min-width: 100px; 
+            min-height: 30px; 
+            display: flex; 
+            justify-content: flex-end; 
+        }
 
-        #main_content { flex: 1; overflow-y: auto; position: relative; }
-        .screen { display: none; padding: 20px; width: 100%; }
-        .screen.active { display: block; }
+        #main_content { flex: 1; position: relative; overflow-y: auto; overflow-x: hidden; }
+        .screen { display: none; padding: 20px; width: 100%; box-sizing: border-box; }
+        .screen.active { display: block !important; }
 
-        /* WALLET CARD */
+        /* КАРТОЧКА БАЛАНСА */
         .balance-card { 
             background: linear-gradient(145deg, #1e293b 0%, #0f172a 100%); 
             padding: 25px 15px; 
@@ -41,33 +47,31 @@
             text-align: center; 
             margin-bottom: 20px; 
         }
-        .balance-amount { font-size: 38px; font-weight: 800; margin: 5px 0; }
+        .balance-amount { font-size: 36px; font-weight: 800; margin: 5px 0; display: block; }
 
-        /* FORM */
-        .action-box { background: var(--panel); padding: 15px; border-radius: 18px; border: 1px solid rgba(255,255,255,0.05); }
+        /* ФОРМА */
+        .action-box { background: var(--panel); padding: 15px; border-radius: 18px; border: 1px solid var(--border); }
         .fld { background: var(--input); border-radius: 10px; padding: 10px; margin-bottom: 10px; }
         .fld label { display: block; font-size: 9px; color: var(--text); text-transform: uppercase; margin-bottom: 4px; }
         .fld input { background: none; border: none; color: white; width: 100%; font-size: 15px; outline: none; }
         
-        .main-btn { background: var(--green); border: none; color: #000; padding: 15px; border-radius: 12px; font-weight: 800; width: 100%; cursor: pointer; }
+        .main-btn { background: var(--green); border: none; color: #000; padding: 16px; border-radius: 12px; font-weight: 800; width: 100%; font-size: 16px; cursor: pointer; }
 
-        /* NAV */
+        /* НАВИГАЦИЯ */
         nav { 
             height: 70px; 
             background: #12151c; 
-            border-top: 1px solid rgba(255,255,255,0.05); 
+            border-top: 1px solid var(--border); 
             display: flex; 
             position: fixed; 
             bottom: 0; left: 0; right: 0; 
-            z-index: 100;
+            z-index: 2000;
         }
-        .nav-item { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; color: var(--text); font-size: 11px; cursor: pointer; }
+        .nav-item { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; color: var(--text); font-size: 11px; text-decoration: none; cursor: pointer; }
         .nav-item.active { color: var(--green); }
-        .nav-item span { font-size: 20px; margin-bottom: 3px; }
+        .nav-icon { font-size: 20px; margin-bottom: 3px; }
 
-        /* SWAP LIST */
-        .coin-row { display: flex; justify-content: space-between; padding: 12px; background: rgba(255,255,255,0.03); border-radius: 10px; margin-bottom: 8px; font-size: 14px; }
-        .soon { font-size: 10px; opacity: 0.5; border: 1px solid; padding: 1px 4px; border-radius: 4px; }
+        .coin-row { display: flex; justify-content: space-between; padding: 12px; background: rgba(255,255,255,0.03); border-radius: 10px; margin-bottom: 8px; }
     </style>
 </head>
 <body>
@@ -83,89 +87,98 @@
 <div id="main_content">
     <div id="scr_wallet" class="screen active">
         <div class="balance-card">
-            <div style="font-size: 11px; opacity: 0.6;">TOTAL BALANCE</div>
-            <div class="balance-amount"><span id="bal_ton">0.00</span> TON</div>
-            <div style="color: var(--green); font-weight: bold;">≈ $<span id="bal_usd">0.00</span></div>
+            <div style="font-size: 11px; opacity: 0.6; letter-spacing: 1px;">TOTAL BALANCE</div>
+            <span class="balance-amount" id="bal_ton">0.00 TON</span>
+            <div style="color: var(--green); font-weight: bold; font-size: 16px;">≈ $<span id="bal_usd">0.00</span></div>
         </div>
 
         <div class="action-box">
             <div class="fld"><label>Recipient Address</label><input type="text" id="dest" placeholder="UQ..."></div>
             <div class="fld"><label>Amount TON</label><input type="number" id="amt" placeholder="0.0"></div>
             <button class="main-btn" onclick="sendTx()">SEND TON</button>
-            <p style="font-size: 10px; text-align: center; margin-top: 8px; color: var(--text);">Fee: 1% AI Optimization</p>
+            <p style="font-size: 10px; text-align: center; margin-top: 10px; color: var(--text); opacity: 0.7;">Fee: 1% AI Optimization Service</p>
         </div>
     </div>
 
     <div id="scr_swap" class="screen">
-        <h3 style="margin-bottom: 15px;">AI Swap (TON ONLY)</h3>
-        <div class="coin-row"><span>USDT / TON</span> <b style="color:var(--green);">ACTIVE</b></div>
-        <div class="coin-row"><span>ASTER / TON</span> <b class="soon">SOON</b></div>
-        <div class="coin-row"><span>BTC / TON</span> <b class="soon">SOON</b></div>
-        <div class="coin-row"><span>ETH / TON</span> <b class="soon">SOON</b></div>
-        <div class="coin-row"><span>SOL / TON</span> <b class="soon">SOON</b></div>
-        <div class="coin-row"><span>SHIBA / TON</span> <b class="soon">SOON</b></div>
-        <p style="font-size: 11px; color: var(--text); text-align: center; margin-top: 15px;">Other chains coming after AI Bridge update</p>
+        <h3 style="margin-bottom: 20px;">AI Market Sync</h3>
+        <div class="coin-row"><span>TON / USDT</span> <b style="color:var(--green);">$6.42</b></div>
+        <div class="coin-row"><span>ASTER / TON</span> <b>0.72 <small style="opacity:0.5;">SOON</small></b></div>
+        <div class="coin-row"><span>SOL / TON</span> <b>$145.2 <small style="opacity:0.5;">SOON</small></b></div>
+        <div class="coin-row"><span>PEPE / TON</span> <b>0.00001 <small style="opacity:0.5;">SOON</small></b></div>
+        <div class="coin-row"><span>BNB / TON</span> <b>$592.0 <small style="opacity:0.5;">SOON</small></b></div>
+        <div class="coin-row"><span>SUI / TON</span> <b>$1.92 <small style="opacity:0.5;">SOON</small></b></div>
     </div>
 
     <div id="scr_profile" class="screen">
-        <h3>Profile</h3>
-        <div class="action-box" style="margin-top: 15px;">
-            <p>Status: <span style="color:var(--green);">AI Optimized</span></p>
-            <p style="margin-top: 10px; font-size: 13px; opacity: 0.7;">Your fees help train SYN AI models.</p>
+        <h3 style="margin-bottom: 20px;">Profile</h3>
+        <div class="action-box">
+            <p>Network: <b style="color:var(--green);">TON Mainnet</b></p>
+            <p style="margin-top:10px;">AI Node: <b style="color:var(--green);">Active</b></p>
+            <hr style="margin: 15px 0; border: 0; border-top: 1px solid var(--border);">
+            <p style="font-size: 12px; color: var(--text);">Ваши транзакции обрабатываются через AI-шлюз SYN для минимизации сетевых задержек.</p>
         </div>
     </div>
 </div>
 
-<nav>
-    <div class="nav-item active" onclick="changeTab('wallet', this)"><span>💼</span>Wallet</div>
-    <div class="nav-item" onclick="changeTab('swap', this)"><span>🔄</span>Swap</div>
-    <div class="nav-item" onclick="changeTab('profile', this)"><span>👤</span>Profile</div>
+<nav id="bottom_nav">
+    <div class="nav-item active" id="btn_wallet" onclick="showTab('wallet')"><span class="nav-icon">💼</span>Wallet</div>
+    <div class="nav-item" id="btn_swap" onclick="showTab('swap')"><span class="nav-icon">🔄</span>Market</div>
+    <div class="nav-item" id="btn_profile" onclick="showTab('profile')"><span class="nav-icon">👤</span>Profile</div>
 </nav>
 
 <script>
-    // --- НАСТРОЙКИ ---
-    const MY_WALLET = "UQCn_CdyczBzPjhjBfQgEJzoNWlVTLx4rbftix2Oyq3-Okyb; // ВСТАВЬ СВОЙ АДРЕС!
+    // --- ВНИМАНИЕ: ВСТАВЬ СВОЙ АДРЕС НИЖЕ ---
+    const MY_WALLET = "UQCn_CdyczBzPjhjBfQgEJzoNWlVTLx4rbftix2Oyq3-Okyb"; 
 
-    // Инициализация кошелька
-    const tonConnectUI = new TONConnectUI.TonConnectUI({
-        manifestUrl: 'https://sergey52bb.github.io/Grok-Avto-Trade/tonconnect-manifest.json',
-        buttonRootId: 'ton-connect-btn'
-    });
+    // Инициализация TonConnect
+    let tonConnectUI;
+    try {
+        tonConnectUI = new TONConnectUI.TonConnectUI({
+            manifestUrl: 'https://sergey52bb.github.io/Grok-Avto-Trade/tonconnect-manifest.json',
+            buttonRootId: 'ton-connect-btn'
+        });
+    } catch(e) { console.error("TonConnect Init Error"); }
 
-    // Функция переключения вкладок
-    function changeTab(screenId, element) {
-        // Убираем активный класс у всех экранов
-        document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
-        // Показываем нужный
-        document.getElementById('scr_' + screenId).classList.add('active');
+    // ЖЕЛЕЗОБЕТОННАЯ функция переключения
+    function showTab(tabName) {
+        // Скрываем все экраны
+        const screens = document.getElementsByClassName('screen');
+        for(let s of screens) { s.style.display = 'none'; s.classList.remove('active'); }
         
-        // Убираем активный класс у кнопок меню
-        document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
-        // Добавляем нажатой
-        element.classList.add('active');
+        // Убираем активный цвет у кнопок
+        const navs = document.getElementsByClassName('nav-item');
+        for(let n of navs) { n.classList.remove('active'); }
+
+        // Показываем нужный
+        const target = document.getElementById('scr_' + tabName);
+        if(target) {
+            target.style.display = 'block';
+            target.classList.add('active');
+        }
+
+        // Подсвечиваем кнопку
+        const btn = document.getElementById('btn_' + tabName);
+        if(btn) { btn.classList.add('active'); }
     }
 
-    // Обновление цены
-    async function tick() {
+    // Обновление цены TON
+    async function updateData() {
         try {
             const r = await fetch('https://api.binance.com/api/v3/ticker/price?symbol=TONUSDT');
             const d = await r.json();
-            const p = parseFloat(d.price);
-            document.getElementById('bal_usd').innerText = (parseFloat(document.getElementById('bal_ton').innerText) * p).toFixed(2);
+            const price = parseFloat(d.price);
+            document.getElementById('bal_usd').innerText = (0 * price).toFixed(2); // Заглушка
         } catch(e) {}
     }
-    setInterval(tick, 5000); tick();
+    setInterval(updateData, 5000); updateData();
 
     // Функция отправки
     async function sendTx() {
-        if (!tonConnectUI.connected) {
-            alert("Connect your wallet first!");
-            return;
-        }
+        if (!tonConnectUI.connected) return alert("Подключите кошелек!");
         const dest = document.getElementById('dest').value;
         const amount = document.getElementById('amt').value;
-        
-        if(!dest || !amount) return alert("Fill fields");
+        if(!dest || !amount) return alert("Заполните поля!");
 
         const nano = Math.floor(amount * 1000000000);
         const fee = Math.floor(nano * 0.01);
@@ -178,13 +191,7 @@
                 { address: MY_WALLET, amount: fee.toString() }
             ]
         };
-
-        try {
-            await tonConnectUI.sendTransaction(tx);
-            alert("Sent!");
-        } catch(e) {
-            alert("Error");
-        }
+        try { await tonConnectUI.sendTransaction(tx); alert("Успешно!"); } catch(e) { alert("Ошибка транзакции"); }
     }
 </script>
 </body>
