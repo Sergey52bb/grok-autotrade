@@ -67,20 +67,28 @@
     tg.ready();
     tg.expand();
 
-    const MY_ADDR = "UQCn_CdyczBzPjhjBfQgEJzoNWlVTLx4rbftix2Oyq3-Okyb";
-
-    // --- СЕКРЕТНЫЙ МЕТОД: МАНИФЕСТ ВНУТРИ СТРОКИ ---
+    // Прямой манифест
     const manifestContent = {
         url: "https://sergey52bb.github.io/grok-autotrade/",
         name: "SYN TERMINAL"
     };
     const manifestUrl = 'data:application/json,' + encodeURIComponent(JSON.stringify(manifestContent));
 
-    const tonConnectUI = new TONConnectUI.TonConnectUI({
-        manifestUrl: manifestUrl,
-        buttonRootId: 'ton-connect-btn'
-    });
+    let tonConnectUI;
 
+    try {
+        tonConnectUI = new TONConnectUI.TonConnectUI({
+            manifestUrl: manifestUrl,
+            buttonRootId: 'ton-connect-btn'
+        });
+        console.log("TonConnect initialized");
+    } catch (e) {
+        // Если будет ошибка - мы её увидим прямо в интерфейсе!
+        document.getElementById('ton-connect-btn').innerHTML = 
+            '<p style="color:red; font-size:10px;">Ошибка: ' + e.message + '</p>';
+    }
+
+    // Твой MY_ADDR и остальные функции ниже...
     function showTab(id, el) {
         document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
         document.getElementById('scr_' + id).classList.add('active');
@@ -88,29 +96,6 @@
         if(el) el.classList.add('active');
         if(id === 'market') updatePrices();
     }
-
-    function doDeposit() {
-        const addr = tonConnectUI.account ? tonConnectUI.account.address : MY_ADDR;
-        tg.showAlert("Адрес для депозита:\n\n" + addr);
-    }
-
-    async function updatePrices() {
-        const list = document.getElementById('market_list');
-        const pairs = [{ n: 'TON/USDT', s: 'TONUSDT' }, { n: 'BTC/USDT', s: 'BTCUSDT' }, { n: 'ETH/USDT', s: 'ETHUSDT' }];
-        let html = '';
-        for (let p of pairs) {
-            try {
-                const response = await fetch(`https://api.binance.com/api/v3/ticker/price?symbol=${p.s}`);
-                const data = await response.json();
-                const price = parseFloat(data.price).toFixed(2);
-                if(p.s === 'TONUSDT') document.getElementById('usd_val').innerText = '$' + price;
-                html += `<div class="coin-row"><b>${p.n}</b><b style="color:var(--green)">$${price}</b></div>`;
-            } catch (e) { html += `<div class="coin-row"><span>${p.n}</span><span>Error</span></div>`; }
-        }
-        list.innerHTML = html;
-    }
-
-    updatePrices();
 </script>
 </body>
 </html>
