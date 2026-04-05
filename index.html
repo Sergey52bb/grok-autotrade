@@ -8,7 +8,7 @@
     <style>
         :root { --bg: #05070a; --panel: #12151c; --green: #00ff95; --text: #94a3b8; --border: #2b2f36; }
         body { background: var(--bg); color: white; margin: 0; font-family: sans-serif; height: 100vh; display: flex; flex-direction: column; overflow: hidden; }
-        header { padding: 15px; background: var(--panel); border-bottom: 1px solid var(--border); text-align: center; font-weight: 800; font-size: 18px; letter-spacing: 1px; }
+        header { padding: 15px; background: var(--panel); border-bottom: 1px solid var(--border); text-align: center; font-weight: 800; font-size: 18px; }
         #main_content { flex: 1; overflow-y: auto; padding: 15px 15px 100px 15px; }
         .screen { display: none; }
         .screen.active { display: block; }
@@ -62,9 +62,10 @@
 </nav>
 
 <script>
-    // === ВСТАВЬ СВОЙ АДРЕС ТУТ ===
-    const MY_ADDR = "UQAFV-zN_fC1YyNfN4vG7jGf3V_6f0f4f5f6f7f8f9";
+    // ТВОЙ АДРЕС (ВСТАВЬ СВОЙ)
+    const MY_ADDR = "ТВОЙ_АДРЕС_ЗДЕСЬ";
 
+    // ВАЖНО: Ссылка на манифест именно этого репозитория!
     const tonConnectUI = new TONConnectUI.TonConnectUI({
         manifestUrl: 'https://sergey52bb.github.io/grok-autotrade/tonconnect-manifest.json',
         buttonRootId: 'ton-connect-btn'
@@ -85,7 +86,7 @@
 
     async function updatePrices() {
         const list = document.getElementById('market_list');
-        const coins = [{ n: 'TON/USDT', b: 'TONUSDT' }, { n: 'BNB/USDT', b: 'BNBUSDT' }, { n: 'BTC/USDT', b: 'BTCUSDT' }, { n: 'ETH/USDT', b: 'ETHUSDT' }];
+        const coins = [{ n: 'TON/USDT', b: 'TONUSDT' }, { n: 'BNB/USDT', b: 'BNBUSDT' }, { n: 'BTC/USDT', b: 'BTCUSDT' }];
         let resHtml = '';
         for (let c of coins) {
             let price = "0.00";
