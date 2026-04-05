@@ -2,65 +2,57 @@
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>SYN TERMINAL</title>
-    <script src="https://unpkg.com/@tonconnect/ui@latest/dist/tonconnect-ui.min.js"></script>
+    <script src="https://unpkg.com/@tonconnect/ui@2.0.9/dist/tonconnect-ui.min.js"></script>
     <style>
         :root { --bg: #05070a; --panel: #12151c; --green: #00ff95; --text: #94a3b8; --border: #2b2f36; }
-        body { background: var(--bg); color: white; margin: 0; font-family: sans-serif; height: 100vh; display: flex; flex-direction: column; overflow: hidden; }
-        header { padding: 15px; background: var(--panel); border-bottom: 1px solid var(--border); text-align: center; }
+        body { background: var(--bg); color: white; margin: 0; font-family: -apple-system, sans-serif; height: 100vh; display: flex; flex-direction: column; overflow: hidden; }
+        header { padding: 20px; background: var(--panel); border-bottom: 1px solid var(--border); text-align: center; }
         #main_content { flex: 1; overflow-y: auto; padding: 15px 15px 100px 15px; }
         .screen { display: none; }
         .screen.active { display: block; }
-        .balance-card { background: #1e293b; padding: 25px; border-radius: 20px; text-align: center; margin-bottom: 20px; border: 1px solid var(--border); }
-        .btns { display: flex; gap: 10px; }
-        .btn { flex: 1; padding: 15px; border-radius: 12px; border: none; font-weight: bold; cursor: pointer; text-transform: uppercase; font-size: 13px; }
-        .btn-white { background: white; color: black; }
-        .btn-green { background: var(--green); color: black; }
-        .coin-row { display: flex; justify-content: space-between; align-items: center; padding: 15px; background: var(--panel); border-radius: 12px; margin-bottom: 8px; border: 1px solid var(--border); }
-        .coin-name { font-weight: bold; display: flex; align-items: center; gap: 10px; }
-        .coin-icon { width: 24px; height: 24px; border-radius: 50%; background: #333; }
-        nav { position: fixed; bottom: 0; width: 100%; height: 75px; background: var(--panel); display: flex; border-top: 1px solid var(--border); z-index: 100; }
+        .balance-card { background: linear-gradient(180deg, #1e293b 0%, #0f172a 100%); padding: 30px; border-radius: 24px; text-align: center; margin-bottom: 20px; border: 1px solid var(--border); }
+        .btns { display: flex; gap: 12px; }
+        .btn { flex: 1; padding: 18px; border-radius: 16px; border: none; font-weight: 800; cursor: pointer; text-transform: uppercase; font-size: 14px; transition: 0.2s; }
+        .btn-white { background: #ffffff; color: #000; }
+        .btn-green { background: var(--green); color: #000; }
+        .coin-row { display: flex; justify-content: space-between; align-items: center; padding: 16px; background: var(--panel); border-radius: 16px; margin-bottom: 10px; border: 1px solid var(--border); }
+        nav { position: fixed; bottom: 0; width: 100%; height: 80px; background: var(--panel); display: flex; border-top: 1px solid var(--border); z-index: 999; }
         .nav-item { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; font-size: 11px; color: var(--text); }
         .nav-item.active { color: var(--green); }
-        #ton-connect-btn { display: flex; justify-content: center; margin: 20px 0; min-height: 44px; }
+        #ton-connect-btn { display: flex; justify-content: center; margin: 20px auto; min-height: 44px; width: 100%; }
     </style>
 </head>
 <body>
 
 <header>
-    <div style="font-weight: bold; font-size: 18px;">💎 SYN TERMINAL</div>
-    <div style="font-size: 9px; color: var(--text); letter-spacing: 2px;">AI TRADING INTERFACE</div>
+    <div style="font-weight: 900; font-size: 20px; letter-spacing: 1px;">💎 SYN TERMINAL</div>
 </header>
 
 <div id="main_content">
     <div id="scr_wallet" class="screen active">
         <div class="balance-card">
-            <div style="font-size: 11px; opacity: 0.5; margin-bottom: 5px;">ESTIMATED BALANCE</div>
-            <h1 id="ton_val" style="font-size: 32px; margin: 5px 0;">0.00 TON</h1>
-            <div id="usd_val" style="color: var(--green); font-weight: bold;">$0.00</div>
+            <div style="font-size: 11px; opacity: 0.6; margin-bottom: 8px; letter-spacing: 1px;">AVAILABLE BALANCE</div>
+            <h1 style="font-size: 38px; margin: 0;">0.00 TON</h1>
+            <div id="top_price" style="color: var(--green); font-weight: bold; margin-top: 5px;">$0.00</div>
         </div>
         <div class="btns">
             <button class="btn btn-white" onclick="handleDeposit()">⬇ Deposit</button>
-            <button class="btn btn-green" onclick="showTab('profile')">⬆ Send</button>
+            <button class="btn btn-green" onclick="handleSendClick()">⬆ Send</button>
         </div>
     </div>
 
     <div id="scr_market" class="screen">
-        <h4 style="margin-bottom: 15px; opacity: 0.7;">LIVE MARKET DATA</h4>
-        <div id="market_list">
-            <p style="text-align: center; color: var(--text);">Loading AI Prices...</p>
-        </div>
+        <h4 style="margin-bottom: 15px; letter-spacing: 1px; opacity: 0.8;">AI MARKET PULSE</h4>
+        <div id="market_list"></div>
     </div>
 
     <div id="scr_profile" class="screen">
-        <h4>SYSTEM PROFILE</h4>
-        <div style="background: var(--panel); padding: 20px; border-radius: 15px; margin-top: 15px; border: 1px solid var(--border);">
-            <p style="font-size: 13px; text-align: center; margin-bottom: 10px;">Account Authorization</p>
+        <h4 style="text-align: center;">TERMINAL ACCESS</h4>
+        <div style="background: var(--panel); padding: 25px; border-radius: 20px; margin-top: 20px; border: 1px solid var(--border); text-align: center;">
+            <p style="font-size: 13px; color: var(--text); margin-bottom: 15px;">Connect Wallet for full AI features</p>
             <div id="ton-connect-btn"></div>
-            <div style="font-size: 11px; color: var(--text); text-align: center; line-height: 1.4;">
-                Connect your TON wallet to enable AI-powered trading and instant withdrawals.
-            </div>
         </div>
     </div>
 </div>
@@ -72,16 +64,15 @@
 </nav>
 
 <script>
-    // --- НАСТРОЙКИ ---
-    const MY_WALLET = "ТВОЙ_АДРЕС_КОШЕЛЬКА"; // Вставь сюда свой адрес!
+    // === ВСТАВЬ СВОЙ АДРЕС ТУТ ===
+    const MY_WALLET = "ТВОЙ_АДРЕС_КОШЕЛЬКА"; 
 
-    // 1. Инициализация TonConnect
+    // Инициализация TonConnect
     const tonConnectUI = new TONConnectUI.TonConnectUI({
         manifestUrl: 'https://sergey52bb.github.io/Grok-Avto-Trade/tonconnect-manifest.json',
         buttonRootId: 'ton-connect-btn'
     });
 
-    // 2. Переключение вкладок
     function showTab(id, el) {
         document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
         document.getElementById('scr_' + id).classList.add('active');
@@ -90,51 +81,52 @@
         if(id === 'market') fetchPrices();
     }
 
-    // 3. Депозит
     function handleDeposit() {
-        const addr = tonConnectUI.account ? tonConnectUI.account.address : MY_WALLET;
-        prompt("UQCn_CdyczBzPjhjBfQgEJzoNWlVTLx4rbftix2Oyq3-Okyb:", addr);
+        const userAddr = tonConnectUI.account ? tonConnectUI.account.address : MY_WALLET;
+        // Используем alert вместо prompt для надежности на мобильных
+        alert("Ваш адрес для копирования:\n\n" + userAddr);
     }
 
-    // 4. Реальные цены с Binance
+    function handleSendClick() {
+        if(!tonConnectUI.account) {
+            alert("UQCn_CdyczBzPjhjBfQgEJzoNWlVTLx4rbftix2Oyq3-Okyb");
+            showTab('profile');
+        } else {
+            alert("Функция отправки будет доступна после синхронизации AI узла.");
+        }
+    }
+
     async function fetchPrices() {
         const list = document.getElementById('market_list');
-        const pairs = [
+        const coins = [
             { n: 'TON/USDT', s: 'ton', b: 'TONUSDT' },
             { n: 'BNB/USDT', s: 'bnb', b: 'BNBUSDT' },
             { n: 'BTC/USDT', s: 'btc', b: 'BTCUSDT' },
             { n: 'ETH/USDT', s: 'eth', b: 'ETHUSDT' },
-            { n: 'SOL/USDT', s: 'sol', b: 'SOLUSDT' },
             { n: 'ASTER/TON', s: 'aster', p: '0.72' }
         ];
 
         let html = '';
-        for (let p of pairs) {
-            let price = p.p || "0.00";
-            if (p.b) {
+        for (let c of coins) {
+            let price = c.p || "Loading...";
+            if (c.b) {
                 try {
-                    const res = await fetch(`https://api.binance.com/api/v3/ticker/price?symbol=${p.b}`);
-                    const data = await res.json();
-                    price = parseFloat(data.price).toFixed(2);
-                    if(p.s === 'ton') document.getElementById('usd_val').innerText = '$' + price;
-                } catch(e) { price = "Check AI"; }
+                    const r = await fetch(`https://api.binance.com/api/v3/ticker/price?symbol=${c.b}`);
+                    const d = await r.json();
+                    price = parseFloat(d.price).toFixed(2);
+                    if(c.s === 'ton') document.getElementById('top_price').innerText = '$' + price;
+                } catch(e) { price = "Error"; }
             }
-            html += `
-                <div class="coin-row">
-                    <div class="coin-name">
-                        <img src="https://raw.githubusercontent.com/t1m9m/cryptocurrency-icons/master/32/color/${p.s}.png" class="coin-icon" onerror="this.style.opacity='0'">
-                        ${p.n}
-                    </div>
-                    <div style="color: var(--green); font-weight: bold;">$${price}</div>
-                </div>`;
+            html += `<div class="coin-row">
+                <span style="font-weight:bold;">${c.n}</span>
+                <span style="color:var(--green); font-weight:bold;">$${price}</span>
+            </div>`;
         }
         list.innerHTML = html;
     }
 
-    // Запуск функций
+    // Запуск цен сразу
     fetchPrices();
-    setInterval(fetchPrices, 30000); // Обновлять каждые 30 сек
 </script>
 </body>
 </html>
-
