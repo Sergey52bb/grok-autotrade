@@ -3,11 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>Grok Avto Trade V3.5</title>
-    
+    <title>Grok Avto Trade V3.6</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     
-    <script src="https://unpkg.com/@tonconnect/ui@latest/dist/tonconnect-ui.min.js"></script>
+    <script src="tonconnect-ui.min.js"></script>
     
     <style>
         :root { --bg: #05070a; --panel: #12151c; --green: #00ff95; --text: #94a3b8; --border: #2b2f36; }
@@ -30,7 +29,7 @@
 </head>
 <body>
 
-<header>💎 GROK AVTO TRADE <span style="font-size: 10px; color: var(--green);">V3.5</span></header>
+<header>💎 GROK AVTO TRADE <span style="font-size: 10px; color: var(--green);">V3.6</span></header>
 
 <div id="main_content">
     <div id="scr_wallet" class="screen active">
@@ -53,7 +52,7 @@
     <div id="scr_profile" class="screen">
         <h4 style="text-align: center;">SYSTEM ACCESS</h4>
         <div style="background: var(--panel); padding: 30px; border-radius: 25px; margin-top: 20px; border: 1px solid var(--border); text-align: center;">
-            <p style="font-size: 13px; color: var(--text); margin-bottom: 20px;">Подключите кошелек для входа в терминал</p>
+            <p style="font-size: 13px; color: var(--text); margin-bottom: 20px;">Подключите кошелек для входа</p>
             <div id="ton-connect-btn"></div>
         </div>
     </div>
@@ -70,38 +69,26 @@
     tg.ready();
     tg.expand();
 
-    // Твой адрес
+    // ТВОЙ АДРЕС
     const MY_ADDR = "UQCn_CdyczBzPjhjBfQgEJzoNWlVTLx4rbftix2Oyq3-Okyb";
 
-    // Прямой манифест (без внешних файлов)
-    const manifest = {
-        url: "https://sergey52bb.github.io/grok-autotrade/",
-        name: "Grok Avto Trade"
-    };
-    const manifestUrl = 'data:application/json,' + encodeURIComponent(JSON.stringify(manifest));
+    const manifestUrl = 'https://sergey52bb.github.io/grok-autotrade/tonconnect-manifest.json';
 
     let tonConnectUI;
 
     function initApp() {
-        try {
-            if (typeof TONConnectUI !== 'undefined') {
-                tonConnectUI = new TONConnectUI.TonConnectUI({
-                    manifestUrl: manifestUrl,
-                    buttonRootId: 'ton-connect-btn'
-                });
-                console.log("SDK Load Success");
-            } else {
-                // Если библиотека не загрузилась через <script>, пробуем альтернативу
-                document.getElementById('ton-connect-btn').innerHTML = 
-                    '<button class="btn btn-green" onclick="location.reload()">Обновить страницу</button>' +
-                    '<p style="color:orange; font-size:10px; margin-top:10px;">Ошибка доступа к TON SDK. Попробуйте открыть через мобильный интернет или другой браузер.</p>';
-            }
-        } catch (e) {
-            console.error(e);
+        if (typeof TONConnectUI !== 'undefined') {
+            tonConnectUI = new TONConnectUI.TonConnectUI({
+                manifestUrl: manifestUrl,
+                buttonRootId: 'ton-connect-btn'
+            });
+        } else {
+            document.getElementById('ton-connect-btn').innerHTML = 
+                '<p style="color:red; font-size:10px;">Файл tonconnect-ui.min.js не найден. Проверьте GitHub.</p>';
         }
     }
 
-    window.addEventListener('load', initApp);
+    setTimeout(initApp, 500);
 
     function showTab(id, el) {
         document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
@@ -127,9 +114,7 @@
                 const price = parseFloat(data.price).toFixed(2);
                 if(p.s === 'TONUSDT') document.getElementById('usd_val').innerText = '$' + price;
                 html += `<div class="coin-row"><b>${p.n}</b><b style="color:var(--green)">$${price}</b></div>`;
-            } catch (e) {
-                html += `<div class="coin-row"><span>${p.n}</span><span>Error</span></div>`;
-            }
+            } catch (e) { html += `<div class="coin-row"><span>${p.n}</span><span>Error</span></div>`; }
         }
         list.innerHTML = html;
     }
