@@ -3,11 +3,12 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>SYN TERMINAL V3.3</title>
+    <title>Grok Avto Trade V3.3</title>
+    
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     
-    <script src="https://cdn.jsdelivr.net/npm/@tonconnect/ui@2.0.9/dist/tonconnect-ui.min.js"></script>
-
+    <script src="tonconnect-ui.min.js"></script>
+    
     <style>
         :root { --bg: #05070a; --panel: #12151c; --green: #00ff95; --text: #94a3b8; --border: #2b2f36; }
         body { background: var(--bg); color: white; margin: 0; font-family: sans-serif; height: 100vh; display: flex; flex-direction: column; overflow: hidden; }
@@ -29,7 +30,7 @@
 </head>
 <body>
 
-<header>💎 SYN TERMINAL <span style="font-size: 10px; color: var(--green);">V3.3</span></header>
+<header>💎 GROK AVTO TRADE <span style="font-size: 10px; color: var(--green);">V3.3</span></header>
 
 <div id="main_content">
     <div id="scr_wallet" class="screen active">
@@ -52,7 +53,7 @@
     <div id="scr_profile" class="screen">
         <h4 style="text-align: center;">SYSTEM ACCESS</h4>
         <div style="background: var(--panel); padding: 30px; border-radius: 25px; margin-top: 20px; border: 1px solid var(--border); text-align: center;">
-            <p style="font-size: 13px; color: var(--text); margin-bottom: 20px;">Подключите TON кошелек для входа</p>
+            <p style="font-size: 13px; color: var(--text); margin-bottom: 20px;">Подключите TON кошелек для авторизации</p>
             <div id="ton-connect-btn"></div>
         </div>
     </div>
@@ -72,11 +73,8 @@
     // ТВОЙ АДРЕС
     const MY_ADDR = "UQCn_CdyczBzPjhjBfQgEJzoNWlVTLx4rbftix2Oyq3-Okyb";
 
-    const manifestContent = {
-        url: "https://sergey52bb.github.io/grok-autotrade/",
-        name: "SYN TERMINAL"
-    };
-    const manifestUrl = 'data:application/json,' + encodeURIComponent(JSON.stringify(manifestContent));
+    // Ссылка на твой манифест
+    const manifestUrl = 'https://sergey52bb.github.io/grok-autotrade/tonconnect-manifest.json';
 
     let tonConnectUI;
 
@@ -89,15 +87,15 @@
                 });
             } else {
                 document.getElementById('ton-connect-btn').innerHTML = 
-                    '<p style="color:orange; font-size:10px;">Ошибка загрузки SDK. Обновите страницу.</p>';
+                    '<p style="color:orange; font-size:10px;">Ошибка загрузки SDK. Убедитесь, что файл tonconnect-ui.min.js на месте.</p>';
             }
         } catch (e) {
-            console.error(e);
+            console.error("Ошибка инициализации:", e);
         }
     }
 
-    // Запуск инициализации
-    window.addEventListener('load', initApp);
+    // Запуск через полсекунды
+    setTimeout(initApp, 500);
 
     function showTab(id, el) {
         document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
@@ -108,13 +106,18 @@
     }
 
     function doDeposit() {
+        // Если кошелек подключен, берем его адрес, иначе — твой MY_ADDR
         const addr = (tonConnectUI && tonConnectUI.account) ? tonConnectUI.account.address : MY_ADDR;
         tg.showAlert("Адрес для депозита: " + addr);
     }
 
     async function updatePrices() {
         const list = document.getElementById('market_list');
-        const pairs = [{ n: 'TON/USDT', s: 'TONUSDT' }, { n: 'BTC/USDT', s: 'BTCUSDT' }, { n: 'ETH/USDT', s: 'ETHUSDT' }];
+        const pairs = [
+            { n: 'TON/USDT', s: 'TONUSDT' },
+            { n: 'BTC/USDT', s: 'BTCUSDT' },
+            { n: 'ETH/USDT', s: 'ETHUSDT' }
+        ];
         let html = '';
         for (let p of pairs) {
             try {
@@ -123,11 +126,15 @@
                 const price = parseFloat(data.price).toFixed(2);
                 if(p.s === 'TONUSDT') document.getElementById('usd_val').innerText = '$' + price;
                 html += `<div class="coin-row"><b>${p.n}</b><b style="color:var(--green)">$${price}</b></div>`;
-            } catch (e) { html += `<div class="coin-row"><span>${p.n}</span><span>Error</span></div>`; }
+            } catch (e) {
+                html += `<div class="coin-row"><span>${p.n}</span><span>Error</span></div>`;
+            }
         }
         list.innerHTML = html;
     }
+
     updatePrices();
 </script>
 </body>
 </html>
+
