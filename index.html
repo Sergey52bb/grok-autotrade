@@ -6,72 +6,41 @@
     <title>💎 SYN TERMINAL</title>
     <script src="https://unpkg.com/@tonconnect/ui@2.0.9/dist/tonconnect-ui.min.js"></script>
     <style>
-        :root { --bg: #05070a; --panel: #12151c; --input: #1e232d; --green: #00ff95; --text: #94a3b8; --border: #2b2f36; }
-        * { box-sizing: border-box; margin: 0; padding: 0; font-family: sans-serif; -webkit-tap-highlight-color: transparent; }
-        
+        :root { --bg: #05070a; --panel: #12151c; --input: #1e232d; --green: #00ff95; --text: #94a3b8; --border: #2b2f36; --accent: #0088cc; }
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Inter', sans-serif; }
         body { background: var(--bg); color: white; height: 100vh; display: flex; flex-direction: column; overflow: hidden; }
 
-        /* HEADER */
-        header { 
-            height: 70px; 
-            padding: 0 15px; 
-            display: flex; 
-            justify-content: space-between; 
-            align-items: center; 
-            background: var(--panel); 
-            border-bottom: 1px solid var(--border);
-            z-index: 1000;
-        }
-        .brand { display: flex; flex-direction: column; line-height: 1.2; }
-        .main-title { font-size: 16px; font-weight: bold; }
-        .sub-title { font-size: 9px; color: var(--text); text-transform: uppercase; letter-spacing: 1px; }
+        header { padding: 15px; background: var(--panel); border-bottom: 1px solid var(--border); text-align: left; }
+        .brand .main-title { font-size: 18px; font-weight: bold; display: block; }
+        .brand .sub-title { font-size: 10px; color: var(--text); text-transform: uppercase; letter-spacing: 1px; }
 
-        /* Фикс кнопки кошелька */
-        #ton-connect-btn { 
-            min-width: 100px; 
-            min-height: 30px; 
-            display: flex; 
-            justify-content: flex-end; 
-        }
+        #main_content { flex: 1; overflow-y: auto; padding-bottom: 80px; }
+        .screen { display: none; padding: 15px; }
+        .screen.active { display: block; }
 
-        #main_content { flex: 1; position: relative; overflow-y: auto; overflow-x: hidden; }
-        .screen { display: none; padding: 20px; width: 100%; box-sizing: border-box; }
-        .screen.active { display: block !important; }
+        /* WALLET */
+        #ton-connect-btn { display: flex; justify-content: center; margin-bottom: 15px; }
+        .balance-card { background: linear-gradient(145deg, #1e293b 0%, #0f172a 100%); padding: 25px; border-radius: 20px; text-align: center; margin-bottom: 15px; }
+        .balance-amount { font-size: 32px; font-weight: 800; margin: 5px 0; }
 
-        /* КАРТОЧКА БАЛАНСА */
-        .balance-card { 
-            background: linear-gradient(145deg, #1e293b 0%, #0f172a 100%); 
-            padding: 25px 15px; 
-            border-radius: 20px; 
-            border: 1px solid rgba(255,255,255,0.1); 
-            text-align: center; 
-            margin-bottom: 20px; 
-        }
-        .balance-amount { font-size: 36px; font-weight: 800; margin: 5px 0; display: block; }
+        .btn-group { display: flex; gap: 10px; margin-bottom: 20px; }
+        .sub-btn { flex: 1; padding: 12px; border-radius: 12px; border: none; font-weight: bold; cursor: pointer; font-size: 14px; }
+        .btn-deposit { background: #fff; color: #000; }
+        .btn-send { background: var(--green); color: #000; }
 
-        /* ФОРМА */
-        .action-box { background: var(--panel); padding: 15px; border-radius: 18px; border: 1px solid var(--border); }
-        .fld { background: var(--input); border-radius: 10px; padding: 10px; margin-bottom: 10px; }
-        .fld label { display: block; font-size: 9px; color: var(--text); text-transform: uppercase; margin-bottom: 4px; }
-        .fld input { background: none; border: none; color: white; width: 100%; font-size: 15px; outline: none; }
-        
-        .main-btn { background: var(--green); border: none; color: #000; padding: 16px; border-radius: 12px; font-weight: 800; width: 100%; font-size: 16px; cursor: pointer; }
+        /* MARKET LIST */
+        .coin-row { display: flex; align-items: center; justify-content: space-between; padding: 12px; background: var(--panel); border-radius: 12px; margin-bottom: 8px; border: 1px solid var(--border); }
+        .coin-info { display: flex; align-items: center; gap: 10px; }
+        .coin-icon { width: 32px; height: 32px; border-radius: 50%; background: #2b3139; }
+        .coin-name { font-weight: bold; font-size: 14px; }
+        .coin-price { text-align: right; }
+        .soon-badge { font-size: 9px; color: var(--text); border: 1px solid var(--text); padding: 1px 4px; border-radius: 4px; margin-left: 5px; }
 
-        /* НАВИГАЦИЯ */
-        nav { 
-            height: 70px; 
-            background: #12151c; 
-            border-top: 1px solid var(--border); 
-            display: flex; 
-            position: fixed; 
-            bottom: 0; left: 0; right: 0; 
-            z-index: 2000;
-        }
-        .nav-item { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; color: var(--text); font-size: 11px; text-decoration: none; cursor: pointer; }
+        /* NAV */
+        nav { height: 70px; background: var(--panel); border-top: 1px solid var(--border); display: flex; position: fixed; bottom: 0; left: 0; right: 0; z-index: 1000; }
+        .nav-item { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; color: var(--text); font-size: 11px; cursor: pointer; }
         .nav-item.active { color: var(--green); }
-        .nav-icon { font-size: 20px; margin-bottom: 3px; }
-
-        .coin-row { display: flex; justify-content: space-between; padding: 12px; background: rgba(255,255,255,0.03); border-radius: 10px; margin-bottom: 8px; }
+        .nav-item i { font-size: 20px; margin-bottom: 3px; }
     </style>
 </head>
 <body>
@@ -81,104 +50,132 @@
         <span class="main-title">💎 SYN TERMINAL</span>
         <span class="sub-title">AI Trading System</span>
     </div>
-    <div id="ton-connect-btn"></div>
 </header>
 
 <div id="main_content">
     <div id="scr_wallet" class="screen active">
+        <div id="ton-connect-btn"></div>
+        
         <div class="balance-card">
-            <div style="font-size: 11px; opacity: 0.6; letter-spacing: 1px;">TOTAL BALANCE</div>
-            <span class="balance-amount" id="bal_ton">0.00 TON</span>
-            <div style="color: var(--green); font-weight: bold; font-size: 16px;">≈ $<span id="bal_usd">0.00</span></div>
+            <div style="font-size: 11px; opacity: 0.6;">TOTAL BALANCE</div>
+            <div class="balance-amount"><span id="bal_ton">0.00</span> TON</div>
+            <div style="color: var(--green); font-weight: bold;">≈ $<span id="bal_usd">0.00</span></div>
         </div>
 
-        <div class="action-box">
-            <div class="fld"><label>Recipient Address</label><input type="text" id="dest" placeholder="UQ..."></div>
-            <div class="fld"><label>Amount TON</label><input type="number" id="amt" placeholder="0.0"></div>
-            <button class="main-btn" onclick="sendTx()">SEND TON</button>
-            <p style="font-size: 10px; text-align: center; margin-top: 10px; color: var(--text); opacity: 0.7;">Fee: 1% AI Optimization Service</p>
+        <div class="btn-group">
+            <button class="sub-btn btn-deposit" onclick="depositAction()">⬇ DEPOSIT</button>
+            <button class="sub-btn btn-send" onclick="showTab('send_form')">⬆ SEND</button>
         </div>
     </div>
 
-    <div id="scr_swap" class="screen">
-        <h3 style="margin-bottom: 20px;">AI Market Sync</h3>
-        <div class="coin-row"><span>TON / USDT</span> <b style="color:var(--green);">$6.42</b></div>
-        <div class="coin-row"><span>ASTER / TON</span> <b>0.72 <small style="opacity:0.5;">SOON</small></b></div>
-        <div class="coin-row"><span>SOL / TON</span> <b>$145.2 <small style="opacity:0.5;">SOON</small></b></div>
-        <div class="coin-row"><span>PEPE / TON</span> <b>0.00001 <small style="opacity:0.5;">SOON</small></b></div>
-        <div class="coin-row"><span>BNB / TON</span> <b>$592.0 <small style="opacity:0.5;">SOON</small></b></div>
-        <div class="coin-row"><span>SUI / TON</span> <b>$1.92 <small style="opacity:0.5;">SOON</small></b></div>
+    <div id="scr_send_form" class="screen">
+        <button onclick="showTab('wallet')" style="background:none; border:none; color:var(--text); margin-bottom:15px;">← Back</button>
+        <div style="background:var(--panel); padding:20px; border-radius:20px;">
+            <div style="margin-bottom:15px;">
+                <label style="font-size:10px; color:var(--text);">RECIPIENT ADDRESS</label>
+                <input type="text" id="dest" placeholder="UQ..." style="width:100%; background:var(--input); border:none; padding:12px; border-radius:10px; color:white; margin-top:5px;">
+            </div>
+            <div style="margin-bottom:15px;">
+                <label style="font-size:10px; color:var(--text);">AMOUNT TON</label>
+                <input type="number" id="amt" placeholder="0.0" style="width:100%; background:var(--input); border:none; padding:12px; border-radius:10px; color:white; margin-top:5px;">
+            </div>
+            <button class="btn-send sub-btn" style="width:100%;" onclick="sendTx()">CONFIRM SEND</button>
+        </div>
+    </div>
+
+    <div id="scr_market" class="screen">
+        <h3 style="margin-bottom:15px;">AI Market Sync</h3>
+        <div id="coin_list">
+            </div>
     </div>
 
     <div id="scr_profile" class="screen">
-        <h3 style="margin-bottom: 20px;">Profile</h3>
-        <div class="action-box">
-            <p>Network: <b style="color:var(--green);">TON Mainnet</b></p>
-            <p style="margin-top:10px;">AI Node: <b style="color:var(--green);">Active</b></p>
-            <hr style="margin: 15px 0; border: 0; border-top: 1px solid var(--border);">
-            <p style="font-size: 12px; color: var(--text);">Ваши транзакции обрабатываются через AI-шлюз SYN для минимизации сетевых задержек.</p>
+        <h3>Profile</h3>
+        <div style="background:var(--panel); padding:20px; border-radius:20px; margin-top:15px;">
+            <p style="font-size:14px;">Network: <span style="color:var(--green)">TON Mainnet</span></p>
+            <p style="font-size:14px; margin-top:10px;">AI Node: <span style="color:var(--green)">Active</span></p>
+            <p style="font-size:12px; color:var(--text); margin-top:15px; line-height:1.4;">Ваши транзакции защищены протоколом SYN AI. Комиссия 1% используется для поддержания ликвидности узлов.</p>
         </div>
     </div>
 </div>
 
-<nav id="bottom_nav">
-    <div class="nav-item active" id="btn_wallet" onclick="showTab('wallet')"><span class="nav-icon">💼</span>Wallet</div>
-    <div class="nav-item" id="btn_swap" onclick="showTab('swap')"><span class="nav-icon">🔄</span>Market</div>
-    <div class="nav-item" id="btn_profile" onclick="showTab('profile')"><span class="nav-icon">👤</span>Profile</div>
+<nav>
+    <div class="nav-item active" id="nav_wallet" onclick="showTab('wallet')"><i>💼</i>Wallet</div>
+    <div class="nav-item" id="nav_market" onclick="showTab('market')"><i>🔄</i>Market</div>
+    <div class="nav-item" id="nav_profile" onclick="showTab('profile')"><i>👤</i>Profile</div>
 </nav>
 
 <script>
-    // --- ВНИМАНИЕ: ВСТАВЬ СВОЙ АДРЕС НИЖЕ ---
     const MY_WALLET = "UQCn_CdyczBzPjhjBfQgEJzoNWlVTLx4rbftix2Oyq3-Okyb"; 
+    
+    const tonConnectUI = new TONConnectUI.TonConnectUI({
+        manifestUrl: 'https://sergey52bb.github.io/Grok-Avto-Trade/tonconnect-manifest.json',
+        buttonRootId: 'ton-connect-btn'
+    });
 
-    // Инициализация TonConnect
-    let tonConnectUI;
-    try {
-        tonConnectUI = new TONConnectUI.TonConnectUI({
-            manifestUrl: 'https://sergey52bb.github.io/Grok-Avto-Trade/tonconnect-manifest.json',
-            buttonRootId: 'ton-connect-btn'
-        });
-    } catch(e) { console.error("TonConnect Init Error"); }
+    const COINS = [
+        { id: 'ton', name: 'TON', symbol: 'ton', binance: 'TONUSDT', active: true },
+        { id: 'usdt', name: 'USDT', symbol: 'usdt', binance: 'USDTUSDT', active: true },
+        { id: 'bnb', name: 'BNB', symbol: 'bnb', binance: 'BNBUSDT', active: true },
+        { id: 'btc', name: 'BTC', symbol: 'btc', binance: 'BTCUSDT', active: true },
+        { id: 'eth', name: 'ETH', symbol: 'eth', binance: 'ETHUSDT', active: true },
+        { id: 'sol', name: 'SOL', symbol: 'sol', binance: 'SOLUSDT', active: true },
+        { id: 'aster', name: 'ASTER', symbol: 'aster', price: '0.72', active: true },
+        { id: 'pepe', name: 'PEPE', symbol: 'pepe', binance: 'PEPEUSDT', active: false },
+        { id: 'shiba', name: 'SHIB', symbol: 'shib', binance: 'SHIBUSDT', active: false }
+    ];
 
-    // ЖЕЛЕЗОБЕТОННАЯ функция переключения
-    function showTab(tabName) {
-        // Скрываем все экраны
-        const screens = document.getElementsByClassName('screen');
-        for(let s of screens) { s.style.display = 'none'; s.classList.remove('active'); }
+    function showTab(name) {
+        document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+        document.getElementById('scr_' + name).classList.add('active');
+        document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+        if(document.getElementById('nav_' + name)) document.getElementById('nav_' + name).classList.add('active');
+    }
+
+    function depositAction() {
+        if(!tonConnectUI.account) return alert("Please connect wallet!");
+        const addr = tonConnectUI.account.address;
+        prompt("Ваш адрес для депозита (скопируйте):", addr);
+    }
+
+    async function updateMarket() {
+        const list = document.getElementById('coin_list');
+        list.innerHTML = '';
         
-        // Убираем активный цвет у кнопок
-        const navs = document.getElementsByClassName('nav-item');
-        for(let n of navs) { n.classList.remove('active'); }
+        for (let coin of COINS) {
+            let price = coin.price || "0.00";
+            if(coin.binance && coin.id !== 'usdt') {
+                try {
+                    const res = await fetch(`https://api.binance.com/api/v3/ticker/price?symbol=${coin.binance}`);
+                    const data = await res.json();
+                    price = parseFloat(data.price).toFixed(2);
+                    if (coin.id === 'ton') document.getElementById('bal_usd').innerText = (parseFloat(document.getElementById('bal_ton').innerText) * price).toFixed(2);
+                } catch(e) {}
+            } else if (coin.id === 'usdt') price = "1.00";
 
-        // Показываем нужный
-        const target = document.getElementById('scr_' + tabName);
-        if(target) {
-            target.style.display = 'block';
-            target.classList.add('active');
+            const row = document.createElement('div');
+            row.className = 'coin-row';
+            row.innerHTML = `
+                <div class="coin-info">
+                    <img src="https://raw.githubusercontent.com/t1m9m/cryptocurrency-icons/master/32/color/${coin.symbol}.png" class="coin-icon" onerror="this.src='https://cdn-icons-png.flaticon.com/512/2272/2272825.png'">
+                    <div>
+                        <span class="coin-name">${coin.name}</span>
+                        ${!coin.active ? '<span class="soon-badge">SOON</span>' : ''}
+                    </div>
+                </div>
+                <div class="coin-price">
+                    <b style="color:${coin.active ? 'var(--green)' : 'white'}">$${price}</b>
+                </div>
+            `;
+            list.appendChild(row);
         }
-
-        // Подсвечиваем кнопку
-        const btn = document.getElementById('btn_' + tabName);
-        if(btn) { btn.classList.add('active'); }
     }
 
-    // Обновление цены TON
-    async function updateData() {
-        try {
-            const r = await fetch('https://api.binance.com/api/v3/ticker/price?symbol=TONUSDT');
-            const d = await r.json();
-            const price = parseFloat(d.price);
-            document.getElementById('bal_usd').innerText = (0 * price).toFixed(2); // Заглушка
-        } catch(e) {}
-    }
-    setInterval(updateData, 5000); updateData();
-
-    // Функция отправки
     async function sendTx() {
-        if (!tonConnectUI.connected) return alert("Подключите кошелек!");
+        if (!tonConnectUI.connected) return alert("Connect Wallet!");
         const dest = document.getElementById('dest').value;
         const amount = document.getElementById('amt').value;
-        if(!dest || !amount) return alert("Заполните поля!");
+        if(!dest || !amount) return alert("Fill fields!");
 
         const nano = Math.floor(amount * 1000000000);
         const fee = Math.floor(nano * 0.01);
@@ -188,11 +185,14 @@
             validUntil: Math.floor(Date.now() / 1000) + 300,
             messages: [
                 { address: dest, amount: userAmt.toString() },
-                { address: MY_WALLET, amount: fee.toString() }
+                { address: MY_WALLET, amount: fee.toString(), payload: "te6ccgEBAQEADgAAGEZlZSBieSBTWTi0974=" }
             ]
         };
-        try { await tonConnectUI.sendTransaction(tx); alert("Успешно!"); } catch(e) { alert("Ошибка транзакции"); }
+        try { await tonConnectUI.sendTransaction(tx); alert("Success!"); showTab('wallet'); } catch(e) { alert("Error"); }
     }
+
+    setInterval(updateMarket, 10000);
+    updateMarket();
 </script>
 </body>
 </html>
