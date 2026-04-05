@@ -3,14 +3,13 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>SYN TERMINAL</title>
+    <title>SYN TERMINAL V2.1</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <script src="https://unpkg.com/@tonconnect/ui@2.0.9/dist/tonconnect-ui.min.js"></script>
-    
     <style>
         :root { --bg: #05070a; --panel: #12151c; --green: #00ff95; --text: #94a3b8; --border: #2b2f36; }
         body { background: var(--bg); color: white; margin: 0; font-family: sans-serif; height: 100vh; display: flex; flex-direction: column; overflow: hidden; }
-        header { padding: 15px; background: var(--panel); border-bottom: 1px solid var(--border); text-align: center; font-weight: 800; }
+        header { padding: 15px; background: var(--panel); border-bottom: 1px solid var(--border); text-align: center; }
         #main_content { flex: 1; overflow-y: auto; padding: 15px 15px 100px 15px; }
         .screen { display: none; }
         .screen.active { display: block; }
@@ -23,12 +22,14 @@
         nav { position: fixed; bottom: 0; width: 100%; height: 75px; background: var(--panel); display: flex; border-top: 1px solid var(--border); }
         .nav-item { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; font-size: 11px; color: var(--text); }
         .nav-item.active { color: var(--green); }
-        #ton-connect-btn { display: flex; justify-content: center; margin-top: 15px; min-height: 44px; }
+        #ton-connect-btn { display: flex; justify-content: center; margin-top: 20px; min-height: 44px; }
     </style>
 </head>
 <body>
 
-<header>💎 SYN TERMINAL</header>
+<header>
+    <div style="font-weight: 800; font-size: 18px;">💎 SYN TERMINAL <span style="font-size: 10px; color: var(--green);">V2.1</span></div>
+</header>
 
 <div id="main_content">
     <div id="scr_wallet" class="screen active">
@@ -45,13 +46,13 @@
 
     <div id="scr_market" class="screen">
         <h4 style="margin-bottom: 15px; opacity: 0.7;">AI MARKET PULSE</h4>
-        <div id="market_list">Загрузка цен...</div>
+        <div id="market_list">Обновление котировок...</div>
     </div>
 
     <div id="scr_profile" class="screen">
         <h4 style="text-align: center;">АВТОРИЗАЦИЯ</h4>
-        <div style="background: var(--panel); padding: 20px; border-radius: 20px; margin-top: 15px; border: 1px solid var(--border); text-align: center;">
-            <p style="font-size: 12px; color: var(--text); margin-bottom: 15px;">Войдите через TON для доступа к торгам</p>
+        <div style="background: var(--panel); padding: 25px; border-radius: 20px; border: 1px solid var(--border); text-align: center;">
+            <p style="font-size: 13px; color: var(--text); margin-bottom: 20px;">Подключите кошелек TON для синхронизации с AI</p>
             <div id="ton-connect-btn"></div>
         </div>
     </div>
@@ -64,11 +65,11 @@
 </nav>
 
 <script>
-    // Сообщаем Телеграму, что приложение готово
     const tg = window.Telegram.WebApp;
-    tg.expand(); // Развернуть на весь экран
+    tg.expand();
 
-    const MY_ADDR = "ТВОЙ_АДРЕС_КОШЕЛЬКА"; // Вставь свой реальный адрес
+    // ЗАМЕНИ НА СВОЙ АДРЕС
+    const MY_ADDR = "UQAFV-zN_fC1YyNfN4vG7jGf3V_6f0f4f5f6f7f8f9";
 
     const tonConnectUI = new TONConnectUI.TonConnectUI({
         manifestUrl: 'https://sergey52bb.github.io/grok-autotrade/tonconnect-manifest.json',
@@ -85,7 +86,7 @@
 
     function doDeposit() {
         const addr = tonConnectUI.account ? tonConnectUI.account.address : MY_ADDR;
-        tg.showAlert("UQCn_CdyczBzPjhjBfQgEJzoNWlVTLx4rbftix2Oyq3-Okyb:\n\n" + addr);
+        tg.showAlert("UQCn_CdyczBzPjhjBfQgEJzoNWlVTLx4rbftix2Oyq3-Okyb" + addr);
     }
 
     async function updatePrices() {
