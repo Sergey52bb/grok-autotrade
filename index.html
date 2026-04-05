@@ -3,11 +3,11 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>Grok Avto Trade V3.4</title>
+    <title>Grok Avto Trade V3.5</title>
     
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/tonconnect-ui/2.0.9/tonconnect-ui.min.js"></script>
+    <script src="https://unpkg.com/@tonconnect/ui@latest/dist/tonconnect-ui.min.js"></script>
     
     <style>
         :root { --bg: #05070a; --panel: #12151c; --green: #00ff95; --text: #94a3b8; --border: #2b2f36; }
@@ -30,7 +30,7 @@
 </head>
 <body>
 
-<header>💎 GROK AVTO TRADE <span style="font-size: 10px; color: var(--green);">V3.4</span></header>
+<header>💎 GROK AVTO TRADE <span style="font-size: 10px; color: var(--green);">V3.5</span></header>
 
 <div id="main_content">
     <div id="scr_wallet" class="screen active">
@@ -53,7 +53,7 @@
     <div id="scr_profile" class="screen">
         <h4 style="text-align: center;">SYSTEM ACCESS</h4>
         <div style="background: var(--panel); padding: 30px; border-radius: 25px; margin-top: 20px; border: 1px solid var(--border); text-align: center;">
-            <p style="font-size: 13px; color: var(--text); margin-bottom: 20px;">Подключите TON кошелек для авторизации</p>
+            <p style="font-size: 13px; color: var(--text); margin-bottom: 20px;">Подключите кошелек для входа в терминал</p>
             <div id="ton-connect-btn"></div>
         </div>
     </div>
@@ -70,15 +70,15 @@
     tg.ready();
     tg.expand();
 
-    // ТВОЙ АДРЕС
+    // Твой адрес
     const MY_ADDR = "UQCn_CdyczBzPjhjBfQgEJzoNWlVTLx4rbftix2Oyq3-Okyb";
 
-    // Прямой манифест в коде (чтобы не создавать лишних файлов)
-    const manifestContent = {
+    // Прямой манифест (без внешних файлов)
+    const manifest = {
         url: "https://sergey52bb.github.io/grok-autotrade/",
         name: "Grok Avto Trade"
     };
-    const manifestUrl = 'data:application/json,' + encodeURIComponent(JSON.stringify(manifestContent));
+    const manifestUrl = 'data:application/json,' + encodeURIComponent(JSON.stringify(manifest));
 
     let tonConnectUI;
 
@@ -89,9 +89,12 @@
                     manifestUrl: manifestUrl,
                     buttonRootId: 'ton-connect-btn'
                 });
+                console.log("SDK Load Success");
             } else {
+                // Если библиотека не загрузилась через <script>, пробуем альтернативу
                 document.getElementById('ton-connect-btn').innerHTML = 
-                    '<p style="color:orange; font-size:12px;">Сеть блокирует подключение. Попробуйте VPN или другой браузер.</p>';
+                    '<button class="btn btn-green" onclick="location.reload()">Обновить страницу</button>' +
+                    '<p style="color:orange; font-size:10px; margin-top:10px;">Ошибка доступа к TON SDK. Попробуйте открыть через мобильный интернет или другой браузер.</p>';
             }
         } catch (e) {
             console.error(e);
