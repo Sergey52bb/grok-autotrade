@@ -8,66 +8,63 @@
     <style>
         :root { --bg: #05070a; --panel: #12151c; --green: #00ff95; --text: #94a3b8; --border: #2b2f36; }
         body { background: var(--bg); color: white; margin: 0; font-family: -apple-system, sans-serif; height: 100vh; display: flex; flex-direction: column; overflow: hidden; }
-        header { padding: 20px; background: var(--panel); border-bottom: 1px solid var(--border); text-align: center; }
+        header { padding: 15px; background: var(--panel); border-bottom: 1px solid var(--border); text-align: center; }
         #main_content { flex: 1; overflow-y: auto; padding: 15px 15px 100px 15px; }
         .screen { display: none; }
         .screen.active { display: block; }
-        .balance-card { background: linear-gradient(180deg, #1e293b 0%, #0f172a 100%); padding: 30px; border-radius: 24px; text-align: center; margin-bottom: 20px; border: 1px solid var(--border); }
-        .btns { display: flex; gap: 12px; }
-        .btn { flex: 1; padding: 18px; border-radius: 16px; border: none; font-weight: 800; cursor: pointer; text-transform: uppercase; font-size: 14px; transition: 0.2s; }
-        .btn-white { background: #ffffff; color: #000; }
+        .balance-card { background: linear-gradient(180deg, #1e293b 0%, #0f172a 100%); padding: 25px; border-radius: 24px; text-align: center; margin-bottom: 20px; border: 1px solid var(--border); }
+        .btns { display: flex; gap: 10px; }
+        .btn { flex: 1; padding: 16px; border-radius: 14px; border: none; font-weight: bold; cursor: pointer; text-transform: uppercase; font-size: 13px; }
+        .btn-white { background: #fff; color: #000; }
         .btn-green { background: var(--green); color: #000; }
-        .coin-row { display: flex; justify-content: space-between; align-items: center; padding: 16px; background: var(--panel); border-radius: 16px; margin-bottom: 10px; border: 1px solid var(--border); }
-        nav { position: fixed; bottom: 0; width: 100%; height: 80px; background: var(--panel); display: flex; border-top: 1px solid var(--border); z-index: 999; }
+        .coin-row { display: flex; justify-content: space-between; align-items: center; padding: 15px; background: var(--panel); border-radius: 14px; margin-bottom: 8px; border: 1px solid var(--border); }
+        nav { position: fixed; bottom: 0; width: 100%; height: 75px; background: var(--panel); display: flex; border-top: 1px solid var(--border); }
         .nav-item { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; font-size: 11px; color: var(--text); }
         .nav-item.active { color: var(--green); }
-        #ton-connect-btn { display: flex; justify-content: center; margin: 20px auto; min-height: 44px; width: 100%; }
+        #ton-connect-btn { display: flex; justify-content: center; margin-top: 15px; min-height: 44px; }
     </style>
 </head>
 <body>
 
-<header>
-    <div style="font-weight: 900; font-size: 20px; letter-spacing: 1px;">💎 SYN TERMINAL</div>
-</header>
+<header><div style="font-weight: 800; font-size: 18px; letter-spacing: 1px;">💎 SYN TERMINAL</div></header>
 
 <div id="main_content">
     <div id="scr_wallet" class="screen active">
         <div class="balance-card">
-            <div style="font-size: 11px; opacity: 0.6; margin-bottom: 8px; letter-spacing: 1px;">AVAILABLE BALANCE</div>
-            <h1 style="font-size: 38px; margin: 0;">0.00 TON</h1>
-            <div id="top_price" style="color: var(--green); font-weight: bold; margin-top: 5px;">$0.00</div>
+            <div style="font-size: 11px; opacity: 0.6; margin-bottom: 5px;">ACCOUNT BALANCE</div>
+            <h1 style="font-size: 34px; margin: 0;">0.00 TON</h1>
+            <div id="usd_rate" style="color: var(--green); font-weight: bold;">$0.00</div>
         </div>
         <div class="btns">
-            <button class="btn btn-white" onclick="handleDeposit()">⬇ Deposit</button>
-            <button class="btn btn-green" onclick="handleSendClick()">⬆ Send</button>
+            <button class="btn btn-white" onclick="doDeposit()">⬇ Пополнить</button>
+            <button class="btn btn-green" onclick="showTab('profile')">⬆ Отправить</button>
         </div>
     </div>
 
     <div id="scr_market" class="screen">
-        <h4 style="margin-bottom: 15px; letter-spacing: 1px; opacity: 0.8;">AI MARKET PULSE</h4>
-        <div id="market_list"></div>
+        <h4 style="margin-bottom: 15px; opacity: 0.7;">РЫНОК AI</h4>
+        <div id="market_list">Загрузка цен...</div>
     </div>
 
     <div id="scr_profile" class="screen">
-        <h4 style="text-align: center;">TERMINAL ACCESS</h4>
-        <div style="background: var(--panel); padding: 25px; border-radius: 20px; margin-top: 20px; border: 1px solid var(--border); text-align: center;">
-            <p style="font-size: 13px; color: var(--text); margin-bottom: 15px;">Connect Wallet for full AI features</p>
+        <h4 style="text-align: center;">АВТОРИЗАЦИЯ</h4>
+        <div style="background: var(--panel); padding: 20px; border-radius: 20px; margin-top: 15px; border: 1px solid var(--border); text-align: center;">
+            <p style="font-size: 12px; color: var(--text); margin-bottom: 15px;">Подключите кошелек для доступа к AI-трейдингу</p>
             <div id="ton-connect-btn"></div>
         </div>
     </div>
 </div>
 
 <nav>
-    <div class="nav-item active" onclick="showTab('wallet', this)"><span>💼</span>Wallet</div>
-    <div class="nav-item" onclick="showTab('market', this)"><span>🔄</span>Market</div>
-    <div class="nav-item" onclick="showTab('profile', this)"><span>👤</span>Profile</div>
+    <div class="nav-item active" onclick="showTab('wallet', this)"><span>💼</span>Кошелек</div>
+    <div class="nav-item" onclick="showTab('market', this)"><span>🔄</span>Маркет</div>
+    <div class="nav-item" onclick="showTab('profile', this)"><span>👤</span>Профиль</div>
 </nav>
 
 <script>
-    // === ВСТАВЬ СВОЙ АДРЕС ТУТ ===
-    const MY_WALLET = "ТВОЙ_АДРЕС_КОШЕЛЬКА"; 
+    // Твой адрес (замени на свой)
+    const MY_ADDR = "UQAFV-zN_fC1YyNfN4vG7jGf3V_6f0f4f5f6f7f8f9";
 
-    // Инициализация TonConnect
     const tonConnectUI = new TONConnectUI.TonConnectUI({
         manifestUrl: 'https://sergey52bb.github.io/Grok-Avto-Trade/tonconnect-manifest.json',
         buttonRootId: 'ton-connect-btn'
@@ -78,55 +75,39 @@
         document.getElementById('scr_' + id).classList.add('active');
         document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
         if(el) el.classList.add('active');
-        if(id === 'market') fetchPrices();
+        if(id === 'market') updatePrices();
     }
 
-    function handleDeposit() {
-        const userAddr = tonConnectUI.account ? tonConnectUI.account.address : MY_WALLET;
-        // Используем alert вместо prompt для надежности на мобильных
-        alert("Ваш адрес для копирования:\n\n" + userAddr);
+    function doDeposit() {
+        const current = tonConnectUI.account ? tonConnectUI.account.address : MY_ADDR;
+        alert("Скопируйте адрес для депозита:\n\n" + current);
     }
 
-    function handleSendClick() {
-        if(!tonConnectUI.account) {
-            alert("UQCn_CdyczBzPjhjBfQgEJzoNWlVTLx4rbftix2Oyq3-Okyb");
-            showTab('profile');
-        } else {
-            alert("Функция отправки будет доступна после синхронизации AI узла.");
-        }
-    }
-
-    async function fetchPrices() {
+    async function updatePrices() {
         const list = document.getElementById('market_list');
         const coins = [
-            { n: 'TON/USDT', s: 'ton', b: 'TONUSDT' },
-            { n: 'BNB/USDT', s: 'bnb', b: 'BNBUSDT' },
-            { n: 'BTC/USDT', s: 'btc', b: 'BTCUSDT' },
-            { n: 'ETH/USDT', s: 'eth', b: 'ETHUSDT' },
-            { n: 'ASTER/TON', s: 'aster', p: '0.72' }
+            { n: 'TON/USDT', b: 'TONUSDT' },
+            { n: 'BNB/USDT', b: 'BNBUSDT' },
+            { n: 'BTC/USDT', b: 'BTCUSDT' },
+            { n: 'ETH/USDT', b: 'ETHUSDT' },
+            { n: 'ASTER/TON', p: '0.72' }
         ];
-
-        let html = '';
+        let resHtml = '';
         for (let c of coins) {
-            let price = c.p || "Loading...";
+            let price = c.p || "0.00";
             if (c.b) {
                 try {
                     const r = await fetch(`https://api.binance.com/api/v3/ticker/price?symbol=${c.b}`);
                     const d = await r.json();
                     price = parseFloat(d.price).toFixed(2);
-                    if(c.s === 'ton') document.getElementById('top_price').innerText = '$' + price;
+                    if(c.n === 'TON/USDT') document.getElementById('usd_rate').innerText = '$' + price;
                 } catch(e) { price = "Error"; }
             }
-            html += `<div class="coin-row">
-                <span style="font-weight:bold;">${c.n}</span>
-                <span style="color:var(--green); font-weight:bold;">$${price}</span>
-            </div>`;
+            resHtml += `<div class="coin-row"><b>${c.n}</b><b style="color:var(--green)">$${price}</b></div>`;
         }
-        list.innerHTML = html;
+        list.innerHTML = resHtml;
     }
-
-    // Запуск цен сразу
-    fetchPrices();
+    updatePrices();
 </script>
 </body>
 </html>
