@@ -3,11 +3,14 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>Grok Avto Trade V3.6</title>
+    <title>Grok Avto Trade V3.8</title>
+    
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     
-    <script src="tonconnect-ui.min.js"></script>
+    <script src="https://unpkg.com/@tonconnect/ui@2.0.9/dist/tonconnect-ui.min.js"></script>
     
+    <script src="https://cdn.jsdelivr.net/npm/@tonconnect/ui@2.0.9/dist/tonconnect-ui.min.js"></script>
+
     <style>
         :root { --bg: #05070a; --panel: #12151c; --green: #00ff95; --text: #94a3b8; --border: #2b2f36; }
         body { background: var(--bg); color: white; margin: 0; font-family: sans-serif; height: 100vh; display: flex; flex-direction: column; overflow: hidden; }
@@ -29,7 +32,7 @@
 </head>
 <body>
 
-<header>💎 GROK AVTO TRADE <span style="font-size: 10px; color: var(--green);">V3.6</span></header>
+<header>💎 GROK AVTO TRADE <span style="font-size: 10px; color: var(--green);">V3.8</span></header>
 
 <div id="main_content">
     <div id="scr_wallet" class="screen active">
@@ -52,7 +55,7 @@
     <div id="scr_profile" class="screen">
         <h4 style="text-align: center;">SYSTEM ACCESS</h4>
         <div style="background: var(--panel); padding: 30px; border-radius: 25px; margin-top: 20px; border: 1px solid var(--border); text-align: center;">
-            <p style="font-size: 13px; color: var(--text); margin-bottom: 20px;">Подключите кошелек для входа</p>
+            <p style="font-size: 13px; color: var(--text); margin-bottom: 20px;">Подключите TON кошелек для авторизации</p>
             <div id="ton-connect-btn"></div>
         </div>
     </div>
@@ -69,26 +72,39 @@
     tg.ready();
     tg.expand();
 
-    // ТВОЙ АДРЕС
+    // Твой актуальный адрес
     const MY_ADDR = "UQCn_CdyczBzPjhjBfQgEJzoNWlVTLx4rbftix2Oyq3-Okyb";
 
-    const manifestUrl = 'https://sergey52bb.github.io/grok-autotrade/tonconnect-manifest.json';
+    // Прямой манифест (без внешних JSON файлов)
+    const manifest = {
+        url: "https://sergey52bb.github.io/grok-autotrade/",
+        name: "Grok Avto Trade"
+    };
+    const manifestUrl = 'data:application/json,' + encodeURIComponent(JSON.stringify(manifest));
 
     let tonConnectUI;
 
     function initApp() {
-        if (typeof TONConnectUI !== 'undefined') {
-            tonConnectUI = new TONConnectUI.TonConnectUI({
-                manifestUrl: manifestUrl,
-                buttonRootId: 'ton-connect-btn'
-            });
-        } else {
-            document.getElementById('ton-connect-btn').innerHTML = 
-                '<p style="color:red; font-size:10px;">Файл tonconnect-ui.min.js не найден. Проверьте GitHub.</p>';
+        try {
+            if (typeof TONConnectUI !== 'undefined') {
+                tonConnectUI = new TONConnectUI.TonConnectUI({
+                    manifestUrl: manifestUrl,
+                    buttonRootId: 'ton-connect-btn'
+                });
+                console.log("TON SDK loaded successfully");
+            } else {
+                document.getElementById('ton-connect-btn').innerHTML = 
+                    '<p style="color:orange; font-size:12px;">Ошибка сети. Проверьте VPN или смените браузер.</p>';
+            }
+        } catch (e) {
+            console.error("Initialization error:", e);
         }
     }
 
-    setTimeout(initApp, 500);
+    // Инициализация с небольшой задержкой
+    window.addEventListener('load', () => {
+        setTimeout(initApp, 1000);
+    });
 
     function showTab(id, el) {
         document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
@@ -105,7 +121,11 @@
 
     async function updatePrices() {
         const list = document.getElementById('market_list');
-        const pairs = [{ n: 'TON/USDT', s: 'TONUSDT' }, { n: 'BTC/USDT', s: 'BTCUSDT' }, { n: 'ETH/USDT', s: 'ETHUSDT' }];
+        const pairs = [
+            { n: 'TON/USDT', s: 'TONUSDT' },
+            { n: 'BTC/USDT', s: 'BTCUSDT' },
+            { n: 'ETH/USDT', s: 'ETHUSDT' }
+        ];
         let html = '';
         for (let p of pairs) {
             try {
@@ -114,10 +134,13 @@
                 const price = parseFloat(data.price).toFixed(2);
                 if(p.s === 'TONUSDT') document.getElementById('usd_val').innerText = '$' + price;
                 html += `<div class="coin-row"><b>${p.n}</b><b style="color:var(--green)">$${price}</b></div>`;
-            } catch (e) { html += `<div class="coin-row"><span>${p.n}</span><span>Error</span></div>`; }
+            } catch (e) {
+                html += `<div class="coin-row"><span>${p.n}</span><span>Error</span></div>`;
+            }
         }
         list.innerHTML = html;
     }
+
     updatePrices();
 </script>
 </body>
