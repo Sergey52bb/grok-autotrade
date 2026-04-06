@@ -3,56 +3,61 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>Grok Avto Trade V4.3</title>
+    <title>Grok Avto Trade V4.4</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <script src="https://unpkg.com/@tonconnect/ui@2.0.9/dist/tonconnect-ui.min.js"></script>
     <style>
         :root { --bg: #05070a; --panel: #12151c; --green: #00ff95; --text: #94a3b8; --border: #2b2f36; }
-        body { background: var(--bg); color: white; margin: 0; font-family: sans-serif; height: 100vh; display: flex; flex-direction: column; overflow: hidden; }
-        header { padding: 20px; background: var(--panel); border-bottom: 1px solid var(--border); text-align: center; font-weight: 900; font-size: 18px; }
+        body { background: var(--bg); color: white; margin: 0; font-family: 'Segoe UI', Roboto, sans-serif; height: 100vh; display: flex; flex-direction: column; overflow: hidden; }
+        header { padding: 20px; background: var(--panel); border-bottom: 1px solid var(--border); text-align: center; font-weight: 900; font-size: 18px; letter-spacing: 1px; }
         #main_content { flex: 1; overflow-y: auto; padding: 20px 15px 100px 15px; }
         .screen { display: none; }
-        .screen.active { display: block; }
-        .balance-card { background: linear-gradient(180deg, #1e293b 0%, #0f172a 100%); padding: 30px; border-radius: 25px; text-align: center; margin-bottom: 25px; border: 1px solid var(--border); }
-        .btns { display: flex; gap: 10px; }
-        .btn { flex: 1; padding: 18px; border-radius: 15px; border: none; font-weight: 800; cursor: pointer; text-transform: uppercase; font-size: 13px; transition: 0.2s; }
-        .btn:active { transform: scale(0.95); opacity: 0.8; }
-        .btn-white { background: #fff; color: #000; }
-        .btn-green { background: var(--green); color: #000; }
-        .coin-row { display: flex; justify-content: space-between; align-items: center; padding: 18px; background: var(--panel); border-radius: 15px; margin-bottom: 8px; border: 1px solid var(--border); }
-        nav { position: fixed; bottom: 0; width: 100%; height: 80px; background: var(--panel); display: flex; border-top: 1px solid var(--border); }
-        .nav-item { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; font-size: 11px; color: var(--text); }
-        .nav-item.active { color: var(--green); }
+        .screen.active { display: block; animation: fadeIn 0.3s ease; }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        
+        .balance-card { background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%); padding: 30px; border-radius: 25px; text-align: center; margin-bottom: 25px; border: 1px solid var(--border); box-shadow: 0 10px 20px rgba(0,0,0,0.3); }
+        .btns { display: flex; gap: 12px; }
+        .btn { flex: 1; padding: 20px; border-radius: 18px; border: none; font-weight: 800; cursor: pointer; text-transform: uppercase; font-size: 12px; transition: all 0.2s; display: flex; align-items: center; justify-content: center; gap: 8px; }
+        .btn:active { transform: scale(0.96); }
+        .btn-white { background: #ffffff; color: #000; box-shadow: 0 4px 12px rgba(255,255,255,0.1); }
+        .btn-green { background: var(--green); color: #000; box-shadow: 0 4px 12px rgba(0,255,149,0.2); }
+        
+        .coin-row { display: flex; justify-content: space-between; align-items: center; padding: 18px; background: var(--panel); border-radius: 18px; margin-bottom: 10px; border: 1px solid var(--border); }
+        nav { position: fixed; bottom: 0; width: 100%; height: 85px; background: var(--panel); display: flex; border-top: 1px solid var(--border); padding-bottom: env(safe-area-inset-bottom); }
+        .nav-item { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; font-size: 10px; color: var(--text); font-weight: 600; opacity: 0.6; }
+        .nav-item.active { color: var(--green); opacity: 1; }
+        .nav-item span { font-size: 20px; margin-bottom: 4px; }
+        
         #ton-connect-btn { display: flex; justify-content: center; margin-top: 20px; }
-        #addr_display { font-size: 10px; opacity: 0.5; word-break: break-all; margin-top: 10px; color: var(--green); }
+        .status-dot { width: 8px; height: 8px; background: var(--green); border-radius: 50%; display: inline-block; margin-right: 6px; box-shadow: 0 0 10px var(--green); }
     </style>
 </head>
 <body>
 
-<header>💎 GROK AVTO TRADE <span style="font-size: 10px; color: var(--green);">V4.3</span></header>
+<header>💎 GROK AVTO TRADE <span style="font-size: 10px; color: var(--green); vertical-align: middle; margin-left: 5px;">V4.4</span></header>
 
 <div id="main_content">
     <div id="scr_wallet" class="screen active">
         <div class="balance-card">
-            <div style="font-size: 11px; opacity: 0.6; margin-bottom: 5px;">ACTIVE WALLET</div>
-            <h1 id="main_bal" style="font-size: 32px; margin: 0; font-weight: 900;">OFFLINE</h1>
-            <div id="addr_display">Привяжите кошелек в профиле</div>
+            <div style="font-size: 11px; opacity: 0.6; margin-bottom: 8px; letter-spacing: 1px;">TON ACCOUNT</div>
+            <h1 id="main_status" style="font-size: 36px; margin: 0; font-weight: 900; color: #fff;">OFFLINE</h1>
+            <div id="addr_display" style="font-size: 12px; margin-top: 10px; font-family: monospace; color: var(--green);">Подключите кошелек</div>
         </div>
         <div class="btns">
-            <button class="btn btn-white" onclick="doDeposit()">⬇ DEPOSIT</button>
-            <button class="btn btn-green" onclick="showTab('profile')">⚙ MANAGE</button>
+            <button class="btn btn-white" onclick="doDeposit()">📥 DEPOSIT</button>
+            <button class="btn btn-green" onclick="showTab('profile')">🛠 MANAGE</button>
         </div>
     </div>
 
     <div id="scr_market" class="screen">
-        <h4 style="margin-bottom: 15px; opacity: 0.8; font-size: 12px;">AI MARKET PULSE</h4>
+        <h4 style="margin-bottom: 15px; opacity: 0.8; font-size: 12px; padding-left: 5px;">LIVE MARKET DATA</h4>
         <div id="market_list"></div>
     </div>
 
     <div id="scr_profile" class="screen">
-        <h4 style="text-align: center;">SYSTEM ACCESS</h4>
-        <div style="background: var(--panel); padding: 30px; border-radius: 25px; margin-top: 20px; border: 1px solid var(--border); text-align: center;">
-            <p style="font-size: 13px; color: var(--text); margin-bottom: 20px;">Статус авторизации</p>
+        <h4 style="text-align: center; font-size: 14px; opacity: 0.8;">CONNECTION SETTINGS</h4>
+        <div style="background: var(--panel); padding: 35px 20px; border-radius: 25px; margin-top: 15px; border: 1px solid var(--border); text-align: center;">
+            <div id="connection_info" style="font-size: 13px; color: var(--text); margin-bottom: 25px;">Авторизуйтесь через TON Connect для работы с терминалом</div>
             <div id="ton-connect-btn"></div>
         </div>
     </div>
@@ -60,18 +65,16 @@
 
 <nav>
     <div class="nav-item active" onclick="showTab('wallet', this)"><span>💼</span>Wallet</div>
-    <div class="nav-item" onclick="showTab('market', this)"><span>🔄</span>Market</div>
-    <div class="nav-item" onclick="showTab('profile', this)"><span>👤</span>Profile</div>
+    <div class="nav-item" onclick="showTab('market', this)"><span>📊</span>Market</div>
+    <div class="nav-item" onclick="showTab('profile', this)"><span>⚙️</span>Settings</div>
 </nav>
 
 <script>
     const tg = window.Telegram.WebApp;
     tg.ready();
+    tg.setHeaderColor('#12151c');
 
-    // Твой адрес для проверки
-    const MY_ADDR = "UQC-SznwEOfPpQkOKtW7Ryr9jPJGTopwJDcuWlBEnpaS1bBJ";
     const manifestUrl = 'https://sergey52bb.github.io/grok-autotrade/tonconnect-manifest.json';
-
     let tonConnectUI;
 
     async function initApp() {
@@ -81,22 +84,24 @@
         });
 
         tonConnectUI.onStatusChange(wallet => {
-            const balLabel = document.getElementById('main_bal');
+            const statusLabel = document.getElementById('main_status');
             const addrLabel = document.getElementById('addr_display');
+            const infoLabel = document.getElementById('connection_info');
             
             if (wallet) {
-                balLabel.innerText = "ONLINE";
-                // Показываем короткий адрес для красоты
+                statusLabel.innerHTML = '<span class="status-dot"></span>ONLINE';
                 const addr = wallet.account.address;
-                addrLabel.innerText = addr.substring(0,6) + "..." + addr.substring(addr.length-6);
+                addrLabel.innerText = addr.substring(0,8) + "..." + addr.substring(addr.length-8);
+                infoLabel.innerText = "Кошелек успешно подключен. Вы можете управлять активами.";
             } else {
-                balLabel.innerText = "OFFLINE";
-                addrLabel.innerText = "Кошелек не подключен";
+                statusLabel.innerText = "OFFLINE";
+                addrLabel.innerText = "Требуется подключение";
+                infoLabel.innerText = "Авторизуйтесь через TON Connect для работы с терминалом";
             }
         });
     }
 
-    window.addEventListener('load', () => setTimeout(initApp, 500));
+    window.addEventListener('load', () => setTimeout(initApp, 400));
 
     function showTab(id, el) {
         document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
@@ -107,10 +112,15 @@
     }
 
     function doDeposit() {
-        const current = (tonConnectUI && tonConnectUI.account) ? tonConnectUI.account.address : MY_ADDR;
-        tg.showConfirm("Скопировать адрес для депозита?\n\n" + current, (ok) => {
+        const current = (tonConnectUI && tonConnectUI.account) ? tonConnectUI.account.address : "Кошелек не подключен";
+        if (!tonConnectUI.account) {
+            tg.showAlert("Сначала подключите кошелек во вкладке Settings");
+            return;
+        }
+        tg.showConfirm("Скопировать ваш адрес в буфер обмена?\n\n" + current, (ok) => {
             if(ok) {
                 navigator.clipboard.writeText(current);
+                tg.HapticFeedback.notificationOccurred('success');
                 tg.showAlert("Адрес скопирован!");
             }
         });
@@ -118,18 +128,20 @@
 
     async function updatePrices() {
         const list = document.getElementById('market_list');
-        const pairs = [{ n: 'TON/USDT', s: 'TONUSDT' }, { n: 'BTC/USDT', s: 'BTCUSDT' }];
+        const pairs = [{ n: 'TON/USDT', s: 'TONUSDT' }, { n: 'BTC/USDT', s: 'BTCUSDT' }, { n: 'ETH/USDT', s: 'ETHUSDT' }];
         let html = '';
         for (let p of pairs) {
             try {
                 const res = await fetch(`https://api.binance.com/api/v3/ticker/price?symbol=${p.s}`);
                 const data = await res.json();
-                html += `<div class="coin-row"><b>${p.n}</b><b style="color:var(--green)">$${parseFloat(data.price).toFixed(2)}</b></div>`;
-            } catch (e) { html += `<div class="coin-row"><span>${p.n}</span><span>Error</span></div>`; }
+                const price = parseFloat(data.price).toFixed(p.s === 'TONUSDT' ? 3 : 2);
+                html += `<div class="coin-row"><b>${p.n}</b><b style="color:var(--green)">$${price}</b></div>`;
+            } catch (e) { html += `<div class="coin-row"><span>${p.n}</span><span>---</span></div>`; }
         }
         list.innerHTML = html;
     }
     updatePrices();
+    setInterval(updatePrices, 15000); // Обновление цен каждые 15 сек
 </script>
 </body>
 </html>
