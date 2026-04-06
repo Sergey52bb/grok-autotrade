@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>Grok Avto Trade V3.9</title>
+    <title>Grok Avto Trade V4.0</title>
     
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     
@@ -30,7 +30,7 @@
 </head>
 <body>
 
-<header>💎 GROK AVTO TRADE <span style="font-size: 10px; color: var(--green);">V3.9</span></header>
+<header>💎 GROK AVTO TRADE <span style="font-size: 10px; color: var(--green);">V4.0</span></header>
 
 <div id="main_content">
     <div id="scr_wallet" class="screen active">
@@ -70,31 +70,28 @@
     tg.ready();
     tg.expand();
 
+    // Твой адрес из репозитория
     const MY_ADDR = "UQCn_CdyczBzPjhjBfQgEJzoNWlVTLx4rbftix2Oyq3-Okyb";
     
-    // Тот самый манифест, про который ты спрашивал
+    // Ссылка на твой файл манифеста (обязательно создай его в GitHub!)
     const manifestUrl = 'https://sergey52bb.github.io/grok-autotrade/tonconnect-manifest.json';
 
     let tonConnectUI;
 
     function initApp() {
         try {
-            // Проверяем оба варианта названия библиотеки
             const Lib = window.TON_CONNECT_UI || window.TonConnectUI;
-            
             if (Lib) {
-                // Инициализация (тот самый кусок кода, что ты скинул!)
                 tonConnectUI = new Lib.TonConnectUI({
                     manifestUrl: manifestUrl,
                     buttonRootId: 'ton-connect-btn'
                 });
-                console.log("Успех: Библиотека найдена и запущена");
             } else {
                 document.getElementById('ton-connect-btn').innerHTML = 
-                    '<p style="color:orange; font-size:12px;">SDK не подгрузился. Попробуйте VPN или мобильный интернет.</p>';
+                    '<p style="color:orange; font-size:12px;">Ошибка загрузки SDK. Проверьте сеть.</p>';
             }
         } catch (e) {
-            console.error("Критическая ошибка:", e);
+            console.error("Init Error:", e);
         }
     }
 
