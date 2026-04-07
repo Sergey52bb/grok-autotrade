@@ -3,73 +3,55 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>SYN TERMINAL V5.6</title>
+    <title>SYN TERMINAL V5.7</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <script src="https://unpkg.com/@tonconnect/ui@2.0.9/dist/tonconnect-ui.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
     <style>
-        :root { --bg: #05070a; --panel: #12151c; --green: #00ff95; --blue: #0088cc; --text: #94a3b8; --border: #2b2f36; --card-bg: #1a1e26; }
+        :root { --bg: #05070a; --panel: #12151c; --green: #00ff95; --blue: #0088cc; --text: #94a3b8; --border: #2b2f36; }
         body { background: var(--bg); color: white; margin: 0; font-family: -apple-system, sans-serif; height: 100vh; display: flex; flex-direction: column; overflow: hidden; }
         
-        /* HEADER */
-        header { padding: 15px; background: var(--panel); border-bottom: 1px solid var(--border); text-align: center; z-index: 20; }
-        header .title { font-weight: 900; font-size: 18px; letter-spacing: 1px; }
-        header .subtitle { font-size: 9px; color: var(--green); letter-spacing: 2px; text-transform: uppercase; margin-top: 2px; }
+        header { padding: 15px; background: var(--panel); border-bottom: 1px solid var(--border); text-align: center; }
+        .title { font-weight: 900; font-size: 18px; }
+        .subtitle { font-size: 9px; color: var(--green); letter-spacing: 2px; text-transform: uppercase; }
 
-        #main_content { flex: 1; overflow-y: auto; padding: 20px 15px 130px 15px; }
+        #main_content { flex: 1; overflow-y: auto; padding: 15px 15px 120px 15px; -webkit-overflow-scrolling: touch; }
         .screen { display: none; }
-        .screen.active { display: block; animation: fadeIn 0.3s ease; }
-        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        .screen.active { display: block; }
 
-        /* LIVE WALLET CARD */
+        /* LIVE CARD STABLE */
         .live-card { 
             background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%); 
-            border-radius: 30px; 
-            padding: 25px; 
-            position: relative; 
-            overflow: hidden; 
-            border: 1px solid var(--border);
-            height: 180px;
-            margin-bottom: 25px;
+            border-radius: 25px; padding: 20px; position: relative; 
+            overflow: hidden; border: 1px solid var(--border); height: 160px; margin-bottom: 20px;
         }
-        .live-card .balance-box { position: absolute; top: 20px; right: 25px; text-align: right; z-index: 5; }
-        .live-card .balance-box .val { font-size: 24px; font-weight: 900; color: #fff; text-shadow: 0 0 15px rgba(255,255,255,0.3); }
-        .live-card .balance-box .label { font-size: 10px; color: var(--green); font-weight: 800; }
+        .balance-box { position: absolute; top: 20px; right: 20px; text-align: right; z-index: 10; }
+        .balance-box .val { font-size: 26px; font-weight: 900; }
+        
+        .coin-anim { position: absolute; width: 35px; opacity: 0.6; z-index: 1; animation: float 5s infinite ease-in-out; }
+        @keyframes float { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-10px); } }
 
-        .coin-anim { position: absolute; width: 40px; opacity: 0.7; pointer-events: none; }
-        @keyframes float { 
-            0%, 100% { transform: translateY(0) rotate(0deg); } 
-            50% { transform: translateY(-15px) rotate(10deg); } 
+        /* ASSET CARDS */
+        .asset-card { 
+            background: #161b22; border-radius: 18px; padding: 15px; 
+            margin-bottom: 10px; display: flex; align-items: center; 
+            justify-content: space-between; border: 1px solid var(--border);
         }
-        
-        .user-info { position: absolute; bottom: 20px; left: 25px; z-index: 5; }
-        .catch-phrase { font-size: 12px; color: var(--green); font-weight: 700; margin-top: 5px; font-style: italic; opacity: 0.9; }
+        .btn-buy { background: var(--green); color: #000; border: none; padding: 8px 15px; border-radius: 10px; font-weight: 800; cursor: pointer; }
 
-        /* NAV MENU UPDATED */
-        nav { position: fixed; bottom: 0; width: 100%; height: 80px; background: var(--panel); display: flex; border-top: 1px solid var(--border); z-index: 100; padding-bottom: env(safe-area-inset-bottom); }
-        .nav-item { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; font-size: 10px; color: var(--text); opacity: 0.6; }
-        .nav-item.active { opacity: 1; color: #fff; }
+        /* NAV STABLE */
+        nav { position: fixed; bottom: 0; width: 100%; height: 75px; background: var(--panel); display: flex; border-top: 1px solid var(--border); z-index: 1000; }
+        .nav-item { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; font-size: 10px; opacity: 0.5; }
+        .nav-item.active { opacity: 1; color: var(--green); }
         
-        /* SPECIAL MARKET BUTTON */
         .nav-market { 
-            position: relative; 
-            top: -20px; 
-            background: var(--green); 
-            width: 65px; 
-            height: 65px; 
-            border-radius: 50%; 
-            box-shadow: 0 0 25px rgba(0, 255, 149, 0.4); 
-            color: #000 !important; 
-            opacity: 1 !important; 
-            font-weight: 900;
+            position: relative; top: -15px; background: var(--green); 
+            width: 60px; height: 60px; border-radius: 50%; 
+            box-shadow: 0 5px 20px rgba(0, 255, 149, 0.4); color: #000 !important; 
         }
 
-        .asset-card { background: rgba(26, 30, 38, 0.6); backdrop-filter: blur(10px); border-radius: 22px; padding: 15px; margin-bottom: 10px; display: flex; align-items: center; justify-content: space-between; border: 1px solid var(--border); }
-        .btn-general { padding: 18px; border-radius: 18px; border: none; font-weight: 800; text-transform: uppercase; font-size: 11px; cursor: pointer; }
-        .btn-green { background: var(--green); color: #000; }
-        
-        .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.95); z-index: 1000; justify-content: center; align-items: center; padding: 20px; }
-        .modal-content { background: var(--panel); padding: 25px; border-radius: 30px; text-align: center; width: 100%; border: 1px solid var(--border); }
+        .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.9); z-index: 2000; justify-content: center; align-items: center; padding: 20px; }
+        .modal-content { background: var(--panel); padding: 25px; border-radius: 25px; width: 100%; border: 1px solid var(--border); text-align: center; }
     </style>
 </head>
 <body>
@@ -82,53 +64,41 @@
 <div id="main_content">
     <div id="scr_wallet" class="screen active">
         <div class="live-card">
-            <img src="https://cryptologos.cc/logos/toncoin-ton-logo.png" class="coin-anim" style="top: 20%; left: 10%; animation: float 4s infinite ease-in-out;">
-            <img src="https://cryptologos.cc/logos/bitcoin-btc-logo.png" class="coin-anim" style="top: 50%; left: 35%; animation: float 6s infinite ease-in-out; width: 50px;">
-            <img src="https://cryptologos.cc/logos/tether-usdt-logo.png" class="coin-anim" style="top: 15%; left: 50%; animation: float 5s infinite ease-in-out; width: 30px;">
-            
+            <img src="https://cryptologos.cc/logos/toncoin-ton-logo.png" class="coin-anim" style="top:10%; left:5%;">
+            <img src="https://cryptologos.cc/logos/bitcoin-btc-logo.png" class="coin-anim" style="top:40%; left:40%; width:45px; animation-delay: -2s;">
             <div class="balance-box">
-                <div class="label">ESTIMATED BALANCE</div>
-                <div class="val" id="total_balance">$0.00</div>
+                <div style="font-size: 9px; color: var(--green);">NET WORTH</div>
+                <div class="val" id="total_balance">$1,240.50</div>
                 <div style="font-size: 10px; opacity: 0.5;">USDT</div>
             </div>
-
-            <div class="user-info">
-                <div id="addr_display" style="font-size: 11px; font-family: monospace; opacity: 0.6;">Connect wallet...</div>
-                <div class="catch-phrase">Trade Smart, Live Large</div>
+            <div style="position: absolute; bottom: 20px; left: 20px;">
+                <div id="addr_display" style="font-size: 10px; opacity: 0.5; font-family: monospace;">Awaiting connection...</div>
+                <div style="color: var(--green); font-size: 12px; font-weight: bold; font-style: italic;">Trade Smart, Live Large</div>
             </div>
         </div>
-
-        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
-            <button class="btn-general" style="background:#fff; color:#000;" onclick="openModal('deposit')">📥 DEPOSIT</button>
-            <button class="btn-general btn-green" onclick="openModal('send')">📤 SEND</button>
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+            <button onclick="openModal('deposit')" style="padding:15px; border-radius:15px; border:none; font-weight:800;">DEPOSIT</button>
+            <button onclick="openModal('send')" style="padding:15px; border-radius:15px; border:none; font-weight:800; background:var(--green);">SEND</button>
         </div>
     </div>
 
     <div id="scr_market" class="screen">
-        <h4 style="opacity: 0.6; font-size: 11px; text-transform: uppercase;">Real-time Terminal</h4>
         <div id="market_list"></div>
     </div>
 
     <div id="scr_swap" class="screen">
-        <h4 style="text-align: center;">⚡ SYN SWAP</h4>
-        <div style="background: var(--panel); padding: 20px; border-radius: 25px; border: 1px solid var(--border);">
-            <div style="background:#000; padding:15px; border-radius:15px; display:flex; justify-content:space-between;">
-                <input type="number" id="swap_from_amount" oninput="calculateSwap()" placeholder="0.00" style="background:none; border:none; color:#fff; width:50%; outline:none;">
-                <select id="swap_from_asset" onchange="calculateSwap()" style="background:#1a1e26; color:#fff; border:none; padding:5px; border-radius:5px;"></select>
-            </div>
-            <div style="text-align: center; margin: 5px 0;">⬇️</div>
-            <div style="background:#000; padding:15px; border-radius:15px; display:flex; justify-content:space-between; border:1px solid var(--green);">
-                <input type="number" id="swap_to_amount" placeholder="0.00" style="background:none; border:none; color:var(--green); width:50%;" readonly>
-                <select id="swap_to_asset" onchange="calculateSwap()" style="background:#1a1e26; color:#fff; border:none; padding:5px; border-radius:5px;"></select>
-            </div>
-            <button class="btn-general btn-green" style="width: 100%; margin-top: 15px;" onclick="tg.showAlert('Swap Completed!')">EXECUTE SWAP</button>
+        <div style="background: var(--panel); padding: 20px; border-radius: 20px; border: 1px solid var(--border);">
+            <h4 style="margin-top:0">SYN Swap</h4>
+            <input type="number" id="swap_from_amount" oninput="calculateSwap()" placeholder="0.00" style="width:100%; padding:15px; border-radius:10px; background:#000; border:1px solid var(--border); color:#fff; margin-bottom:10px;">
+            <select id="swap_from_asset" onchange="calculateSwap()" style="width:100%; padding:10px; margin-bottom:10px;"></select>
+            <div style="text-align:center; margin: 10px 0;">⬇️</div>
+            <input type="number" id="swap_to_amount" placeholder="0.00" readonly style="width:100%; padding:15px; border-radius:10px; background:#000; border:1px solid var(--green); color:var(--green);">
+            <button class="btn-buy" style="width:100%; margin-top:15px; padding:15px;" onclick="tg.showAlert('Confirmed')">SWAP NOW</button>
         </div>
     </div>
 
     <div id="scr_profile" class="screen">
-        <div style="background: var(--panel); padding: 30px; border-radius: 25px; text-align: center; border: 1px solid var(--border);">
-            <div id="ton-connect-btn"></div>
-        </div>
+        <div id="ton-connect-btn" style="display:flex; justify-content:center;"></div>
     </div>
 </div>
 
@@ -141,20 +111,19 @@
 
 <div id="modal_deposit" class="modal" onclick="closeModal('deposit')">
     <div class="modal-content" onclick="event.stopPropagation()">
-        <h3>Deposit Assets</h3>
-        <div id="qrcode" style="display:flex; justify-content:center; margin: 15px 0;"></div>
-        <div id="full_address" style="font-size:10px; word-break:break-all; background:#000; padding:10px; border-radius:10px; color:var(--green);">---</div>
-        <button class="btn-general btn-green" style="width:100%; margin-top:15px;" onclick="copyAddr()">COPY</button>
+        <h3>Deposit</h3>
+        <div id="qrcode" style="display:flex; justify-content:center; margin-bottom:15px;"></div>
+        <div id="full_address" style="font-size:10px; background:#000; padding:10px; border-radius:10px; color:var(--green); word-break:break-all;">---</div>
+        <button class="btn-buy" style="width:100%; margin-top:15px;" onclick="copyAddr()">COPY</button>
     </div>
 </div>
 
 <div id="modal_send" class="modal" onclick="closeModal('send')">
     <div class="modal-content" onclick="event.stopPropagation()">
-        <h3>Send</h3>
-        <input type="text" placeholder="Address" style="width:100%; padding:12px; margin-bottom:10px; border-radius:10px; background:#000; border:1px solid var(--border); color:#fff;">
-        <input type="text" placeholder="Memo (Optional)" style="width:100%; padding:12px; margin-bottom:10px; border-radius:10px; background:#000; border:1px solid var(--border); color:#fff;">
-        <input type="number" placeholder="Amount" style="width:100%; padding:12px; margin-bottom:10px; border-radius:10px; background:#000; border:1px solid var(--border); color:#fff;">
-        <button class="btn-general btn-green" style="width:100%;">SEND NOW</button>
+        <h3>Withdraw</h3>
+        <input type="text" placeholder="Address" style="width:100%; padding:12px; margin-bottom:10px;">
+        <input type="number" placeholder="Amount" style="width:100%; padding:12px; margin-bottom:10px;">
+        <button class="btn-buy" style="width:100%;">CONFIRM</button>
     </div>
 </div>
 
@@ -166,21 +135,49 @@
 
     const assets = [
         { s: 'TON', n: 'TON Network', p: 'TONUSDT', i: 'https://cryptologos.cc/logos/toncoin-ton-logo.png' },
-        { s: 'USDT', n: 'Tether', p: 'USDT', i: 'https://cryptologos.cc/logos/tether-usdt-logo.png' },
         { s: 'BTC', n: 'Bitcoin', p: 'BTCUSDT', i: 'https://cryptologos.cc/logos/bitcoin-btc-logo.png' },
         { s: 'ETH', n: 'Ethereum', p: 'ETHUSDT', i: 'https://cryptologos.cc/logos/ethereum-eth-logo.png' },
-        { s: 'SOL', n: 'Solana', p: 'SOLUSDT', i: 'https://cryptologos.cc/logos/solana-sol-logo.png' }
+        { s: 'SOL', n: 'Solana', p: 'SOLUSDT', i: 'https://cryptologos.cc/logos/solana-sol-logo.png' },
+        { s: 'NEAR', n: 'Near', p: 'NEARUSDT', i: 'https://cryptologos.cc/logos/near-protocol-near-logo.png' }
     ];
 
-    async function init() {
-        const fromS = document.getElementById('swap_from_asset');
-        const toS = document.getElementById('swap_to_asset');
-        assets.forEach(a => {
-            fromS.innerHTML += `<option value="${a.s}">${a.s}</option>`;
-            toS.innerHTML += `<option value="${a.s}">${a.s}</option>`;
-        });
-        toS.value = "USDT";
+    async function updatePrices() {
+        try {
+            // Оптимизация: один запрос ко всем ценам
+            const symbols = assets.map(a => `"${a.p}"`).join(',');
+            const res = await fetch(`https://api.binance.com/api/v3/ticker/price?symbols=[${symbols}]`);
+            const data = await res.json();
+            
+            data.forEach(item => {
+                const asset = assets.find(a => a.p === item.symbol);
+                if(asset) prices[asset.s] = parseFloat(item.price);
+            });
+            prices['USDT'] = 1.0;
 
+            renderMarket();
+        } catch(e) { console.error("Price update failed"); }
+    }
+
+    function renderMarket() {
+        const list = document.getElementById('market_list');
+        list.innerHTML = assets.map(a => `
+            <div class="asset-card">
+                <div style="display:flex; align-items:center; gap:10px;">
+                    <img src="${a.i}" width="30">
+                    <div><b>${a.s}</b></div>
+                </div>
+                <div style="text-align:right;">
+                    <b>$${prices[a.s] ? prices[a.s].toFixed(2) : '...'}</b><br>
+                    <button class="btn-buy" onclick="event.stopPropagation(); tg.showAlert('Trade set!')">BUY</button>
+                </div>
+            </div>
+        `).join('');
+    }
+
+    function init() {
+        const fromS = document.getElementById('swap_from_asset');
+        assets.forEach(a => fromS.innerHTML += `<option value="${a.s}">${a.s}</option>`);
+        
         const tonConnectUI = new TON_CONNECT_UI.TonConnectUI({
             manifestUrl: 'https://sergey52bb.github.io/grok-autotrade/tonconnect-manifest.json',
             buttonRootId: 'ton-connect-btn'
@@ -189,42 +186,12 @@
         tonConnectUI.onStatusChange(wallet => {
             if (wallet) {
                 userFullAddr = wallet.account.address;
-                document.getElementById('addr_display').innerText = userFullAddr.substring(0,12) + "...";
-                document.getElementById('total_balance').innerText = "$1,240.50"; // Пример баланса
+                document.getElementById('addr_display').innerText = userFullAddr.substring(0,10) + "...";
                 updateQR(userFullAddr);
             }
         });
         updatePrices();
-    }
-
-    async function updatePrices() {
-        const list = document.getElementById('market_list');
-        let html = '';
-        for (let a of assets) {
-            if(a.s === 'USDT') { prices[a.s] = 1.0; continue; }
-            const res = await fetch(`https://api.binance.com/api/v3/ticker/price?symbol=${a.p}`);
-            const data = await res.json();
-            prices[a.s] = parseFloat(data.price);
-            html += `<div class="asset-card">
-                <div style="display:flex; align-items:center; gap:10px;">
-                    <img src="${a.i}" width="30">
-                    <div><b>${a.s}</b><br><small style="opacity:0.5">${a.n}</small></div>
-                </div>
-                <div style="text-align:right;">
-                    <b>$${prices[a.s].toFixed(2)}</b><br>
-                    <button class="btn-green" style="padding:5px 10px; font-size:10px; border-radius:5px; border:none;" onclick="tg.showAlert('Order set')">BUY</button>
-                </div>
-            </div>`;
-        }
-        list.innerHTML = html;
-    }
-
-    function calculateSwap() {
-        const amt = document.getElementById('swap_from_amount').value;
-        const from = document.getElementById('swap_from_asset').value;
-        const to = document.getElementById('swap_to_asset').value;
-        if(!amt || !prices[from] || !prices[to]) return;
-        document.getElementById('swap_to_amount').value = (amt * (prices[from]/prices[to]) * 0.99).toFixed(2);
+        setInterval(updatePrices, 20000); // Реже обновляем для стабильности
     }
 
     function showTab(id, el) {
