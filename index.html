@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>Grok AutoTrade V5.2</title>
+    <title>Grok AutoTrade V5.3</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <script src="https://unpkg.com/@tonconnect/ui@2.0.9/dist/tonconnect-ui.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
@@ -19,30 +19,18 @@
         .screen.active { display: block; animation: fadeIn 0.3s ease; }
         @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
 
-        /* Cards */
         .asset-card { background: rgba(26, 30, 38, 0.6); backdrop-filter: blur(10px); border-radius: 22px; padding: 18px; margin-bottom: 12px; display: flex; align-items: center; justify-content: space-between; border: 1px solid var(--border); }
-        .asset-card.ton { border-left: 4px solid var(--blue); }
-        .asset-card.near { border-left: 4px solid var(--green); }
-        .asset-card.bnb { border-left: 4px solid var(--orange); }
-
-        /* Buttons */
         .btn-general { padding: 18px; border-radius: 18px; border: none; font-weight: 800; text-transform: uppercase; font-size: 11px; cursor: pointer; transition: 0.2s; }
-        .btn-general:active { transform: scale(0.96); }
-        .btn-white { background: #fff; color: #000; }
         .btn-green { background: var(--green); color: #000; box-shadow: 0 4px 15px rgba(0, 255, 149, 0.2); }
-        .btn-action { border: none; padding: 10px 20px; border-radius: 14px; font-weight: 800; font-size: 11px; cursor: pointer; }
-
-        /* Swap UI */
-        .swap-input-group { background: #000; border: 1px solid var(--border); padding: 15px; border-radius: 20px; margin-bottom: 5px; }
-        .swap-input-group input { background: transparent; border: none; color: #fff; font-size: 22px; font-weight: 700; width: 60%; outline: none; }
-        .swap-input-group select { background: var(--card-bg); color: #fff; border: 1px solid var(--border); border-radius: 10px; padding: 5px; font-size: 12px; }
-
+        
         /* Modals */
         .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.95); z-index: 100; justify-content: center; align-items: center; padding: 20px; box-sizing: border-box; }
         .modal-content { background: var(--panel); padding: 25px; border-radius: 30px; text-align: center; width: 100%; max-width: 400px; border: 1px solid var(--border); }
-        .modal input { width: 100%; padding: 15px; margin-bottom: 12px; border-radius: 12px; border: 1px solid var(--border); background: #000; color: #fff; box-sizing: border-box; }
+        .modal input { width: 100%; padding: 15px; margin-bottom: 10px; border-radius: 12px; border: 1px solid var(--border); background: #000; color: #fff; box-sizing: border-box; outline: none; }
+        
+        .swap-input-group { background: #000; border: 1px solid var(--border); padding: 15px; border-radius: 20px; margin-bottom: 5px; display: flex; justify-content: space-between; align-items: center; }
+        .swap-input-group input { background: transparent; border: none; color: #fff; font-size: 20px; font-weight: 700; width: 60%; outline: none; }
 
-        /* Nav */
         nav { position: fixed; bottom: 0; width: 100%; height: 85px; background: var(--panel); display: flex; border-top: 1px solid var(--border); }
         .nav-item { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; font-size: 10px; color: var(--text); opacity: 0.5; }
         .nav-item.active { color: var(--green); opacity: 1; }
@@ -54,19 +42,18 @@
 <div class="bg-glow" style="top: -50px; right: -50px; background: var(--green);"></div>
 <div class="bg-glow" style="bottom: 50px; left: -50px; background: var(--blue);"></div>
 
-<header>💎 GROK AUTOTRADE <span style="font-size: 10px; color: var(--green);">V5.2</span></header>
+<header>💎 GROK AUTOTRADE <span style="font-size: 10px; color: var(--green);">V5.3</span></header>
 
 <div id="main_content">
     <div id="scr_wallet" class="screen active">
         <div class="balance-card">
-            <div style="font-size: 11px; opacity: 0.6; letter-spacing: 1px;">TOTAL ASSETS</div>
+            <div style="font-size: 11px; opacity: 0.6;">TOTAL ASSETS</div>
             <h1 id="main_status" style="font-size: 34px; margin: 5px 0; font-weight: 900;">OFFLINE</h1>
-            <div id="addr_display" style="font-size: 11px; opacity: 0.5; font-family: monospace;">Connect in Settings</div>
+            <div id="addr_display" style="font-size: 11px; opacity: 0.5;">Connect in Settings</div>
         </div>
         <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
-            <button class="btn-general btn-white" onclick="openModal('deposit')">📥 DEPOSIT</button>
+            <button class="btn-general" style="background:#fff; color:#000;" onclick="openModal('deposit')">📥 DEPOSIT</button>
             <button class="btn-general btn-green" onclick="openModal('send')">📤 SEND</button>
-            <button class="btn-general btn-white" style="grid-column: span 2; margin-top: 5px; background: rgba(255,255,255,0.05); color: #fff; border: 1px solid var(--border);" onclick="showTab('profile')">⚙️ SETTINGS</button>
         </div>
     </div>
 
@@ -76,31 +63,25 @@
     </div>
 
     <div id="scr_swap" class="screen">
-        <h4 style="text-align: center; margin-bottom: 20px;">⚡ QUICK SWAP</h4>
+        <h4 style="text-align: center;">⚡ SWAP</h4>
         <div style="background: var(--panel); padding: 20px; border-radius: 25px; border: 1px solid var(--border);">
-            <div style="font-size: 10px; opacity: 0.5; margin: 0 0 5px 10px;">YOU SEND</div>
-            <div class="swap-input-group" style="display:flex; justify-content:space-between; align-items:center;">
+            <div class="swap-input-group">
                 <input type="number" id="swap_from_amount" oninput="calculateSwap()" placeholder="0.00">
-                <select id="swap_from_asset" onchange="calculateSwap()">
+                <select id="swap_from_asset" onchange="calculateSwap()" style="background:var(--card-bg); color:#fff; border:none; border-radius:8px; padding:5px;">
                     <option value="TON">TON</option>
                     <option value="USDT">USDT</option>
                 </select>
             </div>
-
             <div style="text-align: center; margin: -10px 0; position: relative; z-index: 5;">
-                <button onclick="reverseSwap()" style="background:var(--green); border:none; width:32px; height:32px; border-radius:50%; font-size:12px; cursor:pointer; box-shadow: 0 0 10px var(--green);">⬇️</button>
+                <button onclick="reverseSwap()" style="background:var(--green); border:none; width:32px; height:32px; border-radius:50%; cursor:pointer;">⬇️</button>
             </div>
-
-            <div style="font-size: 10px; opacity: 0.5; margin: 5px 0 5px 10px;">YOU RECEIVE</div>
-            <div class="swap-input-group" style="display:flex; justify-content:space-between; align-items:center; border-color: var(--green);">
+            <div class="swap-input-group" style="border-color: var(--green);">
                 <input type="number" id="swap_to_amount" style="color:var(--green);" placeholder="0.00" readonly>
-                <select id="swap_to_asset" onchange="calculateSwap()">
+                <select id="swap_to_asset" onchange="calculateSwap()" style="background:var(--card-bg); color:#fff; border:none; border-radius:8px; padding:5px;">
                     <option value="USDT">USDT</option>
                     <option value="TON">TON</option>
                 </select>
             </div>
-            
-            <div id="swap_info" style="font-size: 10px; text-align: center; margin-top: 15px; color: var(--text);">Rate: -- | Fee: 1%</div>
             <button class="btn-general btn-green" style="width: 100%; margin-top: 15px; padding: 20px;" onclick="executeSwap()">CONFIRM SWAP</button>
         </div>
     </div>
@@ -108,16 +89,15 @@
     <div id="scr_profile" class="screen">
         <div style="background: var(--panel); padding: 30px; border-radius: 25px; border: 1px solid var(--border); text-align: center;">
             <div id="ton-connect-btn"></div>
-            <p style="font-size: 11px; opacity: 0.5; margin-top: 20px;">v5.2 Secure Connection Active</p>
         </div>
     </div>
 </div>
 
 <div id="modal_deposit" class="modal" onclick="closeModal('deposit')">
     <div class="modal-content" onclick="event.stopPropagation()">
-        <h3 style="margin-top:0">Deposit TON</h3>
+        <h3>Deposit TON</h3>
         <div id="qrcode"></div>
-        <div class="addr-text" id="full_address">---</div>
+        <div style="font-size: 10px; background: #000; padding: 12px; border-radius: 10px; margin-bottom: 15px; color: var(--green);" id="full_address">---</div>
         <button id="copy_btn" class="btn-general btn-green" style="width: 100%;" onclick="copyUserAddr()">📋 COPY ADDRESS</button>
     </div>
 </div>
@@ -125,17 +105,19 @@
 <div id="modal_send" class="modal" onclick="closeModal('send')">
     <div class="modal-content" onclick="event.stopPropagation()">
         <h3 style="margin-top:0">Send Assets</h3>
-        <input type="text" id="send_to" placeholder="Address">
+        <input type="text" id="send_to" placeholder="Recipient Address">
+        <input type="text" id="send_memo" placeholder="Comment / Memo (Optional)">
         <input type="number" id="send_amount" placeholder="Amount">
-        <button class="btn-general btn-green" style="width: 100%;" onclick="tg.showAlert('Transaction Broadcasted!')">CONFIRM</button>
+        <button class="btn-general btn-green" style="width: 100%; margin-top: 10px;" onclick="tg.showAlert('Sending...')">CONFIRM SEND</button>
     </div>
 </div>
 
 <div id="modal_buy" class="modal" onclick="closeModal('buy')">
     <div class="modal-content" onclick="event.stopPropagation()">
         <h3 style="margin-top:0; color:var(--green);">Buy <span id="buy_coin_name">...</span></h3>
-        <input type="number" id="buy_amount" placeholder="Amount in TON">
-        <button class="btn-general btn-green" style="width: 100%;" onclick="tg.showAlert('Order Placed!')">BUY NOW</button>
+        <input type="number" id="buy_amount" oninput="calculateBuyCost()" placeholder="Amount in TON">
+        <div id="buy_cost_usd" style="font-size: 12px; opacity: 0.6; margin-bottom: 15px;">You pay: $0.00 USDT</div>
+        <button class="btn-general btn-green" style="width: 100%;" onclick="tg.showAlert('Order Placed!')">CONFIRM BUY</button>
     </div>
 </div>
 
@@ -154,12 +136,6 @@
     let userFullAddr = "";
     let globalPriceTON = 7.30;
 
-    const assets = [
-        { s: 'TON', n: 'The Open Network', p: 'TONUSDT', i: 'https://cryptologos.cc/logos/toncoin-ton-logo.png', c: 'ton', b: 'btn-ton' },
-        { s: 'NEAR', n: 'Near Protocol', p: 'NEARUSDT', i: 'https://cryptologos.cc/logos/near-protocol-near-logo.png', c: 'near', b: 'btn-near' },
-        { s: 'BNB', n: 'Binance Coin', p: 'BNBUSDT', i: 'https://cryptologos.cc/logos/bnb-bnb-logo.png', c: 'bnb', b: 'btn-bnb' }
-    ];
-
     async function init() {
         tonConnectUI = new TON_CONNECT_UI.TonConnectUI({
             manifestUrl: 'https://sergey52bb.github.io/grok-autotrade/tonconnect-manifest.json',
@@ -173,36 +149,46 @@
                 updateQR(userFullAddr);
             } else {
                 document.getElementById('main_status').innerText = "OFFLINE";
-                userFullAddr = "";
             }
         });
         updatePrices();
     }
 
     async function updatePrices() {
+        try {
+            const res = await fetch(`https://api.binance.com/api/v3/ticker/price?symbol=TONUSDT`);
+            const data = await res.json();
+            globalPriceTON = parseFloat(data.price);
+        } catch(e) {}
+        
         const list = document.getElementById('market_list');
+        const assets = [
+            { s: 'TON', n: 'The Open Network', p: globalPriceTON, i: 'https://cryptologos.cc/logos/toncoin-ton-logo.png', c: 'ton' },
+            { s: 'NEAR', n: 'Near Protocol', p: 7.20, i: 'https://cryptologos.cc/logos/near-protocol-near-logo.png', c: 'near' }
+        ];
+        
         let html = '';
-        for (let a of assets) {
-            try {
-                const res = await fetch(`https://api.binance.com/api/v3/ticker/price?symbol=${a.p}`);
-                const data = await res.json();
-                const price = parseFloat(data.price);
-                if(a.s === 'TON') globalPriceTON = price;
-                html += `
-                    <div class="asset-card ${a.c}">
-                        <div style="display:flex; align-items:center; gap:12px;">
-                            <div class="coin-icon"><img src="${a.i}"></div>
-                            <div><div style="font-weight:900;">${a.s}</div><div style="font-size:10px; opacity:0.5;">${a.n}</div></div>
-                        </div>
-                        <div style="text-align:right;">
-                            <div style="font-weight:900; margin-bottom:5px;">$${price.toFixed(2)}</div>
-                            <button class="btn-action ${a.b}" style="background:${a.c === 'ton' ? 'var(--blue)' : a.c === 'near' ? 'var(--green)' : 'var(--orange)'}; color:${a.c === 'ton' ? '#fff' : '#000'}" onclick="openBuy('${a.s}')">BUY</button>
-                        </div>
-                    </div>`;
-            } catch (e) {}
-        }
+        assets.forEach(a => {
+            html += `<div class="asset-card" style="border-left: 4px solid ${a.c==='ton'?'var(--blue)':'var(--green)'}">
+                <div style="display:flex; align-items:center; gap:12px;">
+                    <div style="width:40px; height:40px;"><img src="${a.i}" style="width:100%"></div>
+                    <div><div style="font-weight:900;">${a.s}</div><div style="font-size:10px; opacity:0.5;">${a.n}</div></div>
+                </div>
+                <div style="text-align:right;">
+                    <div style="font-weight:900;">$${a.p.toFixed(2)}</div>
+                    <button class="btn-action" style="background:var(--green); border:none; padding:8px 15px; border-radius:10px; font-weight:bold; margin-top:5px;" onclick="openBuy('${a.s}')">BUY</button>
+                </div>
+            </div>`;
+        });
         list.innerHTML = html;
-        calculateSwap(); 
+    }
+
+    function calculateBuyCost() {
+        const val = document.getElementById('buy_amount').value;
+        const display = document.getElementById('buy_cost_usd');
+        if(!val || val <= 0) { display.innerText = "You pay: $0.00 USDT"; return; }
+        const total = val * globalPriceTON;
+        display.innerText = `You pay: $${total.toFixed(2)} USDT`;
     }
 
     function calculateSwap() {
@@ -210,24 +196,9 @@
         const fromAsset = document.getElementById('swap_from_asset').value;
         const toAsset = document.getElementById('swap_to_asset').value;
         const toInput = document.getElementById('swap_to_amount');
-        const info = document.getElementById('swap_info');
-
         if (!amount || amount <= 0) { toInput.value = ""; return; }
-
-        let result = 0;
-        const fee = 0.99; // 1% комиссия
-
-        if (fromAsset === "TON" && toAsset === "USDT") {
-            result = (amount * globalPriceTON) * fee;
-            info.innerText = `Rate: 1 TON ≈ $${globalPriceTON.toFixed(2)} | Fee: 1%`;
-        } else if (fromAsset === "USDT" && toAsset === "TON") {
-            result = (amount / globalPriceTON) * fee;
-            info.innerText = `Rate: 1 USDT ≈ ${(1/globalPriceTON).toFixed(4)} TON | Fee: 1%`;
-        } else {
-            result = amount;
-            info.innerText = "Rate: 1:1 | Fee: 0%";
-        }
-        toInput.value = result.toFixed(fromAsset === "TON" ? 2 : 4);
+        let res = (fromAsset === "TON") ? (amount * globalPriceTON * 0.99) : (amount / globalPriceTON * 0.99);
+        toInput.value = res.toFixed(2);
     }
 
     function reverseSwap() {
@@ -235,14 +206,11 @@
         const t = document.getElementById('swap_to_asset');
         const tmp = f.value; f.value = t.value; t.value = tmp;
         calculateSwap();
-        tg.HapticFeedback.impactOccurred('light');
     }
 
     function openBuy(s) {
-        if (!userFullAddr) { tg.showAlert("Connect wallet first!"); return; }
         document.getElementById('buy_coin_name').innerText = s;
         document.getElementById('modal_buy').style.display = 'flex';
-        tg.HapticFeedback.impactOccurred('medium');
     }
 
     function updateQR(t) {
@@ -251,18 +219,9 @@
         document.getElementById('full_address').innerText = t;
     }
 
-    function openModal(t) { 
-        if (!userFullAddr && t !== 'deposit') { tg.showAlert("Connect wallet first!"); return; }
-        document.getElementById('modal_'+t).style.display = 'flex'; 
-    }
+    function openModal(t) { document.getElementById('modal_'+t).style.display = 'flex'; }
     function closeModal(t) { document.getElementById('modal_'+t).style.display = 'none'; }
-
-    function copyUserAddr() {
-        navigator.clipboard.writeText(userFullAddr);
-        document.getElementById('copy_btn').innerText = "✅ COPIED";
-        tg.HapticFeedback.notificationOccurred('success');
-        setTimeout(() => { document.getElementById('copy_btn').innerText = "📋 COPY ADDRESS"; }, 2000);
-    }
+    function copyUserAddr() { navigator.clipboard.writeText(userFullAddr); tg.showAlert("Copied!"); }
 
     function showTab(id, el) {
         document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
@@ -271,13 +230,8 @@
         if(el) el.classList.add('active');
     }
 
-    function executeSwap() {
-        if(!document.getElementById('swap_from_amount').value) return;
-        tg.showAlert("Swap executed successfully!");
-    }
-
     window.addEventListener('load', () => setTimeout(init, 500));
-    setInterval(updatePrices, 20000);
 </script>
 </body>
 </html>
+
