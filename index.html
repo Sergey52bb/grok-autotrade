@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>Grok AutoTrade V5.0</title>
+    <title>Grok AutoTrade V5.1</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <script src="https://unpkg.com/@tonconnect/ui@2.0.9/dist/tonconnect-ui.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
@@ -20,8 +20,9 @@
         .screen.active { display: block; animation: fadeIn 0.3s ease; }
         @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
 
-        /* Market & Swap Cards */
-        .asset-card { background: rgba(26, 30, 38, 0.6); backdrop-filter: blur(10px); border-radius: 22px; padding: 18px; margin-bottom: 12px; display: flex; align-items: center; justify-content: space-between; border: 1px solid var(--border); }
+        /* Market & Assets Cards with Color Coding */
+        .asset-card { background: rgba(26, 30, 38, 0.6); backdrop-filter: blur(10px); border-radius: 22px; padding: 18px; margin-bottom: 12px; display: flex; align-items: center; justify-content: space-between; border: 1px solid var(--border); transition: 0.2s; }
+        .asset-card:active { transform: scale(0.98); background: rgba(26, 30, 38, 0.9); }
         .asset-card.ton { border-left: 4px solid var(--blue); }
         .asset-card.near { border-left: 4px solid var(--green); }
         .asset-card.bnb { border-left: 4px solid var(--orange); }
@@ -29,18 +30,29 @@
         .coin-icon { width: 44px; height: 44px; border-radius: 50%; display: flex; align-items: center; justify-content: center; background: #000; overflow: hidden; }
         .coin-icon img { width: 100%; height: 100%; }
 
-        .btn-action { border: none; padding: 10px 20px; border-radius: 14px; font-weight: 800; font-size: 11px; cursor: pointer; }
+        .btn-action { border: none; padding: 10px 20px; border-radius: 14px; font-weight: 800; font-size: 11px; cursor: pointer; transition: 0.2s; }
+        .btn-action:active { transform: scale(0.9); opacity: 0.8; }
         .btn-ton { background: var(--blue); color: #fff; }
         .btn-near { background: var(--green); color: #000; }
         .btn-bnb { background: var(--orange); color: #000; }
 
-        /* Swap UI */
-        .swap-box { background: var(--panel); padding: 20px; border-radius: 25px; border: 1px solid var(--border); }
-        .swap-input { background: #000; border: 1px solid var(--border); padding: 20px; border-radius: 18px; margin: 5px 0; color: white; width: 100%; box-sizing: border-box; font-size: 18px; font-weight: 700; }
+        /* General Buttons for Wallet Screen */
+        .btn-general { padding: 18px; border-radius: 18px; border: none; font-weight: 800; text-transform: uppercase; font-size: 11px; cursor: pointer; transition: 0.2s; }
+        .btn-general:active { transform: scale(0.96); }
+        .btn-white { background: #fff; color: #000; }
+        .btn-green { background: var(--green); color: #000; }
+
+        /* Modals */
+        .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.95); z-index: 100; justify-content: center; align-items: center; padding: 20px; box-sizing: border-box; }
+        .modal-content { background: var(--panel); padding: 25px; border-radius: 30px; text-align: center; width: 100%; max-width: 400px; border: 1px solid var(--border); }
+        input { width: 100%; padding: 15px; margin-bottom: 12px; border-radius: 12px; border: 1px solid var(--border); background: #000; color: #fff; box-sizing: border-box; outline: none; }
+        #qrcode { background: white; padding: 10px; border-radius: 15px; display: inline-block; margin-bottom: 15px; }
+        #qrcode img { width: 150px; height: 150px; }
+        .addr-text { font-size: 10px; word-break: break-all; background: #000; padding: 12px; border-radius: 10px; margin-bottom: 15px; color: var(--green); border: 1px solid var(--border); }
 
         /* Navigation */
         nav { position: fixed; bottom: 0; width: 100%; height: 85px; background: var(--panel); display: flex; border-top: 1px solid var(--border); }
-        .nav-item { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; font-size: 10px; color: var(--text); opacity: 0.5; }
+        .nav-item { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; font-size: 10px; color: var(--text); opacity: 0.5; cursor: pointer; }
         .nav-item.active { color: var(--green); opacity: 1; }
 
         /* Wallet Status */
@@ -52,18 +64,19 @@
 <div class="bg-glow" style="top: -50px; right: -50px; background: var(--green);"></div>
 <div class="bg-glow" style="bottom: 50px; left: -50px; background: var(--blue);"></div>
 
-<header>💎 GROK AUTOTRADE <span style="font-size: 10px; color: var(--green);">V5.0</span></header>
+<header>💎 GROK AUTOTRADE <span style="font-size: 10px; color: var(--green);">V5.1</span></header>
 
 <div id="main_content">
     <div id="scr_wallet" class="screen active">
         <div class="balance-card">
             <div style="font-size: 11px; opacity: 0.6;">TOTAL ASSETS</div>
             <h1 id="main_status" style="font-size: 32px; margin: 5px 0;">OFFLINE</h1>
-            <div id="addr_display" style="font-size: 11px; opacity: 0.5;">Not Connected</div>
+            <div id="addr_display" style="font-size: 11px; opacity: 0.5;">Connect in Settings</div>
         </div>
-        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
-            <button class="btn-action btn-near" style="padding: 18px;" onclick="showTab('market')">📊 TRADE</button>
-            <button class="btn-action btn-ton" style="padding: 18px; background: #fff; color: #000;" onclick="showTab('swap')">🔄 SWAP</button>
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+            <button class="btn-general btn-white" onclick="openModal('deposit')">📥 DEPOSIT</button>
+            <button class="btn-general btn-green" onclick="openModal('send')">📤 SEND</button>
+            <button class="btn-general btn-white" style="grid-column: span 2; margin-top: 5px; background: rgba(255,255,255,0.05); color: #fff; border: 1px solid var(--border);" onclick="showTab('profile')">⚙️ SETTINGS</button>
         </div>
     </div>
 
@@ -74,21 +87,45 @@
 
     <div id="scr_swap" class="screen">
         <h4 style="text-align: center;">⚡ QUICK SWAP</h4>
-        <div class="swap-box">
-            <div style="font-size: 11px; opacity: 0.6; margin-left: 10px;">YOU SEND</div>
-            <input type="number" class="swap-input" placeholder="0.00 TON">
+        <div style="background: var(--panel); padding: 20px; border-radius: 25px; border: 1px solid var(--border);">
+            <div style="font-size: 11px; opacity: 0.6;">YOU SEND</div>
+            <input type="number" style="background:#000; border:1px solid var(--border); padding:20px; border-radius:18px; width:100%; box-sizing:border-box; color:#fff; font-size:18px;" placeholder="0.00 TON">
             <div style="text-align: center; margin: 10px 0;">⬇️</div>
-            <div style="font-size: 11px; opacity: 0.6; margin-left: 10px;">YOU RECEIVE</div>
-            <input type="number" class="swap-input" placeholder="0.00 USDT" disabled>
-            <button class="btn-action btn-near" style="width: 100%; margin-top: 20px; padding: 20px;">EXCHANGE NOW</button>
+            <input type="number" style="background:#000; border:1px solid var(--border); padding:20px; border-radius:18px; width:100%; box-sizing:border-box; color:#fff; font-size:18px;" placeholder="0.00 USDT" disabled>
+            <button class="btn-general btn-green" style="width: 100%; margin-top: 20px; padding: 20px;">EXCHANGE NOW</button>
         </div>
     </div>
 
     <div id="scr_profile" class="screen">
         <div style="background: var(--panel); padding: 30px; border-radius: 25px; border: 1px solid var(--border); text-align: center;">
             <div id="ton-connect-btn"></div>
-            <p style="font-size: 11px; color: var(--text); margin-top: 20px;">Security: AES-256 Encryption Active</p>
         </div>
+    </div>
+</div>
+
+<div id="modal_deposit" class="modal" onclick="closeModal('deposit')">
+    <div class="modal-content" onclick="event.stopPropagation()">
+        <h3>Deposit TON</h3>
+        <div id="qrcode"></div>
+        <div class="addr-text" id="full_address">---</div>
+        <button id="copy_btn" class="btn-general btn-green" style="width: 100%;" onclick="copyUserAddr()">📋 COPY ADDRESS</button>
+    </div>
+</div>
+
+<div id="modal_send" class="modal" onclick="closeModal('send')">
+    <div class="modal-content" onclick="event.stopPropagation()">
+        <h3>Send Assets</h3>
+        <input type="text" id="send_to" placeholder="Recipient Address">
+        <input type="number" id="send_amount" placeholder="Amount">
+        <button class="btn-general btn-green" style="width: 100%;" onclick="tg.showAlert('Send logic V5.2')">CONFIRM SEND</button>
+    </div>
+</div>
+
+<div id="modal_buy" class="modal" onclick="closeModal('buy')">
+    <div class="modal-content" onclick="event.stopPropagation()">
+        <h3>Buy <span id="buy_coin_name">Asset</span></h3>
+        <input type="number" id="buy_amount" placeholder="Amount in TON">
+        <button class="btn-general btn-green" style="width: 100%;" onclick="tg.showAlert('Buy logic V5.2')">CONFIRM BUY</button>
     </div>
 </div>
 
@@ -105,7 +142,6 @@
 
     let tonConnectUI;
     let userFullAddr = "";
-
     const assets = [
         { s: 'TON', n: 'The Open Network', p: 'TONUSDT', i: 'https://cryptologos.cc/logos/toncoin-ton-logo.png', c: 'ton', b: 'btn-ton' },
         { s: 'NEAR', n: 'Near Protocol', p: 'NEARUSDT', i: 'https://cryptologos.cc/logos/near-protocol-near-logo.png', c: 'near', b: 'btn-near' },
@@ -121,9 +157,11 @@
             if (wallet) {
                 userFullAddr = wallet.account.address;
                 document.getElementById('main_status').innerText = "ONLINE";
-                document.getElementById('addr_display').innerText = userFullAddr.substring(0,10) + "...";
+                document.getElementById('addr_display').innerText = userFullAddr.substring(0,8) + "...";
+                updateQR(userFullAddr);
             } else {
                 document.getElementById('main_status').innerText = "OFFLINE";
+                userFullAddr = "";
             }
         });
         updatePrices();
@@ -144,12 +182,38 @@
                         </div>
                         <div style="text-align:right;">
                             <div style="font-weight:900; margin-bottom:5px;">$${parseFloat(data.price).toFixed(2)}</div>
-                            <button class="btn-action ${a.b}">BUY</button>
+                            <button class="btn-action ${a.b}" onclick="openBuy('${a.s}')">BUY</button>
                         </div>
                     </div>`;
             } catch (e) {}
         }
         list.innerHTML = html;
+    }
+
+    function openBuy(symbol) {
+        if (!userFullAddr) { tg.showAlert("Connect wallet first!"); return; }
+        document.getElementById('buy_coin_name').innerText = symbol;
+        document.getElementById('modal_buy').style.display = 'flex';
+        tg.HapticFeedback.impactOccurred('medium');
+    }
+
+    function updateQR(t) {
+        const c = document.getElementById("qrcode"); c.innerHTML = "";
+        new QRCode(c, { text: t, width: 150, height: 150 });
+        document.getElementById('full_address').innerText = t;
+    }
+
+    function openModal(t) { 
+        if (!userFullAddr && t !== 'deposit') { tg.showAlert("Connect wallet first!"); return; }
+        document.getElementById('modal_'+t).style.display = 'flex'; 
+    }
+    function closeModal(t) { document.getElementById('modal_'+t).style.display = 'none'; }
+
+    function copyUserAddr() {
+        navigator.clipboard.writeText(userFullAddr);
+        document.getElementById('copy_btn').innerText = "✅ COPIED";
+        tg.HapticFeedback.notificationOccurred('success');
+        setTimeout(() => { document.getElementById('copy_btn').innerText = "📋 COPY ADDRESS"; }, 2000);
     }
 
     function showTab(id, el) {
@@ -161,6 +225,7 @@
     }
 
     window.addEventListener('load', () => setTimeout(init, 500));
+    setInterval(updatePrices, 15000);
 </script>
 </body>
 </html>
