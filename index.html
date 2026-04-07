@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>Grok Avto Trade V4.6</title>
+    <title>Grok Avto Trade V4.7</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <script src="https://unpkg.com/@tonconnect/ui@2.0.9/dist/tonconnect-ui.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
@@ -17,34 +17,32 @@
         @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
         
         .balance-card { background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%); padding: 30px; border-radius: 25px; text-align: center; margin-bottom: 25px; border: 1px solid var(--border); }
-        .btns { display: flex; gap: 12px; }
-        .btn { flex: 1; padding: 18px; border-radius: 18px; border: none; font-weight: 800; cursor: pointer; text-transform: uppercase; font-size: 12px; transition: 0.2s; }
+        .btns { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+        .btn { padding: 18px; border-radius: 18px; border: none; font-weight: 800; cursor: pointer; text-transform: uppercase; font-size: 11px; transition: 0.2s; }
         .btn:active { transform: scale(0.96); }
         .btn-white { background: #fff; color: #000; }
         .btn-green { background: var(--green); color: #000; }
         
-        /* Стили для модального окна Депозита */
-        #deposit_modal { 
-            display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; 
-            background: rgba(0,0,0,0.9); z-index: 100; justify-content: center; align-items: center; padding: 20px; box-sizing: border-box;
-        }
-        .modal-content { background: var(--panel); padding: 30px; border-radius: 30px; text-align: center; width: 100%; max-width: 400px; border: 1px solid var(--border); }
-        #qrcode { background: white; padding: 15px; border-radius: 15px; display: inline-block; margin-bottom: 20px; }
-        #qrcode img { width: 180px; height: 180px; }
-        .addr-text { font-size: 10px; word-break: break-all; background: #000; padding: 15px; border-radius: 10px; margin-bottom: 20px; color: var(--green); border: 1px solid var(--border); }
+        /* Модалки */
+        .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.95); z-index: 100; justify-content: center; align-items: center; padding: 20px; box-sizing: border-box; }
+        .modal-content { background: var(--panel); padding: 25px; border-radius: 30px; text-align: center; width: 100%; max-width: 400px; border: 1px solid var(--border); }
+        
+        #qrcode { background: white; padding: 10px; border-radius: 15px; display: inline-block; margin-bottom: 15px; }
+        #qrcode img { width: 150px; height: 150px; }
+        
+        .addr-text { font-size: 10px; word-break: break-all; background: #000; padding: 12px; border-radius: 10px; margin-bottom: 15px; color: var(--green); border: 1px solid var(--border); position: relative; }
+        .copy-hint { position: absolute; bottom: -18px; left: 50%; transform: translateX(-50%); font-size: 9px; color: var(--green); display: none; }
 
-        .coin-row { display: flex; justify-content: space-between; align-items: center; padding: 18px; background: var(--panel); border-radius: 18px; margin-bottom: 10px; border: 1px solid var(--border); }
+        input { width: 100%; padding: 15px; margin-bottom: 10px; border-radius: 12px; border: 1px solid var(--border); background: #000; color: #fff; box-sizing: border-box; }
+
         nav { position: fixed; bottom: 0; width: 100%; height: 85px; background: var(--panel); display: flex; border-top: 1px solid var(--border); }
         .nav-item { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; font-size: 10px; color: var(--text); opacity: 0.6; }
         .nav-item.active { color: var(--green); opacity: 1; }
-        
-        #ton-connect-btn { display: flex; justify-content: center; margin-top: 15px; }
-        .admin-box { background: rgba(0,255,149,0.05); padding: 15px; border-radius: 15px; border: 1px dashed var(--green); margin-top: 20px; font-size: 11px; }
     </style>
 </head>
 <body>
 
-<header>💎 GROK AVTO TRADE <span style="font-size: 10px; color: var(--green);">V4.6</span></header>
+<header>💎 GROK AVTO TRADE <span style="font-size: 10px; color: var(--green);">V4.7</span></header>
 
 <div id="main_content">
     <div id="scr_wallet" class="screen active">
@@ -54,8 +52,9 @@
             <div id="addr_display" style="font-size: 11px; margin-top: 10px; color: var(--green); opacity: 0.8;">Авторизуйтесь в Settings</div>
         </div>
         <div class="btns">
-            <button class="btn btn-white" onclick="openDeposit()">📥 DEPOSIT</button>
-            <button class="btn btn-green" onclick="showTab('profile')">⚙️ MANAGE</button>
+            <button class="btn btn-white" onclick="openModal('deposit')">📥 DEPOSIT</button>
+            <button class="btn btn-green" onclick="openModal('send')">📤 SEND</button>
+            <button class="btn btn-white" style="grid-column: span 2; margin-top: 5px;" onclick="showTab('profile')">⚙️ MANAGE CONNECTION</button>
         </div>
     </div>
 
@@ -65,25 +64,33 @@
     </div>
 
     <div id="scr_profile" class="screen">
-        <h4 style="text-align: center;">УПРАВЛЕНИЕ ДОСТУПОМ</h4>
+        <h4 style="text-align: center;">СИСТЕМА</h4>
         <div style="background: var(--panel); padding: 25px; border-radius: 20px; border: 1px solid var(--border); text-align: center;">
             <div id="ton-connect-btn"></div>
-        </div>
-        <div class="admin-box">
-            <b style="color: var(--green);">SERVICE FEE ADRESS:</b><br>
-            <span style="word-break: break-all; opacity: 0.7;">UQC-SznwEOfPpQkOKtW7Ryr9jPJGTopwJDcuWlBEnpaS1bBJ</span>
         </div>
     </div>
 </div>
 
-<div id="deposit_modal" onclick="closeDeposit()">
+<div id="modal_deposit" class="modal" onclick="closeModal('deposit')">
     <div class="modal-content" onclick="event.stopPropagation()">
-        <h3 style="margin-top: 0;">Пополнение баланса</h3>
-        <p style="font-size: 12px; opacity: 0.6;">Отсканируйте QR или скопируйте адрес</p>
+        <h3 style="margin-top: 0;">Пополнение</h3>
         <div id="qrcode"></div>
-        <div id="full_address" class="addr-text">Адрес не найден</div>
-        <button class="btn btn-green" style="width: 100%;" onclick="copyUserAddr()">📋 КОПИРОВАТЬ АДРЕС</button>
-        <p style="font-size: 10px; margin-top: 15px; opacity: 0.4;" onclick="closeDeposit()">ЗАКРЫТЬ</p>
+        <div class="addr-text">
+            <span id="full_address">---</span>
+            <div id="copy_hint" class="copy-hint">Адрес скопирован в буфер!</div>
+        </div>
+        <button id="copy_btn" class="btn btn-green" style="width: 100%;" onclick="copyUserAddr()">📋 КОПИРОВАТЬ АДРЕС</button>
+        <p style="font-size: 11px; margin-top: 15px; opacity: 0.5;" onclick="closeModal('deposit')">ЗАКРЫТЬ</p>
+    </div>
+</div>
+
+<div id="modal_send" class="modal" onclick="closeModal('send')">
+    <div class="modal-content" onclick="event.stopPropagation()">
+        <h3 style="margin-top: 0;">Отправить TON</h3>
+        <input type="text" id="send_to" placeholder="Адрес получателя">
+        <input type="number" id="send_amount" placeholder="Сумма (TON)">
+        <button class="btn btn-green" style="width: 100%;" onclick="processSend()">ПОДТВЕРДИТЬ ОТПРАВКУ</button>
+        <p style="font-size: 11px; margin-top: 15px; opacity: 0.5;" onclick="closeModal('send')">ОТМЕНА</p>
     </div>
 </div>
 
@@ -112,11 +119,9 @@
                 document.getElementById('main_status').innerText = "ONLINE";
                 userFullAddr = wallet.account.address;
                 document.getElementById('addr_display').innerText = userFullAddr.substring(0,8) + "..." + userFullAddr.substring(userFullAddr.length-8);
-                // Обновляем QR и адрес в модалке сразу
                 updateQR(userFullAddr);
             } else {
                 document.getElementById('main_status').innerText = "OFFLINE";
-                document.getElementById('addr_display').innerText = "Авторизуйтесь в Settings";
                 userFullAddr = "";
             }
         });
@@ -126,32 +131,53 @@
         const qrContainer = document.getElementById("qrcode");
         qrContainer.innerHTML = "";
         if (text) {
-            new QRCode(qrContainer, { text: text, width: 180, height: 180 });
+            new QRCode(qrContainer, { text: text, width: 150, height: 150 });
             document.getElementById('full_address').innerText = text;
         }
     }
 
-    function openDeposit() {
+    function openModal(type) {
         if (!userFullAddr) {
             tg.showAlert("Сначала подключите кошелек!");
             return;
         }
-        document.getElementById('deposit_modal').style.display = 'flex';
+        document.getElementById('modal_' + type).style.display = 'flex';
         tg.HapticFeedback.impactOccurred('medium');
     }
 
-    function closeDeposit() {
-        document.getElementById('deposit_modal').style.display = 'none';
+    function closeModal(type) {
+        document.getElementById('modal_' + type).style.display = 'none';
     }
 
     function copyUserAddr() {
         if (!userFullAddr) return;
         navigator.clipboard.writeText(userFullAddr).then(() => {
+            const btn = document.getElementById('copy_btn');
+            const hint = document.getElementById('copy_hint');
+            
+            const originalText = btn.innerText;
+            btn.innerText = "✅ АДРЕС СКОПИРОВАН";
+            btn.style.background = "#fff";
+            hint.style.display = "block";
+            
             tg.HapticFeedback.notificationOccurred('success');
-            tg.showAlert("Адрес успешно скопирован!");
-        }).catch(() => {
-            tg.showAlert("Ошибка копирования. Попробуйте еще раз.");
+
+            setTimeout(() => {
+                btn.innerText = originalText;
+                btn.style.background = "var(--green)";
+                hint.style.display = "none";
+            }, 2000);
         });
+    }
+
+    function processSend() {
+        const to = document.getElementById('send_to').value;
+        const amount = document.getElementById('send_amount').value;
+        if(!to || !amount) {
+            tg.showAlert("Заполните все поля");
+            return;
+        }
+        tg.showAlert("Запрос на отправку " + amount + " TON на адрес " + to + " сформирован. (В V4.8 добавим подтверждение транзакции)");
     }
 
     function showTab(id, el) {
@@ -165,4 +191,3 @@
 </script>
 </body>
 </html>
-
