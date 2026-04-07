@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>SYN TERMINAL v5.8</title>
+    <title>SYN TERMINAL v5.9</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <script src="https://unpkg.com/@tonconnect/ui@2.0.9/dist/tonconnect-ui.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
@@ -11,13 +11,7 @@
         :root { --bg: #05070a; --panel: #12151c; --green: #00ff95; --text: #94a3b8; --border: #2b2f36; }
         body { background: var(--bg); color: white; margin: 0; font-family: -apple-system, sans-serif; height: 100vh; display: flex; flex-direction: column; overflow: hidden; }
         
-        /* HEADER - Опустили чуть ниже (padding-top) */
-        header { 
-            padding: 25px 15px 15px 15px; 
-            background: var(--panel); 
-            border-bottom: 1px solid var(--border); 
-            text-align: center; 
-        }
+        header { padding: 25px 15px 15px 15px; background: var(--panel); border-bottom: 1px solid var(--border); text-align: center; }
         header .title { font-weight: 900; font-size: 19px; letter-spacing: 1px; }
         header .subtitle { font-size: 10px; color: var(--green); letter-spacing: 2px; text-transform: uppercase; margin-top: 4px; }
         
@@ -25,39 +19,21 @@
         .screen { display: none; }
         .screen.active { display: block; }
 
-        /* NAV - Увеличили кнопки на долю */
-        nav { 
-            position: fixed; 
-            bottom: 0; 
-            width: 100%; 
-            height: 90px; /* Было 85px */
-            background: var(--panel); 
-            display: flex; 
-            border-top: 1px solid var(--border); 
-            z-index: 1000; 
-            padding-bottom: env(safe-area-inset-bottom);
-        }
-        .nav-item { 
-            flex: 1; 
-            display: flex; 
-            flex-direction: column; 
-            align-items: center; 
-            justify-content: center; 
-            font-size: 11px; /* Чуть крупнее шрифт */
-            color: var(--text); 
-            opacity: 0.5;
-            padding-top: 5px;
-        }
-        .nav-item span { font-size: 22px; margin-bottom: 4px; } /* Увеличили иконки */
+        /* Кнопки меню как надо */
+        nav { position: fixed; bottom: 0; width: 100%; height: 90px; background: var(--panel); display: flex; border-top: 1px solid var(--border); z-index: 1000; padding-bottom: env(safe-area-inset-bottom); }
+        .nav-item { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; font-size: 11px; color: var(--text); opacity: 0.5; }
+        .nav-item span { font-size: 24px; margin-bottom: 4px; }
         .nav-item.active { color: var(--green); opacity: 1; font-weight: bold; }
         
-        /* Остальные стили стабильной версии */
         .balance-card { background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%); padding: 30px; border-radius: 25px; text-align: center; margin-bottom: 25px; border: 1px solid var(--border); }
         .asset-card { background: rgba(26, 30, 38, 0.6); backdrop-filter: blur(10px); border-radius: 22px; padding: 15px; margin-bottom: 10px; display: flex; align-items: center; justify-content: space-between; border: 1px solid var(--border); }
+        
         .btn-general { padding: 18px; border-radius: 18px; border: none; font-weight: 800; text-transform: uppercase; font-size: 11px; cursor: pointer; }
         .btn-green { background: var(--green); color: #000; }
+
         .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.95); z-index: 2000; justify-content: center; align-items: center; padding: 20px; box-sizing: border-box; }
         .modal-content { background: var(--panel); padding: 25px; border-radius: 30px; text-align: center; width: 100%; max-width: 400px; border: 1px solid var(--border); }
+        .modal input { width: 100%; padding: 15px; margin-bottom: 12px; background: #000; border: 1px solid var(--border); color: #fff; border-radius: 12px; box-sizing: border-box; outline: none; }
     </style>
 </head>
 <body>
@@ -99,7 +75,7 @@
 
     <div id="scr_profile" class="screen">
         <div style="background: var(--panel); padding: 30px; border-radius: 25px; border: 1px solid var(--border); text-align: center;">
-            <div id="ton-connect-btn"></div>
+            <div id="ton-connect-btn" style="display: flex; justify-content: center;"></div>
         </div>
     </div>
 </div>
@@ -122,10 +98,11 @@
 
 <div id="modal_send" class="modal" onclick="closeModal('send')">
     <div class="modal-content" onclick="event.stopPropagation()">
-        <h3>Send Assets</h3>
-        <input type="text" placeholder="Recipient Address" style="width:100%; padding:12px; margin-bottom:10px; background:#000; border:1px solid var(--border); color:#fff; border-radius:10px;">
-        <input type="number" placeholder="Amount" style="width:100%; padding:12px; margin-bottom:10px; background:#000; border:1px solid var(--border); color:#fff; border-radius:10px;">
-        <button class="btn-general btn-green" style="width: 100%;">CONFIRM</button>
+        <h3 style="margin-top:0">Send Assets</h3>
+        <input type="text" id="send_addr" placeholder="Recipient Address">
+        <input type="text" id="send_memo" placeholder="Memo / Comment (Optional)">
+        <input type="number" id="send_val" placeholder="Amount">
+        <button class="btn-general btn-green" style="width: 100%;" onclick="tg.showAlert('Processing...')">CONFIRM SEND</button>
     </div>
 </div>
 
@@ -138,12 +115,13 @@
     const assets = [
         { s: 'TON', n: 'TON Network', p: 'TONUSDT', i: 'https://cryptologos.cc/logos/toncoin-ton-logo.png' },
         { s: 'USDT', n: 'Tether', p: 'USDT', i: 'https://cryptologos.cc/logos/tether-usdt-logo.png' },
-        { s: 'BTC', n: 'Bitcoin', p: 'BTCUSDT', i: 'https://cryptologos.cc/logos/bitcoin-btc-logo.png' }
+        { s: 'BTC', n: 'Bitcoin', p: 'BTCUSDT', i: 'https://cryptologos.cc/logos/bitcoin-btc-logo.png' },
+        { s: 'ETH', n: 'Ethereum', p: 'ETHUSDT', i: 'https://cryptologos.cc/logos/ethereum-eth-logo.png' }
     ];
 
     async function init() {
         const fromS = document.getElementById('swap_from_asset');
-        assets.forEach(a => fromS.innerHTML += `<option value="${a.s}">${a.s}</option>`);
+        if(fromS) assets.forEach(a => fromS.innerHTML += `<option value="${a.s}">${a.s}</option>`);
 
         const tonConnectUI = new TON_CONNECT_UI.TonConnectUI({
             manifestUrl: 'https://sergey52bb.github.io/grok-autotrade/tonconnect-manifest.json',
@@ -158,23 +136,26 @@
             }
         });
         updatePrices();
+        setInterval(updatePrices, 30000);
     }
 
     async function updatePrices() {
         try {
-            const res = await fetch(`https://api.binance.com/api/v3/ticker/price?symbols=["TONUSDT","BTCUSDT"]`);
+            const symbols = ["TONUSDT","BTCUSDT","ETHUSDT"];
+            const res = await fetch(`https://api.binance.com/api/v3/ticker/price?symbols=["TONUSDT","BTCUSDT","ETHUSDT"]`);
             const data = await res.json();
             data.forEach(item => {
                 const asset = assets.find(a => a.p === item.symbol);
                 if(asset) prices[asset.s] = parseFloat(item.price);
             });
             prices['USDT'] = 1.0;
-            renderMarket();
-        } catch(e) {}
+            renderMarket(); // ПОЧИНИЛ МАРКЕТ (СКРИН 2)
+        } catch(e) { console.log("Market sync error"); }
     }
 
     function renderMarket() {
         const list = document.getElementById('market_list');
+        if(!list) return;
         list.innerHTML = assets.filter(a => a.s !== 'USDT').map(a => `
             <div class="asset-card">
                 <div style="display:flex; align-items:center; gap:12px;">
@@ -182,7 +163,7 @@
                     <div><b>${a.s}</b><br><small style="opacity:0.5;">${a.n}</small></div>
                 </div>
                 <div style="text-align:right;">
-                    <b>$${prices[a.s] ? prices[a.s].toFixed(2) : '...'}</b><br>
+                    <div style="font-weight:900;">$${prices[a.s] ? prices[a.s].toFixed(2) : '...'}</div>
                     <button class="btn-green" style="padding:6px 12px; font-size:10px; border:none; border-radius:8px; margin-top:5px;">BUY</button>
                 </div>
             </div>
@@ -194,17 +175,18 @@
         document.getElementById('scr_'+id).classList.add('active');
         document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
         el.classList.add('active');
+        tg.HapticFeedback.impactOccurred('light');
     }
 
     function updateQR(t) {
-        const c = document.getElementById("qrcode"); c.innerHTML = "";
-        new QRCode(c, { text: t, width: 150, height: 150 });
+        const c = document.getElementById("qrcode"); if(!c) return;
+        c.innerHTML = ""; new QRCode(c, { text: t, width: 150, height: 150 });
         document.getElementById('full_address').innerText = t;
     }
 
     function openModal(t) { document.getElementById('modal_'+t).style.display = 'flex'; }
     function closeModal(t) { document.getElementById('modal_'+t).style.display = 'none'; }
-    function copyUserAddr() { navigator.clipboard.writeText(userFullAddr); tg.showAlert("Copied!"); }
+    function copyUserAddr() { navigator.clipboard.writeText(userFullAddr); tg.showAlert("Address Copied!"); }
 
     window.onload = init;
 </script>
