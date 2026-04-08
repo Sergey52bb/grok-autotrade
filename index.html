@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>SYN TERMINAL v6.2</title>
+    <title>SYN TERMINAL v6.3</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <script src="https://unpkg.com/@tonconnect/ui@2.0.9/dist/tonconnect-ui.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
@@ -79,7 +79,7 @@
                 <input type="number" id="swap_t_val" placeholder="0.0" readonly>
                 <select id="swap_t_coin" onchange="doSwapCalc()"></select>
             </div>
-            <button class="btn-general" style="background:var(--green); color:#000; margin-top:15px;" onclick="tg.showAlert('Swap pending...')">CONFIRM SWAP</button>
+            <button class="btn-general" style="background:var(--green); color:#000; margin-top:15px;" onclick="tg.showAlert('Swap initiated')">CONFIRM SWAP</button>
         </div>
     </div>
 
@@ -110,9 +110,18 @@
     <div class="modal-content" onclick="event.stopPropagation()">
         <h3>Send Assets</h3>
         <input type="text" placeholder="Recipient Address">
-        <input type="text" id="send_memo" placeholder="Memo / Comment (Required for Exchanges)">
+        <input type="text" placeholder="Memo / Comment">
         <input type="number" placeholder="Amount">
         <button class="btn-general" style="background:var(--green); color:#000;">SEND</button>
+    </div>
+</div>
+
+<div id="modal_trade" class="modal" onclick="closeModal('trade')">
+    <div class="modal-content" onclick="event.stopPropagation()">
+        <h3 id="trade_title">Trade</h3>
+        <p id="trade_asset" style="color:var(--text); font-size:12px; margin-bottom:15px;"></p>
+        <input type="number" id="trade_amount" placeholder="Enter amount">
+        <button id="trade_btn" class="btn-general" style="margin-top:10px;">CONFIRM</button>
     </div>
 </div>
 
@@ -175,12 +184,26 @@
                 <div style="text-align:right;">
                     <b>$${prices[a.s].toLocaleString()}</b>
                     <div style="margin-top:5px;">
-                        <button class="btn-trade btn-buy" onclick="openModal('send')">BUY</button>
-                        <button class="btn-trade btn-sell" onclick="openModal('send')">SELL</button>
+                        <button class="btn-trade btn-buy" onclick="openTrade('BUY', '${a.s}')">BUY</button>
+                        <button class="btn-trade btn-sell" onclick="openTrade('SELL', '${a.s}')">SELL</button>
                     </div>
                 </div>
             </div>
         `).join('');
+    }
+
+    function openTrade(type, coin) {
+        const title = document.getElementById('trade_title');
+        const btn = document.getElementById('trade_btn');
+        const assetInfo = document.getElementById('trade_asset');
+        
+        title.innerText = type === 'BUY' ? 'Buy ' + coin : 'Sell ' + coin;
+        assetInfo.innerText = 'Current price: $' + prices[coin].toLocaleString();
+        btn.style.background = type === 'BUY' ? 'var(--green)' : 'var(--red)';
+        btn.style.color = type === 'BUY' ? '#000' : '#fff';
+        btn.onclick = () => { tg.showAlert(type + ' order for ' + coin + ' placed!'); closeModal('trade'); };
+        
+        openModal('trade');
     }
 
     function doSwapCalc() {
