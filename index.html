@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>SYN TERMINAL v6.6</title>
+    <title>SYN TERMINAL v6.7</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <script src="https://unpkg.com/@tonconnect/ui@2.0.9/dist/tonconnect-ui.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
@@ -11,13 +11,11 @@
         :root { --bg: #05070a; --panel: #12151c; --green: #00ff95; --red: #ff4a4a; --text: #94a3b8; --border: #2b2f36; }
         body { background: var(--bg); color: white; margin: 0; font-family: -apple-system, sans-serif; height: 100vh; display: flex; flex-direction: column; overflow: hidden; }
         
-        /* Welcome Screen */
         #welcome_screen { position: fixed; top:0; left:0; width:100%; height:100%; background: var(--bg); z-index: 5000; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 30px; box-sizing: border-box; text-align: center; }
-        #welcome_screen .crypto-pic { width: 100%; max-width: 320px; border-radius: 20px; margin-bottom: 20px; border: 1px solid var(--green); box-shadow: 0 0 30px rgba(0,255,149,0.2); }
+        #welcome_screen img { width: 100%; max-width: 280px; border-radius: 20px; margin-bottom: 20px; border: 1px solid var(--green); }
 
         header { padding: 25px 15px 15px 15px; background: var(--panel); border-bottom: 1px solid var(--border); text-align: center; }
         header .title { font-weight: 900; font-size: 19px; letter-spacing: 1px; }
-        header .subtitle { font-size: 10px; color: var(--green); letter-spacing: 2px; text-transform: uppercase; margin-top: 4px; }
         
         #main_content { flex: 1; overflow-y: auto; padding: 20px 15px 140px 15px; }
         .screen { display: none; }
@@ -25,70 +23,61 @@
 
         nav { position: fixed; bottom: 0; width: 100%; height: 90px; background: var(--panel); display: flex; border-top: 1px solid var(--border); z-index: 1000; padding-bottom: env(safe-area-inset-bottom); }
         .nav-item { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; font-size: 11px; color: var(--text); opacity: 0.5; }
-        .nav-item span { font-size: 24px; margin-bottom: 4px; }
-        .nav-item.active { color: var(--green); opacity: 1; font-weight: bold; }
+        .nav-item.active { color: var(--green); opacity: 1; }
         
         .balance-card { background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%); padding: 30px; border-radius: 25px; text-align: center; margin-bottom: 25px; border: 1px solid var(--border); }
-        .asset-card { background: rgba(26, 30, 38, 0.6); backdrop-filter: blur(10px); border-radius: 20px; padding: 12px; margin-bottom: 8px; display: flex; align-items: center; justify-content: space-between; border: 1px solid var(--border); }
+        .asset-card { background: var(--panel); border-radius: 20px; padding: 15px; margin-bottom: 10px; display: flex; align-items: center; justify-content: space-between; border: 1px solid var(--border); }
         
-        .chart-container { width: 100%; height: 250px; background: var(--panel); border-radius: 20px; border: 1px solid var(--border); overflow: hidden; margin-bottom: 20px; }
-
         .btn-general { padding: 18px; border-radius: 18px; border: none; font-weight: 800; text-transform: uppercase; font-size: 12px; cursor: pointer; width: 100%; }
-        .btn-trade { padding: 8px 12px; font-size: 10px; border: none; border-radius: 8px; font-weight: bold; min-width: 60px; }
-        
+        .btn-trade { padding: 8px 12px; font-size: 10px; border: none; border-radius: 8px; font-weight: bold; cursor: pointer; }
+
         .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.9); z-index: 2000; justify-content: center; align-items: center; padding: 20px; }
         .modal-content { background: var(--panel); padding: 25px; border-radius: 30px; text-align: center; width: 100%; border: 1px solid var(--border); }
-        .modal input { width: 100%; padding: 15px; margin-bottom: 10px; background: #000; border: 1px solid var(--border); border-radius: 12px; color: #fff; box-sizing: border-box; }
+        .modal input { width: 100%; padding: 15px; margin-bottom: 10px; background: #000; border: 1px solid var(--border); border-radius: 12px; color: #fff; box-sizing: border-box; outline: none; }
     </style>
 </head>
 <body>
 
 <div id="welcome_screen">
-    <img src="https://img.freepik.com/free-vector/gradient-crypto-logo-template_23-2149206159.jpg" class="crypto-pic">
+    <img src="https://img.freepik.com/free-vector/gradient-crypto-logo-template_23-2149206159.jpg">
     <h1>SYN Terminal</h1>
-    <p>AI-Powered Crypto Trading Platform</p>
-    <button class="btn-general" style="background:var(--green); color:#000; width:80%;" onclick="startApp()">START TRADING</button>
+    <p>Professional AI Trading</p>
+    <button class="btn-general" style="background:var(--green); color:#000;" onclick="startApp()">LAUNCH</button>
 </div>
 
 <header>
     <div class="title">💎 SYN TERMINAL</div>
-    <div class="subtitle">Real-time Trading</div>
 </header>
 
 <div id="main_content">
     <div id="scr_wallet" class="screen active">
         <div class="balance-card">
-            <div style="font-size: 11px; opacity: 0.6;">MAIN BALANCE</div>
-            <h1 id="main_balance" style="font-size: 36px; margin: 10px 0;">0.00 TON</h1>
-            <div id="addr_display" style="font-size: 10px; opacity: 0.4;">Wallet Not Connected</div>
+            <div style="font-size: 11px; opacity: 0.6;">TOTAL BALANCE</div>
+            <h1 id="main_balance">0.00 TON</h1>
+            <div id="addr_display" style="font-size: 10px; opacity: 0.4;">Not Connected</div>
         </div>
-        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 20px;">
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
             <button class="btn-general" style="background:#fff; color:#000;" onclick="openModal('deposit')">DEPOSIT</button>
             <button class="btn-general" style="background:var(--green); color:#000;" onclick="openModal('send')">SEND</button>
         </div>
     </div>
 
     <div id="scr_market" class="screen">
-        <div class="chart-container">
-            <iframe src="https://s.tradingview.com/widgetembed/?frameElementId=tradingview_1&symbol=OKX%3ATONUSDT&interval=60&hidesidetoolbar=1&symboledit=1&saveimage=1&toolbarbg=f1f3f6&studies=%5B%5D&theme=dark&style=1&timezone=Etc%2FUTC" style="width: 100%; height: 100%; border: none;"></iframe>
-        </div>
         <div id="market_list"></div>
     </div>
 
     <div id="scr_swap" class="screen">
         <div style="background:var(--panel); padding:20px; border-radius:25px; border:1px solid var(--border);">
-            <div style="background:#000; padding:15px; border-radius:15px; margin-bottom:10px;">
-                <input type="number" id="sw_f_val" placeholder="0.0" oninput="doSwapCalc()" style="background:transparent; border:none; color:#fff; width:100%; font-size:20px; outline:none;">
-                <select id="sw_f_coin" onchange="doSwapCalc()" style="background:#1a1e26; color:#fff; border:none; margin-top:10px;"></select>
-            </div>
-            <button class="btn-general" style="background:var(--green); color:#000;" onclick="tg.showAlert('Swap confirmed')">SWAP ASSETS</button>
+            <input type="number" id="sw_f_val" placeholder="0.0" oninput="doSwapCalc()" style="width:100%; background:#000; border:1px solid var(--border); padding:15px; border-radius:15px; color:#fff; margin-bottom:10px;">
+            <select id="sw_f_coin" style="width:100%; background:#1a1e26; color:#fff; padding:10px; border-radius:10px; margin-bottom:15px;"></select>
+            <div style="text-align:center; margin-bottom:15px; color:var(--green);">⬇️</div>
+            <select id="sw_t_coin" style="width:100%; background:#1a1e26; color:#fff; padding:10px; border-radius:10px; margin-bottom:20px;"></select>
+            <button class="btn-general" style="background:var(--green); color:#000;" onclick="tg.showAlert('Swap processing...')">SWAP</button>
         </div>
     </div>
 
     <div id="scr_profile" class="screen">
-        <div style="background:var(--panel); padding:20px; border-radius:25px; border:1px solid var(--border); text-align:center;">
-            <div id="ton-connect-btn"></div>
-        </div>
+        <div style="background:var(--panel); padding:20px; border-radius:25px; text-align:center;"><div id="ton-connect-btn"></div></div>
     </div>
 </div>
 
@@ -101,8 +90,9 @@
 
 <div id="modal_deposit" class="modal" onclick="closeModal('deposit')">
     <div class="modal-content" onclick="event.stopPropagation()">
-        <h3>Deposit TON</h3>
+        <h3>Deposit</h3>
         <div id="qrcode" style="display:flex; justify-content:center; margin:15px 0; background:white; padding:10px; border-radius:10px;"></div>
+        <div id="full_addr" style="font-size:9px; color:var(--text); word-break:break-all; margin-bottom:15px;"></div>
         <button class="btn-general" style="background:var(--green); color:#000;" onclick="copyAddr()">COPY ADDRESS</button>
     </div>
 </div>
@@ -110,38 +100,26 @@
 <div id="modal_send" class="modal" onclick="closeModal('send')">
     <div class="modal-content" onclick="event.stopPropagation()">
         <h3>Send TON</h3>
-        <input type="text" placeholder="Address">
-        <input type="number" placeholder="Amount">
-        <button class="btn-general" style="background:var(--green); color:#000;">CONFIRM SEND</button>
+        <input type="text" id="send_addr" placeholder="Recipient Address">
+        <input type="text" id="send_memo" placeholder="Memo (Optional)">
+        <input type="number" id="send_amount" placeholder="Amount">
+        <button class="btn-general" style="background:var(--green); color:#000;">SEND</button>
     </div>
 </div>
 
 <script>
     const tg = window.Telegram.WebApp;
-    tg.ready(); tg.expand();
-
-    let prices = { 'TON': 7.2, 'BTC': 65000, 'ETH': 3500, 'USDT': 1 };
-    const assets = [
-        { s:'TON', p:'TONUSDT', i:'https://cryptologos.cc/logos/toncoin-ton-logo.png' },
-        { s:'BTC', p:'BTCUSDT', i:'https://cryptologos.cc/logos/bitcoin-btc-logo.png' }
-    ];
+    let prices = { 'TON': 7.2, 'BTC': 65000, 'USDT': 1 };
+    const assets = [{s:'TON', i:'https://cryptologos.cc/logos/toncoin-ton-logo.png'}, {s:'BTC', i:'https://cryptologos.cc/logos/bitcoin-btc-logo.png'}];
+    let currentAddr = "";
 
     function startApp() { document.getElementById('welcome_screen').style.display = 'none'; }
 
-    async function fetchBalance(address) {
-        try {
-            const response = await fetch(`https://toncenter.com/api/v2/getAddressBalance?address=${address}`);
-            const data = await response.json();
-            if (data.ok) {
-                const bal = (parseInt(data.result) / 1000000000).toFixed(2);
-                document.getElementById('main_balance').innerText = bal + " TON";
-            }
-        } catch (e) { console.error("Balance fetch error"); }
-    }
-
     function init() {
         const f = document.getElementById('sw_f_coin');
-        assets.forEach(a => f.innerHTML += `<option value="${a.s}">${a.s}</option>`);
+        const t = document.getElementById('sw_t_coin');
+        assets.forEach(a => { f.innerHTML += `<option value="${a.s}">${a.s}</option>`; t.innerHTML += `<option value="${a.s}">${a.s}</option>`; });
+        t.value = "BTC";
 
         const tonConnectUI = new TON_CONNECT_UI.TonConnectUI({
             manifestUrl: 'https://sergey52bb.github.io/grok-autotrade/tonconnect-manifest.json',
@@ -150,22 +128,27 @@
 
         tonConnectUI.onStatusChange(wallet => {
             if (wallet) {
-                const a = wallet.account.address;
-                document.getElementById('addr_display').innerText = a.substring(0,8) + "..." + a.substring(a.length-8);
+                currentAddr = wallet.account.address;
+                document.getElementById('addr_display').innerText = currentAddr.substring(0,8) + "...";
+                document.getElementById('full_addr').innerText = currentAddr;
                 document.getElementById("qrcode").innerHTML = "";
-                new QRCode(document.getElementById("qrcode"), { text: a, width: 160, height: 160 });
-                fetchBalance(a);
+                new QRCode(document.getElementById("qrcode"), { text: currentAddr, width: 140, height: 140 });
+                fetch(`https://toncenter.com/api/v2/getAddressBalance?address=${currentAddr}`)
+                    .then(r => r.json()).then(d => { if(d.ok) document.getElementById('main_balance').innerText = (d.result/1e9).toFixed(2) + " TON"; });
             }
         });
         renderMarket();
     }
 
     function renderMarket() {
-        const list = document.getElementById('market_list');
-        list.innerHTML = assets.map(a => `
+        document.getElementById('market_list').innerHTML = assets.map(a => `
             <div class="asset-card">
                 <div style="display:flex; align-items:center; gap:10px;"><img src="${a.i}" width="24"><b>${a.s}</b></div>
-                <div><b>$${prices[a.s]}</b></div>
+                <div style="text-align:right;">
+                    <b>$${prices[a.s]}</b><br>
+                    <button class="btn-trade" style="color:var(--green)" onclick="tg.showAlert('Buy order')">BUY</button>
+                    <button class="btn-trade" style="color:var(--red)" onclick="tg.showAlert('Sell order')">SELL</button>
+                </div>
             </div>
         `).join('');
     }
@@ -179,7 +162,7 @@
 
     function openModal(id) { document.getElementById('modal_'+id).style.display = 'flex'; }
     function closeModal(id) { document.getElementById('modal_'+id).style.display = 'none'; }
-    function copyAddr() { tg.showAlert("Address Copied!"); }
+    function copyAddr() { navigator.clipboard.writeText(currentAddr); tg.showAlert("Address Copied!"); }
 
     window.onload = init;
 </script>
