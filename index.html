@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>SYN TERMINAL v6.8</title>
+    <title>SYN TERMINAL v6.9</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <script src="https://unpkg.com/@tonconnect/ui@2.0.9/dist/tonconnect-ui.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
@@ -19,21 +19,21 @@
         .screen.active { display: block; }
 
         nav { position: fixed; bottom: 0; width: 100%; height: 90px; background: var(--panel); display: flex; border-top: 1px solid var(--border); z-index: 1000; padding-bottom: env(safe-area-inset-bottom); }
-        .nav-item { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; font-size: 11px; color: var(--text); opacity: 0.5; }
+        .nav-item { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; font-size: 11px; color: var(--text); opacity: 0.5; cursor: pointer; }
         .nav-item.active { color: var(--green); opacity: 1; }
         
         .balance-card { background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%); padding: 30px; border-radius: 25px; text-align: center; margin-bottom: 25px; border: 1px solid var(--border); }
         .asset-card { background: var(--panel); border-radius: 20px; padding: 15px; margin-bottom: 12px; border: 1px solid var(--border); }
         
-        /* Мини-график (имитация) */
-        .sparkline { width: 100px; height: 20px; stroke: var(--green); stroke-width: 2; fill: none; margin-top: 5px; }
+        .sparkline { width: 100px; height: 20px; stroke: var(--green); stroke-width: 2; fill: none; }
         
         .btn-general { padding: 18px; border-radius: 18px; border: none; font-weight: 800; text-transform: uppercase; font-size: 12px; cursor: pointer; width: 100%; }
-        .btn-trade { padding: 8px 15px; font-size: 10px; border-radius: 8px; font-weight: bold; border: 1px solid rgba(255,255,255,0.1); background: rgba(255,255,255,0.05); color: white; cursor: pointer; }
+        .btn-trade { padding: 8px 15px; font-size: 10px; border-radius: 8px; font-weight: bold; border: 1px solid rgba(255,255,255,0.1); background: rgba(255,255,255,0.05); color: white; }
 
         .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.95); z-index: 2000; justify-content: center; align-items: center; padding: 20px; }
         .modal-content { background: var(--panel); padding: 25px; border-radius: 30px; text-align: center; width: 100%; border: 1px solid var(--border); }
-        .modal input { width: 100%; padding: 15px; margin-bottom: 10px; background: #000; border: 1px solid var(--border); border-radius: 12px; color: #fff; box-sizing: border-box; outline: none; }
+        
+        select, input { width: 100%; padding: 15px; background: #000; border: 1px solid var(--border); border-radius: 12px; color: #fff; box-sizing: border-box; outline: none; }
     </style>
 </head>
 <body>
@@ -45,7 +45,7 @@
         <div class="balance-card">
             <div style="font-size: 11px; opacity: 0.6;">TOTAL BALANCE</div>
             <h1 id="main_balance">0.00 TON</h1>
-            <div id="addr_display" style="font-size: 10px; opacity: 0.4; font-family: monospace;">---</div>
+            <div id="addr_display" style="font-size: 10px; opacity: 0.4; font-family: monospace;">Disconnected</div>
         </div>
         <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
             <button class="btn-general" style="background:#fff; color:#000;" onclick="openModal('deposit')">DEPOSIT</button>
@@ -54,16 +54,22 @@
     </div>
 
     <div id="scr_market" class="screen">
-        <div id="market_list"></div>
+        <div id="market_list">Loading real-time data...</div>
     </div>
 
     <div id="scr_swap" class="screen">
         <div style="background:var(--panel); padding:20px; border-radius:25px; border:1px solid var(--border);">
-            <div style="font-size:12px; opacity:0.6; margin-bottom:8px;">You Pay</div>
-            <select id="sw_f_coin" style="width:100%; background:#000; color:#fff; padding:15px; border-radius:12px; border:1px solid var(--border); margin-bottom:15px;"></select>
-            <div style="font-size:12px; opacity:0.6; margin-bottom:8px;">You Receive</div>
-            <select id="sw_t_coin" style="width:100%; background:#000; color:#fff; padding:15px; border-radius:12px; border:1px solid var(--border); margin-bottom:20px;"></select>
-            <button class="btn-general" style="background:var(--green); color:#000;" onclick="tg.showAlert('Swap processing...')">SWAP ASSETS</button>
+            <p style="font-size:12px; opacity:0.6;">Sell</p>
+            <div style="display:flex; gap:10px; margin-bottom:15px;">
+                <input type="number" id="sw_val" placeholder="0.0" oninput="calculateSwap()">
+                <select id="sw_from" onchange="calculateSwap()"></select>
+            </div>
+            <p style="font-size:12px; opacity:0.6;">Buy</p>
+            <div style="display:flex; gap:10px; margin-bottom:20px;">
+                <input type="text" id="sw_res" placeholder="0.0" readonly style="color:var(--green);">
+                <select id="sw_to" onchange="calculateSwap()"></select>
+            </div>
+            <button class="btn-general" style="background:var(--green); color:#000;" onclick="tg.showAlert('Swap Initiated')">CONFIRM SWAP</button>
         </div>
     </div>
 
@@ -81,39 +87,47 @@
 
 <div id="modal_deposit" class="modal" onclick="closeModal('deposit')">
     <div class="modal-content" onclick="event.stopPropagation()">
-        <h3>Your TON Address</h3>
+        <h3>Deposit Address</h3>
         <div id="qrcode" style="display:flex; justify-content:center; margin:15px 0; background:white; padding:10px; border-radius:10px;"></div>
-        <div id="full_addr" style="font-size:10px; color:var(--text); word-break:break-all; margin-bottom:15px; font-family:monospace;"></div>
-        <button class="btn-general" style="background:var(--green); color:#000;" onclick="copyAddr()">COPY ADDRESS</button>
+        <p id="full_addr" style="font-size:10px; word-break:break-all; opacity:0.5;"></p>
+        <button class="btn-general" style="background:var(--green); color:#000;" onclick="copyAddr()">COPY</button>
     </div>
 </div>
 
 <div id="modal_send" class="modal" onclick="closeModal('send')">
     <div class="modal-content" onclick="event.stopPropagation()">
-        <h3>Send Assets</h3>
-        <input type="text" id="send_addr" placeholder="Recipient Address">
-        <input type="text" id="send_memo" placeholder="Memo (Comment)">
-        <input type="number" id="send_amount" placeholder="Amount">
-        <button class="btn-general" style="background:var(--green); color:#000;">SEND</button>
+        <h3>Send TON</h3>
+        <input type="text" placeholder="Address" style="margin-bottom:10px;">
+        <input type="text" placeholder="Memo" style="margin-bottom:10px;">
+        <input type="number" placeholder="Amount">
+        <button class="btn-general" style="background:var(--green); color:#000; margin-top:15px;">SEND</button>
     </div>
 </div>
 
 <script>
     const tg = window.Telegram.WebApp;
-    tg.ready(); tg.expand();
-
-    let prices = { 'TON': 7.24, 'BTC': 69420.50, 'ETH': 3450.12, 'DOGE': 0.16, 'USDT': 1 };
+    let prices = { 'TON': 7.20, 'BTC': 69000, 'ETH': 3400, 'DOGE': 0.16, 'USDT': 1 };
     const assets = [
-        {s:'TON', i:'https://cryptologos.cc/logos/toncoin-ton-logo.png', g:'M0,10 L10,8 L20,12 L30,5 L40,9 L50,4 L60,8 L70,3 L80,7 L90,2 L100,5'},
-        {s:'BTC', i:'https://cryptologos.cc/logos/bitcoin-btc-logo.png', g:'M0,5 L10,7 L20,4 L30,8 L40,3 L50,6 L60,2 L70,5 L80,1 L90,4 L100,2'},
-        {s:'ETH', i:'https://cryptologos.cc/logos/ethereum-eth-logo.png', g:'M0,8 L10,5 L20,9 L30,4 L40,7 L50,3 L60,6 L70,2 L80,5 L90,1 L100,4'},
-        {s:'DOGE', i:'https://cryptologos.cc/logos/dogecoin-doge-logo.png', g:'M0,12 L10,10 L20,13 L30,9 L40,11 L50,8 L60,10 L70,7 L80,9 L90,6 L100,8'}
+        {s:'TON', i:'https://cryptologos.cc/logos/toncoin-ton-logo.png', g:'M0,10 L20,5 L40,8 L60,2 L80,6 L100,3'},
+        {s:'BTC', i:'https://cryptologos.cc/logos/bitcoin-btc-logo.png', g:'M0,5 L20,8 L40,3 L60,7 L80,2 L100,5'},
+        {s:'ETH', i:'https://cryptologos.cc/logos/ethereum-eth-logo.png', g:'M0,8 L20,3 L40,6 L60,1 L80,4 L100,2'},
+        {s:'DOGE', i:'https://cryptologos.cc/logos/dogecoin-doge-logo.png', g:'M0,10 L20,12 L40,9 L60,11 L80,8 L100,10'}
     ];
     let currentAddr = "";
 
+    async function updatePrices() {
+        try {
+            const res = await fetch('https://api.binance.com/api/v3/ticker/price');
+            const data = await res.json();
+            const map = { 'BTCUSDT': 'BTC', 'ETHUSDT': 'ETH', 'DOGEUSDT': 'DOGE' };
+            data.forEach(item => { if(map[item.symbol]) prices[map[item.symbol]] = parseFloat(item.price); });
+            renderMarket();
+        } catch(e) { renderMarket(); }
+    }
+
     function init() {
-        const f = document.getElementById('sw_f_coin');
-        const t = document.getElementById('sw_t_coin');
+        const f = document.getElementById('sw_from');
+        const t = document.getElementById('sw_to');
         Object.keys(prices).forEach(s => {
             f.innerHTML += `<option value="${s}">${s}</option>`;
             t.innerHTML += `<option value="${s}">${s}</option>`;
@@ -128,7 +142,7 @@
         tonConnectUI.onStatusChange(wallet => {
             if (wallet) {
                 currentAddr = wallet.account.address;
-                document.getElementById('addr_display').innerText = currentAddr.substring(0,10) + "...";
+                document.getElementById('addr_display').innerText = currentAddr.substring(0,8) + "...";
                 document.getElementById('full_addr').innerText = currentAddr;
                 document.getElementById("qrcode").innerHTML = "";
                 new QRCode(document.getElementById("qrcode"), { text: currentAddr, width: 140, height: 140 });
@@ -136,7 +150,15 @@
                     .then(r => r.json()).then(d => { if(d.ok) document.getElementById('main_balance').innerText = (d.result/1e9).toFixed(2) + " TON"; });
             }
         });
-        renderMarket();
+        updatePrices();
+        setInterval(updatePrices, 30000);
+    }
+
+    function calculateSwap() {
+        const f = document.getElementById('sw_from').value;
+        const t = document.getElementById('sw_to').value;
+        const v = document.getElementById('sw_val').value;
+        if(v) document.getElementById('sw_res').value = ((v * prices[f]) / prices[t]).toFixed(4);
     }
 
     function renderMarket() {
@@ -145,20 +167,14 @@
                 <div style="display:flex; justify-content:space-between; align-items:center;">
                     <div style="display:flex; align-items:center; gap:10px;">
                         <img src="${a.i}" width="28">
-                        <div>
-                            <b style="font-size:16px;">${a.s}</b><br>
-                            <span style="color:var(--text); font-size:12px;">$${prices[a.s].toLocaleString()}</span>
-                        </div>
+                        <div><b>${a.s}</b><br><span style="font-size:12px; opacity:0.6;">$${prices[a.s].toLocaleString()}</span></div>
                     </div>
                     <div style="display:flex; gap:8px;">
-                        <button class="btn-trade" onclick="tg.showAlert('Order: Buy ${a.s}')" style="color:var(--green)">BUY</button>
-                        <button class="btn-trade" onclick="tg.showAlert('Order: Sell ${a.s}')" style="color:var(--red)">SELL</button>
+                        <button class="btn-trade" style="color:var(--green)">BUY</button>
+                        <button class="btn-trade" style="color:var(--red)">SELL</button>
                     </div>
                 </div>
-                <div style="margin-top:10px; display:flex; align-items:center; gap:15px;">
-                    <svg class="sparkline" viewBox="0 0 100 15"><path d="${a.g}" /></svg>
-                    <span style="font-size:10px; color:var(--green); opacity:0.8;">+2.4% last 24h</span>
-                </div>
+                <div style="margin-top:10px;"><svg class="sparkline" viewBox="0 0 100 15"><path d="${a.g}" /></svg></div>
             </div>
         `).join('');
     }
@@ -168,21 +184,11 @@
         document.getElementById('scr_'+id).classList.add('active');
         document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
         el.classList.add('active');
-        tg.HapticFeedback.impactOccurred('light');
     }
 
     function openModal(id) { document.getElementById('modal_'+id).style.display = 'flex'; }
     function closeModal(id) { document.getElementById('modal_'+id).style.display = 'none'; }
-    
-    function copyAddr() {
-        const el = document.createElement('textarea');
-        el.value = currentAddr;
-        document.body.appendChild(el);
-        el.select();
-        document.execCommand('copy');
-        document.body.removeChild(el);
-        tg.showAlert("Address Copied!");
-    }
+    function copyAddr() { navigator.clipboard.writeText(currentAddr); tg.showAlert("Copied!"); }
 
     window.onload = init;
 </script>
