@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>SYN TERMINAL v6.1</title>
+    <title>SYN TERMINAL v6.2</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <script src="https://unpkg.com/@tonconnect/ui@2.0.9/dist/tonconnect-ui.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
@@ -27,19 +27,19 @@
         .balance-card { background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%); padding: 30px; border-radius: 25px; text-align: center; margin-bottom: 25px; border: 1px solid var(--border); }
         .asset-card { background: rgba(26, 30, 38, 0.6); backdrop-filter: blur(10px); border-radius: 22px; padding: 15px; margin-bottom: 10px; display: flex; align-items: center; justify-content: space-between; border: 1px solid var(--border); }
         
-        .btn-general { padding: 18px; border-radius: 18px; border: none; font-weight: 800; text-transform: uppercase; font-size: 11px; cursor: pointer; }
+        .btn-general { padding: 18px; border-radius: 18px; border: none; font-weight: 800; text-transform: uppercase; font-size: 11px; cursor: pointer; width: 100%; }
         .btn-trade { padding: 8px 12px; font-size: 10px; border: none; border-radius: 8px; font-weight: bold; min-width: 60px; }
         .btn-buy { background: var(--green); color: #000; }
         .btn-sell { background: var(--red); color: #fff; }
 
-        /* SWAP STYLES */
         .swap-box { background: var(--panel); padding: 20px; border-radius: 25px; border: 1px solid var(--border); }
         .swap-input-group { background: #000; border: 1px solid var(--border); padding: 12px; border-radius: 15px; display: flex; justify-content: space-between; margin-bottom: 5px; }
-        .swap-input-group input { background: transparent; border: none; color: #fff; font-size: 18px; width: 60%; outline: none; }
-        .swap-input-group select { background: #1a1e26; color: #fff; border: 1px solid var(--border); border-radius: 8px; padding: 5px; }
+        .swap-input-group input { background: transparent; border: none; color: #fff; font-size: 18px; width: 50%; outline: none; }
+        .swap-input-group select { background: #1a1e26; color: #fff; border: 1px solid var(--border); border-radius: 8px; padding: 5px; width: 40%; }
 
-        .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.95); z-index: 2000; justify-content: center; align-items: center; padding: 20px; box-sizing: border-box; }
+        .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.9); z-index: 2000; justify-content: center; align-items: center; padding: 20px; box-sizing: border-box; }
         .modal-content { background: var(--panel); padding: 25px; border-radius: 30px; text-align: center; width: 100%; max-width: 400px; border: 1px solid var(--border); }
+        .modal input { width: 100%; padding: 15px; margin-bottom: 10px; background: #000; border: 1px solid var(--border); border-radius: 12px; color: #fff; box-sizing: border-box; }
     </style>
 </head>
 <body>
@@ -52,9 +52,9 @@
 <div id="main_content">
     <div id="scr_wallet" class="screen active">
         <div class="balance-card">
-            <div style="font-size: 11px; opacity: 0.6; letter-spacing: 1px;">NET WORTH</div>
-            <h1 id="main_status" style="font-size: 34px; margin: 5px 0; font-weight: 900;">ONLINE</h1>
-            <div id="addr_display" style="font-size: 11px; opacity: 0.5;">Disconnected</div>
+            <div style="font-size: 11px; opacity: 0.6;">NET WORTH</div>
+            <h1 style="font-size: 34px; margin: 5px 0;">ONLINE</h1>
+            <div id="addr_display" style="font-size: 11px; opacity: 0.5;">Not Connected</div>
         </div>
         <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
             <button class="btn-general" style="background:#fff; color:#000;" onclick="openModal('deposit')">📥 DEPOSIT</button>
@@ -63,32 +63,29 @@
     </div>
 
     <div id="scr_market" class="screen">
-        <h4 style="opacity: 0.6; font-size: 12px; margin-bottom: 15px;">LIVE MARKET</h4>
-        <div id="market_list" style="text-align: center; padding: 20px;">Synchronizing...</div>
+        <h4 style="opacity:0.6; font-size:12px;">LIVE MARKET</h4>
+        <div id="market_list">Loading prices...</div>
     </div>
 
     <div id="scr_swap" class="screen">
         <h4 style="text-align: center;">⚡ SYN SWAP</h4>
         <div class="swap-box">
             <div class="swap-input-group">
-                <input type="number" id="swap_from_val" placeholder="0.0" oninput="calcSwap()">
-                <select id="swap_from_coin" onchange="calcSwap()"></select>
+                <input type="number" id="swap_f_val" placeholder="0.0" oninput="doSwapCalc()">
+                <select id="swap_f_coin" onchange="doSwapCalc()"></select>
             </div>
-            <div style="text-align: center; margin: 10px 0;">
-                <button onclick="reverseSwap()" style="background:none; border:none; color:var(--green); font-size: 20px; cursor:pointer;">🔄</button>
-            </div>
+            <div style="text-align:center; margin:10px 0;"><button onclick="swapReverse()" style="background:none; border:none; color:var(--green); font-size:20px;">🔄</button></div>
             <div class="swap-input-group" style="border-color: var(--green);">
-                <input type="number" id="swap_to_val" placeholder="0.0" readonly>
-                <select id="swap_to_coin" onchange="calcSwap()"></select>
+                <input type="number" id="swap_t_val" placeholder="0.0" readonly>
+                <select id="swap_t_coin" onchange="doSwapCalc()"></select>
             </div>
-            <div id="swap_info" style="font-size: 10px; color: var(--text); text-align: center; margin-top: 10px;">Rate: --</div>
-            <button class="btn-general" style="width:100%; margin-top:15px; background:var(--green); color:#000;" onclick="tg.showAlert('Swap Executed!')">CONFIRM SWAP</button>
+            <button class="btn-general" style="background:var(--green); color:#000; margin-top:15px;" onclick="tg.showAlert('Swap pending...')">CONFIRM SWAP</button>
         </div>
     </div>
 
     <div id="scr_profile" class="screen">
-        <div style="background: var(--panel); padding: 30px; border-radius: 25px; border: 1px solid var(--border); text-align: center;">
-            <div id="ton-connect-btn" style="display: flex; justify-content: center;"></div>
+        <div style="background:var(--panel); padding:30px; border-radius:25px; text-align:center; border:1px solid var(--border);">
+            <div id="ton-connect-btn"></div>
         </div>
     </div>
 </div>
@@ -102,19 +99,20 @@
 
 <div id="modal_deposit" class="modal" onclick="closeModal('deposit')">
     <div class="modal-content" onclick="event.stopPropagation()">
-        <h3>Receive Assets</h3>
-        <div id="qrcode" style="display:flex; justify-content:center; margin:15px 0;"></div>
-        <div id="full_address" style="font-size: 10px; color:var(--green); word-break:break-all;">---</div>
-        <button class="btn-general" style="width:100%; margin-top:15px; background:var(--green);" onclick="copyUserAddr()">COPY</button>
+        <h3>Your Address</h3>
+        <div id="qrcode" style="display:flex; justify-content:center; margin:15px 0; background:white; padding:10px; border-radius:10px;"></div>
+        <div id="full_address" style="font-size:10px; color:var(--green); word-break:break-all; margin-bottom:15px;">---</div>
+        <button class="btn-general" style="background:var(--green); color:#000;" onclick="copyAddr()">COPY</button>
     </div>
 </div>
 
 <div id="modal_send" class="modal" onclick="closeModal('send')">
     <div class="modal-content" onclick="event.stopPropagation()">
-        <h3 style="margin:0 0 15px 0;">Send</h3>
-        <input type="text" placeholder="Address" style="width:100%; padding:15px; margin-bottom:10px; background:#000; border:1px solid var(--border); border-radius:12px; color:#fff;">
-        <input type="number" placeholder="Amount" style="width:100%; padding:15px; background:#000; border:1px solid var(--border); border-radius:12px; color:#fff;">
-        <button class="btn-general" style="width:100%; background:var(--green); margin-top:15px;">SEND NOW</button>
+        <h3>Send Assets</h3>
+        <input type="text" placeholder="Recipient Address">
+        <input type="text" id="send_memo" placeholder="Memo / Comment (Required for Exchanges)">
+        <input type="number" placeholder="Amount">
+        <button class="btn-general" style="background:var(--green); color:#000;">SEND</button>
     </div>
 </div>
 
@@ -122,66 +120,17 @@
     const tg = window.Telegram.WebApp;
     tg.ready(); tg.expand();
 
-    let prices = { 'TON': 7.3, 'BTC': 65000, 'ETH': 3500, 'USDT': 1.0 };
+    let prices = { 'TON': 7.2, 'BTC': 65000, 'ETH': 3500, 'USDT': 1 };
     const assets = [
-        { s: 'TON', p: 'TONUSDT', i: 'https://cryptologos.cc/logos/toncoin-ton-logo.png' },
-        { s: 'BTC', p: 'BTCUSDT', i: 'https://cryptologos.cc/logos/bitcoin-btc-logo.png' },
-        { s: 'ETH', p: 'ETHUSDT', i: 'https://cryptologos.cc/logos/ethereum-eth-logo.png' },
-        { s: 'USDT', p: 'USDTUSDT', i: 'https://cryptologos.cc/logos/tether-usdt-logo.png' }
+        { s:'TON', p:'TONUSDT', i:'https://cryptologos.cc/logos/toncoin-ton-logo.png' },
+        { s:'BTC', p:'BTCUSDT', i:'https://cryptologos.cc/logos/bitcoin-btc-logo.png' },
+        { s:'ETH', p:'ETHUSDT', i:'https://cryptologos.cc/logos/ethereum-eth-logo.png' },
+        { s:'USDT', p:'USDTUSDT', i:'https://cryptologos.cc/logos/tether-usdt-logo.png' }
     ];
 
-    async function updateMarket() {
-        try {
-            const res = await fetch('https://api.binance.com/api/v3/ticker/price');
-            const data = await res.json();
-            assets.forEach(a => {
-                const found = data.find(item => item.symbol === a.p);
-                if(found) prices[a.s] = parseFloat(found.price);
-            });
-            renderMarket();
-        } catch(e) { console.error("Market error"); renderMarket(); }
-    }
-
-    function renderMarket() {
-        const list = document.getElementById('market_list');
-        if(!list) return;
-        list.innerHTML = assets.filter(a => a.s !== 'USDT').map(a => `
-            <div class="asset-card">
-                <div style="display:flex; align-items:center; gap:12px;">
-                    <img src="${a.i}" style="width:32px; height:32px;">
-                    <b>${a.s}</b>
-                </div>
-                <div style="text-align:right;">
-                    <div style="font-weight:900;">$${prices[a.s].toLocaleString()}</div>
-                    <div style="display:flex; gap:5px; margin-top:5px;">
-                        <button class="btn-trade btn-buy" onclick="openModal('send')">BUY</button>
-                        <button class="btn-trade btn-sell" onclick="openModal('send')">SELL</button>
-                    </div>
-                </div>
-            </div>
-        `).join('');
-    }
-
-    function calcSwap() {
-        const from = document.getElementById('swap_from_coin').value;
-        const to = document.getElementById('swap_to_coin').value;
-        const val = document.getElementById('swap_from_val').value;
-        if(!val) return;
-        const result = (val * prices[from]) / prices[to];
-        document.getElementById('swap_to_val').value = result.toFixed(4);
-        document.getElementById('swap_info').innerText = `1 ${from} ≈ ${(prices[from]/prices[to]).toFixed(4)} ${to}`;
-    }
-
-    function reverseSwap() {
-        const f = document.getElementById('swap_from_coin');
-        const t = document.getElementById('swap_to_coin');
-        const temp = f.value; f.value = t.value; t.value = temp;
-        calcSwap();
-    }
-
     function init() {
-        const f = document.getElementById('swap_from_coin');
-        const t = document.getElementById('swap_to_coin');
+        const f = document.getElementById('swap_f_coin');
+        const t = document.getElementById('swap_t_coin');
         assets.forEach(a => {
             f.innerHTML += `<option value="${a.s}">${a.s}</option>`;
             t.innerHTML += `<option value="${a.s}">${a.s}</option>`;
@@ -193,8 +142,59 @@
             buttonRootId: 'ton-connect-btn'
         });
 
-        updateMarket();
-        setInterval(updateMarket, 20000);
+        tonConnectUI.onStatusChange(wallet => {
+            if (wallet) {
+                const a = wallet.account.address;
+                document.getElementById('addr_display').innerText = a.substring(0,6) + "..." + a.substring(a.length-4);
+                document.getElementById('full_address').innerText = a;
+                document.getElementById("qrcode").innerHTML = "";
+                new QRCode(document.getElementById("qrcode"), { text: a, width: 160, height: 160 });
+            }
+        });
+        fetchPrices();
+        setInterval(fetchPrices, 20000);
+    }
+
+    async function fetchPrices() {
+        try {
+            const res = await fetch('https://api.binance.com/api/v3/ticker/price');
+            const data = await res.json();
+            assets.forEach(a => {
+                const item = data.find(d => d.symbol === a.p);
+                if(item) prices[a.s] = parseFloat(item.price);
+            });
+            renderMarket();
+        } catch(e) { renderMarket(); }
+    }
+
+    function renderMarket() {
+        const list = document.getElementById('market_list');
+        list.innerHTML = assets.filter(a => a.s !== 'USDT').map(a => `
+            <div class="asset-card">
+                <div style="display:flex; align-items:center; gap:10px;"><img src="${a.i}" width="30"><b>${a.s}</b></div>
+                <div style="text-align:right;">
+                    <b>$${prices[a.s].toLocaleString()}</b>
+                    <div style="margin-top:5px;">
+                        <button class="btn-trade btn-buy" onclick="openModal('send')">BUY</button>
+                        <button class="btn-trade btn-sell" onclick="openModal('send')">SELL</button>
+                    </div>
+                </div>
+            </div>
+        `).join('');
+    }
+
+    function doSwapCalc() {
+        const f = document.getElementById('swap_f_coin').value;
+        const t = document.getElementById('swap_t_coin').value;
+        const v = document.getElementById('swap_f_val').value;
+        if(v) document.getElementById('swap_t_val').value = ((v * prices[f]) / prices[t]).toFixed(4);
+    }
+
+    function swapReverse() {
+        const f = document.getElementById('swap_f_coin');
+        const t = document.getElementById('swap_t_coin');
+        const tmp = f.value; f.value = t.value; t.value = tmp;
+        doSwapCalc();
     }
 
     function showTab(id, el) {
@@ -202,12 +202,12 @@
         document.getElementById('scr_'+id).classList.add('active');
         document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
         el.classList.add('active');
-        tg.HapticFeedback.impactOccurred('medium');
+        tg.HapticFeedback.impactOccurred('light');
     }
 
-    function openModal(t) { document.getElementById('modal_'+t).style.display = 'flex'; }
-    function closeModal(t) { document.getElementById('modal_'+t).style.display = 'none'; }
-    function copyUserAddr() { tg.showAlert("Copied!"); }
+    function openModal(id) { document.getElementById('modal_'+id).style.display = 'flex'; }
+    function closeModal(id) { document.getElementById('modal_'+id).style.display = 'none'; }
+    function copyAddr() { navigator.clipboard.writeText(document.getElementById('full_address').innerText); tg.showAlert("Copied!"); }
 
     window.onload = init;
 </script>
