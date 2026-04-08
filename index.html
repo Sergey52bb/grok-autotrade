@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>SYN TERMINAL v6.3</title>
+    <title>SYN TERMINAL v6.4</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <script src="https://unpkg.com/@tonconnect/ui@2.0.9/dist/tonconnect-ui.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
@@ -11,6 +11,12 @@
         :root { --bg: #05070a; --panel: #12151c; --green: #00ff95; --red: #ff4a4a; --text: #94a3b8; --border: #2b2f36; }
         body { background: var(--bg); color: white; margin: 0; font-family: -apple-system, sans-serif; height: 100vh; display: flex; flex-direction: column; overflow: hidden; }
         
+        /* Приветственный экран как на скрине 1 */
+        #welcome_screen { position: fixed; top:0; left:0; width:100%; height:100%; background: var(--bg); z-index: 5000; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 20px; box-sizing: border-box; text-align: center; }
+        #welcome_screen img { width: 80%; border-radius: 20px; margin-bottom: 20px; box-shadow: 0 0 30px rgba(0,255,149,0.2); }
+        #welcome_screen h2 { margin: 10px 0; font-weight: 900; }
+        #welcome_screen p { color: var(--text); font-size: 14px; margin-bottom: 30px; }
+
         header { padding: 25px 15px 15px 15px; background: var(--panel); border-bottom: 1px solid var(--border); text-align: center; }
         header .title { font-weight: 900; font-size: 19px; letter-spacing: 1px; }
         header .subtitle { font-size: 10px; color: var(--green); letter-spacing: 2px; text-transform: uppercase; margin-top: 4px; }
@@ -32,17 +38,19 @@
         .btn-buy { background: var(--green); color: #000; }
         .btn-sell { background: var(--red); color: #fff; }
 
-        .swap-box { background: var(--panel); padding: 20px; border-radius: 25px; border: 1px solid var(--border); }
-        .swap-input-group { background: #000; border: 1px solid var(--border); padding: 12px; border-radius: 15px; display: flex; justify-content: space-between; margin-bottom: 5px; }
-        .swap-input-group input { background: transparent; border: none; color: #fff; font-size: 18px; width: 50%; outline: none; }
-        .swap-input-group select { background: #1a1e26; color: #fff; border: 1px solid var(--border); border-radius: 8px; padding: 5px; width: 40%; }
-
         .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.9); z-index: 2000; justify-content: center; align-items: center; padding: 20px; box-sizing: border-box; }
         .modal-content { background: var(--panel); padding: 25px; border-radius: 30px; text-align: center; width: 100%; max-width: 400px; border: 1px solid var(--border); }
         .modal input { width: 100%; padding: 15px; margin-bottom: 10px; background: #000; border: 1px solid var(--border); border-radius: 12px; color: #fff; box-sizing: border-box; }
     </style>
 </head>
 <body>
+
+<div id="welcome_screen">
+    <img src="https://img.freepik.com/free-vector/gradient-crypto-logo-template_23-2149206159.jpg" alt="Logo">
+    <h2>Welcome to SYN Terminal</h2>
+    <p>The most advanced trading terminal <br> inside Telegram.</p>
+    <button class="btn-general" style="background:var(--green); color:#000; width:80%;" onclick="startApp()">LAUNCH TERMINAL</button>
+</div>
 
 <header>
     <div class="title">💎 SYN TERMINAL</div>
@@ -64,28 +72,28 @@
 
     <div id="scr_market" class="screen">
         <h4 style="opacity:0.6; font-size:12px;">LIVE MARKET</h4>
-        <div id="market_list">Loading prices...</div>
+        <div id="market_list">Synchronizing...</div>
     </div>
 
     <div id="scr_swap" class="screen">
         <h4 style="text-align: center;">⚡ SYN SWAP</h4>
-        <div class="swap-box">
-            <div class="swap-input-group">
-                <input type="number" id="swap_f_val" placeholder="0.0" oninput="doSwapCalc()">
-                <select id="swap_f_coin" onchange="doSwapCalc()"></select>
+        <div style="background: var(--panel); padding: 20px; border-radius: 25px; border: 1px solid var(--border);">
+            <div style="display:flex; justify-content:space-between; background:#000; padding:12px; border-radius:15px; margin-bottom:10px;">
+                <input type="number" id="sw_f_val" placeholder="0.0" style="background:transparent; border:none; color:#fff; width:50%;" oninput="doSwapCalc()">
+                <select id="sw_f_coin" onchange="doSwapCalc()" style="background:#1a1e26; color:#fff; border:none;"></select>
             </div>
-            <div style="text-align:center; margin:10px 0;"><button onclick="swapReverse()" style="background:none; border:none; color:var(--green); font-size:20px;">🔄</button></div>
-            <div class="swap-input-group" style="border-color: var(--green);">
-                <input type="number" id="swap_t_val" placeholder="0.0" readonly>
-                <select id="swap_t_coin" onchange="doSwapCalc()"></select>
+            <div style="text-align:center; margin:5px 0;"><button onclick="swapReverse()" style="background:none; border:none; color:var(--green); font-size:20px;">🔄</button></div>
+            <div style="display:flex; justify-content:space-between; background:#000; padding:12px; border-radius:15px; border:1px solid var(--green);">
+                <input type="number" id="sw_t_val" placeholder="0.0" readonly style="background:transparent; border:none; color:#fff; width:50%;">
+                <select id="sw_t_coin" onchange="doSwapCalc()" style="background:#1a1e26; color:#fff; border:none;"></select>
             </div>
-            <button class="btn-general" style="background:var(--green); color:#000; margin-top:15px;" onclick="tg.showAlert('Swap initiated')">CONFIRM SWAP</button>
+            <button class="btn-general" style="background:var(--green); color:#000; margin-top:20px;" onclick="tg.showAlert('Swap complete!')">CONFIRM SWAP</button>
         </div>
     </div>
 
     <div id="scr_profile" class="screen">
         <div style="background:var(--panel); padding:30px; border-radius:25px; text-align:center; border:1px solid var(--border);">
-            <div id="ton-connect-btn"></div>
+            <div id="ton-connect-btn" style="display:flex; justify-content:center;"></div>
         </div>
     </div>
 </div>
@@ -137,9 +145,14 @@
         { s:'USDT', p:'USDTUSDT', i:'https://cryptologos.cc/logos/tether-usdt-logo.png' }
     ];
 
+    function startApp() {
+        document.getElementById('welcome_screen').style.display = 'none';
+        tg.HapticFeedback.notificationOccurred('success');
+    }
+
     function init() {
-        const f = document.getElementById('swap_f_coin');
-        const t = document.getElementById('swap_t_coin');
+        const f = document.getElementById('sw_f_coin');
+        const t = document.getElementById('sw_t_coin');
         assets.forEach(a => {
             f.innerHTML += `<option value="${a.s}">${a.s}</option>`;
             t.innerHTML += `<option value="${a.s}">${a.s}</option>`;
@@ -183,7 +196,7 @@
                 <div style="display:flex; align-items:center; gap:10px;"><img src="${a.i}" width="30"><b>${a.s}</b></div>
                 <div style="text-align:right;">
                     <b>$${prices[a.s].toLocaleString()}</b>
-                    <div style="margin-top:5px;">
+                    <div style="display:flex; gap:5px; margin-top:5px;">
                         <button class="btn-trade btn-buy" onclick="openTrade('BUY', '${a.s}')">BUY</button>
                         <button class="btn-trade btn-sell" onclick="openTrade('SELL', '${a.s}')">SELL</button>
                     </div>
@@ -195,27 +208,23 @@
     function openTrade(type, coin) {
         const title = document.getElementById('trade_title');
         const btn = document.getElementById('trade_btn');
-        const assetInfo = document.getElementById('trade_asset');
-        
         title.innerText = type === 'BUY' ? 'Buy ' + coin : 'Sell ' + coin;
-        assetInfo.innerText = 'Current price: $' + prices[coin].toLocaleString();
+        document.getElementById('trade_asset').innerText = 'Price: $' + prices[coin].toLocaleString();
         btn.style.background = type === 'BUY' ? 'var(--green)' : 'var(--red)';
-        btn.style.color = type === 'BUY' ? '#000' : '#fff';
-        btn.onclick = () => { tg.showAlert(type + ' order for ' + coin + ' placed!'); closeModal('trade'); };
-        
+        btn.onclick = () => { tg.showAlert(type + ' order sent'); closeModal('trade'); };
         openModal('trade');
     }
 
     function doSwapCalc() {
-        const f = document.getElementById('swap_f_coin').value;
-        const t = document.getElementById('swap_t_coin').value;
-        const v = document.getElementById('swap_f_val').value;
-        if(v) document.getElementById('swap_t_val').value = ((v * prices[f]) / prices[t]).toFixed(4);
+        const f = document.getElementById('sw_f_coin').value;
+        const t = document.getElementById('sw_t_coin').value;
+        const v = document.getElementById('sw_f_val').value;
+        if(v) document.getElementById('sw_t_val').value = ((v * prices[f]) / prices[t]).toFixed(4);
     }
 
     function swapReverse() {
-        const f = document.getElementById('swap_f_coin');
-        const t = document.getElementById('swap_t_coin');
+        const f = document.getElementById('sw_f_coin');
+        const t = document.getElementById('sw_t_coin');
         const tmp = f.value; f.value = t.value; t.value = tmp;
         doSwapCalc();
     }
