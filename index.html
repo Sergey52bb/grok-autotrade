@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>Grok Avto Trade v7.7</title>
+    <title>Grok Avto Trade v7.8</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <script src="https://unpkg.com/@tonconnect/ui@2.0.9/dist/tonconnect-ui.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
@@ -12,20 +12,26 @@
         body { background: var(--bg); color: white; margin: 0; font-family: -apple-system, sans-serif; height: 100vh; display: flex; flex-direction: column; overflow: hidden; }
         header { padding: 25px 15px 15px 15px; background: var(--panel); border-bottom: 1px solid var(--border); text-align: center; }
         header .title { font-weight: 900; font-size: 19px; letter-spacing: 1px; }
+        
         #main_content { flex: 1; overflow-y: auto; padding: 20px 15px 140px 15px; }
         .screen { display: none; }
         .screen.active { display: block; }
+
         nav { position: fixed; bottom: 0; width: 100%; height: 90px; background: var(--panel); display: flex; border-top: 1px solid var(--border); z-index: 1000; padding-bottom: env(safe-area-inset-bottom); }
         .nav-item { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; font-size: 11px; color: var(--text); opacity: 0.5; cursor: pointer; }
         .nav-item.active { color: var(--green); opacity: 1; }
+
         .balance-card { background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%); padding: 30px; border-radius: 25px; text-align: center; margin-bottom: 25px; border: 1px solid var(--border); }
-        .asset-card { background: var(--panel); border-radius: 20px; padding: 18px; margin-bottom: 12px; border: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; }
         .btn-general { padding: 18px; border-radius: 18px; border: none; font-weight: 800; text-transform: uppercase; font-size: 12px; cursor: pointer; width: 100%; }
-        .btn-trade { padding: 10px 14px; font-size: 10px; border-radius: 8px; font-weight: bold; border: 1px solid rgba(255,255,255,0.1); background: rgba(255,255,255,0.05); color: white; cursor: pointer; }
+        
         .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.95); z-index: 2000; justify-content: center; align-items: center; padding: 20px; }
         .modal-content { background: var(--panel); padding: 25px; border-radius: 30px; text-align: center; width: 100%; border: 1px solid var(--border); }
+        
         select, input { width: 100%; padding: 15px; background: #000; border: 1px solid var(--border); border-radius: 12px; color: #fff; box-sizing: border-box; outline: none; margin-bottom: 10px; }
         #swap_reverse_btn { background: var(--panel); border: 1px solid var(--border); color: var(--green); width: 42px; height: 42px; border-radius: 50%; font-size: 18px; cursor: pointer; display: flex; align-items: center; justify-content: center; margin: -20px auto; z-index: 10; position: relative; }
+        
+        /* Стили для кнопки коннекта в меню */
+        #ton-connect-stub { width: 100%; display: flex; justify-content: center; }
     </style>
 </head>
 <body>
@@ -37,46 +43,11 @@
         <div class="balance-card">
             <div style="font-size: 11px; opacity: 0.6;">TOTAL BALANCE</div>
             <h1 id="main_balance">0.00 TON</h1>
-            <div id="addr_display" style="font-size: 10px; opacity: 0.4; font-family: monospace;">Disconnected</div>
+            <div id="addr_display" style="font-size: 10px; opacity: 0.4; font-family: monospace;">Not Connected</div>
         </div>
         <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
             <button class="btn-general" style="background:#fff; color:#000;" onclick="openModal('deposit')">DEPOSIT</button>
             <button class="btn-general" style="background:var(--green); color:#000;" onclick="openModal('send')">SEND</button>
-        </div>
-    </div>
-
-    <div id="scr_market" class="screen">
-        <div id="market_list">
-            <div class="asset-card">
-                <div style="display:flex; align-items:center; gap:12px;">
-                    <img src="https://cryptologos.cc/logos/toncoin-ton-logo.png" width="32">
-                    <div><b>TON</b><br><span id="price-TON" style="font-size:12px; opacity:0.6;">Loading...</span></div>
-                </div>
-                <div style="display:flex; gap:8px;">
-                    <button class="btn-trade" style="color:var(--green)" onclick="quickTrade('TON', 'buy')">BUY</button>
-                    <button class="btn-trade" style="color:var(--red)" onclick="quickTrade('TON', 'sell')">SELL</button>
-                </div>
-            </div>
-            <div class="asset-card">
-                <div style="display:flex; align-items:center; gap:12px;">
-                    <img src="https://cryptologos.cc/logos/bitcoin-btc-logo.png" width="32">
-                    <div><b>BTC</b><br><span id="price-BTC" style="font-size:12px; opacity:0.6;">Loading...</span></div>
-                </div>
-                <div style="display:flex; gap:8px;">
-                    <button class="btn-trade" style="color:var(--green)" onclick="quickTrade('BTC', 'buy')">BUY</button>
-                    <button class="btn-trade" style="color:var(--red)" onclick="quickTrade('BTC', 'sell')">SELL</button>
-                </div>
-            </div>
-            <div class="asset-card">
-                <div style="display:flex; align-items:center; gap:12px;">
-                    <img src="https://cryptologos.cc/logos/ethereum-eth-logo.png" width="32">
-                    <div><b>ETH</b><br><span id="price-ETH" style="font-size:12px; opacity:0.6;">Loading...</span></div>
-                </div>
-                <div style="display:flex; gap:8px;">
-                    <button class="btn-trade" style="color:var(--green)" onclick="quickTrade('ETH', 'buy')">BUY</button>
-                    <button class="btn-trade" style="color:var(--red)" onclick="quickTrade('ETH', 'sell')">SELL</button>
-                </div>
-            </div>
         </div>
     </div>
 
@@ -85,28 +56,39 @@
             <p style="font-size:11px; opacity:0.5;">PAY</p>
             <input type="number" id="sw_val" placeholder="0.0" oninput="calculateSwap()">
             <select id="sw_from" onchange="validateSwap(); calculateSwap()"></select>
+            
             <button id="swap_reverse_btn" onclick="swapReverse()">🔄</button>
+            
             <p style="font-size:11px; opacity:0.5; margin-top:10px;">RECEIVE</p>
             <input type="text" id="sw_res" placeholder="0.0" readonly style="color:var(--green);">
             <select id="sw_to" onchange="validateSwap(); calculateSwap()"></select>
+            
             <div id="sw_usd_info" style="text-align:right; font-size:10px; color:var(--text); margin-bottom:10px;">Value: $0.00</div>
-            <button id="sw_btn" class="btn-general" style="background:var(--green); color:#000;" onclick="tg.showAlert('Order Sent')">CONFIRM SWAP</button>
+            <button id="sw_btn" class="btn-general" style="background:var(--green); color:#000;" onclick="tg.showAlert('Swap Initiated')">CONFIRM SWAP</button>
+        </div>
+    </div>
+
+    <div id="scr_connect" class="screen">
+        <div style="background:var(--panel); padding:40px 20px; border-radius:25px; text-align:center; border:1px solid var(--border);">
+            <h3 style="margin-top:0;">Wallet Connection</h3>
+            <p style="font-size:13px; opacity:0.6; margin-bottom:30px;">Connect your TON wallet to start trading and manage your balance.</p>
+            <div id="ton-connect-btn" style="display:flex; justify-content:center;"></div>
         </div>
     </div>
 </div>
 
 <nav>
     <div class="nav-item active" onclick="showTab('wallet', this)"><span>💼</span>Wallet</div>
-    <div class="nav-item" onclick="showTab('market', this)"><span>📊</span>Market</div>
     <div class="nav-item" onclick="showTab('swap', this)"><span>🔄</span>Swap</div>
+    <div class="nav-item" onclick="showTab('connect', this)"><span>🔗</span>Connect</div>
 </nav>
 
 <div id="modal_deposit" class="modal" onclick="closeModal('deposit')">
     <div class="modal-content" onclick="event.stopPropagation()">
         <h3>Deposit TON</h3>
-        <div id="qrcode" style="display:flex; justify-content:center; margin:15px 0; background:white; padding:10px; border-radius:10px;"></div>
-        <p id="full_addr" style="font-size:10px; word-break:break-all; opacity:0.5; font-family:monospace;">Connect wallet first</p>
-        <button class="btn-general" style="background:var(--green); color:#000;" onclick="copyAddr()">COPY</button>
+        <div id="qrcode" style="display:flex; justify-content:center; margin:15px 0; background:white; padding:10px; border-radius:10px; min-height:140px;"></div>
+        <p id="full_addr" style="font-size:10px; word-break:break-all; opacity:0.5; font-family:monospace;">Please connect wallet</p>
+        <button class="btn-general" style="background:var(--green); color:#000;" onclick="copyAddr()">COPY ADDRESS</button>
     </div>
 </div>
 
@@ -124,33 +106,17 @@
 <script>
     const tg = window.Telegram.WebApp;
     tg.ready();
+    
     let prices = { 'TON': 7.2, 'BTC': 69000, 'ETH': 3450, 'USDT': 1 };
     let currentAddr = "";
 
-    function updatePriceUI(s, p) {
-        const el = document.getElementById(`price-${s}`);
-        if (el) el.innerText = `$${p.toLocaleString(undefined, {minimumFractionDigits: 2})}`;
-    }
-
-    async function fastLoad() {
-        try {
-            const r = await fetch('https://api.binance.com/api/v3/ticker/price?symbols=["BTCUSDT","ETHUSDT","TONUSDT"]');
-            const data = await r.json();
-            data.forEach(i => {
-                const s = i.symbol.replace('USDT','');
-                prices[s] = parseFloat(i.price);
-                updatePriceUI(s, prices[s]);
-            });
-        } catch(e) {}
-    }
-
+    // WebSocket для обновления цен (в фоне для работы Свопа)
     function connectMarket() {
         const ws = new WebSocket("wss://stream.binance.com:9443/ws/btcusdt@ticker/ethusdt@ticker/tonusdt@ticker");
         ws.onmessage = (e) => {
             const d = JSON.parse(e.data);
             const s = d.s.replace('USDT','');
             prices[s] = parseFloat(d.c);
-            updatePriceUI(s, prices[s]);
         };
         ws.onclose = () => setTimeout(connectMarket, 3000);
     }
@@ -164,34 +130,32 @@
         });
         t.value = "USDT";
 
-        const tc = new TON_CONNECT_UI.TonConnectUI({
+        const tonConnectUI = new TON_CONNECT_UI.TonConnectUI({
             manifestUrl: 'https://sergey52bb.github.io/grok-autotrade/tonconnect-manifest.json',
-            buttonRootId: 'scr_profile' // Кнопка коннекта может быть в скрытом профиле
+            buttonRootId: 'ton-connect-btn'
         });
 
-        tc.onStatusChange(w => {
-            if (w) {
-                currentAddr = w.account.address;
+        tonConnectUI.onStatusChange(wallet => {
+            if (wallet) {
+                currentAddr = wallet.account.address;
                 document.getElementById('addr_display').innerText = currentAddr.substring(0,8)+"..."+currentAddr.substring(currentAddr.length-4);
                 document.getElementById('full_addr').innerText = currentAddr;
                 document.getElementById("qrcode").innerHTML = "";
                 new QRCode(document.getElementById("qrcode"), { text: currentAddr, width: 140, height: 140 });
+                
+                // Запрос баланса
+                fetch(`https://toncenter.com/api/v2/getAddressBalance?address=${currentAddr}`)
+                    .then(r => r.json()).then(d => {
+                        if(d.ok) document.getElementById('main_balance').innerText = (d.result/1e9).toFixed(2) + " TON";
+                    });
+            } else {
+                currentAddr = "";
+                document.getElementById('addr_display').innerText = "Not Connected";
+                document.getElementById('main_balance').innerText = "0.00 TON";
             }
         });
 
-        fastLoad();
         connectMarket();
-    }
-
-    function openModal(id) { document.getElementById('modal_'+id).style.display = 'flex'; }
-    function closeModal(id) { document.getElementById('modal_'+id).style.display = 'none'; }
-    function copyAddr() { navigator.clipboard.writeText(document.getElementById('full_addr').innerText); tg.showAlert("Copied!"); }
-
-    function quickTrade(coin, type) {
-        showTab('swap', document.querySelectorAll('.nav-item')[2]);
-        document.getElementById('sw_from').value = (type === 'buy') ? 'USDT' : coin;
-        document.getElementById('sw_to').value = (type === 'buy') ? coin : 'USDT';
-        calculateSwap(); validateSwap();
     }
 
     function showTab(id, el) {
@@ -199,12 +163,18 @@
         document.getElementById('scr_'+id).classList.add('active');
         document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
         el.classList.add('active');
+        tg.HapticFeedback.selectionChanged();
     }
+
+    function openModal(id) { document.getElementById('modal_'+id).style.display = 'flex'; }
+    function closeModal(id) { document.getElementById('modal_'+id).style.display = 'none'; }
+    function copyAddr() { if(currentAddr) { navigator.clipboard.writeText(currentAddr); tg.showAlert("Copied!"); } }
 
     function swapReverse() {
         const f = document.getElementById('sw_from'), t = document.getElementById('sw_to');
         const tmp = f.value; f.value = t.value; t.value = tmp;
         calculateSwap(); validateSwap();
+        tg.HapticFeedback.impactOccurred('medium');
     }
 
     function calculateSwap() {
@@ -212,6 +182,9 @@
         if(v > 0) {
             document.getElementById('sw_res').value = ((v * prices[f]) / prices[t]).toFixed(4);
             document.getElementById('sw_usd_info').innerText = `Value: $${(v * prices[f]).toLocaleString()}`;
+        } else {
+            document.getElementById('sw_res').value = "";
+            document.getElementById('sw_usd_info').innerText = "Value: $0.00";
         }
     }
 
