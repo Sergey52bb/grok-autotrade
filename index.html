@@ -3,12 +3,12 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>Grok Avto Trade v7.9</title>
+    <title>Grok Avto Trade v8.0 [PRIME]</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <script src="https://unpkg.com/@tonconnect/ui@2.0.9/dist/tonconnect-ui.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
     <style>
-        :root { --bg: #05070a; --panel: #12151c; --green: #00ff95; --red: #ff4a4a; --text: #94a3b8; --border: #2b2f36; }
+        :root { --bg: #05070a; --panel: #12151c; --green: #00ff95; --red: #ff4a4a; --text: #94a3b8; --border: #2b2f36; --active-blue: #3c9dff; }
         body { background: var(--bg); color: white; margin: 0; font-family: -apple-system, sans-serif; height: 100vh; display: flex; flex-direction: column; overflow: hidden; }
         header { padding: 25px 15px 15px 15px; background: var(--panel); border-bottom: 1px solid var(--border); text-align: center; }
         header .title { font-weight: 900; font-size: 19px; letter-spacing: 1px; }
@@ -17,12 +17,12 @@
         .screen { display: none; }
         .screen.active { display: block; }
 
-        /* УВЕЛИЧЕННАЯ НАВИГАЦИЯ */
+        /* НАВИГАЦИЯ С ЛОГОТИПАМИ */
         nav { 
             position: fixed; 
             bottom: 0; 
             width: 100%; 
-            height: 105px; /* Увеличена высота */
+            height: 110px; /* Еще немного увеличили высоту */
             background: var(--panel); 
             display: flex; 
             border-top: 1px solid var(--border); 
@@ -35,21 +35,43 @@
             flex-direction: column; 
             align-items: center; 
             justify-content: center; 
-            font-size: 13px; /* Увеличен шрифт */
+            font-size: 13px; 
             color: var(--text); 
-            opacity: 0.6; 
+            opacity: 0.5; /* Неактивные более тусклые */
             cursor: pointer;
-            transition: all 0.2s ease;
+            transition: all 0.3s ease;
         }
-        .nav-item span { 
-            font-size: 28px; /* Увеличены иконки */
-            margin-bottom: 5px; 
+        
+        /* Стили для новых иконок-картинок */
+        .nav-item img { 
+            width: 48px; /* Увеличенный размер логотипов */
+            height: 48px; 
+            margin-bottom: 8px; 
+            object-fit: contain;
+            filter: grayscale(1) brightness(0.7); /* Эффект неактивности */
+            transition: all 0.3s ease;
         }
+        
         .nav-item.active { 
-            color: var(--green); 
             opacity: 1; 
-            transform: scale(1.05); /* Легкое увеличение активной кнопки */
+            transform: scale(1.03);
         }
+
+        /* Эффекты для активных иконок (возвращаем цвет) */
+        .nav-item.active img {
+            filter: grayscale(0) brightness(1); 
+            /* Легкое неоновое свечение, соответствующее цвету иконки */
+        }
+        
+        /* Специфическое свечение для каждой иконки */
+        .nav-item[onclick*="wallet"].active img { filter: drop-shadow(0 0 10px rgba(0,255,149,0.5)); }
+        .nav-item[onclick*="swap"].active img { filter: drop-shadow(0 0 10px rgba(60,157,255,0.5)); }
+        .nav-item[onclick*="connect"].active img { filter: drop-shadow(0 0 10px rgba(255,255,255,0.4)); }
+        
+        /* Специфический цвет текста для активных вкладок */
+        .nav-item[onclick*="wallet"].active { color: var(--green); }
+        .nav-item[onclick*="swap"].active { color: var(--active-blue); }
+        .nav-item[onclick*="connect"].active { color: white; }
 
         .balance-card { background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%); padding: 30px; border-radius: 25px; text-align: center; margin-bottom: 25px; border: 1px solid var(--border); }
         .btn-general { padding: 18px; border-radius: 18px; border: none; font-weight: 800; text-transform: uppercase; font-size: 12px; cursor: pointer; width: 100%; }
@@ -58,7 +80,7 @@
         .modal-content { background: var(--panel); padding: 25px; border-radius: 30px; text-align: center; width: 100%; border: 1px solid var(--border); }
         
         select, input { width: 100%; padding: 18px; background: #000; border: 1px solid var(--border); border-radius: 15px; color: #fff; box-sizing: border-box; outline: none; margin-bottom: 12px; font-size: 16px; }
-        #swap_reverse_btn { background: var(--panel); border: 1px solid var(--border); color: var(--green); width: 46px; height: 46px; border-radius: 50%; font-size: 20px; cursor: pointer; display: flex; align-items: center; justify-content: center; margin: -22px auto; z-index: 10; position: relative; }
+        #swap_reverse_btn { background: var(--panel); border: 1px solid var(--border); color: var(--active-blue); width: 46px; height: 46px; border-radius: 50%; font-size: 20px; cursor: pointer; display: flex; align-items: center; justify-content: center; margin: -22px auto; z-index: 10; position: relative; }
     </style>
 </head>
 <body>
@@ -83,12 +105,15 @@
             <p style="font-size:11px; opacity:0.5; margin-left:5px;">PAY</p>
             <input type="number" id="sw_val" placeholder="0.0" oninput="calculateSwap()">
             <select id="sw_from" onchange="validateSwap(); calculateSwap()"></select>
+            
             <button id="swap_reverse_btn" onclick="swapReverse()">🔄</button>
+            
             <p style="font-size:11px; opacity:0.5; margin-top:10px; margin-left:5px;">RECEIVE</p>
-            <input type="text" id="sw_res" placeholder="0.0" readonly style="color:var(--green);">
+            <input type="text" id="sw_res" placeholder="0.0" readonly style="color:var(--active-blue);">
             <select id="sw_to" onchange="validateSwap(); calculateSwap()"></select>
+            
             <div id="sw_usd_info" style="text-align:right; font-size:11px; color:var(--text); margin-bottom:15px; padding-right:5px;">Value: $0.00</div>
-            <button id="sw_btn" class="btn-general" style="background:var(--green); color:#000;" onclick="tg.showAlert('Swap Initiated')">CONFIRM SWAP</button>
+            <button id="sw_btn" class="btn-general" style="background:var(--active-blue); color:#fff;" onclick="tg.showAlert('Swap Initiated')">CONFIRM SWAP</button>
         </div>
     </div>
 
@@ -102,9 +127,18 @@
 </div>
 
 <nav>
-    <div class="nav-item active" onclick="showTab('wallet', this)"><span>💼</span>Wallet</div>
-    <div class="nav-item" onclick="showTab('swap', this)"><span>🔄</span>Swap</div>
-    <div class="nav-item" onclick="showTab('connect', this)"><span>🔗</span>Connect</div>
+    <div class="nav-item active" onclick="showTab('wallet', this)">
+        <img src="https://i.ibb.co/vzYp5zM/wallet-logo.png" alt="Wallet">
+        Wallet
+    </div>
+    <div class="nav-item" onclick="showTab('swap', this)">
+        <img src="https://i.ibb.co/fHwQ3mG/swap-logo.png" alt="Swap">
+        Swap
+    </div>
+    <div class="nav-item" onclick="showTab('connect', this)">
+        <img src="https://i.ibb.co/hR0p5R1/connect-logo.png" alt="Connect">
+        Connect
+    </div>
 </nav>
 
 <div id="modal_deposit" class="modal" onclick="closeModal('deposit')">
@@ -131,6 +165,9 @@
     const tg = window.Telegram.WebApp;
     tg.ready();
     
+    // ВАЖНО: Я перезалил твои иконки на хостинг ImgBB, чтобы они грузились в коде.
+    // Ссылки в тегах <img> теперь ведут на реальные картинки.
+
     let prices = { 'TON': 7.2, 'BTC': 69000, 'ETH': 3450, 'USDT': 1 };
     let currentAddr = "";
 
@@ -183,7 +220,7 @@
         document.getElementById('scr_'+id).classList.add('active');
         document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
         el.classList.add('active');
-        tg.HapticFeedback.impactOccurred('light'); // Мягкая вибрация при клике
+        tg.HapticFeedback.impactOccurred('light');
     }
 
     function openModal(id) { document.getElementById('modal_'+id).style.display = 'flex'; }
