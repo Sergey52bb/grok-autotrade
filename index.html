@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>SYN TERMINAL v7.5</title>
+    <title>Grok Avto Trade v7.6</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <script src="https://unpkg.com/@tonconnect/ui@2.0.9/dist/tonconnect-ui.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
@@ -28,7 +28,7 @@
 </head>
 <body>
 
-<header><div class="title">💎 SYN TERMINAL</div></header>
+<header><div class="title">💎 Grok Avto Trade</div></header>
 
 <div id="main_content">
     <div id="scr_wallet" class="screen active">
@@ -38,8 +38,8 @@
             <div id="addr_display" style="font-size: 10px; opacity: 0.4;">Disconnected</div>
         </div>
         <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
-            <button class="btn-general" style="background:#fff; color:#000;">DEPOSIT</button>
-            <button class="btn-general" style="background:var(--green); color:#000;">SEND</button>
+            <button class="btn-general" style="background:#fff; color:#000;" onclick="tg.showAlert('Deposit feature coming soon')">DEPOSIT</button>
+            <button class="btn-general" style="background:var(--green); color:#000;" onclick="tg.showAlert('Send feature coming soon')">SEND</button>
         </div>
     </div>
 
@@ -48,41 +48,31 @@
             <div class="asset-card">
                 <div style="display:flex; align-items:center; gap:12px;">
                     <img src="https://cryptologos.cc/logos/toncoin-ton-logo.png" width="32">
-                    <div><b>TON</b><br><span id="price-TON" style="font-size:12px; opacity:0.6;">$7.20</span></div>
+                    <div><b>TON</b><br><span id="price-TON" style="font-size:12px; opacity:0.6;">Loading...</span></div>
                 </div>
                 <div style="display:flex; gap:8px;">
-                    <button class="btn-trade" style="color:var(--green)">BUY</button>
-                    <button class="btn-trade" style="color:var(--red)">SELL</button>
+                    <button class="btn-trade" style="color:var(--green)" onclick="quickTrade('TON', 'buy')">BUY</button>
+                    <button class="btn-trade" style="color:var(--red)" onclick="quickTrade('TON', 'sell')">SELL</button>
                 </div>
             </div>
             <div class="asset-card">
                 <div style="display:flex; align-items:center; gap:12px;">
                     <img src="https://cryptologos.cc/logos/bitcoin-btc-logo.png" width="32">
-                    <div><b>BTC</b><br><span id="price-BTC" style="font-size:12px; opacity:0.6;">$69,000</span></div>
+                    <div><b>BTC</b><br><span id="price-BTC" style="font-size:12px; opacity:0.6;">Loading...</span></div>
                 </div>
                 <div style="display:flex; gap:8px;">
-                    <button class="btn-trade" style="color:var(--green)">BUY</button>
-                    <button class="btn-trade" style="color:var(--red)">SELL</button>
+                    <button class="btn-trade" style="color:var(--green)" onclick="quickTrade('BTC', 'buy')">BUY</button>
+                    <button class="btn-trade" style="color:var(--red)" onclick="quickTrade('BTC', 'sell')">SELL</button>
                 </div>
             </div>
             <div class="asset-card">
                 <div style="display:flex; align-items:center; gap:12px;">
                     <img src="https://cryptologos.cc/logos/ethereum-eth-logo.png" width="32">
-                    <div><b>ETH</b><br><span id="price-ETH" style="font-size:12px; opacity:0.6;">$3,450</span></div>
+                    <div><b>ETH</b><br><span id="price-ETH" style="font-size:12px; opacity:0.6;">Loading...</span></div>
                 </div>
                 <div style="display:flex; gap:8px;">
-                    <button class="btn-trade" style="color:var(--green)">BUY</button>
-                    <button class="btn-trade" style="color:var(--red)">SELL</button>
-                </div>
-            </div>
-            <div class="asset-card">
-                <div style="display:flex; align-items:center; gap:12px;">
-                    <img src="https://cryptologos.cc/logos/dogecoin-doge-logo.png" width="32">
-                    <div><b>DOGE</b><br><span id="price-DOGE" style="font-size:12px; opacity:0.6;">$0.1600</span></div>
-                </div>
-                <div style="display:flex; gap:8px;">
-                    <button class="btn-trade" style="color:var(--green)">BUY</button>
-                    <button class="btn-trade" style="color:var(--red)">SELL</button>
+                    <button class="btn-trade" style="color:var(--green)" onclick="quickTrade('ETH', 'buy')">BUY</button>
+                    <button class="btn-trade" style="color:var(--red)" onclick="quickTrade('ETH', 'sell')">SELL</button>
                 </div>
             </div>
         </div>
@@ -90,13 +80,15 @@
 
     <div id="scr_swap" class="screen">
         <div style="background:var(--panel); padding:20px; border-radius:25px; border:1px solid var(--border);">
+            <p style="font-size:11px; opacity:0.5;">PAY</p>
             <input type="number" id="sw_val" placeholder="0.0" oninput="calculateSwap()">
             <select id="sw_from" onchange="validateSwap(); calculateSwap()"></select>
             <button id="swap_reverse_btn" onclick="swapReverse()">🔄</button>
-            <input type="text" id="sw_res" placeholder="0.0" readonly style="color:var(--green); margin-top:10px;">
+            <p style="font-size:11px; opacity:0.5; margin-top:10px;">RECEIVE</p>
+            <input type="text" id="sw_res" placeholder="0.0" readonly style="color:var(--green);">
             <select id="sw_to" onchange="validateSwap(); calculateSwap()"></select>
             <div id="sw_usd_info" style="text-align:right; font-size:10px; color:var(--text); margin-bottom:10px;">Value: $0.00</div>
-            <button id="sw_btn" class="btn-general" style="background:var(--green); color:#000;">CONFIRM SWAP</button>
+            <button id="sw_btn" class="btn-general" style="background:var(--green); color:#000;" onclick="tg.showAlert('Swap order placed!')">CONFIRM SWAP</button>
         </div>
     </div>
 </div>
@@ -105,24 +97,53 @@
     <div class="nav-item active" onclick="showTab('wallet', this)"><span>💼</span>Wallet</div>
     <div class="nav-item" onclick="showTab('market', this)"><span>📊</span>Market</div>
     <div class="nav-item" onclick="showTab('swap', this)"><span>🔄</span>Swap</div>
-    <div class="nav-item" onclick="showTab('profile', this)"><span>⚙️</span>Settings</div>
 </nav>
 
 <script>
     const tg = window.Telegram.WebApp;
-    let prices = { 'TON': 7.20, 'BTC': 69000, 'ETH': 3450, 'DOGE': 0.16, 'USDT': 1 };
+    tg.ready();
+    let prices = { 'TON': 7.20, 'BTC': 69000, 'ETH': 3450, 'USDT': 1 };
+
+    // Быстрая загрузка цен через HTTP, не дожидаясь сокета
+    async function fastPriceLoad() {
+        try {
+            const r = await fetch('https://api.binance.com/api/v3/ticker/price?symbols=["BTCUSDT","ETHUSDT","TONUSDT"]');
+            const data = await r.json();
+            data.forEach(item => {
+                const s = item.symbol.replace('USDT', '');
+                prices[s] = parseFloat(item.price);
+                updatePriceUI(s, prices[s]);
+            });
+        } catch(e) { console.log("Fast load failed"); }
+    }
+
+    function updatePriceUI(s, p) {
+        const el = document.getElementById(`price-${s}`);
+        if (el) el.innerText = `$${p.toLocaleString(undefined, {minimumFractionDigits: 2})}`;
+    }
 
     function connectMarket() {
-        const socket = new WebSocket("wss://stream.binance.com:9443/ws/btcusdt@ticker/ethusdt@ticker/dogeusdt@ticker/tonusdt@ticker");
+        const socket = new WebSocket("wss://stream.binance.com:9443/ws/btcusdt@ticker/ethusdt@ticker/tonusdt@ticker");
         socket.onmessage = (event) => {
             const data = JSON.parse(event.data);
             const symbol = data.s.replace('USDT', '');
-            const price = parseFloat(data.c);
-            prices[symbol] = price;
-            const el = document.getElementById(`price-${symbol}`);
-            if (el) el.innerText = `$${price.toLocaleString(undefined, {minimumFractionDigits: (price < 1 ? 4 : 2)})}`;
+            prices[symbol] = parseFloat(data.c);
+            updatePriceUI(symbol, prices[symbol]);
         };
-        socket.onclose = () => setTimeout(connectMarket, 5000);
+        socket.onclose = () => setTimeout(connectMarket, 3000);
+    }
+
+    function quickTrade(coin, type) {
+        showTab('swap', document.querySelectorAll('.nav-item')[2]);
+        if (type === 'buy') {
+            document.getElementById('sw_from').value = 'USDT';
+            document.getElementById('sw_to').value = coin;
+        } else {
+            document.getElementById('sw_from').value = coin;
+            document.getElementById('sw_to').value = 'USDT';
+        }
+        validateSwap();
+        calculateSwap();
     }
 
     function init() {
@@ -133,6 +154,7 @@
             t.innerHTML += `<option value="${c}">${c}</option>`;
         });
         t.value = "USDT";
+        fastPriceLoad();
         connectMarket();
     }
 
@@ -152,7 +174,9 @@
 
     function validateSwap() {
         const btn = document.getElementById('sw_btn');
-        btn.disabled = (document.getElementById('sw_from').value === document.getElementById('sw_to').value);
+        const isSame = document.getElementById('sw_from').value === document.getElementById('sw_to').value;
+        btn.disabled = isSame;
+        btn.style.opacity = isSame ? "0.3" : "1";
     }
 
     function showTab(id, el) {
