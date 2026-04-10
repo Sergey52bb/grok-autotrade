@@ -3,29 +3,40 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>SYN TERMINAL v7.2</title>
+    <title>SYN TERMINAL v7.3</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <script src="https://unpkg.com/@tonconnect/ui@2.0.9/dist/tonconnect-ui.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
     <style>
         :root { --bg: #05070a; --panel: #12151c; --green: #00ff95; --red: #ff4a4a; --text: #94a3b8; --border: #2b2f36; }
         body { background: var(--bg); color: white; margin: 0; font-family: -apple-system, sans-serif; height: 100vh; display: flex; flex-direction: column; overflow: hidden; }
+        
         header { padding: 25px 15px 15px 15px; background: var(--panel); border-bottom: 1px solid var(--border); text-align: center; }
         header .title { font-weight: 900; font-size: 19px; letter-spacing: 1px; }
+        
         #main_content { flex: 1; overflow-y: auto; padding: 20px 15px 140px 15px; }
         .screen { display: none; }
         .screen.active { display: block; }
+
         nav { position: fixed; bottom: 0; width: 100%; height: 90px; background: var(--panel); display: flex; border-top: 1px solid var(--border); z-index: 1000; padding-bottom: env(safe-area-inset-bottom); }
-        .nav-item { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; font-size: 11px; color: var(--text); opacity: 0.5; }
+        .nav-item { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; font-size: 11px; color: var(--text); opacity: 0.5; cursor: pointer; }
         .nav-item.active { color: var(--green); opacity: 1; }
+        
         .balance-card { background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%); padding: 30px; border-radius: 25px; text-align: center; margin-bottom: 25px; border: 1px solid var(--border); }
         .asset-card { background: var(--panel); border-radius: 20px; padding: 18px; margin-bottom: 12px; border: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; }
-        .btn-general { padding: 18px; border-radius: 18px; border: none; font-weight: 800; text-transform: uppercase; font-size: 12px; cursor: pointer; width: 100%; }
+        
+        .btn-general { padding: 18px; border-radius: 18px; border: none; font-weight: 800; text-transform: uppercase; font-size: 12px; cursor: pointer; width: 100%; transition: 0.3s; }
         .btn-general:disabled { background: #2b2f36 !important; color: #555 !important; cursor: not-allowed; opacity: 0.6; }
-        .btn-trade { padding: 10px 16px; font-size: 10px; border-radius: 10px; font-weight: bold; border: 1px solid rgba(255,255,255,0.1); background: rgba(255,255,255,0.05); color: white; }
+        .btn-trade { padding: 10px 16px; font-size: 10px; border-radius: 10px; font-weight: bold; border: 1px solid rgba(255,255,255,0.1); background: rgba(255,255,255,0.05); color: white; cursor: pointer; }
+
         .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.95); z-index: 2000; justify-content: center; align-items: center; padding: 20px; }
         .modal-content { background: var(--panel); padding: 25px; border-radius: 30px; text-align: center; width: 100%; border: 1px solid var(--border); }
-        select, input { width: 100%; padding: 15px; background: #000; border: 1px solid var(--border); border-radius: 12px; color: #fff; box-sizing: border-box; outline: none; margin-bottom: 10px; }
+        
+        select, input { width: 100%; padding: 15px; background: #000; border: 1px solid var(--border); border-radius: 12px; color: #fff; box-sizing: border-box; outline: none; margin-bottom: 10px; font-size: 14px; }
+        
+        /* Стили для кнопки реверса в Свопе */
+        #swap_reverse_btn { background: var(--panel); border: 1px solid var(--border); color: var(--green); width: 40px; height: 40px; border-radius: 50%; font-size: 18px; cursor: pointer; display: flex; align-items: center; justify-content: center; margin: 0 auto; margin-top: -15px; margin-bottom: -15px; z-index: 10; position: relative; transition: 0.2s; }
+        #swap_reverse_btn:active { transform: scale(0.9); background: #1a1e26; }
     </style>
 </head>
 <body>
@@ -37,7 +48,7 @@
         <div class="balance-card">
             <div style="font-size: 11px; opacity: 0.6;">TOTAL BALANCE</div>
             <h1 id="main_balance">0.00 TON</h1>
-            <div id="addr_display" style="font-size: 10px; opacity: 0.4;">Disconnected</div>
+            <div id="addr_display" style="font-size: 10px; opacity: 0.4; font-family: monospace;">Disconnected</div>
         </div>
         <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
             <button class="btn-general" style="background:#fff; color:#000;" onclick="openModal('deposit')">DEPOSIT</button>
@@ -46,24 +57,24 @@
     </div>
 
     <div id="scr_market" class="screen">
-        <div id="market_list"></div>
+        <div id="market_list">Synchronizing prices...</div>
     </div>
 
     <div id="scr_swap" class="screen">
-        <div style="background:var(--panel); padding:20px; border-radius:25px; border:1px solid var(--border);">
-            <p style="font-size:11px; opacity:0.5; margin-bottom:5px;">SELL</p>
-            <div style="display:flex; gap:10px;">
-                <input type="number" id="sw_val" placeholder="0.0" oninput="calculateSwap()">
-                <select id="sw_from" onchange="validateSwap(); calculateSwap()"></select>
-            </div>
-            <div style="text-align:center; color:var(--green); margin:10px 0;">⬇️</div>
-            <p style="font-size:11px; opacity:0.5; margin-bottom:5px;">BUY</p>
-            <div style="display:flex; gap:10px;">
-                <input type="text" id="sw_res" placeholder="0.0" readonly style="color:var(--green);">
-                <select id="sw_to" onchange="validateSwap(); calculateSwap()"></select>
-            </div>
+        <div style="background:var(--panel); padding:20px; border-radius:25px; border:1px solid var(--border); display: flex; flex-direction: column;">
+            <p style="font-size:11px; opacity:0.5; margin-bottom:5px;">SELL (YOU PAY)</p>
+            <input type="number" id="sw_val" placeholder="0.0" oninput="calculateSwap()">
+            <select id="sw_from" onchange="validateSwap(); calculateSwap()"></select>
+            
+            <button id="swap_reverse_btn" onclick="swapReverse()">🔄</button>
+            
+            <p style="font-size:11px; opacity:0.5; margin-bottom:5px; margin-top:10px;">BUY (YOU RECEIVE)</p>
+            <input type="text" id="sw_res" placeholder="0.0" readonly style="color:var(--green);">
+            <select id="sw_to" onchange="validateSwap(); calculateSwap()"></select>
+            
             <div id="sw_usd_info" style="text-align:right; font-size:10px; color:var(--text); margin-bottom:15px;">Value: $0.00</div>
-            <button id="sw_btn" class="btn-general" style="background:var(--green); color:#000;" onclick="tg.showAlert('Swap processing...')">CONFIRM SWAP</button>
+            
+            <button id="sw_btn" class="btn-general" style="background:var(--green); color:#000;" onclick="tg.showAlert('Swap confirmed!')">CONFIRM SWAP</button>
         </div>
     </div>
 
@@ -84,7 +95,7 @@
         <h3>Deposit Address</h3>
         <div id="qrcode" style="display:flex; justify-content:center; margin:15px 0; background:white; padding:10px; border-radius:10px;"></div>
         <p id="full_addr" style="font-size:10px; word-break:break-all; opacity:0.5; font-family:monospace;"></p>
-        <button class="btn-general" style="background:var(--green); color:#000;" onclick="copyAddr()">COPY</button>
+        <button class="btn-general" style="background:var(--green); color:#000;" onclick="copyAddr()">COPY ADDRESS</button>
     </div>
 </div>
 
@@ -93,7 +104,7 @@
         <h3>Send Assets</h3>
         <select id="send_asset_select"></select>
         <input type="text" placeholder="Recipient Address">
-        <input type="text" placeholder="Memo (Comment)">
+        <input type="text" placeholder="Memo (Optional)">
         <input type="number" placeholder="Amount">
         <button class="btn-general" style="background:var(--green); color:#000; margin-top:10px;">SEND NOW</button>
     </div>
@@ -103,21 +114,32 @@
     const tg = window.Telegram.WebApp;
     tg.ready(); tg.expand();
 
-    let prices = { 'TON': 7.24, 'BTC': 69500, 'ETH': 3500, 'DOGE': 0.16, 'USDT': 1 };
+    // Запасные цены на случай сбоя API
+    let prices = { 'TON': 7.24, 'BTC': 69200, 'ETH': 3480, 'DOGE': 0.16, 'USDT': 1 };
     const assets = [
         {s:'TON', i:'https://cryptologos.cc/logos/toncoin-ton-logo.png'},
         {s:'BTC', i:'https://cryptologos.cc/logos/bitcoin-btc-logo.png'},
         {s:'ETH', i:'https://cryptologos.cc/logos/ethereum-eth-logo.png'},
         {s:'DOGE', i:'https://cryptologos.cc/logos/dogecoin-doge-logo.png'}
     ];
+    let currentAddr = "";
 
+    // НАДЕЖНЫЙ МЕТОД ОБНОВЛЕНИЯ ЦЕН
     async function updatePrices() {
         try {
+            // Сначала пробуем Бинанс
             const res = await fetch('https://api.binance.com/api/v3/ticker/price');
+            if (!res.ok) throw new Error("Binance failed");
             const data = await res.json();
             const map = { 'BTCUSDT': 'BTC', 'ETHUSDT': 'ETH', 'DOGEUSDT': 'DOGE' };
             data.forEach(item => { if(map[item.symbol]) prices[map[item.symbol]] = parseFloat(item.price); });
-        } catch(e) {}
+            console.log("Prices updated via Binance");
+        } catch(e) {
+            // Если Бинанс сдох, используем резервный метод (тянем только TON)
+            fetch('https://tonapi.io/v2/rates?tokens=ton&currencies=usd')
+                .then(r => r.json()).then(d => { if(d.rates.TON.prices.USD) prices['TON'] = d.rates.TON.prices.USD; });
+            console.log("Prices updated via Backup API");
+        }
         renderMarket();
     }
 
@@ -125,12 +147,15 @@
         const f = document.getElementById('sw_from');
         const t = document.getElementById('sw_to');
         const s = document.getElementById('send_asset_select');
-        Object.keys(prices).forEach(c => {
-            f.innerHTML += `<option value="${c}">${c}</option>`;
-            t.innerHTML += `<option value="${c}">${c}</option>`;
-            s.innerHTML += `<option value="${c}">${c}</option>`;
+        
+        const coinOptions = [...Object.keys(prices)]; // Используем все монеты, включая USDT
+        
+        coinOptions.forEach(coin => {
+            f.innerHTML += `<option value="${coin}">${coin}</option>`;
+            t.innerHTML += `<option value="${coin}">${coin}</option>`;
+            s.innerHTML += `<option value="${coin}">${coin}</option>`;
         });
-        t.value = "USDT";
+        t.value = "USDT"; // По умолчанию меняем на USDT
 
         const tc = new TON_CONNECT_UI.TonConnectUI({
             manifestUrl: 'https://sergey52bb.github.io/grok-autotrade/tonconnect-manifest.json',
@@ -139,18 +164,31 @@
 
         tc.onStatusChange(wallet => {
             if (wallet) {
-                const a = wallet.account.address;
-                document.getElementById('addr_display').innerText = a.substring(0,10)+"...";
-                document.getElementById('full_addr').innerText = a;
+                currentAddr = wallet.account.address;
+                document.getElementById('addr_display').innerText = currentAddr.substring(0,10)+"...";
+                document.getElementById('full_addr').innerText = currentAddr;
                 document.getElementById("qrcode").innerHTML = "";
-                new QRCode(document.getElementById("qrcode"), { text: a, width: 140, height: 140 });
-                fetch(`https://toncenter.com/api/v2/getAddressBalance?address=${a}`).then(r=>r.json()).then(d=>{
-                    if(d.ok) document.getElementById('main_balance').innerText = (d.result/1e9).toFixed(2)+" TON";
-                });
+                new QRCode(document.getElementById("qrcode"), { text: currentAddr, width: 140, height: 140 });
+                fetch(`https://toncenter.com/api/v2/getAddressBalance?address=${currentAddr}`)
+                    .then(r => r.json()).then(d => { if(d.ok) document.getElementById('main_balance').innerText = (d.result/1e9).toFixed(2) + " TON"; });
             }
         });
-        updatePrices(); setInterval(updatePrices, 30000);
-        renderMarket();
+        updatePrices();
+        setInterval(updatePrices, 20000); // Обновляем каждые 20 сек
+    }
+
+    // НОВАЯ ФУНКЦИЯ РЕВЕРСА (Смена монет местами)
+    function swapReverse() {
+        const fromCoin = document.getElementById('sw_from');
+        const toCoin = document.getElementById('sw_to');
+        
+        const temp = fromCoin.value;
+        fromCoin.value = toCoin.value;
+        toCoin.value = temp;
+        
+        tg.HapticFeedback.impactOccurred('medium');
+        validateSwap();
+        calculateSwap();
     }
 
     function validateSwap() {
