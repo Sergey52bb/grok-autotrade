@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>SYN TERMINAL v7.1</title>
+    <title>SYN TERMINAL v7.2</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <script src="https://unpkg.com/@tonconnect/ui@2.0.9/dist/tonconnect-ui.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
@@ -19,11 +19,10 @@
         .nav-item { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; font-size: 11px; color: var(--text); opacity: 0.5; }
         .nav-item.active { color: var(--green); opacity: 1; }
         .balance-card { background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%); padding: 30px; border-radius: 25px; text-align: center; margin-bottom: 25px; border: 1px solid var(--border); }
-        .asset-card { background: var(--panel); border-radius: 20px; padding: 15px; margin-bottom: 12px; border: 1px solid var(--border); }
-        .sparkline { width: 100px; height: 20px; stroke: var(--green); stroke-width: 2; fill: none; }
-        .btn-general { padding: 18px; border-radius: 18px; border: none; font-weight: 800; text-transform: uppercase; font-size: 12px; cursor: pointer; width: 100%; transition: 0.3s; }
-        .btn-general:disabled { opacity: 0.3; cursor: not-allowed; filter: grayscale(1); }
-        .btn-trade { padding: 8px 15px; font-size: 10px; border-radius: 8px; font-weight: bold; border: 1px solid rgba(255,255,255,0.1); background: rgba(255,255,255,0.05); color: white; }
+        .asset-card { background: var(--panel); border-radius: 20px; padding: 18px; margin-bottom: 12px; border: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; }
+        .btn-general { padding: 18px; border-radius: 18px; border: none; font-weight: 800; text-transform: uppercase; font-size: 12px; cursor: pointer; width: 100%; }
+        .btn-general:disabled { background: #2b2f36 !important; color: #555 !important; cursor: not-allowed; opacity: 0.6; }
+        .btn-trade { padding: 10px 16px; font-size: 10px; border-radius: 10px; font-weight: bold; border: 1px solid rgba(255,255,255,0.1); background: rgba(255,255,255,0.05); color: white; }
         .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.95); z-index: 2000; justify-content: center; align-items: center; padding: 20px; }
         .modal-content { background: var(--panel); padding: 25px; border-radius: 30px; text-align: center; width: 100%; border: 1px solid var(--border); }
         select, input { width: 100%; padding: 15px; background: #000; border: 1px solid var(--border); border-radius: 12px; color: #fff; box-sizing: border-box; outline: none; margin-bottom: 10px; }
@@ -52,18 +51,18 @@
 
     <div id="scr_swap" class="screen">
         <div style="background:var(--panel); padding:20px; border-radius:25px; border:1px solid var(--border);">
-            <p style="font-size:11px; opacity:0.5; margin:0 0 5px 5px;">SELL</p>
+            <p style="font-size:11px; opacity:0.5; margin-bottom:5px;">SELL</p>
             <div style="display:flex; gap:10px;">
                 <input type="number" id="sw_val" placeholder="0.0" oninput="calculateSwap()">
                 <select id="sw_from" onchange="validateSwap(); calculateSwap()"></select>
             </div>
-            <div style="text-align:center; color:var(--green); margin:5px 0;">⬇️</div>
-            <p style="font-size:11px; opacity:0.5; margin:0 0 5px 5px;">BUY</p>
+            <div style="text-align:center; color:var(--green); margin:10px 0;">⬇️</div>
+            <p style="font-size:11px; opacity:0.5; margin-bottom:5px;">BUY</p>
             <div style="display:flex; gap:10px;">
                 <input type="text" id="sw_res" placeholder="0.0" readonly style="color:var(--green);">
                 <select id="sw_to" onchange="validateSwap(); calculateSwap()"></select>
             </div>
-            <div id="sw_usd_info" style="text-align:right; font-size:10px; color:var(--text); margin: 5px 0 15px 0;">Value: $0.00</div>
+            <div id="sw_usd_info" style="text-align:right; font-size:10px; color:var(--text); margin-bottom:15px;">Value: $0.00</div>
             <button id="sw_btn" class="btn-general" style="background:var(--green); color:#000;" onclick="tg.showAlert('Swap processing...')">CONFIRM SWAP</button>
         </div>
     </div>
@@ -93,9 +92,10 @@
     <div class="modal-content" onclick="event.stopPropagation()">
         <h3>Send Assets</h3>
         <select id="send_asset_select"></select>
-        <input type="text" placeholder="Address">
+        <input type="text" placeholder="Recipient Address">
+        <input type="text" placeholder="Memo (Comment)">
         <input type="number" placeholder="Amount">
-        <button class="btn-general" style="background:var(--green); color:#000;">SEND</button>
+        <button class="btn-general" style="background:var(--green); color:#000; margin-top:10px;">SEND NOW</button>
     </div>
 </div>
 
@@ -105,10 +105,10 @@
 
     let prices = { 'TON': 7.24, 'BTC': 69500, 'ETH': 3500, 'DOGE': 0.16, 'USDT': 1 };
     const assets = [
-        {s:'TON', i:'https://cryptologos.cc/logos/toncoin-ton-logo.png', g:'M0,10 L20,5 L40,8 L60,2 L80,6 L100,3'},
-        {s:'BTC', i:'https://cryptologos.cc/logos/bitcoin-btc-logo.png', g:'M0,5 L20,8 L40,3 L60,7 L80,2 L100,5'},
-        {s:'ETH', i:'https://cryptologos.cc/logos/ethereum-eth-logo.png', g:'M0,8 L20,3 L40,6 L60,1 L80,4 L100,2'},
-        {s:'DOGE', i:'https://cryptologos.cc/logos/dogecoin-doge-logo.png', g:'M0,10 L20,12 L40,9 L60,11 L80,8 L100,10'}
+        {s:'TON', i:'https://cryptologos.cc/logos/toncoin-ton-logo.png'},
+        {s:'BTC', i:'https://cryptologos.cc/logos/bitcoin-btc-logo.png'},
+        {s:'ETH', i:'https://cryptologos.cc/logos/ethereum-eth-logo.png'},
+        {s:'DOGE', i:'https://cryptologos.cc/logos/dogecoin-doge-logo.png'}
     ];
 
     async function updatePrices() {
@@ -117,7 +117,7 @@
             const data = await res.json();
             const map = { 'BTCUSDT': 'BTC', 'ETHUSDT': 'ETH', 'DOGEUSDT': 'DOGE' };
             data.forEach(item => { if(map[item.symbol]) prices[map[item.symbol]] = parseFloat(item.price); });
-        } catch(e) { console.log("Price update failed"); }
+        } catch(e) {}
         renderMarket();
     }
 
@@ -150,22 +150,16 @@
             }
         });
         updatePrices(); setInterval(updatePrices, 30000);
-        renderMarket(); // Первый запуск принудительно
+        renderMarket();
     }
 
     function validateSwap() {
-        const f = document.getElementById('sw_from');
-        const t = document.getElementById('sw_to');
+        const f = document.getElementById('sw_from').value;
+        const t = document.getElementById('sw_to').value;
         const btn = document.getElementById('sw_btn');
-        if(f.value === t.value) {
-            btn.disabled = true;
-            btn.innerText = "SAME ASSETS ERROR";
-            btn.style.background = "#333";
-        } else {
-            btn.disabled = false;
-            btn.innerText = "CONFIRM SWAP";
-            btn.style.background = "var(--green)";
-        }
+        btn.disabled = (f === t);
+        if (f === t) { btn.innerText = "CHOOSE DIFFERENT ASSETS"; } 
+        else { btn.innerText = "CONFIRM SWAP"; }
     }
 
     function calculateSwap() {
@@ -181,20 +175,16 @@
     }
 
     function renderMarket() {
-        const list = document.getElementById('market_list');
-        list.innerHTML = assets.map(a => `
+        document.getElementById('market_list').innerHTML = assets.map(a => `
             <div class="asset-card">
-                <div style="display:flex; justify-content:space-between; align-items:center;">
-                    <div style="display:flex; align-items:center; gap:10px;">
-                        <img src="${a.i}" width="28">
-                        <div><b>${a.s}</b><br><span style="font-size:12px; opacity:0.6;">$${prices[a.s].toLocaleString()}</span></div>
-                    </div>
-                    <div style="display:flex; gap:8px;">
-                        <button class="btn-trade" style="color:var(--green)">BUY</button>
-                        <button class="btn-trade" style="color:var(--red)">SELL</button>
-                    </div>
+                <div style="display:flex; align-items:center; gap:12px;">
+                    <img src="${a.i}" width="32" style="border-radius:50%">
+                    <div><b>${a.s}</b><br><span style="font-size:12px; opacity:0.6;">$${prices[a.s].toLocaleString()}</span></div>
                 </div>
-                <div style="margin-top:10px;"><svg class="sparkline" viewBox="0 0 100 15"><path d="${a.g}" /></svg></div>
+                <div style="display:flex; gap:8px;">
+                    <button class="btn-trade" style="color:var(--green)">BUY</button>
+                    <button class="btn-trade" style="color:var(--red)">SELL</button>
+                </div>
             </div>
         `).join('');
     }
