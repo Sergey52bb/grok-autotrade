@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>Grok Avto Trade v7.6</title>
+    <title>Grok Avto Trade v7.7</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <script src="https://unpkg.com/@tonconnect/ui@2.0.9/dist/tonconnect-ui.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
@@ -18,12 +18,14 @@
         nav { position: fixed; bottom: 0; width: 100%; height: 90px; background: var(--panel); display: flex; border-top: 1px solid var(--border); z-index: 1000; padding-bottom: env(safe-area-inset-bottom); }
         .nav-item { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; font-size: 11px; color: var(--text); opacity: 0.5; cursor: pointer; }
         .nav-item.active { color: var(--green); opacity: 1; }
+        .balance-card { background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%); padding: 30px; border-radius: 25px; text-align: center; margin-bottom: 25px; border: 1px solid var(--border); }
         .asset-card { background: var(--panel); border-radius: 20px; padding: 18px; margin-bottom: 12px; border: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; }
         .btn-general { padding: 18px; border-radius: 18px; border: none; font-weight: 800; text-transform: uppercase; font-size: 12px; cursor: pointer; width: 100%; }
         .btn-trade { padding: 10px 14px; font-size: 10px; border-radius: 8px; font-weight: bold; border: 1px solid rgba(255,255,255,0.1); background: rgba(255,255,255,0.05); color: white; cursor: pointer; }
+        .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.95); z-index: 2000; justify-content: center; align-items: center; padding: 20px; }
+        .modal-content { background: var(--panel); padding: 25px; border-radius: 30px; text-align: center; width: 100%; border: 1px solid var(--border); }
         select, input { width: 100%; padding: 15px; background: #000; border: 1px solid var(--border); border-radius: 12px; color: #fff; box-sizing: border-box; outline: none; margin-bottom: 10px; }
         #swap_reverse_btn { background: var(--panel); border: 1px solid var(--border); color: var(--green); width: 42px; height: 42px; border-radius: 50%; font-size: 18px; cursor: pointer; display: flex; align-items: center; justify-content: center; margin: -20px auto; z-index: 10; position: relative; }
-        .balance-card { background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%); padding: 30px; border-radius: 25px; text-align: center; margin-bottom: 25px; border: 1px solid var(--border); }
     </style>
 </head>
 <body>
@@ -35,11 +37,11 @@
         <div class="balance-card">
             <div style="font-size: 11px; opacity: 0.6;">TOTAL BALANCE</div>
             <h1 id="main_balance">0.00 TON</h1>
-            <div id="addr_display" style="font-size: 10px; opacity: 0.4;">Disconnected</div>
+            <div id="addr_display" style="font-size: 10px; opacity: 0.4; font-family: monospace;">Disconnected</div>
         </div>
         <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
-            <button class="btn-general" style="background:#fff; color:#000;" onclick="tg.showAlert('Deposit feature coming soon')">DEPOSIT</button>
-            <button class="btn-general" style="background:var(--green); color:#000;" onclick="tg.showAlert('Send feature coming soon')">SEND</button>
+            <button class="btn-general" style="background:#fff; color:#000;" onclick="openModal('deposit')">DEPOSIT</button>
+            <button class="btn-general" style="background:var(--green); color:#000;" onclick="openModal('send')">SEND</button>
         </div>
     </div>
 
@@ -88,7 +90,7 @@
             <input type="text" id="sw_res" placeholder="0.0" readonly style="color:var(--green);">
             <select id="sw_to" onchange="validateSwap(); calculateSwap()"></select>
             <div id="sw_usd_info" style="text-align:right; font-size:10px; color:var(--text); margin-bottom:10px;">Value: $0.00</div>
-            <button id="sw_btn" class="btn-general" style="background:var(--green); color:#000;" onclick="tg.showAlert('Swap order placed!')">CONFIRM SWAP</button>
+            <button id="sw_btn" class="btn-general" style="background:var(--green); color:#000;" onclick="tg.showAlert('Order Sent')">CONFIRM SWAP</button>
         </div>
     </div>
 </div>
@@ -99,63 +101,104 @@
     <div class="nav-item" onclick="showTab('swap', this)"><span>🔄</span>Swap</div>
 </nav>
 
+<div id="modal_deposit" class="modal" onclick="closeModal('deposit')">
+    <div class="modal-content" onclick="event.stopPropagation()">
+        <h3>Deposit TON</h3>
+        <div id="qrcode" style="display:flex; justify-content:center; margin:15px 0; background:white; padding:10px; border-radius:10px;"></div>
+        <p id="full_addr" style="font-size:10px; word-break:break-all; opacity:0.5; font-family:monospace;">Connect wallet first</p>
+        <button class="btn-general" style="background:var(--green); color:#000;" onclick="copyAddr()">COPY</button>
+    </div>
+</div>
+
+<div id="modal_send" class="modal" onclick="closeModal('send')">
+    <div class="modal-content" onclick="event.stopPropagation()">
+        <h3>Send Assets</h3>
+        <select id="send_asset_select"></select>
+        <input type="text" placeholder="Recipient Address">
+        <input type="text" placeholder="Memo (Optional)">
+        <input type="number" placeholder="Amount">
+        <button class="btn-general" style="background:var(--green); color:#000;">SEND NOW</button>
+    </div>
+</div>
+
 <script>
     const tg = window.Telegram.WebApp;
     tg.ready();
-    let prices = { 'TON': 7.20, 'BTC': 69000, 'ETH': 3450, 'USDT': 1 };
-
-    // Быстрая загрузка цен через HTTP, не дожидаясь сокета
-    async function fastPriceLoad() {
-        try {
-            const r = await fetch('https://api.binance.com/api/v3/ticker/price?symbols=["BTCUSDT","ETHUSDT","TONUSDT"]');
-            const data = await r.json();
-            data.forEach(item => {
-                const s = item.symbol.replace('USDT', '');
-                prices[s] = parseFloat(item.price);
-                updatePriceUI(s, prices[s]);
-            });
-        } catch(e) { console.log("Fast load failed"); }
-    }
+    let prices = { 'TON': 7.2, 'BTC': 69000, 'ETH': 3450, 'USDT': 1 };
+    let currentAddr = "";
 
     function updatePriceUI(s, p) {
         const el = document.getElementById(`price-${s}`);
         if (el) el.innerText = `$${p.toLocaleString(undefined, {minimumFractionDigits: 2})}`;
     }
 
-    function connectMarket() {
-        const socket = new WebSocket("wss://stream.binance.com:9443/ws/btcusdt@ticker/ethusdt@ticker/tonusdt@ticker");
-        socket.onmessage = (event) => {
-            const data = JSON.parse(event.data);
-            const symbol = data.s.replace('USDT', '');
-            prices[symbol] = parseFloat(data.c);
-            updatePriceUI(symbol, prices[symbol]);
-        };
-        socket.onclose = () => setTimeout(connectMarket, 3000);
+    async function fastLoad() {
+        try {
+            const r = await fetch('https://api.binance.com/api/v3/ticker/price?symbols=["BTCUSDT","ETHUSDT","TONUSDT"]');
+            const data = await r.json();
+            data.forEach(i => {
+                const s = i.symbol.replace('USDT','');
+                prices[s] = parseFloat(i.price);
+                updatePriceUI(s, prices[s]);
+            });
+        } catch(e) {}
     }
 
-    function quickTrade(coin, type) {
-        showTab('swap', document.querySelectorAll('.nav-item')[2]);
-        if (type === 'buy') {
-            document.getElementById('sw_from').value = 'USDT';
-            document.getElementById('sw_to').value = coin;
-        } else {
-            document.getElementById('sw_from').value = coin;
-            document.getElementById('sw_to').value = 'USDT';
-        }
-        validateSwap();
-        calculateSwap();
+    function connectMarket() {
+        const ws = new WebSocket("wss://stream.binance.com:9443/ws/btcusdt@ticker/ethusdt@ticker/tonusdt@ticker");
+        ws.onmessage = (e) => {
+            const d = JSON.parse(e.data);
+            const s = d.s.replace('USDT','');
+            prices[s] = parseFloat(d.c);
+            updatePriceUI(s, prices[s]);
+        };
+        ws.onclose = () => setTimeout(connectMarket, 3000);
     }
 
     function init() {
-        const f = document.getElementById('sw_from');
-        const t = document.getElementById('sw_to');
+        const f = document.getElementById('sw_from'), t = document.getElementById('sw_to'), s = document.getElementById('send_asset_select');
         Object.keys(prices).forEach(c => {
             f.innerHTML += `<option value="${c}">${c}</option>`;
             t.innerHTML += `<option value="${c}">${c}</option>`;
+            s.innerHTML += `<option value="${c}">${c}</option>`;
         });
         t.value = "USDT";
-        fastPriceLoad();
+
+        const tc = new TON_CONNECT_UI.TonConnectUI({
+            manifestUrl: 'https://sergey52bb.github.io/grok-autotrade/tonconnect-manifest.json',
+            buttonRootId: 'scr_profile' // Кнопка коннекта может быть в скрытом профиле
+        });
+
+        tc.onStatusChange(w => {
+            if (w) {
+                currentAddr = w.account.address;
+                document.getElementById('addr_display').innerText = currentAddr.substring(0,8)+"..."+currentAddr.substring(currentAddr.length-4);
+                document.getElementById('full_addr').innerText = currentAddr;
+                document.getElementById("qrcode").innerHTML = "";
+                new QRCode(document.getElementById("qrcode"), { text: currentAddr, width: 140, height: 140 });
+            }
+        });
+
+        fastLoad();
         connectMarket();
+    }
+
+    function openModal(id) { document.getElementById('modal_'+id).style.display = 'flex'; }
+    function closeModal(id) { document.getElementById('modal_'+id).style.display = 'none'; }
+    function copyAddr() { navigator.clipboard.writeText(document.getElementById('full_addr').innerText); tg.showAlert("Copied!"); }
+
+    function quickTrade(coin, type) {
+        showTab('swap', document.querySelectorAll('.nav-item')[2]);
+        document.getElementById('sw_from').value = (type === 'buy') ? 'USDT' : coin;
+        document.getElementById('sw_to').value = (type === 'buy') ? coin : 'USDT';
+        calculateSwap(); validateSwap();
+    }
+
+    function showTab(id, el) {
+        document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+        document.getElementById('scr_'+id).classList.add('active');
+        document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+        el.classList.add('active');
     }
 
     function swapReverse() {
@@ -174,16 +217,7 @@
 
     function validateSwap() {
         const btn = document.getElementById('sw_btn');
-        const isSame = document.getElementById('sw_from').value === document.getElementById('sw_to').value;
-        btn.disabled = isSame;
-        btn.style.opacity = isSame ? "0.3" : "1";
-    }
-
-    function showTab(id, el) {
-        document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
-        document.getElementById('scr_'+id).classList.add('active');
-        document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
-        el.classList.add('active');
+        btn.disabled = (document.getElementById('sw_from').value === document.getElementById('sw_to').value);
     }
 
     window.onload = init;
