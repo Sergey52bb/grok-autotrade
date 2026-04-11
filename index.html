@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>Grok Avto Trade v8.3</title>
+    <title>Grok Avto Trade v8.4</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <script src="https://unpkg.com/@tonconnect/ui@2.0.9/dist/tonconnect-ui.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
@@ -28,16 +28,17 @@
 
         #main_content { flex: 1; overflow-y: auto; padding: 10px 15px 140px; }
         .screen { display: none; }
-        .screen.active { display: block; animation: fadeIn 0.3s ease; }
-        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        .screen.active { display: block; }
 
         .card { background: var(--panel); border: 1px solid var(--border); padding: 25px 20px; border-radius: 28px; backdrop-filter: blur(10px); margin-bottom: 20px; }
         .btn-action { padding: 18px; border-radius: 20px; border: none; font-weight: 800; font-size: 13px; cursor: pointer; width: 100%; transition: 0.2s; text-transform: uppercase; }
         
-        nav { position: fixed; bottom: 20px; left: 15px; right: 15px; height: 85px; background: var(--panel); display: flex; border-radius: 24px; border: 1px solid var(--border); backdrop-filter: blur(20px); z-index: 1000; }
-        .nav-item { flex: 1; display: flex; align-items: center; justify-content: center; cursor: pointer; opacity: 0.4; transition: 0.3s; }
-        .nav-item img { width: 42px; height: 42px; object-fit: contain; }
-        .nav-item.active { opacity: 1; transform: translateY(-5px); }
+        /* НАВИГАЦИЯ СО СТАНДАРТНЫМИ ЗНАЧКАМИ */
+        nav { position: fixed; bottom: 20px; left: 15px; right: 15px; height: 80px; background: var(--panel); display: flex; border-radius: 24px; border: 1px solid var(--border); backdrop-filter: blur(20px); z-index: 1000; }
+        .nav-item { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; cursor: pointer; opacity: 0.4; transition: 0.3s; color: white; }
+        .nav-item span { font-size: 32px; margin-bottom: 2px; }
+        .nav-item div { font-size: 10px; font-weight: 600; text-transform: uppercase; }
+        .nav-item.active { opacity: 1; transform: translateY(-5px); color: var(--blue); }
 
         input, select { width: 100%; padding: 18px; background: rgba(0,0,0,0.4); border: 1px solid var(--border); border-radius: 16px; color: white; margin-bottom: 12px; outline: none; font-size: 16px; box-sizing: border-box; }
         
@@ -53,8 +54,8 @@
     <div id="scr_wallet" class="screen active">
         <div class="card" style="text-align: center;">
             <div style="font-size: 11px; opacity: 0.5; margin-bottom: 8px;">TOTAL BALANCE</div>
-            <h1 id="main_balance" style="font-size: 40px; margin: 0; color: #fff;">0.00 TON</h1>
-            <div id="addr_display" style="font-size: 11px; color: var(--blue); margin-top: 12px; font-family: monospace; letter-spacing: 1px;">NOT CONNECTED</div>
+            <h1 id="main_balance" style="font-size: 40px; margin: 0;">0.00 TON</h1>
+            <div id="addr_display" style="font-size: 11px; color: var(--blue); margin-top: 12px; font-family: monospace;">NOT CONNECTED</div>
         </div>
         <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
             <button class="btn-action" style="background:#fff; color:#000;" onclick="openModal('deposit')">DEPOSIT</button>
@@ -64,39 +65,39 @@
 
     <div id="scr_swap" class="screen">
         <div class="card">
-            <p style="font-size:11px; opacity:0.5; margin: 0 0 8px 5px;">PAY</p>
+            <p style="font-size:11px; opacity:0.5; margin-left:5px;">PAY</p>
             <input type="number" id="sw_val" placeholder="0.0" oninput="calculateSwap()">
             <select id="sw_from" onchange="calculateSwap()"></select>
             
-            <div style="text-align:center; margin: -5px 0 10px 0; color: var(--blue); font-size: 20px;">↓</div>
+            <div style="text-align:center; margin: -5px 0 10px 0; font-size: 20px; color: var(--blue);">↓</div>
             
-            <p style="font-size:11px; opacity:0.5; margin: 0 0 8px 5px;">RECEIVE</p>
+            <p style="font-size:11px; opacity:0.5; margin-left:5px;">RECEIVE</p>
             <input type="text" id="sw_res" placeholder="0.0" readonly style="color:var(--green);">
             <select id="sw_to" onchange="calculateSwap()"></select>
             
-            <button class="btn-action" style="background:var(--green); color:#000; margin-top:10px;" onclick="tg.showAlert('Swap processing...')">CONFIRM SWAP</button>
+            <button class="btn-action" style="background:var(--green); color:#000; margin-top:10px;" onclick="tg.showAlert('Processing Swap...')">CONFIRM SWAP</button>
         </div>
     </div>
 
     <div id="scr_connect" class="screen">
-        <div class="card" style="text-align: center; padding: 50px 20px;">
-            <h3 style="margin-top: 0;">Wallet Connection</h3>
-            <p style="font-size: 14px; opacity: 0.6; margin-bottom: 30px;">Connect your TON wallet to manage assets.</p>
+        <div class="card" style="text-align: center; padding: 40px 20px;">
+            <h3>Wallet Settings</h3>
+            <p style="font-size: 14px; opacity: 0.6; margin-bottom: 30px;">Connect your TON wallet to start trading.</p>
             <div id="ton-connect-btn" style="display:flex; justify-content:center;"></div>
         </div>
     </div>
 </div>
 
 <nav>
-    <div class="nav-item active" onclick="showTab('wallet', this)"><img src="https://i.ibb.co/vzYp5zM/wallet-logo.png"></div>
-    <div class="nav-item" onclick="showTab('swap', this)"><img src="https://i.ibb.co/fHwQ3mG/swap-logo.png"></div>
-    <div class="nav-item" onclick="showTab('connect', this)"><img src="https://i.ibb.co/hR0p5R1/connect-logo.png"></div>
+    <div class="nav-item active" onclick="showTab('wallet', this)"><span>💼</span><div>Wallet</div></div>
+    <div class="nav-item" onclick="showTab('swap', this)"><span>🌀</span><div>Swap</div></div>
+    <div class="nav-item" onclick="showTab('connect', this)"><span>🔗</span><div>Connect</div></div>
 </nav>
 
 <div id="modal_deposit" class="modal" onclick="closeModal('deposit')">
     <div class="modal-content" onclick="event.stopPropagation()">
-        <h3 style="color:var(--green)">Deposit TON</h3>
-        <div id="qrcode" style="display:flex; justify-content:center; margin:20px 0; background:#fff; padding:15px; border-radius:15px; min-height: 150px;"></div>
+        <h3 style="color:var(--green)">Deposit Assets</h3>
+        <div id="qrcode" style="display:flex; justify-content:center; margin:20px 0; background:#fff; padding:15px; border-radius:15px; min-height:150px;"></div>
         <p id="full_addr" style="font-size:11px; word-break:break-all; opacity:0.5; font-family: monospace;">Please connect wallet</p>
         <button class="btn-action" style="background:var(--blue); color:#fff;" onclick="copyAddr()">COPY ADDRESS</button>
     </div>
@@ -104,12 +105,12 @@
 
 <div id="modal_send" class="modal" onclick="closeModal('send')">
     <div class="modal-content" onclick="event.stopPropagation()">
-        <h3>Send Assets</h3>
+        <h3>Send Crypto</h3>
         <select id="send_asset_select"></select>
         <input type="text" placeholder="Recipient Address">
-        <input type="text" placeholder="Memo / Comment">
+        <input type="text" id="send_memo" placeholder="Memo (Optional)">
         <input type="number" placeholder="Amount">
-        <button class="btn-action" style="background:var(--green); color:#000;" onclick="tg.showAlert('Transaction initiated')">SEND NOW</button>
+        <button class="btn-action" style="background:var(--green); color:#000;" onclick="tg.showAlert('Sending...')">SEND NOW</button>
     </div>
 </div>
 
@@ -119,23 +120,27 @@
     tg.expand();
 
     let currentAddr = "";
-    let prices = { 'TON': 7.35, 'BTC': 69200, 'ETH': 3480, 'USDT': 1.00 };
+    let prices = { 'TON': 7.42, 'BTC': 69400, 'ETH': 3500, 'USDT': 1.00 };
 
     function init() {
-        // Наполняем списки монет (Swap и Send)
+        // Гарантированное наполнение всех списков при загрузке
         const f = document.getElementById('sw_from');
         const t = document.getElementById('sw_to');
         const s = document.getElementById('send_asset_select');
         
-        f.innerHTML = ""; t.innerHTML = ""; s.innerHTML = ""; // Очистка
+        // Очищаем перед заполнением
+        f.innerHTML = ""; t.innerHTML = ""; s.innerHTML = "";
 
         Object.keys(prices).forEach(c => {
-            f.innerHTML += `<option value="${c}">${c}</option>`;
-            t.innerHTML += `<option value="${c}">${c}</option>`;
-            s.innerHTML += `<option value="${c}">${c}</option>`;
+            let opt1 = document.createElement('option'); opt1.value = c; opt1.innerText = c;
+            let opt2 = document.createElement('option'); opt2.value = c; opt2.innerText = c;
+            let opt3 = document.createElement('option'); opt3.value = c; opt3.innerText = c;
+            f.appendChild(opt1);
+            t.appendChild(opt2);
+            s.appendChild(opt3);
         });
-        t.value = "USDT"; // По умолчанию меняем на USDT
-        
+        t.value = "USDT"; // Целевая валюта по умолчанию
+
         const tc = new TON_CONNECT_UI.TonConnectUI({
             manifestUrl: 'https://sergey52bb.github.io/grok-autotrade/tonconnect-manifest.json',
             buttonRootId: 'ton-connect-btn'
@@ -177,10 +182,11 @@
         const f = document.getElementById('sw_from').value;
         const t = document.getElementById('sw_to').value;
         const v = document.getElementById('sw_val').value;
+        const res = document.getElementById('sw_res');
         if(v > 0) {
-            document.getElementById('sw_res').value = ((v * prices[f]) / prices[t]).toFixed(4);
+            res.value = ((v * prices[f]) / prices[t]).toFixed(4);
         } else {
-            document.getElementById('sw_res').value = "";
+            res.value = "";
         }
     }
 
