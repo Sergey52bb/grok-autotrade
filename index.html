@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>SYN TERMINAL v9.0</title>
+    <title>SYN TERMINAL v10.0</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <script src="https://unpkg.com/@tonconnect/ui@2.0.9/dist/tonconnect-ui.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
@@ -18,13 +18,13 @@
         }
         
         body { 
-            background: radial-gradient(circle at top right, #0a1f32 0%, #050b14 60%),
+            background: radial-gradient(circle at top right, #0a2540 0%, #050b14 60%),
                         radial-gradient(circle at bottom left, rgba(0, 255, 149, 0.05) 0%, transparent 45%);
             color: white; margin: 0; font-family: -apple-system, sans-serif; height: 100vh; display: flex; flex-direction: column; overflow: hidden; 
         }
 
-        header { padding: 20px 15px 10px; text-align: center; }
-        header .title { font-weight: 900; font-size: 22px; color: white; letter-spacing: 1px; margin-bottom: 2px; }
+        header { padding: 25px 15px 10px; text-align: center; }
+        header .title { font-weight: 900; font-size: 24px; color: white; letter-spacing: 1px; }
         header .subtitle { font-size: 10px; color: var(--blue); letter-spacing: 2px; font-weight: 700; opacity: 0.8; }
 
         #main_content { flex: 1; overflow-y: auto; padding: 10px 15px 140px; }
@@ -33,32 +33,33 @@
 
         .card { background: var(--panel); border: 1px solid var(--border); padding: 25px 20px; border-radius: 28px; backdrop-filter: blur(10px); margin-bottom: 15px; }
         
-        /* СТИЛЬ СПИСКА АКТИВОВ (TRUST WALLET STYLE) */
-        .asset-item { display: flex; justify-content: space-between; align-items: center; padding: 15px 0; border-bottom: 1px solid var(--border); }
+        /* TRUST WALLET LIST STYLE */
+        .asset-item { display: flex; justify-content: space-between; align-items: center; padding: 16px 0; border-bottom: 1px solid var(--border); cursor: pointer; transition: 0.2s; }
+        .asset-item:active { opacity: 0.5; transform: scale(0.98); }
         .asset-item:last-child { border: none; }
-        .asset-info { display: flex; align-items: center; gap: 12px; }
-        .asset-icon { width: 40px; height: 40px; background: rgba(255,255,255,0.05); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 20px; }
-        .asset-name { font-weight: 700; font-size: 15px; margin-bottom: 2px; }
-        .asset-price { font-size: 12px; opacity: 0.5; }
-        .asset-change { font-size: 11px; margin-left: 5px; font-weight: 600; }
+        .asset-info { display: flex; align-items: center; gap: 14px; }
+        .asset-icon { width: 44px; height: 44px; background: rgba(255,255,255,0.05); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 22px; }
+        .asset-name { font-weight: 700; font-size: 16px; }
+        .asset-price { font-size: 12px; opacity: 0.5; margin-top: 2px; }
+        .asset-change { font-size: 11px; margin-left: 4px; font-weight: 600; }
         .asset-balance { text-align: right; }
-        .bal-crypto { font-weight: 700; font-size: 15px; }
+        .bal-crypto { font-weight: 700; font-size: 16px; }
         .bal-usd { font-size: 12px; opacity: 0.5; margin-top: 2px; }
 
-        .btn-action { padding: 18px; border-radius: 20px; border: none; font-weight: 800; font-size: 13px; cursor: pointer; width: 100%; transition: 0.2s; }
+        .btn-action { padding: 18px; border-radius: 22px; border: none; font-weight: 800; font-size: 13px; cursor: pointer; width: 100%; transition: 0.2s; }
         .btn-action:disabled { background: #222 !important; color: #444 !important; opacity: 0.6; }
         
         nav { position: fixed; bottom: 20px; left: 15px; right: 15px; height: 80px; background: var(--panel); display: flex; border-radius: 24px; border: 1px solid var(--border); backdrop-filter: blur(20px); z-index: 1000; }
         .nav-item { flex: 1; display: flex; align-items: center; justify-content: center; cursor: pointer; opacity: 0.4; transition: 0.3s; }
         .nav-item span { font-size: 30px; }
-        .nav-item.active { opacity: 1; transform: translateY(-5px); filter: drop-shadow(0 0 8px var(--blue)); }
+        .nav-item.active { opacity: 1; transform: translateY(-5px); filter: drop-shadow(0 0 10px var(--blue)); }
 
         input, select { width: 100%; padding: 18px; background: rgba(0,0,0,0.3); border: 1px solid var(--border); border-radius: 18px; color: white; margin-bottom: 10px; outline: none; font-size: 16px; box-sizing: border-box; }
         
-        #rev_btn { background: #1a222c; border: 1px solid var(--border); color: var(--blue); width: 42px; height: 42px; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: -26px auto; z-index: 5; position: relative; cursor: pointer; font-size: 18px; box-shadow: 0 4px 10px rgba(0,0,0,0.3); }
+        #rev_btn { background: #1a222c; border: 1px solid var(--border); color: var(--blue); width: 44px; height: 44px; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: -28px auto; z-index: 5; position: relative; cursor: pointer; font-size: 18px; }
 
-        .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.95); z-index: 2000; justify-content: center; align-items: center; padding: 20px; }
-        .modal-content { background: #0a111a; padding: 30px; border-radius: 30px; text-align: center; width: 100%; border: 1px solid var(--border); }
+        .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.96); z-index: 2000; justify-content: center; align-items: center; padding: 20px; }
+        .modal-content { background: #0d141d; padding: 30px; border-radius: 35px; text-align: center; width: 100%; border: 1px solid var(--border); }
     </style>
 </head>
 <body>
@@ -70,51 +71,34 @@
 
 <div id="main_content">
     <div id="scr_wallet" class="screen active">
-        <div class="card" style="text-align: center; background: transparent; border: none; padding-top: 0;">
-            <div style="font-size: 11px; opacity: 0.4; letter-spacing: 1px; margin-bottom: 5px;">MAIN PORTFOLIO</div>
-            <h1 id="main_balance" style="font-size: 42px; margin: 0; font-weight: 900;">0.00 TON</h1>
-            <div id="addr_display" style="font-size: 11px; color: var(--blue); margin-top: 10px; opacity: 0.6;">Disconnected</div>
+        <div class="card" style="text-align: center; background: transparent; border: none;">
+            <div style="font-size: 12px; opacity: 0.4; letter-spacing: 1px;">TOTAL BALANCE</div>
+            <h1 id="main_balance" style="font-size: 44px; margin: 5px 0 10px; font-weight: 900;">0.00 TON</h1>
+            <div id="addr_display" style="font-size: 11px; color: var(--blue); background: rgba(56, 151, 255, 0.1); padding: 5px 12px; border-radius: 20px; display: inline-block;">Disconnected</div>
         </div>
 
         <div class="card">
-            <div class="asset-item">
+            <div style="font-size: 11px; font-weight: 800; opacity: 0.5; margin-bottom: 15px;">ASSETS</div>
+            <div class="asset-item" onclick="openModal('send', 'TON')">
                 <div class="asset-info">
-                    <div class="asset-icon" style="color:#0088cc;">💎</div>
-                    <div>
-                        <div class="asset-name">TON</div>
-                        <div class="asset-price">$7.42 <span class="asset-change" style="color:var(--green);">+2.4%</span></div>
-                    </div>
+                    <div class="asset-icon" style="background: rgba(0, 136, 204, 0.1); color:#0088cc;">💎</div>
+                    <div><div class="asset-name">TON</div><div class="asset-price">$7.42 <span class="asset-change" style="color:var(--green);">+2.1%</span></div></div>
                 </div>
-                <div class="asset-balance">
-                    <div class="bal-crypto" id="bal_ton">0.00</div>
-                    <div class="bal-usd">$0.00</div>
-                </div>
+                <div class="asset-balance"><div class="bal-crypto" id="bal_ton">0.00</div><div class="bal-usd">$0.00</div></div>
             </div>
-            <div class="asset-item">
+            <div class="asset-item" onclick="openModal('send', 'BTC')">
                 <div class="asset-info">
-                    <div class="asset-icon" style="color:#f7931a;">🟠</div>
-                    <div>
-                        <div class="asset-name">BTC</div>
-                        <div class="asset-price">$69,420 <span class="asset-change" style="color:var(--red);">-0.8%</span></div>
-                    </div>
+                    <div class="asset-icon" style="background: rgba(247, 147, 26, 0.1); color:#f7931a;">🟠</div>
+                    <div><div class="asset-name">BTC</div><div class="asset-price">$69,420 <span class="asset-change" style="color:var(--red);">-0.4%</span></div></div>
                 </div>
-                <div class="asset-balance">
-                    <div class="bal-crypto">0.00</div>
-                    <div class="bal-usd">$0.00</div>
-                </div>
+                <div class="asset-balance"><div class="bal-crypto">0.00</div><div class="bal-usd">$0.00</div></div>
             </div>
-            <div class="asset-item">
+            <div class="asset-item" onclick="openModal('send', 'USDT')">
                 <div class="asset-info">
-                    <div class="asset-icon" style="color:#26a17b;">💵</div>
-                    <div>
-                        <div class="asset-name">USDT</div>
-                        <div class="asset-price">$1.00 <span class="asset-change" style="color:var(--green);">+0.01%</span></div>
-                    </div>
+                    <div class="asset-icon" style="background: rgba(38, 161, 123, 0.1); color:#26a17b;">💵</div>
+                    <div><div class="asset-name">USDT</div><div class="asset-price">$1.00 <span class="asset-change" style="color:var(--green);">+0.01%</span></div></div>
                 </div>
-                <div class="asset-balance">
-                    <div class="bal-crypto">0.00</div>
-                    <div class="bal-usd">$0.00</div>
-                </div>
+                <div class="asset-balance"><div class="bal-crypto">0.00</div><div class="bal-usd">$0.00</div></div>
             </div>
         </div>
 
@@ -136,13 +120,13 @@
             <input type="text" id="sw_res" placeholder="0.0" readonly style="color:var(--green);">
             <select id="sw_to" onchange="validateSwap()"></select>
             
-            <button id="sw_confirm_btn" class="btn-action" style="background:var(--green); color:#000; margin-top:10px;" onclick="tg.showAlert('Confirming Swap...')">CONFIRM SWAP</button>
+            <button id="sw_confirm_btn" class="btn-action" style="background:var(--green); color:#000; margin-top:10px;" onclick="tg.showAlert('Swap Executing...')">CONFIRM SWAP</button>
         </div>
     </div>
 
     <div id="scr_connect" class="screen">
         <div class="card" style="text-align: center; padding: 40px 20px;">
-            <h3>Terminal Settings</h3>
+            <h3>Connection Settings</h3>
             <div id="ton-connect-btn" style="display:flex; justify-content:center; margin-top:20px;"></div>
         </div>
     </div>
@@ -156,8 +140,8 @@
 
 <div id="modal_deposit" class="modal" onclick="closeModal('deposit')">
     <div class="modal-content" onclick="event.stopPropagation()">
-        <h3>Deposit Assets</h3>
-        <div id="qrcode" style="display:flex; justify-content:center; margin:20px 0; background:#fff; padding:15px; border-radius:15px; min-height:150px;"></div>
+        <h3 style="color:var(--green)">Deposit TON</h3>
+        <div id="qrcode" style="display:flex; justify-content:center; margin:20px 0; background:#fff; padding:15px; border-radius:15px;"></div>
         <p id="full_addr" style="font-size:11px; word-break:break-all; opacity:0.5; font-family:monospace;">Please connect wallet</p>
         <button class="btn-action" style="background:var(--blue); color:#fff;" onclick="copyAddr()">COPY</button>
     </div>
@@ -165,24 +149,25 @@
 
 <div id="modal_send" class="modal" onclick="closeModal('send')">
     <div class="modal-content" onclick="event.stopPropagation()">
-        <h3>Send Crypto</h3>
+        <h3>Send Assets</h3>
         <select id="send_asset_select"></select>
         <input type="text" placeholder="Recipient Address">
+        <input type="text" placeholder="Memo (Required for exchanges)" style="border-color: var(--blue);">
         <input type="number" placeholder="Amount">
-        <button class="btn-action" style="background:var(--green); color:#000;">SEND</button>
+        <button class="btn-action" style="background:var(--green); color:#000;" onclick="tg.showAlert('Transaction Sent')">SEND NOW</button>
     </div>
 </div>
 
 <script>
     const tg = window.Telegram.WebApp;
-    tg.ready();
-    tg.expand();
+    tg.ready(); tg.expand();
 
     let prices = { 'TON': 7.42, 'BTC': 69420, 'ETH': 3505, 'USDT': 1.00 };
     let currentAddr = "";
 
     function init() {
         const f = document.getElementById('sw_from'), t = document.getElementById('sw_to'), s = document.getElementById('send_asset_select');
+        f.innerHTML = ""; t.innerHTML = ""; s.innerHTML = "";
         Object.keys(prices).forEach(c => {
             f.innerHTML += `<option value="${c}">${c}</option>`;
             t.innerHTML += `<option value="${c}">${c}</option>`;
@@ -227,40 +212,24 @@
         const f = document.getElementById('sw_from'), t = document.getElementById('sw_to');
         const tmp = f.value; f.value = t.value; t.value = tmp;
         validateSwap();
-        tg.HapticFeedback.notificationOccurred('success');
     }
 
     function validateSwap() {
-        const f = document.getElementById('sw_from').value;
-        const t = document.getElementById('sw_to').value;
-        const err = document.getElementById('sw_err_msg');
-        const btn = document.getElementById('sw_confirm_btn');
-        const res = document.getElementById('sw_res');
-
-        if (f === t) {
-            err.style.display = "inline";
-            btn.disabled = true;
-            res.value = "";
-        } else {
-            err.style.display = "none";
-            btn.disabled = false;
-            calculateSwap();
-        }
+        const f = document.getElementById('sw_from').value, t = document.getElementById('sw_to').value;
+        const err = document.getElementById('sw_err_msg'), btn = document.getElementById('sw_confirm_btn'), res = document.getElementById('sw_res');
+        if (f === t) { err.style.display = "inline"; btn.disabled = true; res.value = ""; } 
+        else { err.style.display = "none"; btn.disabled = false; calculateSwap(); }
     }
 
     function calculateSwap() {
-        const f = document.getElementById('sw_from').value;
-        const t = document.getElementById('sw_to').value;
-        const v = document.getElementById('sw_val').value;
-        const res = document.getElementById('sw_res');
-        if(v > 0 && f !== t) {
-            res.value = ((v * prices[f]) / prices[t]).toFixed(4);
-        } else {
-            res.value = "";
-        }
+        const f = document.getElementById('sw_from').value, t = document.getElementById('sw_to').value, v = document.getElementById('sw_val').value;
+        if(v > 0 && f !== t) document.getElementById('sw_res').value = ((v * prices[f]) / prices[t]).toFixed(4);
     }
 
-    function openModal(id) { document.getElementById('modal_'+id).style.display = 'flex'; }
+    function openModal(id, asset = 'TON') { 
+        if(id === 'send') document.getElementById('send_asset_select').value = asset;
+        document.getElementById('modal_'+id).style.display = 'flex'; 
+    }
     function closeModal(id) { document.getElementById('modal_'+id).style.display = 'none'; }
     function copyAddr() { if(currentAddr) { navigator.clipboard.writeText(currentAddr); tg.showAlert("Copied!"); } }
 
