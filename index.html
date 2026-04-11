@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>SYN TERMINAL v11.3</title>
+    <title>SYN TERMINAL v11.4</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <script src="https://unpkg.com/@tonconnect/ui@2.0.9/dist/tonconnect-ui.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
@@ -32,7 +32,7 @@
 
         .total-balance-card { text-align: center; padding: 20px 0 30px; }
         .total-balance-card h1 { font-size: 44px; margin: 5px 0; font-weight: 900; letter-spacing: -1px; }
-        .address-badge { font-size: 11px; color: var(--blue); background: rgba(56, 151, 255, 0.1); padding: 6px 14px; border-radius: 20px; display: inline-block; }
+        .address-badge { font-size: 11px; color: var(--blue); background: rgba(56, 151, 255, 0.1); padding: 6px 14px; border-radius: 20px; display: inline-block; font-family: monospace; }
 
         .card { background: var(--panel); border: 1px solid var(--border); padding: 10px 20px; border-radius: 30px; margin-bottom: 20px; }
         
@@ -46,24 +46,19 @@
         .bal-amount { font-weight: 700; font-size: 16px; }
 
         input, select { width: 100%; padding: 18px; background: rgba(255,255,255,0.05); border: 1px solid var(--border); border-radius: 20px; color: white; margin-bottom: 12px; outline: none; font-size: 16px; box-sizing: border-box; }
+        #rev_btn { background: #1a222c; border: 1px solid var(--border); color: var(--blue); width: 40px; height: 40px; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: -26px auto; z-index: 5; position: relative; cursor: pointer; }
 
         nav { position: fixed; bottom: 20px; left: 15px; right: 15px; height: 75px; background: var(--panel); display: flex; border-radius: 25px; border: 1px solid var(--border); z-index: 100; }
-        .nav-item { flex: 1; display: flex; align-items: center; justify-content: center; cursor: pointer; opacity: 0.3; }
-        .nav-item.active { opacity: 1; }
+        .nav-item { flex: 1; display: flex; align-items: center; justify-content: center; cursor: pointer; opacity: 0.3; transition: 0.2s; }
+        .nav-item.active { opacity: 1; transform: translateY(-3px); }
         .nav-item span { font-size: 28px; }
 
-        /* УНИВЕРСАЛЬНАЯ МОДАЛКА */
-        .modal-overlay { 
-            display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; 
-            background: rgba(0,0,0,0.85); z-index: 1000; align-items: flex-end; 
-        }
-        .modal-body { 
-            background: #111a27; width: 100%; border-radius: 35px 35px 0 0; 
-            padding: 30px 20px 40px; box-sizing: border-box; border-top: 1px solid var(--border); 
-        }
-        .btn-confirm { background: var(--green); color: black; padding: 18px; border-radius: 20px; width: 100%; border: none; font-weight: 800; cursor: pointer; margin-top: 10px; }
+        /* MODAL SYSTEM */
+        .modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); z-index: 1000; align-items: flex-end; }
+        .modal-body { background: #111a27; width: 100%; border-radius: 35px 35px 0 0; padding: 30px 20px 40px; box-sizing: border-box; border-top: 1px solid var(--border); }
+        .btn-confirm { background: var(--green); color: black; padding: 18px; border-radius: 20px; width: 100%; border: none; font-weight: 800; cursor: pointer; margin-top: 10px; transition: 0.2s; }
+        .btn-confirm:disabled { background: #222; color: #555; cursor: not-allowed; }
         
-        /* Стили для вложенных окон внутри модалки */
         .modal-view { display: none; }
         .modal-view.active { display: block; }
     </style>
@@ -93,23 +88,36 @@
                 <div class="asset-details"><div class="asset-name">Bitcoin</div><div class="asset-price">$69,420</div></div>
                 <div class="asset-balance"><div class="bal-amount">0.00</div></div>
             </div>
+            <div class="asset-item" onclick="showAssetMenu('USDT')">
+                <div class="asset-icon" style="color:#26a17b;">💵</div>
+                <div class="asset-details"><div class="asset-name">USDT</div><div class="asset-price">$1.00</div></div>
+                <div class="asset-balance"><div class="bal-amount">0.00</div></div>
+            </div>
         </div>
     </div>
 
     <div id="scr_swap" class="screen">
         <div class="card" style="margin-top: 20px;">
-            <input type="number" id="sw_val" placeholder="0.0" oninput="calculateSwap()">
+            <div style="font-size: 11px; opacity: 0.5; margin-bottom: 8px;">PAY</div>
+            <input type="number" id="sw_val" placeholder="0.0" oninput="validateSwap()">
             <select id="sw_from" onchange="validateSwap()"></select>
-            <div id="sw_err_msg" style="display:none; color:var(--red); text-align:center; font-size:12px; margin: 10px 0;">Invalid pair</div>
+            
+            <div id="rev_btn" onclick="swapReverse()">🔄</div>
+            
+            <div style="display:flex; justify-content:space-between; margin: 15px 0 8px; font-size: 11px; opacity: 0.5;">
+                <span>RECEIVE</span>
+                <span id="sw_err_msg" style="display:none; color:var(--red); font-weight:bold;">Invalid pair</span>
+            </div>
             <input type="text" id="sw_res" placeholder="0.0" readonly style="color:var(--green);">
             <select id="sw_to" onchange="validateSwap()"></select>
-            <button class="btn-confirm" onclick="tg.showAlert('Swap processing...')">Confirm Swap</button>
+            
+            <button id="sw_confirm_btn" class="btn-confirm" onclick="tg.showAlert('Swap processing...')">Confirm Swap</button>
         </div>
     </div>
 
     <div id="scr_connect" class="screen">
         <div class="card" style="text-align:center; margin-top: 20px; padding: 40px 20px;">
-            <div id="ton-connect-btn"></div>
+            <div id="ton-connect-btn" style="display:flex; justify-content:center;"></div>
         </div>
     </div>
 </div>
@@ -124,7 +132,7 @@
     <div class="modal-body" onclick="event.stopPropagation()">
         
         <div id="view_menu" class="modal-view">
-            <h3 id="menu_title" style="text-align:center; margin-top:0;">Asset</h3>
+            <h3 id="menu_title" style="text-align:center; margin-top:0;">Asset Options</h3>
             <div style="display:grid; grid-template-columns:1fr 1fr; gap:15px;">
                 <button class="btn-confirm" style="background:#fff;" onclick="switchModalView('deposit')">RECEIVE</button>
                 <button class="btn-confirm" style="background:var(--blue); color:white;" onclick="switchModalView('send')">SEND</button>
@@ -140,13 +148,13 @@
 
         <div id="view_send" class="modal-view">
             <h3 style="text-align:center; margin-top:0;">Send <span class="cur_asset">TON</span></h3>
-            <input type="text" placeholder="Wallet Address">
-            <input type="text" placeholder="Memo (Optional)">
+            <input type="text" placeholder="Recipient Wallet">
+            <input type="text" placeholder="Memo (Comment)">
             <input type="number" placeholder="Amount">
             <button class="btn-confirm" onclick="tg.showAlert('Sending...')">Confirm Send</button>
         </div>
 
-        <button class="btn-confirm" style="background:transparent; color:white; opacity:0.5; margin-top:15px;" onclick="closeUniversalModal()">CANCEL</button>
+        <button class="btn-confirm" style="background:transparent; color:white; opacity:0.3; margin-top:15px; font-size:12px;" onclick="closeUniversalModal()">CLOSE</button>
     </div>
 </div>
 
@@ -178,8 +186,18 @@
                 document.getElementById('full_addr').innerText = currentAddr;
                 document.getElementById("qrcode").innerHTML = "";
                 new QRCode(document.getElementById("qrcode"), { text: currentAddr, width: 150, height: 150 });
+                
+                fetch(`https://toncenter.com/api/v2/getAddressBalance?address=${currentAddr}`)
+                    .then(r => r.json()).then(d => {
+                        if(d.ok) {
+                            let b = (d.result/1e9).toFixed(2);
+                            document.getElementById('main_balance').innerText = b + " TON";
+                            document.getElementById('bal_ton').innerText = b;
+                        }
+                    });
             }
         });
+        validateSwap();
     }
 
     function showTab(id, el) {
@@ -204,8 +222,38 @@
         document.getElementById('view_' + viewId).classList.add('active');
     }
 
-    function closeUniversalModal() {
-        document.getElementById('universal_modal').style.display = 'none';
+    function closeUniversalModal() { document.getElementById('universal_modal').style.display = 'none'; }
+
+    // SWAP LOGIC
+    function validateSwap() {
+        const from = document.getElementById('sw_from').value;
+        const to = document.getElementById('sw_to').value;
+        const val = document.getElementById('sw_val').value;
+        const err = document.getElementById('sw_err_msg');
+        const btn = document.getElementById('sw_confirm_btn');
+        const res = document.getElementById('sw_res');
+
+        if (from === to) {
+            err.innerText = "Same asset"; err.style.display = "block";
+            btn.disabled = true; res.value = ""; return;
+        }
+
+        // Ограничение: обмен только через TON
+        if (from !== 'TON' && to !== 'TON') {
+            err.innerText = "Use TON as bridge"; err.style.display = "block";
+            btn.disabled = true; res.value = ""; return;
+        }
+
+        err.style.display = "none";
+        btn.disabled = false;
+        if(val > 0) res.value = ((val * prices[from]) / prices[to]).toFixed(4);
+        else res.value = "";
+    }
+
+    function swapReverse() {
+        const f = document.getElementById('sw_from'), t = document.getElementById('sw_to');
+        const tmp = f.value; f.value = t.value; t.value = tmp;
+        validateSwap();
     }
 
     function copyAddr() { if(currentAddr) { navigator.clipboard.writeText(currentAddr); tg.showAlert("Copied!"); } }
