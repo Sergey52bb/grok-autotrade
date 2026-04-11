@@ -3,14 +3,14 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>SYN TERMINAL v11.1</title>
+    <title>SYN TERMINAL v11.2</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <script src="https://unpkg.com/@tonconnect/ui@2.0.9/dist/tonconnect-ui.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
     <style>
         :root { 
             --bg: #050b14; 
-            --panel: rgba(18, 26, 38, 0.95); 
+            --panel: rgba(18, 26, 38, 0.98); 
             --blue: #3897ff; 
             --green: #00ff95; 
             --red: #ff4a4a;
@@ -37,7 +37,7 @@
 
         .card { background: var(--panel); border: 1px solid var(--border); padding: 10px 20px; border-radius: 30px; backdrop-filter: blur(15px); margin-bottom: 20px; }
         
-        .asset-item { display: flex; justify-content: space-between; align-items: center; padding: 18px 0; border-bottom: 1px solid var(--border); cursor: pointer; }
+        .asset-item { display: flex; justify-content: space-between; align-items: center; padding: 18px 0; border-bottom: 1px solid var(--border); cursor: pointer; -webkit-tap-highlight-color: transparent; }
         .asset-item:last-child { border: none; }
         .asset-icon { width: 46px; height: 46px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 22px; background: rgba(255,255,255,0.03); }
         .asset-details { flex: 1; margin-left: 15px; }
@@ -45,8 +45,7 @@
         .asset-price { font-size: 12px; opacity: 0.5; margin-top: 3px; }
         .asset-balance { text-align: right; }
         .bal-amount { font-weight: 700; font-size: 16px; }
-        
-        /* Своп Инпуты */
+
         input, select { width: 100%; padding: 18px; background: rgba(255,255,255,0.05); border: 1px solid var(--border); border-radius: 20px; color: white; margin-bottom: 12px; outline: none; font-size: 16px; box-sizing: border-box; }
         #rev_btn { background: #1a222c; border: 1px solid var(--border); color: var(--blue); width: 44px; height: 44px; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: -28px auto; z-index: 5; position: relative; cursor: pointer; }
 
@@ -55,9 +54,11 @@
         .nav-item.active { opacity: 1; transform: translateY(-3px); }
         .nav-item span { font-size: 28px; }
 
-        .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.9); z-index: 2000; align-items: flex-end; }
-        .modal-content { background: #0d141d; width: 100%; border-radius: 35px 35px 0 0; padding: 30px 20px 50px; border-top: 1px solid var(--border); box-sizing: border-box; }
+        /* Модалки */
+        .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); z-index: 2000; align-items: flex-end; justify-content: center; }
+        .modal-content { background: #0d141d; width: 100%; max-width: 500px; border-radius: 35px 35px 0 0; padding: 30px 20px 50px; border-top: 1px solid var(--border); box-sizing: border-box; position: relative; }
         .btn-confirm { background: var(--green); color: black; padding: 18px; border-radius: 20px; width: 100%; border: none; font-weight: 800; text-transform: uppercase; margin-top: 10px; cursor: pointer; }
+        .close-area { position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: -1; }
     </style>
 </head>
 <body>
@@ -95,17 +96,17 @@
             <select id="sw_from" onchange="validateSwap()"></select>
             <div id="rev_btn" onclick="swapReverse()">🔄</div>
             <div style="display:flex; justify-content:space-between; margin-top: 15px; font-size: 11px; opacity: 0.5;">
-                <span>RECEIVE</span><span id="sw_err_msg" style="display:none; color:var(--red);">Invalid pair</span>
+                <span>RECEIVE</span><span id="sw_err_msg" style="display:none; color:var(--red); font-weight:bold;">Invalid pair</span>
             </div>
             <input type="text" id="sw_res" placeholder="0.0" readonly style="color:var(--green);">
             <select id="sw_to" onchange="validateSwap()"></select>
-            <button id="sw_confirm_btn" class="btn-confirm" onclick="tg.showAlert('Swap processing...')">Confirm Swap</button>
+            <button id="sw_confirm_btn" class="btn-confirm" onclick="tg.showAlert('Confirming swap...')">Confirm Swap</button>
         </div>
     </div>
 
     <div id="scr_connect" class="screen">
         <div class="card" style="text-align:center; margin-top: 20px; padding: 40px 20px;">
-            <h3>Settings</h3>
+            <h3>Terminal Settings</h3>
             <div id="ton-connect-btn" style="display:flex; justify-content:center; margin-top:20px;"></div>
         </div>
     </div>
@@ -117,32 +118,36 @@
     <div class="nav-item" onclick="showTab('connect', this)"><span>🔗</span></div>
 </nav>
 
-<div id="action_modal" class="modal" onclick="closeModal('action')">
-    <div class="modal-content" onclick="event.stopPropagation()">
+<div id="action_modal" class="modal">
+    <div class="close-area" onclick="closeModal('action')"></div>
+    <div class="modal-content">
         <h3 id="action_title" style="margin-top:0; text-align:center;">Action</h3>
         <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
             <button class="btn-confirm" style="background:#fff;" onclick="closeModal('action'); openModal('deposit')">RECEIVE</button>
             <button class="btn-confirm" style="background:var(--blue); color:white;" onclick="closeModal('action'); openModal('send')">SEND</button>
         </div>
+        <button class="btn-confirm" style="background:transparent; color:white; margin-top:15px; opacity:0.5;" onclick="closeModal('action')">CANCEL</button>
     </div>
 </div>
 
-<div id="modal_deposit" class="modal" onclick="closeModal('deposit')">
-    <div class="modal-content" style="border-radius:35px;" onclick="event.stopPropagation()">
+<div id="modal_deposit" class="modal">
+    <div class="close-area" onclick="closeModal('deposit')"></div>
+    <div class="modal-content" style="border-radius:35px 35px 35px 35px; margin: 10px; margin-bottom: 20px;">
         <h3 style="margin-top:0;">Receive <span id="dep_asset_name">TON</span></h3>
         <div id="qrcode" style="display:flex; justify-content:center; margin:20px 0; background:#fff; padding:15px; border-radius:15px; min-height:150px;"></div>
-        <p id="full_addr" style="font-size:11px; word-break:break-all; opacity:0.5; font-family:monospace;">Not connected</p>
+        <p id="full_addr" style="font-size:11px; word-break:break-all; opacity:0.5; font-family:monospace; text-align:center;">Not connected</p>
         <button class="btn-confirm" onclick="copyAddr()">Copy Address</button>
     </div>
 </div>
 
-<div id="modal_send" class="modal" onclick="closeModal('send')">
-    <div class="modal-content" style="border-radius:35px;" onclick="event.stopPropagation()">
+<div id="modal_send" class="modal">
+    <div class="close-area" onclick="closeModal('send')"></div>
+    <div class="modal-content" style="border-radius:35px 35px 35px 35px; margin: 10px; margin-bottom: 20px;">
         <h3 style="margin-top:0;">Send <span id="send_asset_name">TON</span></h3>
-        <input type="text" placeholder="Address">
+        <input type="text" placeholder="Wallet Address">
         <input type="text" placeholder="Memo (Optional)">
         <input type="number" placeholder="Amount">
-        <button class="btn-confirm">Confirm Send</button>
+        <button class="btn-confirm" onclick="tg.showAlert('Processing transfer...')">Confirm Send</button>
     </div>
 </div>
 
@@ -152,10 +157,10 @@
 
     let prices = { 'TON': 7.42, 'BTC': 69420, 'ETH': 3505, 'USDT': 1.00 };
     let currentAddr = "";
-    let selectedAsset = 'TON';
 
     function init() {
         const f = document.getElementById('sw_from'), t = document.getElementById('sw_to');
+        f.innerHTML = ""; t.innerHTML = "";
         Object.keys(prices).forEach(c => {
             f.innerHTML += `<option value="${c}">${c}</option>`;
             t.innerHTML += `<option value="${c}">${c}</option>`;
@@ -196,18 +201,15 @@
     }
 
     function openAction(asset) {
-        selectedAsset = asset;
         document.getElementById('action_title').innerText = asset + " Options";
         document.getElementById('dep_asset_name').innerText = asset;
         document.getElementById('send_asset_name').innerText = asset;
         document.getElementById('action_modal').style.display = 'flex';
+        tg.HapticFeedback.impactOccurred('medium');
     }
 
     function openModal(id) { document.getElementById('modal_'+id).style.display = 'flex'; }
-    function closeModal(id) { 
-        document.getElementById('modal_'+id).style.display = 'none'; 
-        if(id === 'action') document.getElementById('action_modal').style.display = 'none';
-    }
+    function closeModal(id) { document.getElementById('modal_'+id).style.display = 'none'; }
 
     function validateSwap() {
         const f = document.getElementById('sw_from').value, t = document.getElementById('sw_to').value;
