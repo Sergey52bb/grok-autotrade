@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>Grok Avto Trade v11.7</title>
+    <title>Grok Avto Trade v11.8</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <script src="https://unpkg.com/@tonconnect/ui@2.0.9/dist/tonconnect-ui.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
@@ -18,22 +18,27 @@
         #main_content { flex: 1; overflow-y: auto; padding: 10px 15px 120px; }
         .screen { display: none; }
         .screen.active { display: block; }
-        .total-balance-card { text-align: center; padding: 20px 0 30px; }
-        .total-balance-card h1 { font-size: 40px; margin: 5px 0; font-weight: 900; }
-        .address-badge { font-size: 11px; color: var(--blue); background: rgba(56, 151, 255, 0.1); padding: 6px 14px; border-radius: 20px; display: inline-block; font-family: monospace; }
+        
         .card { background: var(--panel); border: 1px solid var(--border); padding: 10px 20px; border-radius: 30px; margin-bottom: 20px; }
+        
+        /* СТИЛИ ДЛЯ ИКОНОК */
+        .asset-icon-img { width: 38px; height: 38px; border-radius: 50%; object-fit: cover; }
+        .asset-icon-box { width: 44px; height: 44px; display: flex; align-items: center; justify-content: center; background: rgba(255,255,255,0.03); border-radius: 50%; border: 1px solid var(--border); }
+
         .asset-item { display: flex; justify-content: space-between; align-items: center; padding: 18px 0; border-bottom: 1px solid var(--border); cursor: pointer; -webkit-tap-highlight-color: transparent; }
         .asset-item:last-child { border: none; }
-        .asset-icon { width: 42px; height: 42px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 20px; background: rgba(255,255,255,0.03); border: 1px solid var(--border); }
         .asset-details { flex: 1; margin-left: 15px; }
         .asset-name { font-weight: 800; font-size: 15px; }
         .asset-price { font-size: 12px; opacity: 0.5; color: var(--green); }
         .bal-amount { font-weight: 700; font-size: 15px; text-align: right; }
+
         input, select { width: 100%; padding: 18px; background: rgba(255,255,255,0.05); border: 1px solid var(--border); border-radius: 20px; color: white; margin-bottom: 12px; outline: none; font-size: 16px; box-sizing: border-box; }
         #rev_btn { background: #1a222c; border: 1px solid var(--border); color: var(--blue); width: 40px; height: 40px; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: -26px auto; z-index: 5; position: relative; cursor: pointer; }
+        
         nav { position: fixed; bottom: 20px; left: 15px; right: 15px; height: 75px; background: var(--panel); display: flex; border-radius: 25px; border: 1px solid var(--border); z-index: 100; }
         .nav-item { flex: 1; display: flex; align-items: center; justify-content: center; cursor: pointer; opacity: 0.3; transition: 0.2s; }
         .nav-item.active { opacity: 1; transform: translateY(-3px); }
+        
         .modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); z-index: 1000; align-items: flex-end; }
         .modal-body { background: #111a27; width: 100%; border-radius: 35px 35px 0 0; padding: 30px 20px 40px; box-sizing: border-box; border-top: 1px solid var(--border); }
         .btn-confirm { background: var(--green); color: black; padding: 18px; border-radius: 20px; width: 100%; border: none; font-weight: 800; cursor: pointer; margin-top: 10px; }
@@ -51,10 +56,10 @@
 
 <div id="main_content">
     <div id="scr_wallet" class="screen active">
-        <div class="total-balance-card">
-            <div style="font-size: 11px; opacity: 0.5; letter-spacing: 1px;">ESTIMATED BALANCE</div>
-            <h1 id="main_balance">0.00 TON</h1>
-            <div id="addr_display" class="address-badge">Disconnected</div>
+        <div style="text-align:center; padding: 20px 0 30px;">
+            <div style="font-size: 11px; opacity: 0.5;">ESTIMATED BALANCE</div>
+            <h1 id="main_balance" style="font-size:40px; margin:5px 0;">0.00 TON</h1>
+            <div id="addr_display" style="font-size: 11px; color: var(--blue); background: rgba(56, 151, 255, 0.1); padding: 6px 14px; border-radius: 20px; display: inline-block; font-family: monospace;">Disconnected</div>
         </div>
         <div class="card" id="asset_list"></div>
     </div>
@@ -66,7 +71,7 @@
             <select id="sw_from" onchange="validateSwap()"></select>
             <div id="rev_btn" onclick="swapReverse()">🔄</div>
             <div style="display:flex; justify-content:space-between; margin: 15px 0 8px; font-size: 11px; opacity: 0.5;">
-                <span>RECEIVE</span><span id="sw_err_msg" style="display:none; color:var(--red); font-weight:bold;">Invalid pair</span>
+                <span>RECEIVE</span><span id="sw_err_msg" style="display:none; color:var(--red); font-weight:bold;"></span>
             </div>
             <input type="text" id="sw_res" placeholder="0.0" readonly style="color:var(--green);">
             <select id="sw_to" onchange="validateSwap()"></select>
@@ -76,8 +81,7 @@
 
     <div id="scr_connect" class="screen">
         <div class="card" style="text-align:center; margin-top: 20px; padding: 40px 20px;">
-            <p style="opacity:0.6; font-size: 13px;">Connect wallet to enable live trading.</p>
-            <div id="ton-connect-btn" style="display:flex; justify-content:center; margin-top: 15px;"></div>
+            <div id="ton-connect-btn" style="display:flex; justify-content:center;"></div>
         </div>
     </div>
 </div>
@@ -106,7 +110,6 @@
         <div id="view_send" class="modal-view">
             <h3 style="text-align:center; margin-top:0;">Send <span class="cur_asset"></span></h3>
             <input type="text" placeholder="Recipient Address">
-            <input type="text" placeholder="Memo (Optional)">
             <input type="number" placeholder="Amount">
             <button class="btn-confirm" onclick="tg.showAlert('Sending...')">Confirm Send</button>
         </div>
@@ -118,20 +121,21 @@
     const tg = window.Telegram.WebApp;
     tg.ready(); tg.expand();
 
+    // СПИСОК С ЖИВЫМИ ССЫЛКАМИ НА ЛОГОТИПЫ
     const assets = [
-        { id: 'TON', name: 'TON', price: 7.42, icon: '💎', apiId: 'the-open-network' },
-        { id: 'BTC', name: 'Bitcoin', price: 69420, icon: '🟠', apiId: 'bitcoin' },
-        { id: 'USDT', name: 'USDT', price: 1.00, icon: '💵', apiId: 'tether' },
-        { id: 'ETH', name: 'Ethereum', price: 3505, icon: '🔹', apiId: 'ethereum' },
-        { id: 'SOL', name: 'Solana', price: 145.2, icon: '☀️', apiId: 'solana' },
-        { id: 'NEAR', name: 'Near', price: 6.85, icon: '🌑', apiId: 'near' },
-        { id: 'NOT', name: 'Notcoin', price: 0.014, icon: '⬛', apiId: 'notcoin' },
-        { id: 'USDC', name: 'USDC', price: 1.00, icon: '🔵', apiId: 'usd-coin' },
-        { id: 'DOGE', name: 'Doge', price: 0.16, icon: '🐕', apiId: 'dogecoin' },
-        { id: 'BNB', name: 'BNB', price: 590.4, icon: '🟡', apiId: 'binancecoin' },
-        { id: 'LTC', name: 'Litecoin', price: 82.3, icon: '🥈', apiId: 'litecoin' },
-        { id: 'SUI', name: 'Sui', price: 1.15, icon: '💧', apiId: 'sui' },
-        { id: 'POL', name: 'Polygon', price: 0.72, icon: '💜', apiId: 'matic-network' }
+        { id: 'TON', name: 'TON', price: 7.42, apiId: 'the-open-network', img: 'https://cryptologos.cc/logos/toncoin-ton-logo.png' },
+        { id: 'BTC', name: 'Bitcoin', price: 69420, apiId: 'bitcoin', img: 'https://cryptologos.cc/logos/bitcoin-btc-logo.png' },
+        { id: 'ETH', name: 'Ethereum', price: 3505, apiId: 'ethereum', img: 'https://cryptologos.cc/logos/ethereum-eth-logo.png' },
+        { id: 'USDT', name: 'USDT', price: 1.00, apiId: 'tether', img: 'https://cryptologos.cc/logos/tether-usdt-logo.png' },
+        { id: 'USDC', name: 'USDC', price: 1.00, apiId: 'usd-coin', img: 'https://cryptologos.cc/logos/usd-coin-usdc-logo.png' },
+        { id: 'SOL', name: 'Solana', price: 145.2, apiId: 'solana', img: 'https://cryptologos.cc/logos/solana-sol-logo.png' },
+        { id: 'BNB', name: 'BNB', price: 590.4, apiId: 'binancecoin', img: 'https://cryptologos.cc/logos/binance-coin-bnb-logo.png' },
+        { id: 'DOGE', name: 'Doge', price: 0.16, apiId: 'dogecoin', img: 'https://cryptologos.cc/logos/dogecoin-doge-logo.png' },
+        { id: 'NEAR', name: 'Near', price: 6.85, apiId: 'near', img: 'https://cryptologos.cc/logos/near-protocol-near-logo.png' },
+        { id: 'NOT', name: 'Notcoin', price: 0.014, apiId: 'notcoin', img: 'https://assets.coingecko.com/coins/images/37829/large/notcoin.png' },
+        { id: 'LTC', name: 'Litecoin', price: 82.3, apiId: 'litecoin', img: 'https://cryptologos.cc/logos/litecoin-ltc-logo.png' },
+        { id: 'SUI', name: 'Sui', price: 1.15, apiId: 'sui', img: 'https://assets.coingecko.com/coins/images/26375/large/sui_logo.png' },
+        { id: 'POL', name: 'Polygon', price: 0.72, apiId: 'matic-network', img: 'https://cryptologos.cc/logos/polygon-matic-logo.png' }
     ];
 
     let currentAddr = "";
@@ -148,7 +152,7 @@
                     if (priceEl) priceEl.innerText = `$${a.price.toLocaleString()}`;
                 }
             });
-            validateSwap(); // Пересчитать своп при обновлении цен
+            validateSwap();
         } catch (e) { console.log("Price fetch delay"); }
     }
 
@@ -158,15 +162,20 @@
         list.innerHTML = ""; f.innerHTML = ""; t.innerHTML = "";
         
         assets.forEach(a => {
-            list.innerHTML += `<div class="asset-item" onclick="showAssetMenu('${a.id}')"><div class="asset-icon">${a.icon}</div><div class="asset-details"><div class="asset-name">${a.name}</div><div class="asset-price" id="price_${a.id}">$${a.price.toLocaleString()}</div></div><div class="bal-amount">0.00</div></div>`;
+            list.innerHTML += `
+                <div class="asset-item" onclick="showAssetMenu('${a.id}')">
+                    <div class="asset-icon-box"><img src="${a.img}" class="asset-icon-img" onerror="this.src='https://cdn-icons-png.flaticon.com/512/25/25228.png'"></div>
+                    <div class="asset-details">
+                        <div class="asset-name">${a.name}</div>
+                        <div class="asset-price" id="price_${a.id}">$${a.price.toLocaleString()}</div>
+                    </div>
+                    <div class="bal-amount">0.00</div>
+                </div>`;
             f.innerHTML += `<option value="${a.id}">${a.id}</option>`;
             t.innerHTML += `<option value="${a.id}">${a.id}</option>`;
         });
 
-        // ФИКС: Устанавливаем разные монеты по умолчанию
-        f.value = "TON";
-        t.value = "USDT";
-
+        f.value = "TON"; t.value = "USDT";
         updatePrices();
         setInterval(updatePrices, 60000);
 
@@ -241,3 +250,4 @@
 </script>
 </body>
 </html>
+
