@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>Grok Avto Trade v11.5</title>
+    <title>Grok Avto Trade v11.6</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <script src="https://unpkg.com/@tonconnect/ui@2.0.9/dist/tonconnect-ui.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
@@ -19,15 +19,15 @@
         .screen { display: none; }
         .screen.active { display: block; }
         .total-balance-card { text-align: center; padding: 20px 0 30px; }
-        .total-balance-card h1 { font-size: 44px; margin: 5px 0; font-weight: 900; letter-spacing: -1px; }
+        .total-balance-card h1 { font-size: 40px; margin: 5px 0; font-weight: 900; }
         .address-badge { font-size: 11px; color: var(--blue); background: rgba(56, 151, 255, 0.1); padding: 6px 14px; border-radius: 20px; display: inline-block; font-family: monospace; }
         .card { background: var(--panel); border: 1px solid var(--border); padding: 10px 20px; border-radius: 30px; margin-bottom: 20px; }
         .asset-item { display: flex; justify-content: space-between; align-items: center; padding: 18px 0; border-bottom: 1px solid var(--border); cursor: pointer; -webkit-tap-highlight-color: transparent; }
         .asset-item:last-child { border: none; }
-        .asset-icon { width: 44px; height: 44px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 20px; background: rgba(255,255,255,0.03); }
+        .asset-icon { width: 42px; height: 42px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 20px; background: rgba(255,255,255,0.03); border: 1px solid var(--border); }
         .asset-details { flex: 1; margin-left: 15px; }
         .asset-name { font-weight: 800; font-size: 15px; }
-        .asset-price { font-size: 12px; opacity: 0.5; }
+        .asset-price { font-size: 12px; opacity: 0.5; color: var(--green); }
         .bal-amount { font-weight: 700; font-size: 15px; text-align: right; }
         input, select { width: 100%; padding: 18px; background: rgba(255,255,255,0.05); border: 1px solid var(--border); border-radius: 20px; color: white; margin-bottom: 12px; outline: none; font-size: 16px; box-sizing: border-box; }
         #rev_btn { background: #1a222c; border: 1px solid var(--border); color: var(--blue); width: 40px; height: 40px; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: -26px auto; z-index: 5; position: relative; }
@@ -37,7 +37,6 @@
         .modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); z-index: 1000; align-items: flex-end; }
         .modal-body { background: #111a27; width: 100%; border-radius: 35px 35px 0 0; padding: 30px 20px 40px; box-sizing: border-box; border-top: 1px solid var(--border); }
         .btn-confirm { background: var(--green); color: black; padding: 18px; border-radius: 20px; width: 100%; border: none; font-weight: 800; cursor: pointer; margin-top: 10px; }
-        .btn-confirm:disabled { background: #222; color: #555; }
         .modal-view { display: none; }
         .modal-view.active { display: block; }
     </style>
@@ -52,12 +51,11 @@
 <div id="main_content">
     <div id="scr_wallet" class="screen active">
         <div class="total-balance-card">
-            <div style="font-size: 11px; opacity: 0.5; letter-spacing: 1px;">TOTAL BALANCE</div>
+            <div style="font-size: 11px; opacity: 0.5; letter-spacing: 1px;">ESTIMATED BALANCE</div>
             <h1 id="main_balance">0.00 TON</h1>
             <div id="addr_display" class="address-badge">Disconnected</div>
         </div>
-        <div class="card" id="asset_list">
-            </div>
+        <div class="card" id="asset_list"></div>
     </div>
 
     <div id="scr_swap" class="screen">
@@ -77,7 +75,8 @@
 
     <div id="scr_connect" class="screen">
         <div class="card" style="text-align:center; margin-top: 20px; padding: 40px 20px;">
-            <div id="ton-connect-btn" style="display:flex; justify-content:center;"></div>
+            <p style="opacity:0.6; font-size: 13px;">Connect your TON wallet to start trading.</p>
+            <div id="ton-connect-btn" style="display:flex; justify-content:center; margin-top: 15px;"></div>
         </div>
     </div>
 </div>
@@ -91,7 +90,7 @@
 <div id="universal_modal" class="modal-overlay" onclick="closeUniversalModal()">
     <div class="modal-body" onclick="event.stopPropagation()">
         <div id="view_menu" class="modal-view">
-            <h3 id="menu_title" style="text-align:center; margin-top:0;">Asset Options</h3>
+            <h3 id="menu_title" style="text-align:center; margin-top:0;">Options</h3>
             <div style="display:grid; grid-template-columns:1fr 1fr; gap:15px;">
                 <button class="btn-confirm" style="background:#fff;" onclick="switchModalView('deposit')">RECEIVE</button>
                 <button class="btn-confirm" style="background:var(--blue); color:white;" onclick="switchModalView('send')">SEND</button>
@@ -105,7 +104,7 @@
         </div>
         <div id="view_send" class="modal-view">
             <h3 style="text-align:center; margin-top:0;">Send <span class="cur_asset"></span></h3>
-            <input type="text" placeholder="Recipient Wallet">
+            <input type="text" placeholder="Recipient Address">
             <input type="text" placeholder="Memo (Optional)">
             <input type="number" placeholder="Amount">
             <button class="btn-confirm" onclick="tg.showAlert('Sending...')">Confirm Send</button>
@@ -118,39 +117,65 @@
     const tg = window.Telegram.WebApp;
     tg.ready(); tg.expand();
 
+    // ЗАКРЕПЛЕННЫЙ СПИСОК 13 МОНЕТ
     const assets = [
-        { id: 'TON', name: 'TON', price: 7.42, icon: '💎' },
-        { id: 'BTC', name: 'Bitcoin', price: 69420, icon: '🟠' },
-        { id: 'USDT', name: 'USDT', price: 1.00, icon: '💵' },
-        { id: 'ETH', name: 'Ethereum', price: 3505, icon: '🔹' },
-        { id: 'SOL', name: 'Solana', price: 145.2, icon: '☀️' },
-        { id: 'NEAR', name: 'Near', price: 6.85, icon: '🌑' },
-        { id: 'NOT', name: 'Notcoin', price: 0.014, icon: '⬛' },
-        { id: 'USDC', name: 'USDC', price: 1.00, icon: '🔵' },
-        { id: 'DOGE', name: 'Doge', price: 0.16, icon: '🐕' },
-        { id: 'BNB', name: 'BNB', price: 590.4, icon: '🟡' },
-        { id: 'LTC', name: 'Litecoin', price: 82.3, icon: '🥈' },
-        { id: 'SUI', name: 'Sui', price: 1.15, icon: '💧' },
-        { id: 'POL', name: 'Polygon', price: 0.72, icon: '💜' }
+        { id: 'TON', name: 'TON', price: 7.42, icon: '💎', apiId: 'the-open-network' },
+        { id: 'BTC', name: 'Bitcoin', price: 69420, icon: '🟠', apiId: 'bitcoin' },
+        { id: 'USDT', name: 'USDT', price: 1.00, icon: '💵', apiId: 'tether' },
+        { id: 'ETH', name: 'Ethereum', price: 3505, icon: '🔹', apiId: 'ethereum' },
+        { id: 'SOL', name: 'Solana', price: 145.2, icon: '☀️', apiId: 'solana' },
+        { id: 'NEAR', name: 'Near', price: 6.85, icon: '🌑', apiId: 'near' },
+        { id: 'NOT', name: 'Notcoin', price: 0.014, icon: '⬛', apiId: 'notcoin' },
+        { id: 'USDC', name: 'USDC', price: 1.00, icon: '🔵', apiId: 'usd-coin' },
+        { id: 'DOGE', name: 'Doge', price: 0.16, icon: '🐕', apiId: 'dogecoin' },
+        { id: 'BNB', name: 'BNB', price: 590.4, icon: '🟡', apiId: 'binancecoin' },
+        { id: 'LTC', name: 'Litecoin', price: 82.3, icon: '🥈', apiId: 'litecoin' },
+        { id: 'SUI', name: 'Sui', price: 1.15, icon: '💧', apiId: 'sui' },
+        { id: 'POL', name: 'Polygon', price: 0.72, icon: '💜', apiId: 'matic-network' }
     ];
 
     let currentAddr = "";
 
-    function init() {
+    async function updatePrices() {
+        try {
+            const ids = assets.map(a => a.apiId).join(',');
+            const response = await fetch(`https://api.coingecko.com/api/v3/simple/price?ids=${ids}&vs_currencies=usd`);
+            const data = await response.json();
+            assets.forEach(a => {
+                if (data[a.apiId]) {
+                    a.price = data[a.apiId].usd;
+                    const priceEl = document.getElementById(`price_${a.id}`);
+                    if (priceEl) priceEl.innerText = `$${a.price.toLocaleString()}`;
+                }
+            });
+        } catch (e) { console.log("Price update failed, using defaults"); }
+    }
+
+    function renderAssets() {
         const list = document.getElementById('asset_list');
         const f = document.getElementById('sw_from'), t = document.getElementById('sw_to');
+        list.innerHTML = ""; f.innerHTML = ""; t.innerHTML = "";
         
         assets.forEach(a => {
             list.innerHTML += `
                 <div class="asset-item" onclick="showAssetMenu('${a.id}')">
                     <div class="asset-icon">${a.icon}</div>
-                    <div class="asset-details"><div class="asset-name">${a.name}</div><div class="asset-price">$${a.price}</div></div>
+                    <div class="asset-details">
+                        <div class="asset-name">${a.name}</div>
+                        <div class="asset-price" id="price_${a.id}">$${a.price.toLocaleString()}</div>
+                    </div>
                     <div class="bal-amount" id="bal_${a.id.toLowerCase()}">0.00</div>
                 </div>`;
             f.innerHTML += `<option value="${a.id}">${a.id}</option>`;
             t.innerHTML += `<option value="${a.id}">${a.id}</option>`;
         });
         t.value = "USDT";
+    }
+
+    function init() {
+        renderAssets();
+        updatePrices();
+        setInterval(updatePrices, 60000); // Обновлять раз в минуту
 
         const tc = new TON_CONNECT_UI.TonConnectUI({
             manifestUrl: 'https://sergey52bb.github.io/grok-autotrade/tonconnect-manifest.json',
@@ -164,21 +189,8 @@
                 document.getElementById('full_addr').innerText = currentAddr;
                 document.getElementById("qrcode").innerHTML = "";
                 new QRCode(document.getElementById("qrcode"), { text: currentAddr, width: 150, height: 150 });
-                updateBalance();
             }
         });
-    }
-
-    function updateBalance() {
-        if(!currentAddr) return;
-        fetch(`https://toncenter.com/api/v2/getAddressBalance?address=${currentAddr}`)
-            .then(r => r.json()).then(d => {
-                if(d.ok) {
-                    let b = (d.result/1e9).toFixed(2);
-                    document.getElementById('main_balance').innerText = b + " TON";
-                    document.getElementById('bal_ton').innerText = b;
-                }
-            });
     }
 
     function showTab(id, el) {
@@ -191,16 +203,16 @@
 
     function showAssetMenu(assetId) {
         const a = assets.find(x => x.id === assetId);
-        document.getElementById('menu_title').innerText = a.name + " Options";
+        document.getElementById('menu_title').innerText = a.name;
         document.querySelectorAll('.cur_asset').forEach(e => e.innerText = a.id);
         switchModalView('menu');
         document.getElementById('universal_modal').style.display = 'flex';
         tg.HapticFeedback.impactOccurred('medium');
     }
 
-    function switchModalView(viewId) {
-        document.querySelectorAll('.modal-view').forEach(v => v.classList.remove('active'));
-        document.getElementById('view_' + viewId).classList.add('active');
+    function switchModalView(v) {
+        document.querySelectorAll('.modal-view').forEach(x => x.classList.remove('active'));
+        document.getElementById('view_' + v).classList.add('active');
     }
 
     function closeUniversalModal() { document.getElementById('universal_modal').style.display = 'none'; }
@@ -210,13 +222,12 @@
         const val = document.getElementById('sw_val').value, err = document.getElementById('sw_err_msg');
         const btn = document.getElementById('sw_confirm_btn'), res = document.getElementById('sw_res');
 
-        if (from === to) { err.innerText = "Same asset"; err.style.display = "block"; btn.disabled = true; res.value = ""; return; }
-        if (from !== 'TON' && to !== 'TON') { err.innerText = "Use TON bridge"; err.style.display = "block"; btn.disabled = true; res.value = ""; return; }
+        if (from === to) { btn.disabled = true; res.value = ""; return; }
+        if (from !== 'TON' && to !== 'TON') { err.style.display = "block"; btn.disabled = true; res.value = ""; return; }
 
         err.style.display = "none"; btn.disabled = false;
         const p1 = assets.find(x => x.id === from).price, p2 = assets.find(x => x.id === to).price;
-        if(val > 0) res.value = ((val * p1) / p2).toFixed(4);
-        else res.value = "";
+        if(val > 0) res.value = ((val * p1) / p2).toFixed(6);
     }
 
     function swapReverse() {
