@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>Grok Avto Trade v12.5</title>
+    <title>Grok Avto Trade v13.0</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <script src="https://unpkg.com/@tonconnect/ui@2.0.9/dist/tonconnect-ui.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
@@ -17,33 +17,23 @@
         .screen { display: none; }
         .screen.active { display: block; }
         .card { background: var(--panel); border: 1px solid var(--border); padding: 10px 20px; border-radius: 30px; margin-bottom: 20px; }
-        
-        /* СТИЛИ ДЛЯ ИКОНОК */
-        .asset-icon-box { width: 44px; height: 44px; display: flex; align-items: center; justify-content: center; border-radius: 50%; border: 1px solid var(--border); overflow: hidden; background: #000; position: relative; }
+        .asset-icon-box { width: 44px; height: 44px; display: flex; align-items: center; justify-content: center; background: rgba(255,255,255,0.03); border-radius: 50%; border: 1px solid var(--border); overflow: hidden; }
         .asset-icon-img { width: 100%; height: 100%; object-fit: cover; }
-        
-        /* ЛОГОТИП NOTCOIN НА ЧИСТОМ CSS */
-        .not-logo { width: 100%; height: 100%; background: black; position: relative; display: flex; align-items: center; justify-content: center; }
-        .not-diamond { width: 22px; height: 22px; background: white; transform: rotate(45deg); display: flex; flex-direction: column; align-items: center; justify-content: center; overflow: hidden; }
-        .not-line { width: 40px; height: 3px; background: black; margin: 2px 0; transform: rotate(-45deg); }
-
-        .asset-item { display: flex; justify-content: space-between; align-items: center; padding: 18px 0; border-bottom: 1px solid var(--border); cursor: pointer; }
+        .asset-item { display: flex; justify-content: space-between; align-items: center; padding: 18px 0; border-bottom: 1px solid var(--border); cursor: pointer; -webkit-tap-highlight-color: transparent; }
         .asset-item:last-child { border: none; }
         .asset-details { flex: 1; margin-left: 15px; }
         .asset-name { font-weight: 800; font-size: 15px; }
         .asset-price { font-size: 12px; opacity: 0.5; color: var(--green); }
         .bal-amount { font-weight: 700; font-size: 15px; text-align: right; }
-        
         input, select { width: 100%; padding: 18px; background: rgba(255,255,255,0.05); border: 1px solid var(--border); border-radius: 20px; color: white; margin-bottom: 12px; outline: none; font-size: 16px; box-sizing: border-box; }
         #rev_btn { background: #1a222c; border: 1px solid var(--border); color: var(--blue); width: 40px; height: 40px; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: -26px auto; z-index: 5; position: relative; cursor: pointer; }
-        
         nav { position: fixed; bottom: 20px; left: 15px; right: 15px; height: 75px; background: var(--panel); display: flex; border-radius: 25px; border: 1px solid var(--border); z-index: 100; }
         .nav-item { flex: 1; display: flex; align-items: center; justify-content: center; cursor: pointer; opacity: 0.3; transition: 0.2s; }
         .nav-item.active { opacity: 1; transform: translateY(-3px); }
-        
         .modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); z-index: 1000; align-items: flex-end; }
         .modal-body { background: #111a27; width: 100%; border-radius: 35px 35px 0 0; padding: 30px 20px 40px; box-sizing: border-box; border-top: 1px solid var(--border); }
         .btn-confirm { background: var(--green); color: black; padding: 18px; border-radius: 20px; width: 100%; border: none; font-weight: 800; cursor: pointer; margin-top: 10px; }
+        .btn-confirm:disabled { background: #222; color: #555; }
         .modal-view { display: none; }
         .modal-view.active { display: block; }
     </style>
@@ -64,7 +54,7 @@
         </div>
         <div class="card" id="asset_list"></div>
     </div>
-    
+
     <div id="scr_swap" class="screen">
         <div class="card" style="margin-top: 20px;">
             <div style="font-size: 11px; opacity: 0.5; margin-bottom: 8px;">PAY</div>
@@ -126,12 +116,35 @@
     const assets = [
         { id: 'TON', name: 'TON', price: 7.42, apiId: 'the-open-network', img: 'https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/ton/info/logo.png' },
         { id: 'BTC', name: 'Bitcoin', price: 69420, apiId: 'bitcoin', img: 'https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/bitcoin/info/logo.png' },
-        { id: 'ETH', name: 'Ethereum', price: 3505, apiId: 'ethereum', img: 'https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/ethereum/info/logo.png' },
         { id: 'USDT', name: 'USDT', price: 1.00, apiId: 'tether', img: 'https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/ethereum/assets/0xdAC17F958D2ee523a2206206994597C13D831ec7/logo.png' },
+        { id: 'ETH', name: 'Ethereum', price: 3505, apiId: 'ethereum', img: 'https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/ethereum/info/logo.png' },
         { id: 'SOL', name: 'Solana', price: 145.2, apiId: 'solana', img: 'https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/solana/info/logo.png' },
-        { id: 'NOT', name: 'Notcoin', price: 0.014, apiId: 'notcoin', isCustom: true },
-        { id: 'SUI', name: 'Sui', price: 1.15, apiId: 'sui', img: 'https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/sui/info/logo.png' }
+        { id: 'NEAR', name: 'Near', price: 6.85, apiId: 'near', img: 'https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/near/info/logo.png' },
+        { id: 'USDC', name: 'USDC', price: 1.00, apiId: 'usd-coin', img: 'https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/ethereum/assets/0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48/logo.png' },
+        { id: 'DOGE', name: 'Doge', price: 0.16, apiId: 'dogecoin', img: 'https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/doge/info/logo.png' },
+        { id: 'BNB', name: 'BNB', price: 590.4, apiId: 'binancecoin', img: 'https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/binance/info/logo.png' },
+        { id: 'LTC', name: 'Litecoin', price: 82.3, apiId: 'litecoin', img: 'https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/litecoin/info/logo.png' },
+        { id: 'SUI', name: 'Sui', price: 1.15, apiId: 'sui', img: 'https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/sui/info/logo.png' },
+        { id: 'POL', name: 'Polygon', price: 0.72, apiId: 'matic-network', img: 'https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/polygon/info/logo.png' }
     ];
+
+    let currentAddr = "";
+
+    async function updatePrices() {
+        try {
+            const ids = assets.map(a => a.apiId).join(',');
+            const response = await fetch(`https://api.coingecko.com/api/v3/simple/price?ids=${ids}&vs_currencies=usd`);
+            const data = await response.json();
+            assets.forEach(a => {
+                if (data[a.apiId]) {
+                    a.price = data[a.apiId].usd;
+                    const el = document.getElementById(`price_${a.id}`);
+                    if (el) el.innerText = `$${a.price.toLocaleString()}`;
+                }
+            });
+            validateSwap();
+        } catch (e) { console.log("Price fetch error"); }
+    }
 
     function init() {
         const list = document.getElementById('asset_list');
@@ -139,13 +152,11 @@
         list.innerHTML = ""; f.innerHTML = ""; t.innerHTML = "";
         
         assets.forEach(a => {
-            let iconHtml = a.isCustom ? 
-                `<div class="not-logo"><div class="not-diamond"><div class="not-line"></div><div class="not-line"></div></div></div>` :
-                `<img src="${a.img}" class="asset-icon-img">`;
-
             list.innerHTML += `
                 <div class="asset-item" onclick="showAssetMenu('${a.id}')">
-                    <div class="asset-icon-box">${iconHtml}</div>
+                    <div class="asset-icon-box">
+                        <img src="${a.img}" class="asset-icon-img" onerror="this.src='https://cdn-icons-png.flaticon.com/512/11550/11550130.png'">
+                    </div>
                     <div class="asset-details">
                         <div class="asset-name">${a.name}</div>
                         <div class="asset-price" id="price_${a.id}">$${a.price.toLocaleString()}</div>
@@ -155,20 +166,23 @@
             f.innerHTML += `<option value="${a.id}">${a.id}</option>`;
             t.innerHTML += `<option value="${a.id}">${a.id}</option>`;
         });
+
         f.value = "TON"; t.value = "USDT";
-        
+        updatePrices();
+        setInterval(updatePrices, 60000);
+
         const tc = new TON_CONNECT_UI.TonConnectUI({
             manifestUrl: 'https://sergey52bb.github.io/grok-autotrade/tonconnect-manifest.json',
             buttonRootId: 'ton-connect-btn'
         });
-        
+
         tc.onStatusChange(w => {
             if (w) {
-                const addr = w.account.address;
-                document.getElementById('addr_display').innerText = addr.substring(0,8)+"..."+addr.substring(addr.length-4);
-                document.getElementById('full_addr').innerText = addr;
+                currentAddr = w.account.address;
+                document.getElementById('addr_display').innerText = currentAddr.substring(0,8)+"..."+currentAddr.substring(currentAddr.length-4);
+                document.getElementById('full_addr').innerText = currentAddr;
                 document.getElementById("qrcode").innerHTML = "";
-                new QRCode(document.getElementById("qrcode"), { text: addr, width: 150, height: 150 });
+                new QRCode(document.getElementById("qrcode"), { text: currentAddr, width: 150, height: 150 });
             }
         });
         validateSwap();
@@ -181,7 +195,7 @@
         el.classList.add('active');
         tg.HapticFeedback.selectionChanged();
     }
-    
+
     function showAssetMenu(id) {
         const a = assets.find(x => x.id === id);
         document.getElementById('menu_title').innerText = a.name;
@@ -189,23 +203,50 @@
         switchModalView('menu');
         document.getElementById('universal_modal').style.display = 'flex';
     }
-    
+
     function switchModalView(v) {
         document.querySelectorAll('.modal-view').forEach(x => x.classList.remove('active'));
         document.getElementById('view_' + v).classList.add('active');
     }
-    
+
     function closeUniversalModal() { document.getElementById('universal_modal').style.display = 'none'; }
-    
+
     function validateSwap() {
-        const from = document.getElementById('sw_from').value, to = document.getElementById('sw_to').value;
-        const val = document.getElementById('sw_val').value, err = document.getElementById('sw_err_msg');
-        const btn = document.getElementById('sw_confirm_btn'), res = document.getElementById('sw_res');
-        if (from === to) { btn.disabled = true; res.value = ""; return; }
-        if (from !== 'TON' && to !== 'TON') { err.innerText = "Use TON bridge"; err.style.display = "block"; btn.disabled = true; res.value = ""; return; }
-        err.style.display = "none"; btn.disabled = false;
-        const p1 = assets.find(x => x.id === from).price, p2 = assets.find(x => x.id === to).price;
-        if(val > 0) res.value = ((val * p1) / p2).toFixed(6);
+        const from = document.getElementById('sw_from').value;
+        const to = document.getElementById('sw_to').value;
+        const val = document.getElementById('sw_val').value;
+        const err = document.getElementById('sw_err_msg');
+        const btn = document.getElementById('sw_confirm_btn');
+        const res = document.getElementById('sw_res');
+
+        // ЗАПРЕТ НА ОДИНАКОВЫЙ АКТИВ
+        if (from === to) {
+            err.innerText = "Cannot swap same asset";
+            err.style.display = "block";
+            btn.disabled = true;
+            res.value = "";
+            return;
+        }
+
+        // ПРОВЕРКА ЧЕРЕЗ TON BRIDGE
+        if (from !== 'TON' && to !== 'TON') {
+            err.innerText = "Use TON bridge";
+            err.style.display = "block";
+            btn.disabled = true;
+            res.value = "";
+            return;
+        }
+
+        err.style.display = "none";
+        btn.disabled = false;
+
+        const p1 = assets.find(x => x.id === from).price;
+        const p2 = assets.find(x => x.id === to).price;
+        if(val > 0) {
+            res.value = ((val * p1) / p2).toFixed(6);
+        } else {
+            res.value = "";
+        }
     }
 
     function swapReverse() {
@@ -213,10 +254,12 @@
         const tmp = f.value; f.value = t.value; t.value = tmp;
         validateSwap();
     }
-    
+
     function copyAddr() { 
-        const addr = document.getElementById('full_addr').innerText;
-        if(addr && addr !== "Disconnected") { navigator.clipboard.writeText(addr); tg.showAlert("Copied!"); } 
+        if(currentAddr && currentAddr !== "") { 
+            navigator.clipboard.writeText(currentAddr); 
+            tg.showAlert("Copied!"); 
+        } 
     }
 
     window.onload = init;
