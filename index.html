@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>Grok Avto Trade v11.8</title>
+    <title>Grok Avto Trade v11.9</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <script src="https://unpkg.com/@tonconnect/ui@2.0.9/dist/tonconnect-ui.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
@@ -21,9 +21,8 @@
         
         .card { background: var(--panel); border: 1px solid var(--border); padding: 10px 20px; border-radius: 30px; margin-bottom: 20px; }
         
-        /* СТИЛИ ДЛЯ ИКОНОК */
-        .asset-icon-img { width: 38px; height: 38px; border-radius: 50%; object-fit: cover; }
-        .asset-icon-box { width: 44px; height: 44px; display: flex; align-items: center; justify-content: center; background: rgba(255,255,255,0.03); border-radius: 50%; border: 1px solid var(--border); }
+        .asset-icon-box { width: 44px; height: 44px; display: flex; align-items: center; justify-content: center; background: rgba(255,255,255,0.03); border-radius: 50%; border: 1px solid var(--border); overflow: hidden; }
+        .asset-icon-img { width: 100%; height: 100%; object-fit: cover; }
 
         .asset-item { display: flex; justify-content: space-between; align-items: center; padding: 18px 0; border-bottom: 1px solid var(--border); cursor: pointer; -webkit-tap-highlight-color: transparent; }
         .asset-item:last-child { border: none; }
@@ -109,8 +108,8 @@
         </div>
         <div id="view_send" class="modal-view">
             <h3 style="text-align:center; margin-top:0;">Send <span class="cur_asset"></span></h3>
-            <input type="text" placeholder="Recipient Address">
-            <input type="number" placeholder="Amount">
+            <input type="text" id="send_addr" placeholder="Recipient Address">
+            <input type="text" id="send_memo" placeholder="Memo (Optional)"> <input type="number" id="send_amount" placeholder="Amount">
             <button class="btn-confirm" onclick="tg.showAlert('Sending...')">Confirm Send</button>
         </div>
         <button class="btn-confirm" style="background:transparent; color:white; opacity:0.3; margin-top:15px; font-size:12px;" onclick="closeUniversalModal()">CLOSE</button>
@@ -121,21 +120,20 @@
     const tg = window.Telegram.WebApp;
     tg.ready(); tg.expand();
 
-    // СПИСОК С ЖИВЫМИ ССЫЛКАМИ НА ЛОГОТИПЫ
     const assets = [
-        { id: 'TON', name: 'TON', price: 7.42, apiId: 'the-open-network', img: 'https://cryptologos.cc/logos/toncoin-ton-logo.png' },
-        { id: 'BTC', name: 'Bitcoin', price: 69420, apiId: 'bitcoin', img: 'https://cryptologos.cc/logos/bitcoin-btc-logo.png' },
-        { id: 'ETH', name: 'Ethereum', price: 3505, apiId: 'ethereum', img: 'https://cryptologos.cc/logos/ethereum-eth-logo.png' },
-        { id: 'USDT', name: 'USDT', price: 1.00, apiId: 'tether', img: 'https://cryptologos.cc/logos/tether-usdt-logo.png' },
-        { id: 'USDC', name: 'USDC', price: 1.00, apiId: 'usd-coin', img: 'https://cryptologos.cc/logos/usd-coin-usdc-logo.png' },
-        { id: 'SOL', name: 'Solana', price: 145.2, apiId: 'solana', img: 'https://cryptologos.cc/logos/solana-sol-logo.png' },
-        { id: 'BNB', name: 'BNB', price: 590.4, apiId: 'binancecoin', img: 'https://cryptologos.cc/logos/binance-coin-bnb-logo.png' },
-        { id: 'DOGE', name: 'Doge', price: 0.16, apiId: 'dogecoin', img: 'https://cryptologos.cc/logos/dogecoin-doge-logo.png' },
-        { id: 'NEAR', name: 'Near', price: 6.85, apiId: 'near', img: 'https://cryptologos.cc/logos/near-protocol-near-logo.png' },
+        { id: 'TON', name: 'TON', price: 7.42, apiId: 'the-open-network', img: 'https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/ton/info/logo.png' },
+        { id: 'BTC', name: 'Bitcoin', price: 69420, apiId: 'bitcoin', img: 'https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/bitcoin/info/logo.png' },
+        { id: 'ETH', name: 'Ethereum', price: 3505, apiId: 'ethereum', img: 'https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/ethereum/info/logo.png' },
+        { id: 'USDT', name: 'USDT', price: 1.00, apiId: 'tether', img: 'https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/ethereum/assets/0xdAC17F958D2ee523a2206206994597C13D831ec7/logo.png' },
+        { id: 'USDC', name: 'USDC', price: 1.00, apiId: 'usd-coin', img: 'https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/ethereum/assets/0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48/logo.png' },
+        { id: 'SOL', name: 'Solana', price: 145.2, apiId: 'solana', img: 'https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/solana/info/logo.png' },
+        { id: 'BNB', name: 'BNB', price: 590.4, apiId: 'binancecoin', img: 'https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/binance/info/logo.png' },
+        { id: 'DOGE', name: 'Doge', price: 0.16, apiId: 'dogecoin', img: 'https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/doge/info/logo.png' },
+        { id: 'NEAR', name: 'Near', price: 6.85, apiId: 'near', img: 'https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/near/info/logo.png' },
         { id: 'NOT', name: 'Notcoin', price: 0.014, apiId: 'notcoin', img: 'https://assets.coingecko.com/coins/images/37829/large/notcoin.png' },
-        { id: 'LTC', name: 'Litecoin', price: 82.3, apiId: 'litecoin', img: 'https://cryptologos.cc/logos/litecoin-ltc-logo.png' },
+        { id: 'LTC', name: 'Litecoin', price: 82.3, apiId: 'litecoin', img: 'https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/litecoin/info/logo.png' },
         { id: 'SUI', name: 'Sui', price: 1.15, apiId: 'sui', img: 'https://assets.coingecko.com/coins/images/26375/large/sui_logo.png' },
-        { id: 'POL', name: 'Polygon', price: 0.72, apiId: 'matic-network', img: 'https://cryptologos.cc/logos/polygon-matic-logo.png' }
+        { id: 'POL', name: 'Polygon', price: 0.72, apiId: 'matic-network', img: 'https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/polygon/info/logo.png' }
     ];
 
     let currentAddr = "";
@@ -148,12 +146,12 @@
             assets.forEach(a => {
                 if (data[a.apiId]) {
                     a.price = data[a.apiId].usd;
-                    const priceEl = document.getElementById(`price_${a.id}`);
-                    if (priceEl) priceEl.innerText = `$${a.price.toLocaleString()}`;
+                    const el = document.getElementById(`price_${a.id}`);
+                    if (el) el.innerText = `$${a.price.toLocaleString()}`;
                 }
             });
             validateSwap();
-        } catch (e) { console.log("Price fetch delay"); }
+        } catch (e) { console.log("Price err"); }
     }
 
     function init() {
@@ -164,7 +162,9 @@
         assets.forEach(a => {
             list.innerHTML += `
                 <div class="asset-item" onclick="showAssetMenu('${a.id}')">
-                    <div class="asset-icon-box"><img src="${a.img}" class="asset-icon-img" onerror="this.src='https://cdn-icons-png.flaticon.com/512/25/25228.png'"></div>
+                    <div class="asset-icon-box">
+                        <img src="${a.img}" class="asset-icon-img" onerror="this.src='https://cdn-icons-png.flaticon.com/512/11550/11550130.png'">
+                    </div>
                     <div class="asset-details">
                         <div class="asset-name">${a.name}</div>
                         <div class="asset-price" id="price_${a.id}">$${a.price.toLocaleString()}</div>
@@ -224,14 +224,8 @@
         const val = document.getElementById('sw_val').value, err = document.getElementById('sw_err_msg');
         const btn = document.getElementById('sw_confirm_btn'), res = document.getElementById('sw_res');
 
-        if (from === to) { 
-            err.innerText = "Select different assets"; err.style.display = "block";
-            btn.disabled = true; res.value = ""; return; 
-        }
-        if (from !== 'TON' && to !== 'TON') { 
-            err.innerText = "Use TON bridge"; err.style.display = "block";
-            btn.disabled = true; res.value = ""; return; 
-        }
+        if (from === to) { err.innerText = "Select different assets"; err.style.display = "block"; btn.disabled = true; res.value = ""; return; }
+        if (from !== 'TON' && to !== 'TON') { err.innerText = "Use TON bridge"; err.style.display = "block"; btn.disabled = true; res.value = ""; return; }
 
         err.style.display = "none"; btn.disabled = false;
         const p1 = assets.find(x => x.id === from).price, p2 = assets.find(x => x.id === to).price;
@@ -250,4 +244,3 @@
 </script>
 </body>
 </html>
-
