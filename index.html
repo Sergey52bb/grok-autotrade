@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>Grok Avto Trade v12.2</title>
+    <title>Grok Avto Trade v12.3</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <script src="https://unpkg.com/@tonconnect/ui@2.0.9/dist/tonconnect-ui.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
@@ -17,8 +17,9 @@
         .screen { display: none; }
         .screen.active { display: block; }
         .card { background: var(--panel); border: 1px solid var(--border); padding: 10px 20px; border-radius: 30px; margin-bottom: 20px; }
-        .asset-icon-box { width: 44px; height: 44px; display: flex; align-items: center; justify-content: center; background: rgba(255,255,255,0.03); border-radius: 50%; border: 1px solid var(--border); overflow: hidden; }
-        .asset-icon-img { width: 100%; height: 100%; object-fit: cover; }
+        .asset-icon-box { width: 44px; height: 44px; display: flex; align-items: center; justify-content: center; background: rgba(255,255,255,0.05); border-radius: 50%; border: 1px solid var(--border); overflow: hidden; position: relative; }
+        .asset-icon-img { width: 100%; height: 100%; object-fit: cover; z-index: 2; position: relative; }
+        .asset-icon-placeholder { position: absolute; font-size: 18px; font-weight: 900; color: rgba(255,255,255,0.2); z-index: 1; }
         .asset-item { display: flex; justify-content: space-between; align-items: center; padding: 18px 0; border-bottom: 1px solid var(--border); cursor: pointer; -webkit-tap-highlight-color: transparent; }
         .asset-item:last-child { border: none; }
         .asset-details { flex: 1; margin-left: 15px; }
@@ -54,7 +55,6 @@
         </div>
         <div class="card" id="asset_list"></div>
     </div>
-
     <div id="scr_swap" class="screen">
         <div class="card" style="margin-top: 20px;">
             <div style="font-size: 11px; opacity: 0.5; margin-bottom: 8px;">PAY</div>
@@ -69,7 +69,6 @@
             <button id="sw_confirm_btn" class="btn-confirm" onclick="tg.showAlert('Swap processing...')">Confirm Swap</button>
         </div>
     </div>
-
     <div id="scr_connect" class="screen">
         <div class="card" style="text-align:center; margin-top: 20px; padding: 40px 20px;">
             <div id="ton-connect-btn" style="display:flex; justify-content:center;"></div>
@@ -123,8 +122,7 @@
         { id: 'BNB', name: 'BNB', price: 590.4, apiId: 'binancecoin', img: 'https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/binance/info/logo.png' },
         { id: 'DOGE', name: 'Doge', price: 0.16, apiId: 'dogecoin', img: 'https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/doge/info/logo.png' },
         { id: 'NEAR', name: 'Near', price: 6.85, apiId: 'near', img: 'https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/near/info/logo.png' },
-        // NOTCOIN ТЕПЕРЬ ВСТРОЕН ПРЯМО В КОД (BASE64)
-        { id: 'NOT', name: 'Notcoin', price: 0.014, apiId: 'notcoin', img: 'data:image/png;base64,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' },
+        { id: 'NOT', name: 'Notcoin', price: 0.014, apiId: 'notcoin', img: 'https://t.me/i/notcoin_logo.png' },
         { id: 'LTC', name: 'Litecoin', price: 82.3, apiId: 'litecoin', img: 'https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/litecoin/info/logo.png' },
         { id: 'SUI', name: 'Sui', price: 1.15, apiId: 'sui', img: 'https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/sui/info/logo.png' },
         { id: 'POL', name: 'Polygon', price: 0.72, apiId: 'matic-network', img: 'https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/polygon/info/logo.png' }
@@ -145,7 +143,7 @@
                 }
             });
             validateSwap();
-        } catch (e) { console.log("Price err"); }
+        } catch (e) {}
     }
 
     function init() {
@@ -157,7 +155,8 @@
             list.innerHTML += `
                 <div class="asset-item" onclick="showAssetMenu('${a.id}')">
                     <div class="asset-icon-box">
-                        <img src="${a.img}" class="asset-icon-img" onerror="this.src='https://cdn-icons-png.flaticon.com/512/11550/11550130.png'">
+                        <div class="asset-icon-placeholder">${a.id[0]}</div>
+                        <img src="${a.img}" class="asset-icon-img" onerror="this.style.display='none'">
                     </div>
                     <div class="asset-details">
                         <div class="asset-name">${a.name}</div>
@@ -168,16 +167,13 @@
             f.innerHTML += `<option value="${a.id}">${a.id}</option>`;
             t.innerHTML += `<option value="${a.id}">${a.id}</option>`;
         });
-
         f.value = "TON"; t.value = "USDT";
         updatePrices();
         setInterval(updatePrices, 60000);
-
         const tc = new TON_CONNECT_UI.TonConnectUI({
             manifestUrl: 'https://sergey52bb.github.io/grok-autotrade/tonconnect-manifest.json',
             buttonRootId: 'ton-connect-btn'
         });
-
         tc.onStatusChange(w => {
             if (w) {
                 currentAddr = w.account.address;
@@ -197,7 +193,6 @@
         el.classList.add('active');
         tg.HapticFeedback.selectionChanged();
     }
-
     function showAssetMenu(id) {
         const a = assets.find(x => x.id === id);
         document.getElementById('menu_title').innerText = a.name;
@@ -205,14 +200,11 @@
         switchModalView('menu');
         document.getElementById('universal_modal').style.display = 'flex';
     }
-
     function switchModalView(v) {
         document.querySelectorAll('.modal-view').forEach(x => x.classList.remove('active'));
         document.getElementById('view_' + v).classList.add('active');
     }
-
     function closeUniversalModal() { document.getElementById('universal_modal').style.display = 'none'; }
-
     function validateSwap() {
         const from = document.getElementById('sw_from').value, to = document.getElementById('sw_to').value;
         const val = document.getElementById('sw_val').value, err = document.getElementById('sw_err_msg');
@@ -223,17 +215,13 @@
         const p1 = assets.find(x => x.id === from).price, p2 = assets.find(x => x.id === to).price;
         if(val > 0) res.value = ((val * p1) / p2).toFixed(6);
     }
-
     function swapReverse() {
         const f = document.getElementById('sw_from'), t = document.getElementById('sw_to');
         const tmp = f.value; f.value = t.value; t.value = tmp;
         validateSwap();
     }
-
     function copyAddr() { if(currentAddr) { navigator.clipboard.writeText(currentAddr); tg.showAlert("Copied!"); } }
-
     window.onload = init;
 </script>
 </body>
 </html>
-
