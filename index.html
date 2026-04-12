@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>Grok Avto Trade v11.6</title>
+    <title>Grok Avto Trade v11.7</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <script src="https://unpkg.com/@tonconnect/ui@2.0.9/dist/tonconnect-ui.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
@@ -30,13 +30,14 @@
         .asset-price { font-size: 12px; opacity: 0.5; color: var(--green); }
         .bal-amount { font-weight: 700; font-size: 15px; text-align: right; }
         input, select { width: 100%; padding: 18px; background: rgba(255,255,255,0.05); border: 1px solid var(--border); border-radius: 20px; color: white; margin-bottom: 12px; outline: none; font-size: 16px; box-sizing: border-box; }
-        #rev_btn { background: #1a222c; border: 1px solid var(--border); color: var(--blue); width: 40px; height: 40px; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: -26px auto; z-index: 5; position: relative; }
+        #rev_btn { background: #1a222c; border: 1px solid var(--border); color: var(--blue); width: 40px; height: 40px; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: -26px auto; z-index: 5; position: relative; cursor: pointer; }
         nav { position: fixed; bottom: 20px; left: 15px; right: 15px; height: 75px; background: var(--panel); display: flex; border-radius: 25px; border: 1px solid var(--border); z-index: 100; }
         .nav-item { flex: 1; display: flex; align-items: center; justify-content: center; cursor: pointer; opacity: 0.3; transition: 0.2s; }
         .nav-item.active { opacity: 1; transform: translateY(-3px); }
         .modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); z-index: 1000; align-items: flex-end; }
         .modal-body { background: #111a27; width: 100%; border-radius: 35px 35px 0 0; padding: 30px 20px 40px; box-sizing: border-box; border-top: 1px solid var(--border); }
         .btn-confirm { background: var(--green); color: black; padding: 18px; border-radius: 20px; width: 100%; border: none; font-weight: 800; cursor: pointer; margin-top: 10px; }
+        .btn-confirm:disabled { background: #222; color: #555; }
         .modal-view { display: none; }
         .modal-view.active { display: block; }
     </style>
@@ -75,7 +76,7 @@
 
     <div id="scr_connect" class="screen">
         <div class="card" style="text-align:center; margin-top: 20px; padding: 40px 20px;">
-            <p style="opacity:0.6; font-size: 13px;">Connect your TON wallet to start trading.</p>
+            <p style="opacity:0.6; font-size: 13px;">Connect wallet to enable live trading.</p>
             <div id="ton-connect-btn" style="display:flex; justify-content:center; margin-top: 15px;"></div>
         </div>
     </div>
@@ -117,7 +118,6 @@
     const tg = window.Telegram.WebApp;
     tg.ready(); tg.expand();
 
-    // ЗАКРЕПЛЕННЫЙ СПИСОК 13 МОНЕТ
     const assets = [
         { id: 'TON', name: 'TON', price: 7.42, icon: '💎', apiId: 'the-open-network' },
         { id: 'BTC', name: 'Bitcoin', price: 69420, icon: '🟠', apiId: 'bitcoin' },
@@ -148,34 +148,27 @@
                     if (priceEl) priceEl.innerText = `$${a.price.toLocaleString()}`;
                 }
             });
-        } catch (e) { console.log("Price update failed, using defaults"); }
+            validateSwap(); // Пересчитать своп при обновлении цен
+        } catch (e) { console.log("Price fetch delay"); }
     }
 
-    function renderAssets() {
+    function init() {
         const list = document.getElementById('asset_list');
         const f = document.getElementById('sw_from'), t = document.getElementById('sw_to');
         list.innerHTML = ""; f.innerHTML = ""; t.innerHTML = "";
         
         assets.forEach(a => {
-            list.innerHTML += `
-                <div class="asset-item" onclick="showAssetMenu('${a.id}')">
-                    <div class="asset-icon">${a.icon}</div>
-                    <div class="asset-details">
-                        <div class="asset-name">${a.name}</div>
-                        <div class="asset-price" id="price_${a.id}">$${a.price.toLocaleString()}</div>
-                    </div>
-                    <div class="bal-amount" id="bal_${a.id.toLowerCase()}">0.00</div>
-                </div>`;
+            list.innerHTML += `<div class="asset-item" onclick="showAssetMenu('${a.id}')"><div class="asset-icon">${a.icon}</div><div class="asset-details"><div class="asset-name">${a.name}</div><div class="asset-price" id="price_${a.id}">$${a.price.toLocaleString()}</div></div><div class="bal-amount">0.00</div></div>`;
             f.innerHTML += `<option value="${a.id}">${a.id}</option>`;
             t.innerHTML += `<option value="${a.id}">${a.id}</option>`;
         });
-        t.value = "USDT";
-    }
 
-    function init() {
-        renderAssets();
+        // ФИКС: Устанавливаем разные монеты по умолчанию
+        f.value = "TON";
+        t.value = "USDT";
+
         updatePrices();
-        setInterval(updatePrices, 60000); // Обновлять раз в минуту
+        setInterval(updatePrices, 60000);
 
         const tc = new TON_CONNECT_UI.TonConnectUI({
             manifestUrl: 'https://sergey52bb.github.io/grok-autotrade/tonconnect-manifest.json',
@@ -191,6 +184,7 @@
                 new QRCode(document.getElementById("qrcode"), { text: currentAddr, width: 150, height: 150 });
             }
         });
+        validateSwap();
     }
 
     function showTab(id, el) {
@@ -201,13 +195,12 @@
         tg.HapticFeedback.selectionChanged();
     }
 
-    function showAssetMenu(assetId) {
-        const a = assets.find(x => x.id === assetId);
+    function showAssetMenu(id) {
+        const a = assets.find(x => x.id === id);
         document.getElementById('menu_title').innerText = a.name;
         document.querySelectorAll('.cur_asset').forEach(e => e.innerText = a.id);
         switchModalView('menu');
         document.getElementById('universal_modal').style.display = 'flex';
-        tg.HapticFeedback.impactOccurred('medium');
     }
 
     function switchModalView(v) {
@@ -222,8 +215,14 @@
         const val = document.getElementById('sw_val').value, err = document.getElementById('sw_err_msg');
         const btn = document.getElementById('sw_confirm_btn'), res = document.getElementById('sw_res');
 
-        if (from === to) { btn.disabled = true; res.value = ""; return; }
-        if (from !== 'TON' && to !== 'TON') { err.style.display = "block"; btn.disabled = true; res.value = ""; return; }
+        if (from === to) { 
+            err.innerText = "Select different assets"; err.style.display = "block";
+            btn.disabled = true; res.value = ""; return; 
+        }
+        if (from !== 'TON' && to !== 'TON') { 
+            err.innerText = "Use TON bridge"; err.style.display = "block";
+            btn.disabled = true; res.value = ""; return; 
+        }
 
         err.style.display = "none"; btn.disabled = false;
         const p1 = assets.find(x => x.id === from).price, p2 = assets.find(x => x.id === to).price;
