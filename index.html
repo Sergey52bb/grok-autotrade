@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>Grok Avto Trade v14.2</title>
+    <title>Grok Avto Trade v14.3</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <script src="https://unpkg.com/@tonconnect/ui@2.0.9/dist/tonconnect-ui.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
@@ -11,20 +11,19 @@
         :root { --bg: #050b14; --panel: #0d141d; --blue: #4DB8FF; --green: #00ff95; --red: #ff4a4a; --border: rgba(255,255,255,0.08); }
         body { background: var(--bg); color: white; margin: 0; font-family: -apple-system, sans-serif; height: 100vh; display: flex; flex-direction: column; overflow: hidden; }
         
-        /* ШАПКА С ТВОИМ SVG */
         header { padding: 15px 15px 5px; text-align: center; flex-shrink: 0; }
         .logo-svg { width: 140px; height: auto; margin-bottom: 5px; }
         header .subtitle { font-size: 9px; color: var(--blue); letter-spacing: 3px; font-weight: 800; opacity: 0.8; }
 
-        /* ИСПРАВЛЕННЫЙ ОТСТУП ДЛЯ ПОЛИГОНА */
         #main_content { flex: 1; overflow-y: auto; padding: 10px 15px 150px; } 
-        
         .screen { display: none; }
         .screen.active { display: block; }
         
-        .card { background: var(--panel); border: 1px solid var(--border); padding: 5px 15px; border-radius: 25px; margin-bottom: 15px; }
+        .card { background: var(--panel); border: 1px solid var(--border); padding: 15px; border-radius: 25px; margin-bottom: 15px; }
         
-        /* БОЛЬШИЕ ИКОНКИ */
+        /* SYN WALLET BADGE */
+        .syn-badge { font-size: 10px; font-weight: 900; color: var(--blue); background: rgba(77, 184, 255, 0.1); padding: 4px 10px; border-radius: 10px; display: inline-block; margin-top: 5px; letter-spacing: 1px; }
+
         .asset-icon-box { width: 48px; height: 48px; min-width: 48px; display: flex; align-items: center; justify-content: center; background: #1a222c; border-radius: 50%; overflow: hidden; border: 1px solid var(--border); }
         .asset-icon-img { width: 100%; height: 100%; object-fit: cover; display: block; }
         
@@ -46,7 +45,6 @@
             background-color: var(--blue); border-radius: 0 4px 4px 0;
         }
 
-        /* УВЕЛИЧЕННАЯ НАВИГАЦИЯ */
         nav { position: fixed; bottom: 15px; left: 15px; right: 15px; height: 85px; background: var(--panel); display: flex; border-radius: 28px; border: 1px solid var(--border); z-index: 100; box-shadow: 0 -5px 20px rgba(0,0,0,0.5); }
         .nav-item { flex: 1; display: flex; align-items: center; justify-content: center; cursor: pointer; opacity: 0.3; transition: 0.2s; font-size: 28px; }
         .nav-item.active { opacity: 1; transform: translateY(-5px); font-size: 32px; }
@@ -54,9 +52,11 @@
         input, select { width: 100%; padding: 18px; background: rgba(255,255,255,0.05); border: 1px solid var(--border); border-radius: 20px; color: white; margin-bottom: 12px; outline: none; font-size: 16px; box-sizing: border-box; }
         #rev_btn { background: #1a222c; border: 1px solid var(--border); color: var(--blue); width: 44px; height: 44px; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: -28px auto; z-index: 5; position: relative; cursor: pointer; font-size: 20px; }
         
+        .btn-confirm { background: var(--green); color: black; padding: 18px; border-radius: 20px; width: 100%; border: none; font-weight: 800; cursor: pointer; margin-top: 10px; transition: 0.3s; }
+        .btn-confirm:disabled { background: #2a333d; color: #555; cursor: not-allowed; }
+
         .modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); z-index: 1000; align-items: flex-end; }
         .modal-body { background: #111a27; width: 100%; border-radius: 35px 35px 0 0; padding: 30px 20px 40px; box-sizing: border-box; border-top: 1px solid var(--border); }
-        .btn-confirm { background: var(--green); color: black; padding: 18px; border-radius: 20px; width: 100%; border: none; font-weight: 800; cursor: pointer; margin-top: 10px; }
         .modal-view { display: none; }
         .modal-view.active { display: block; }
     </style>
@@ -65,7 +65,7 @@
 
 <header>
     <svg class="logo-svg" viewBox="0 0 668 237" fill="none" xmlns="http://www.w3.org/2000/svg">
-        <path d="M118.204 0.000194514C183.486 0.000194514 236.408 52.9223 236.408 118.204C236.408 183.487 183.486 236.408 118.204 236.408C52.9216 236.408 0.000184007 183.486 0 118.204C0 52.9224 52.9215 0.000354089 118.204 0.000194514ZM74.1011 62.1964C57.6799 62.1964 47.268 79.9119 55.5308 94.2346L109.964 188.582C113.619 194.922 122.781 194.922 126.436 188.582L180.88 94.2346C189.132 79.9342 178.72 62.1965 162.31 62.1964H74.1011ZM162.288 78.8411C166.031 78.8411 168.234 82.812 166.45 85.9074L137.856 137.091L137.851 137.099L126.506 159.046V78.8411H162.288ZM109.872 78.8516V159.024L98.5376 137.087L98.5334 137.08L69.9294 85.9214L69.8468 85.7724C68.2134 82.6996 70.405 78.8516 74.0899 78.8516H109.872Z" fill="#4DB8FF"/>
+        <path d="M118.204 0.000194514C183.486 0.000194514 236.408 52.9223 236.408 118.204C236.408 183.487 183.486 236.408 118.204 236.408C52.9216 236.408 0.000184007 183.486 0 118.204C0 52.9224 52.9215 0.000354089 118.204 0.000194514ZM74.1011 62.1964C57.6799 62.1964 47.268 79.9119 55.5308 94.2346L109.964 188.582C113.619 194.922 122.781 194.922 126.436 188.582L180.88 94.2346C189.132 79.9342 178.72 62.1965 162.31 62.1964H74.1011ZM162.288 78.8411C166.031 78.8411 168.234 82.812 166.45 85.9074L137.856 137.091L137.851 137.099L126.506 159.046V78.8411H162.288ZM109.872 78.8516V159.024L98.5376 137.087L98.5334 137.08L69.9294 85.9214L69.8468 85.7724C68.2134 82.6996 70.405 78.8516 74.0899 78.8516H109.872" fill="#4DB8FF"/>
         <path d="M639.524 146.751V62.9139H668V188.849H636.565L573.696 99.0752V188.849H545.034V62.9139H581.277L639.524 146.751Z" fill="white"/>
         <path d="M456.407 191.686C414.432 191.686 384.107 163.081 384.107 126.74C384.107 90.3983 414.432 61.7931 456.407 61.7931C498.382 61.7931 528.707 90.5782 528.707 126.74C528.707 162.901 498.382 191.686 456.407 191.686ZM456.407 167.219C481 167.219 497.272 149.408 497.272 126.74C497.272 104.071 481 86.2605 456.407 86.2605C431.814 86.2605 415.542 104.071 415.542 126.74C415.542 149.408 431.814 167.219 456.407 167.219Z" fill="white"/>
         <path d="M384.269 63.5978V85.7264H342.11V189.533H312.339V85.7264H270.179V63.5978H384.269Z" fill="white"/>
@@ -78,7 +78,9 @@
         <div style="text-align:center; padding: 15px 0 25px;">
             <div style="font-size: 11px; opacity: 0.5;">ESTIMATED BALANCE</div>
             <h1 id="main_balance" style="font-size:40px; margin:5px 0;">0.00 TON</h1>
-            <div id="addr_display" style="font-size: 11px; color: var(--blue); background: rgba(77, 184, 255, 0.1); padding: 6px 14px; border-radius: 20px; display: inline-block; font-family: monospace;">Disconnected</div>
+            <div class="syn-badge">👛 SYN WALLET</div>
+            <br>
+            <div id="addr_display" style="font-size: 11px; color: var(--blue); background: rgba(77, 184, 255, 0.1); padding: 6px 14px; border-radius: 20px; display: inline-block; font-family: monospace; margin-top: 15px;">Disconnected</div>
         </div>
         <div id="asset_list"></div>
     </div>
@@ -120,21 +122,7 @@
                 <button class="btn-confirm" style="background:var(--blue); color:white;" onclick="switchModalView('send')">SEND</button>
             </div>
         </div>
-        <div id="view_deposit" class="modal-view">
-            <h3 style="text-align:center; margin-top:0;">Receive <span class="cur_asset"></span></h3>
-            <div id="qrcode" style="display:flex; justify-content:center; margin:20px 0; background:#fff; padding:15px; border-radius:15px; min-height:150px;"></div>
-            <p id="full_addr" style="font-size:11px; word-break:break-all; opacity:0.5; font-family:monospace; text-align:center;"></p>
-            <button class="btn-confirm" onclick="copyAddr()">Copy Address</button>
         </div>
-        <div id="view_send" class="modal-view">
-            <h3 style="text-align:center; margin-top:0;">Send <span class="cur_asset"></span></h3>
-            <input type="text" id="send_addr" placeholder="Recipient Address">
-            <input type="text" id="send_memo" placeholder="Memo (Optional)">
-            <input type="number" id="send_amount" placeholder="Amount">
-            <button class="btn-confirm" onclick="tg.showAlert('Sending...')">Confirm Send</button>
-        </div>
-        <button class="btn-confirm" style="background:transparent; color:white; opacity:0.3; margin-top:15px; font-size:12px;" onclick="closeUniversalModal()">CLOSE</button>
-    </div>
 </div>
 
 <script>
@@ -158,22 +146,6 @@
 
     let currentAddr = "";
 
-    async function updatePrices() {
-        try {
-            const ids = assets.map(a => a.apiId).join(',');
-            const response = await fetch(`https://api.coingecko.com/api/v3/simple/price?ids=${ids}&vs_currencies=usd`);
-            const data = await response.json();
-            assets.forEach(a => {
-                if (data[a.apiId]) {
-                    a.price = data[a.apiId].usd;
-                    const el = document.getElementById(`price_${a.id}`);
-                    if (el) el.innerText = `$${a.price.toLocaleString()}`;
-                }
-            });
-            validateSwap();
-        } catch (e) { }
-    }
-
     function init() {
         const list = document.getElementById('asset_list');
         const f = document.getElementById('sw_from'), t = document.getElementById('sw_to');
@@ -182,36 +154,19 @@
         assets.forEach(a => {
             list.innerHTML += `
                 <div class="asset-item" onclick="showAssetMenu('${a.id}')">
-                    <div class="asset-icon-box">
-                        <img src="${a.img}" class="asset-icon-img" onerror="this.src='https://cdn-icons-png.flaticon.com/512/11550/11550130.png'">
-                    </div>
-                    <div class="asset-details">
-                        <div class="asset-name">${a.name}</div>
-                        <div class="asset-price" id="price_${a.id}">$${a.price.toLocaleString()}</div>
-                    </div>
+                    <div class="asset-icon-box"><img src="${a.img}" class="asset-icon-img" onerror="this.src='https://cdn-icons-png.flaticon.com/512/11550/11550130.png'"></div>
+                    <div class="asset-details"><div class="asset-name">${a.name}</div><div class="asset-price" id="price_${a.id}">$${a.price.toLocaleString()}</div></div>
                     <div class="bal-amount">0.00</div>
                 </div>`;
             f.innerHTML += `<option value="${a.id}">${a.id}</option>`;
             t.innerHTML += `<option value="${a.id}">${a.id}</option>`;
         });
         f.value = "TON"; t.value = "USDT";
-        updatePrices();
-        setInterval(updatePrices, 60000);
-        const tc = new TON_CONNECT_UI.TonConnectUI({
-            manifestUrl: 'https://sergey52bb.github.io/grok-autotrade/tonconnect-manifest.json',
-            buttonRootId: 'ton-connect-btn'
-        });
-        tc.onStatusChange(w => {
-            if (w) {
-                currentAddr = w.account.address;
-                document.getElementById('addr_display').innerText = currentAddr.substring(0,8)+"..."+currentAddr.substring(currentAddr.length-4);
-                document.getElementById('full_addr').innerText = currentAddr;
-                document.getElementById("qrcode").innerHTML = "";
-                new QRCode(document.getElementById("qrcode"), { text: currentAddr, width: 150, height: 150 });
-            }
-        });
+        const tc = new TON_CONNECT_UI.TonConnectUI({ manifestUrl: 'https://sergey52bb.github.io/grok-autotrade/tonconnect-manifest.json', buttonRootId: 'ton-connect-btn' });
+        tc.onStatusChange(w => { if (w) { currentAddr = w.account.address; document.getElementById('addr_display').innerText = currentAddr.substring(0,8)+"..."+currentAddr.substring(currentAddr.length-4); } });
         validateSwap();
     }
+
     function showTab(id, el) {
         document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
         document.getElementById('scr_'+id).classList.add('active');
@@ -219,34 +174,42 @@
         el.classList.add('active');
         tg.HapticFeedback.selectionChanged();
     }
-    function showAssetMenu(id) {
-        const a = assets.find(x => x.id === id);
-        document.getElementById('menu_title').innerText = a.name;
-        document.querySelectorAll('.cur_asset').forEach(e => e.innerText = a.id);
-        switchModalView('menu');
-        document.getElementById('universal_modal').style.display = 'flex';
-    }
-    function switchModalView(v) {
-        document.querySelectorAll('.modal-view').forEach(x => x.classList.remove('active'));
-        document.getElementById('view_' + v).classList.add('active');
-    }
-    function closeUniversalModal() { document.getElementById('universal_modal').style.display = 'none'; }
+
+    // ЛОГИКА ЗАПРЕТА ОБМЕНА ОДИНАКОВЫХ МОНЕТ
     function validateSwap() {
         const from = document.getElementById('sw_from').value, to = document.getElementById('sw_to').value;
         const val = document.getElementById('sw_val').value, err = document.getElementById('sw_err_msg');
         const btn = document.getElementById('sw_confirm_btn'), res = document.getElementById('sw_res');
-        if (from === to) { err.innerText = "Same asset"; err.style.display = "block"; btn.disabled = true; res.value = ""; return; }
-        if (from !== 'TON' && to !== 'TON') { err.innerText = "Use TON bridge"; err.style.display = "block"; btn.disabled = true; res.value = ""; return; }
-        err.style.display = "none"; btn.disabled = false;
+        
+        if (from === to) { 
+            err.innerText = "Invalid pair"; 
+            err.style.display = "block"; 
+            btn.disabled = true; 
+            res.value = "0.0"; 
+            return; 
+        }
+        
+        if (from !== 'TON' && to !== 'TON') { 
+            err.innerText = "Use TON bridge"; 
+            err.style.display = "block"; 
+            btn.disabled = true; 
+            res.value = "0.0"; 
+            return; 
+        }
+
+        err.style.display = "none"; 
+        btn.disabled = false;
         const p1 = assets.find(x => x.id === from).price, p2 = assets.find(x => x.id === to).price;
         if(val > 0) res.value = ((val * p1) / p2).toFixed(6);
+        else res.value = "0.0";
     }
+
     function swapReverse() {
         const f = document.getElementById('sw_from'), t = document.getElementById('sw_to');
         const tmp = f.value; f.value = t.value; t.value = tmp;
         validateSwap();
     }
-    function copyAddr() { if(currentAddr) { navigator.clipboard.writeText(currentAddr); tg.showAlert("Copied!"); } }
+    
     window.onload = init;
 </script>
 </body>
