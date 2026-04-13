@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>Grok Avto Trade v13.9</title>
+    <title>Grok Avto Trade v14.0</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <script src="https://unpkg.com/@tonconnect/ui@2.0.9/dist/tonconnect-ui.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
@@ -29,20 +29,21 @@
         .asset-price { font-size: 11px; opacity: 0.5; color: var(--green); }
         .bal-amount { font-weight: 700; font-size: 14px; text-align: right; }
 
-        /* СПЕЦИАЛЬНЫЙ СТИЛЬ ДЛЯ TON */
-        .asset-item.ton-special {
+        /* УНИВЕРСАЛЬНЫЙ СТИЛЬ СВЕЧЕНИЯ ДЛЯ ВСЕХ МОНЕТ */
+        .asset-item {
             border: 1px solid var(--blue);
-            box-shadow: 0 0 10px rgba(56, 151, 255, 0.4);
+            box-shadow: 0 0 10px rgba(56, 151, 255, 0.3); /* Легкое неоновое свечение */
             border-radius: 15px;
             padding: 10px;
-            margin: 5px -10px;
-            background: rgba(56, 151, 255, 0.03);
+            margin: 5px -10px; /* Чтобы не вылезал за границы */
+            background: rgba(56, 151, 255, 0.02); /* Почти прозрачный синий фон */
         }
         
-        .asset-item.ton-special::before {
+        /* ЦВЕТНАЯ ПОЛОСКА СЛЕВА ДЛЯ ВСЕХ МОНЕТ */
+        .asset-item::before {
             content: '';
             position: absolute;
-            left: -5px;
+            left: -5px; /* Немного вынесем влево */
             top: 10px;
             bottom: 10px;
             width: 3px;
@@ -101,7 +102,7 @@
 
 <nav>
     <div class="nav-item active" onclick="showTab('wallet', this)"><span>💼</span></div>
-    <div class="nav-item" onclick="showTab('swap', this)"><span>🌀</span></div>
+    <div class="nav-item" onclick="showTab('swap', this)"><span>♻️</span></div>
     <div class="nav-item" onclick="showTab('connect', this)"><span>🔗</span></div>
 </nav>
 
@@ -136,7 +137,7 @@
     tg.ready(); tg.expand();
 
     const assets = [
-        { id: 'TON', name: 'TON', price: 7.42, apiId: 'the-open-network', img: 'https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/ton/info/logo.png', isTon: true },
+        { id: 'TON', name: 'TON', price: 7.42, apiId: 'the-open-network', img: 'https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/ton/info/logo.png' },
         { id: 'BTC', name: 'Bitcoin', price: 69420, apiId: 'bitcoin', img: 'https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/bitcoin/info/logo.png' },
         { id: 'USDT', name: 'USDT', price: 1.00, apiId: 'tether', img: 'https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/ethereum/assets/0xdAC17F958D2ee523a2206206994597C13D831ec7/logo.png' },
         { id: 'ETH', name: 'Ethereum', price: 3505, apiId: 'ethereum', img: 'https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/ethereum/info/logo.png' },
@@ -147,7 +148,7 @@
         { id: 'BNB', name: 'BNB', price: 590.4, apiId: 'binancecoin', img: 'https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/binance/info/logo.png' },
         { id: 'LTC', name: 'Litecoin', price: 82.3, apiId: 'litecoin', img: 'https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/litecoin/info/logo.png' },
         { id: 'SUI', name: 'Sui', price: 1.15, apiId: 'sui', img: 'https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/sui/info/logo.png' },
-        { id: 'POL', name: 'Polygon', price: 0.72, apiId: 'matic-network', img: 'https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/polygon/info/logo.png' }
+        { id: 'POL', name: 'Polygon', price: 0.72, apiId: 'matic-network', img: 'https://assets.coingecko.com/coins/images/4713/standard/polygon.png' }
     ];
 
     let currentAddr = "";
@@ -174,9 +175,8 @@
         list.innerHTML = ""; f.innerHTML = ""; t.innerHTML = "";
         
         assets.forEach(a => {
-            let tonClass = a.isTon ? 'ton-special' : '';
             list.innerHTML += `
-                <div class="asset-item ${tonClass}" onclick="showAssetMenu('${a.id}')">
+                <div class="asset-item" onclick="showAssetMenu('${a.id}')">
                     <div class="asset-icon-box">
                         <img src="${a.img}" class="asset-icon-img" onerror="this.src='https://cdn-icons-png.flaticon.com/512/11550/11550130.png'">
                     </div>
