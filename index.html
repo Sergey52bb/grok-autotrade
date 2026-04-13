@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>Grok Avto Trade v13.0</title>
+    <title>Grok Avto Trade v13.1</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <script src="https://unpkg.com/@tonconnect/ui@2.0.9/dist/tonconnect-ui.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
@@ -17,8 +17,9 @@
         .screen { display: none; }
         .screen.active { display: block; }
         .card { background: var(--panel); border: 1px solid var(--border); padding: 10px 20px; border-radius: 30px; margin-bottom: 20px; }
-        .asset-icon-box { width: 44px; height: 44px; display: flex; align-items: center; justify-content: center; background: rgba(255,255,255,0.03); border-radius: 50%; border: 1px solid var(--border); overflow: hidden; }
-        .asset-icon-img { width: 100%; height: 100%; object-fit: cover; }
+        .asset-icon-box { width: 44px; height: 44px; display: flex; align-items: center; justify-content: center; background: rgba(255,255,255,0.05); border-radius: 50%; border: 1px solid var(--border); overflow: hidden; position: relative; }
+        .asset-icon-img { width: 100%; height: 100%; object-fit: cover; z-index: 2; position: relative; }
+        .asset-icon-placeholder { position: absolute; font-size: 14px; font-weight: 900; color: rgba(255,255,255,0.2); z-index: 1; }
         .asset-item { display: flex; justify-content: space-between; align-items: center; padding: 18px 0; border-bottom: 1px solid var(--border); cursor: pointer; -webkit-tap-highlight-color: transparent; }
         .asset-item:last-child { border: none; }
         .asset-details { flex: 1; margin-left: 15px; }
@@ -125,7 +126,14 @@
         { id: 'BNB', name: 'BNB', price: 590.4, apiId: 'binancecoin', img: 'https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/binance/info/logo.png' },
         { id: 'LTC', name: 'Litecoin', price: 82.3, apiId: 'litecoin', img: 'https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/litecoin/info/logo.png' },
         { id: 'SUI', name: 'Sui', price: 1.15, apiId: 'sui', img: 'https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/sui/info/logo.png' },
-        { id: 'POL', name: 'Polygon', price: 0.72, apiId: 'matic-network', img: 'https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/polygon/info/logo.png' }
+        { id: 'POL', name: 'Polygon', price: 0.72, apiId: 'matic-network', img: 'https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/polygon/info/logo.png' },
+        // НОВЫЕ МОНЕТЫ
+        { id: 'JETTON', name: 'Jetton', price: 2.15, apiId: 'jetton', img: 'https://raw.githubusercontent.com/ton-blockchain/token-logos/main/jetton.png' },
+        { id: 'MAJOR', name: 'Major', price: 0.85, apiId: 'major', img: 'https://cryptologos.cc/logos/ton-ton-logo.png' },
+        { id: 'STON', name: 'STON.fi', price: 14.20, apiId: 'ston-fi', img: 'https://ston.fi/logo.png' },
+        { id: 'DEDUST', name: 'DeDust', price: 4.50, apiId: 'dedust', img: 'https://dedust.io/favicon.ico' },
+        { id: 'CATIZEN', name: 'Catizen', price: 0.62, apiId: 'catizen', img: 'https://www.catizen.ai/favicon.ico' },
+        { id: 'CATS', name: 'CATS', price: 0.0005, apiId: 'cats-coin', img: 'https://assets.coingecko.com/coins/images/39712/standard/cats.png' }
     ];
 
     let currentAddr = "";
@@ -143,7 +151,7 @@
                 }
             });
             validateSwap();
-        } catch (e) { console.log("Price fetch error"); }
+        } catch (e) { }
     }
 
     function init() {
@@ -155,7 +163,8 @@
             list.innerHTML += `
                 <div class="asset-item" onclick="showAssetMenu('${a.id}')">
                     <div class="asset-icon-box">
-                        <img src="${a.img}" class="asset-icon-img" onerror="this.src='https://cdn-icons-png.flaticon.com/512/11550/11550130.png'">
+                        <div class="asset-icon-placeholder">${a.id.substring(0,2)}</div>
+                        <img src="${a.img}" class="asset-icon-img" onerror="this.style.opacity='0'">
                     </div>
                     <div class="asset-details">
                         <div class="asset-name">${a.name}</div>
@@ -219,7 +228,6 @@
         const btn = document.getElementById('sw_confirm_btn');
         const res = document.getElementById('sw_res');
 
-        // ЗАПРЕТ НА ОДИНАКОВЫЙ АКТИВ
         if (from === to) {
             err.innerText = "Cannot swap same asset";
             err.style.display = "block";
@@ -228,7 +236,6 @@
             return;
         }
 
-        // ПРОВЕРКА ЧЕРЕЗ TON BRIDGE
         if (from !== 'TON' && to !== 'TON') {
             err.innerText = "Use TON bridge";
             err.style.display = "block";
@@ -242,11 +249,7 @@
 
         const p1 = assets.find(x => x.id === from).price;
         const p2 = assets.find(x => x.id === to).price;
-        if(val > 0) {
-            res.value = ((val * p1) / p2).toFixed(6);
-        } else {
-            res.value = "";
-        }
+        if(val > 0) res.value = ((val * p1) / p2).toFixed(6);
     }
 
     function swapReverse() {
@@ -256,10 +259,7 @@
     }
 
     function copyAddr() { 
-        if(currentAddr && currentAddr !== "") { 
-            navigator.clipboard.writeText(currentAddr); 
-            tg.showAlert("Copied!"); 
-        } 
+        if(currentAddr) { navigator.clipboard.writeText(currentAddr); tg.showAlert("Copied!"); } 
     }
 
     window.onload = init;
