@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>Grok Avto Trade v13.3</title>
+    <title>Grok Avto Trade v13.4</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <script src="https://unpkg.com/@tonconnect/ui@2.0.9/dist/tonconnect-ui.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
@@ -17,26 +17,19 @@
         .screen { display: none; }
         .screen.active { display: block; }
         .card { background: var(--panel); border: 1px solid var(--border); padding: 10px 20px; border-radius: 30px; margin-bottom: 20px; }
-        
-        /* ИКОНКИ С ЦВЕТНЫМИ ЗАГЛУШКАМИ */
-        .asset-icon-box { width: 44px; height: 44px; display: flex; align-items: center; justify-content: center; background: #222; border-radius: 50%; border: 1px solid var(--border); overflow: hidden; position: relative; flex-shrink: 0; }
-        .asset-icon-img { width: 100%; height: 100%; object-fit: cover; z-index: 2; position: relative; transition: opacity 0.3s; }
-        .asset-icon-placeholder { position: absolute; font-size: 11px; font-weight: 900; color: #fff; z-index: 1; text-transform: uppercase; }
-
+        .asset-icon-box { width: 44px; height: 44px; display: flex; align-items: center; justify-content: center; background: rgba(255,255,255,0.03); border-radius: 50%; border: 1px solid var(--border); overflow: hidden; }
+        .asset-icon-img { width: 100%; height: 100%; object-fit: cover; }
         .asset-item { display: flex; justify-content: space-between; align-items: center; padding: 18px 0; border-bottom: 1px solid var(--border); cursor: pointer; -webkit-tap-highlight-color: transparent; }
         .asset-item:last-child { border: none; }
         .asset-details { flex: 1; margin-left: 15px; }
         .asset-name { font-weight: 800; font-size: 15px; }
         .asset-price { font-size: 12px; opacity: 0.5; color: var(--green); }
         .bal-amount { font-weight: 700; font-size: 15px; text-align: right; }
-        
         input, select { width: 100%; padding: 18px; background: rgba(255,255,255,0.05); border: 1px solid var(--border); border-radius: 20px; color: white; margin-bottom: 12px; outline: none; font-size: 16px; box-sizing: border-box; }
         #rev_btn { background: #1a222c; border: 1px solid var(--border); color: var(--blue); width: 40px; height: 40px; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: -26px auto; z-index: 5; position: relative; cursor: pointer; }
-        
         nav { position: fixed; bottom: 20px; left: 15px; right: 15px; height: 75px; background: var(--panel); display: flex; border-radius: 25px; border: 1px solid var(--border); z-index: 100; }
         .nav-item { flex: 1; display: flex; align-items: center; justify-content: center; cursor: pointer; opacity: 0.3; transition: 0.2s; }
         .nav-item.active { opacity: 1; transform: translateY(-3px); }
-        
         .modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); z-index: 1000; align-items: flex-end; }
         .modal-body { background: #111a27; width: 100%; border-radius: 35px 35px 0 0; padding: 30px 20px 40px; box-sizing: border-box; border-top: 1px solid var(--border); }
         .btn-confirm { background: var(--green); color: black; padding: 18px; border-radius: 20px; width: 100%; border: none; font-weight: 800; cursor: pointer; margin-top: 10px; }
@@ -121,25 +114,21 @@
     tg.ready(); tg.expand();
 
     const assets = [
-        { id: 'TON', name: 'TON', price: 7.42, apiId: 'the-open-network', img: 'https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/ton/info/logo.png', color: '#0088cc' },
-        { id: 'BTC', name: 'Bitcoin', price: 69420, apiId: 'bitcoin', img: 'https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/bitcoin/info/logo.png', color: '#f7931a' },
-        { id: 'USDT', name: 'USDT', price: 1.00, apiId: 'tether', img: 'https://assets.coingecko.com/coins/images/325/standard/tether.png', color: '#26a17b' },
-        { id: 'ETH', name: 'Ethereum', price: 3505, apiId: 'ethereum', img: 'https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/ethereum/info/logo.png', color: '#627eea' },
-        { id: 'SOL', name: 'Solana', price: 145.2, apiId: 'solana', img: 'https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/solana/info/logo.png', color: '#14f195' },
-        { id: 'NEAR', name: 'Near', price: 6.85, apiId: 'near', img: 'https://assets.coingecko.com/coins/images/10365/standard/near.png', color: '#000000' },
-        { id: 'USDC', name: 'USDC', price: 1.00, apiId: 'usd-coin', img: 'https://assets.coingecko.com/coins/images/6319/standard/usdc.png', color: '#2775ca' },
-        { id: 'DOGE', name: 'Doge', price: 0.16, apiId: 'dogecoin', img: 'https://assets.coingecko.com/coins/images/5/standard/dogecoin.png', color: '#c2a633' },
-        { id: 'BNB', name: 'BNB', price: 590.4, apiId: 'binancecoin', img: 'https://assets.coingecko.com/coins/images/825/standard/bnb.png', color: '#f3ba2f' },
-        { id: 'LTC', name: 'Litecoin', price: 82.3, apiId: 'litecoin', img: 'https://assets.coingecko.com/coins/images/2/standard/litecoin.png', color: '#345d9d' },
-        { id: 'SUI', name: 'Sui', price: 1.15, apiId: 'sui', img: 'https://assets.coingecko.com/coins/images/26375/standard/sui_asset.png', color: '#6fbcf0' },
-        { id: 'POL', name: 'Polygon', price: 0.72, apiId: 'matic-network', img: 'https://assets.coingecko.com/coins/images/4713/standard/polygon.png', color: '#8247e5' },
-        
-        { id: 'JETTON', name: 'Jetton', price: 2.15, apiId: 'jetton', img: 'https://assets.coingecko.com/coins/images/29450/standard/jetton.png', color: '#0088cc' },
-        { id: 'MAJOR', name: 'Major', price: 0.85, apiId: 'major', img: 'https://assets.coingecko.com/coins/images/51351/standard/major.png', color: '#000000' },
-        { id: 'STON', name: 'STON.fi', price: 14.20, apiId: 'ston-fi', img: 'https://assets.coingecko.com/coins/images/33058/standard/ston.png', color: '#10141f' },
-        { id: 'DEDUST', name: 'DeDust', price: 4.50, apiId: 'dedust', img: 'https://assets.coingecko.com/coins/images/35058/standard/dedust.png', color: '#1c1c1c' },
-        { id: 'CATIZEN', name: 'Catizen', price: 0.62, apiId: 'catizen', img: 'https://assets.coingecko.com/coins/images/39515/standard/catizen.png', color: '#e5c08d' },
-        { id: 'CATS', name: 'CATS', price: 0.0005, apiId: 'cats-coin', img: 'https://assets.coingecko.com/coins/images/39712/standard/cats.png', color: '#1a1a1a' }
+        { id: 'TON', name: 'TON', price: 7.42, apiId: 'the-open-network', img: 'https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/ton/info/logo.png' },
+        { id: 'BTC', name: 'Bitcoin', price: 69420, apiId: 'bitcoin', img: 'https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/bitcoin/info/logo.png' },
+        { id: 'USDT', name: 'USDT', price: 1.00, apiId: 'tether', img: 'https://assets.coingecko.com/coins/images/325/standard/tether.png' },
+        { id: 'ETH', name: 'Ethereum', price: 3505, apiId: 'ethereum', img: 'https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/ethereum/info/logo.png' },
+        { id: 'SOL', name: 'Solana', price: 145.2, apiId: 'solana', img: 'https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/solana/info/logo.png' },
+        { id: 'NEAR', name: 'Near', price: 6.85, apiId: 'near', img: 'https://assets.coingecko.com/coins/images/10365/standard/near.png' },
+        { id: 'USDC', name: 'USDC', price: 1.00, apiId: 'usd-coin', img: 'https://assets.coingecko.com/coins/images/6319/standard/usdc.png' },
+        { id: 'DOGE', name: 'Doge', price: 0.16, apiId: 'dogecoin', img: 'https://assets.coingecko.com/coins/images/5/standard/dogecoin.png' },
+        { id: 'BNB', name: 'BNB', price: 590.4, apiId: 'binancecoin', img: 'https://assets.coingecko.com/coins/images/825/standard/bnb.png' },
+        { id: 'LTC', name: 'Litecoin', price: 82.3, apiId: 'litecoin', img: 'https://assets.coingecko.com/coins/images/2/standard/litecoin.png' },
+        { id: 'SUI', name: 'Sui', price: 1.15, apiId: 'sui', img: 'https://assets.coingecko.com/coins/images/26375/standard/sui_asset.png' },
+        { id: 'POL', name: 'Polygon', price: 0.72, apiId: 'matic-network', img: 'https://assets.coingecko.com/coins/images/4713/standard/polygon.png' },
+        // ТОЛЬКО STON И DEDUST
+        { id: 'STON', name: 'STON.fi', price: 14.20, apiId: 'ston-fi', img: 'https://assets.coingecko.com/coins/images/33058/standard/ston.png' },
+        { id: 'DEDUST', name: 'DeDust', price: 4.50, apiId: 'dedust', img: 'https://assets.coingecko.com/coins/images/35058/standard/dedust.png' }
     ];
 
     let currentAddr = "";
@@ -168,9 +157,8 @@
         assets.forEach(a => {
             list.innerHTML += `
                 <div class="asset-item" onclick="showAssetMenu('${a.id}')">
-                    <div class="asset-icon-box" style="background: ${a.color}">
-                        <div class="asset-icon-placeholder">${a.id.substring(0,2)}</div>
-                        <img src="${a.img}" class="asset-icon-img" onload="this.style.opacity='1'" onerror="this.style.opacity='0'">
+                    <div class="asset-icon-box">
+                        <img src="${a.img}" class="asset-icon-img" onerror="this.src='https://cdn-icons-png.flaticon.com/512/11550/11550130.png'">
                     </div>
                     <div class="asset-details">
                         <div class="asset-name">${a.name}</div>
@@ -227,9 +215,12 @@
     function closeUniversalModal() { document.getElementById('universal_modal').style.display = 'none'; }
 
     function validateSwap() {
-        const from = document.getElementById('sw_from').value, to = document.getElementById('sw_to').value;
-        const val = document.getElementById('sw_val').value, err = document.getElementById('sw_err_msg');
-        const btn = document.getElementById('sw_confirm_btn'), res = document.getElementById('sw_res');
+        const from = document.getElementById('sw_from').value;
+        const to = document.getElementById('sw_to').value;
+        const val = document.getElementById('sw_val').value;
+        const err = document.getElementById('sw_err_msg');
+        const btn = document.getElementById('sw_confirm_btn');
+        const res = document.getElementById('sw_res');
 
         if (from === to) {
             err.innerText = "Cannot swap same asset";
@@ -238,6 +229,7 @@
             res.value = "";
             return;
         }
+
         if (from !== 'TON' && to !== 'TON') {
             err.innerText = "Use TON bridge";
             err.style.display = "block";
@@ -245,9 +237,12 @@
             res.value = "";
             return;
         }
+
         err.style.display = "none";
         btn.disabled = false;
-        const p1 = assets.find(x => x.id === from).price, p2 = assets.find(x => x.id === to).price;
+
+        const p1 = assets.find(x => x.id === from).price;
+        const p2 = assets.find(x => x.id === to).price;
         if(val > 0) res.value = ((val * p1) / p2).toFixed(6);
     }
 
