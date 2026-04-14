@@ -3,61 +3,38 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>Grok Avto Trade v14.8</title>
+    <title>Grok Avto Trade v14.9</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <script src="https://unpkg.com/@tonconnect/ui@2.0.9/dist/tonconnect-ui.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
     <style>
         :root { --bg: #050b14; --panel: #0d141d; --blue: #4DB8FF; --green: #00ff95; --red: #ff4a4a; --border: rgba(255,255,255,0.08); }
         body { background: var(--bg); color: white; margin: 0; font-family: -apple-system, sans-serif; height: 100vh; display: flex; flex-direction: column; overflow: hidden; }
-        
         header { padding: 15px 15px 5px; text-align: center; flex-shrink: 0; }
         .logo-svg { width: 140px; height: auto; margin-bottom: 2px; }
         header .subtitle { font-size: 11px; color: var(--blue); letter-spacing: 2px; font-weight: 800; opacity: 0.9; }
-
         #main_content { flex: 1; overflow-y: auto; padding: 10px 15px 150px; } 
         .screen { display: none; }
         .screen.active { display: block; }
-        
         .card { background: var(--panel); border: 1px solid var(--border); padding: 15px; border-radius: 25px; margin-bottom: 15px; }
-        
         .asset-icon-box { width: 48px; height: 48px; min-width: 48px; display: flex; align-items: center; justify-content: center; background: #1a222c; border-radius: 50%; overflow: hidden; border: 1px solid var(--border); }
         .asset-icon-img { width: 100%; height: 100%; object-fit: cover; }
-        
-        .asset-item { 
-            display: flex; justify-content: space-between; align-items: center; 
-            padding: 12px 12px; border: 1px solid rgba(77, 184, 255, 0.25); 
-            box-shadow: 0 0 10px rgba(77, 184, 255, 0.15); 
-            cursor: pointer; position: relative; border-radius: 20px; margin-bottom: 12px;
-            background: rgba(77, 184, 255, 0.02);
-        }
+        .asset-item { display: flex; justify-content: space-between; align-items: center; padding: 12px 12px; border: 1px solid rgba(77, 184, 255, 0.25); box-shadow: 0 0 10px rgba(77, 184, 255, 0.15); cursor: pointer; position: relative; border-radius: 20px; margin-bottom: 12px; background: rgba(77, 184, 255, 0.02); }
         .asset-details { flex: 1; margin-left: 15px; }
         .asset-name { font-weight: 800; font-size: 15px; }
         .asset-price { font-size: 12px; opacity: 0.6; color: var(--green); }
         .bal-amount { font-weight: 700; font-size: 15px; text-align: right; }
-
-        .asset-item::before {
-            content: ''; position: absolute; left: 0; top: 15px; bottom: 15px; width: 4px;
-            background-color: var(--blue); border-radius: 0 4px 4px 0;
-        }
-
-        /* PREMIUM SWAP STYLES */
         .swap-selector { display: flex; align-items: center; gap: 10px; background: rgba(255,255,255,0.05); border-radius: 20px; padding: 12px 15px; border: 1px solid var(--border); cursor: pointer; }
         .swap-selector img { width: 28px; height: 28px; border-radius: 50%; }
         .swap-selector span { font-weight: 700; flex: 1; }
         .coin-option { display: flex; align-items: center; gap: 15px; padding: 15px; border-bottom: 1px solid var(--border); cursor: pointer; }
         .coin-option img { width: 32px; height: 32px; border-radius: 50%; }
-        .coin-option .coin-ticker { font-weight: 800; }
-
         nav { position: fixed; bottom: 15px; left: 15px; right: 15px; height: 85px; background: var(--panel); display: flex; border-radius: 28px; border: 1px solid var(--border); z-index: 100; box-shadow: 0 -5px 20px rgba(0,0,0,0.5); }
         .nav-item { flex: 1; display: flex; align-items: center; justify-content: center; cursor: pointer; opacity: 0.3; transition: 0.2s; font-size: 30px; }
         .nav-item.active { opacity: 1; transform: translateY(-5px); font-size: 36px; }
-
         input { width: 100%; padding: 18px; background: rgba(255,255,255,0.05); border: 1px solid var(--border); border-radius: 20px; color: white; margin-bottom: 12px; outline: none; font-size: 18px; box-sizing: border-box; }
         #rev_btn { background: #1a222c; border: 1px solid var(--border); color: var(--blue); width: 44px; height: 44px; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: -20px auto; z-index: 5; position: relative; cursor: pointer; }
         .btn-confirm { background: var(--green); color: black; padding: 18px; border-radius: 20px; width: 100%; border: none; font-weight: 800; cursor: pointer; margin-top: 10px; }
-
-        /* MODAL & PICKER STYLES */
         .modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); z-index: 1000; align-items: flex-end; }
         .modal-body { background: #111a27; width: 100%; border-radius: 35px 35px 0 0; padding: 25px 20px 40px; box-sizing: border-box; max-height: 80vh; overflow-y: auto; }
         .modal-view { display: none; }
@@ -67,12 +44,7 @@
 <body>
 
 <header>
-    <svg class="logo-svg" viewBox="0 0 668 237" fill="none">
-        <path d="M118.204 0.000194514C183.486 0.000194514 236.408 52.9223 236.408 118.204C236.408 183.487 183.486 236.408 118.204 236.408C52.9216 236.408 0.000184007 183.486 0 118.204C0 52.9224 52.9215 0.000354089 118.204 0.000194514ZM74.1011 62.1964C57.6799 62.1964 47.268 79.9119 55.5308 94.2346L109.964 188.582C113.619 194.922 122.781 194.922 126.436 188.582L180.88 94.2346C189.132 79.9342 178.72 62.1965 162.31 62.1964H74.1011ZM162.288 78.8411C166.031 78.8411 168.234 82.812 166.45 85.9074L137.856 137.091L137.851 137.099L126.506 159.046V78.8411H162.288ZM109.872 78.8516V159.024L98.5376 137.087L98.5334 137.08L69.9294 85.9214L69.8468 85.7724C68.2134 82.6996 70.405 78.8516 74.0899 78.8516H109.872" fill="#4DB8FF"/>
-        <path d="M639.524 146.751V62.9139H668V188.849H636.565L573.696 99.0752V188.849H545.034V62.9139H581.277L639.524 146.751Z" fill="white"/>
-        <path d="M456.407 191.686C414.432 191.686 384.107 163.081 384.107 126.74C384.107 90.3983 414.432 61.7931 456.407 61.7931C498.382 61.7931 528.707 90.5782 528.707 126.74C528.707 162.901 498.382 191.686 456.407 191.686ZM456.407 167.219C481 167.219 497.272 149.408 497.272 126.74C497.272 104.071 481 86.2605 456.407 86.2605C431.814 86.2605 415.542 104.071 415.542 126.74C415.542 149.408 431.814 167.219 456.407 167.219Z" fill="white"/>
-        <path d="M384.269 63.5978V85.7264H342.11V189.533H312.339V85.7264H270.179V63.5978H384.269Z" fill="white"/>
-    </svg>
+    <svg class="logo-svg" viewBox="0 0 668 237" fill="none"><path d="M118.204 0.000194514C183.486 0.000194514 236.408 52.9223 236.408 118.204C236.408 183.487 183.486 236.408 118.204 236.408C52.9216 236.408 0.000184007 183.486 0 118.204C0 52.9224 52.9215 0.000354089 118.204 0.000194514ZM74.1011 62.1964C57.6799 62.1964 47.268 79.9119 55.5308 94.2346L109.964 188.582C113.619 194.922 122.781 194.922 126.436 188.582L180.88 94.2346C189.132 79.9342 178.72 62.1965 162.31 62.1964H74.1011ZM162.288 78.8411C166.031 78.8411 168.234 82.812 166.45 85.9074L137.856 137.091L137.851 137.099L126.506 159.046V78.8411H162.288ZM109.872 78.8516V159.024L98.5376 137.087L98.5334 137.08L69.9294 85.9214L69.8468 85.7724C68.2134 82.6996 70.405 78.8516 74.0899 78.8516H109.872" fill="#4DB8FF"/><path d="M639.524 146.751V62.9139H668V188.849H636.565L573.696 99.0752V188.849H545.034V62.9139H581.277L639.524 146.751Z" fill="white"/><path d="M456.407 191.686C414.432 191.686 384.107 163.081 384.107 126.74C384.107 90.3983 414.432 61.7931 456.407 61.7931C498.382 61.7931 528.707 90.5782 528.707 126.74C528.707 162.901 498.382 191.686 456.407 191.686ZM456.407 167.219C481 167.219 497.272 149.408 497.272 126.74C497.272 104.071 481 86.2605 456.407 86.2605C431.814 86.2605 415.542 104.071 415.542 126.74C415.542 149.408 431.814 167.219 456.407 167.219Z" fill="white"/><path d="M384.269 63.5978V85.7264H342.11V189.533H312.339V85.7264H270.179V63.5978H384.269Z" fill="white"/></svg>
     <div class="subtitle">👛 SYN WALLET</div>
 </header>
 
@@ -85,28 +57,20 @@
         </div>
         <div id="asset_list"></div>
     </div>
-    
     <div id="scr_swap" class="screen">
         <div class="card" style="margin-top: 10px;">
             <div style="font-size: 11px; opacity: 0.5; margin-bottom: 8px;">PAY</div>
             <input type="number" id="sw_val" placeholder="0.0" oninput="calculateSwap()">
-            <div class="swap-selector" onclick="openCoinPicker('from')">
-                <img id="sw_from_img" src=""><span id="sw_from_txt">TON</span>
-            </div>
+            <div class="swap-selector" onclick="openCoinPicker('from')"><img id="sw_from_img" src=""><span id="sw_from_txt">TON</span></div>
             <div id="rev_btn" onclick="swapReverse()">🌀</div>
             <div style="font-size: 11px; opacity: 0.5; margin: 20px 0 8px;">RECEIVE</div>
             <input type="text" id="sw_res" placeholder="0.0" readonly style="color:var(--green);">
-            <div class="swap-selector" onclick="openCoinPicker('to')">
-                <img id="sw_to_img" src=""><span id="sw_to_txt">USDT</span>
-            </div>
+            <div class="swap-selector" onclick="openCoinPicker('to')"><img id="sw_to_img" src=""><span id="sw_to_txt">USDT</span></div>
             <button class="btn-confirm" style="margin-top: 25px;" onclick="tg.showAlert('Swap initiated')">Confirm Swap</button>
         </div>
     </div>
-    
     <div id="scr_connect" class="screen">
-        <div class="card" style="text-align:center; margin-top: 20px; padding: 40px 20px;">
-            <div id="ton-connect-btn" style="display:flex; justify-content:center;"></div>
-        </div>
+        <div class="card" style="text-align:center; margin-top: 20px; padding: 40px 20px;"><div id="ton-connect-btn" style="display:flex; justify-content:center;"></div></div>
     </div>
 </div>
 
@@ -128,7 +92,7 @@
         <div id="view_deposit" class="modal-view">
             <h3 style="text-align:center; margin-top:0;">Receive <span class="cur_asset"></span></h3>
             <div id="qrcode" style="display:flex; justify-content:center; margin:15px 0; background:#fff; padding:15px; border-radius:15px;"></div>
-            <p id="full_addr" style="font-size:11px; word-break:break-all; opacity:0.5; font-family:monospace; text-align:center;"></p>
+            <p id="full_addr" style="font-size:11px; word-break:break-all; opacity:0.5; font-family:monospace; text-align:center;">Disconnected</p>
             <button class="btn-confirm" onclick="copyAddr()">Copy Address</button>
         </div>
         <div id="view_send" class="modal-view">
@@ -152,7 +116,6 @@
 
 <script>
     const tg = window.Telegram.WebApp; tg.ready(); tg.expand();
-
     const assets = [
         { id: 'TON', name: 'TON', price: 7.42, cg: 'the-open-network', img: 'https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/ton/info/logo.png' },
         { id: 'BTC', name: 'Bitcoin', price: 69420, cg: 'bitcoin', img: 'https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/bitcoin/info/logo.png' },
@@ -168,22 +131,24 @@
         { id: 'POL', name: 'Polygon', price: 0.72, cg: 'matic-network', img: 'https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/polygon/info/logo.png' }
     ];
 
-    let swapFrom = "TON", swapTo = "USDT", activePicker = "";
+    let swapFrom = "TON", swapTo = "USDT", activePicker = "", currentAddr = "";
 
     function init() {
-        const list = document.getElementById('asset_list');
-        list.innerHTML = "";
+        const list = document.getElementById('asset_list'); list.innerHTML = "";
         assets.forEach(a => {
-            list.innerHTML += `
-                <div class="asset-item" onclick="showAssetMenu('${a.id}')">
-                    <div class="asset-icon-box"><img src="${a.img}" class="asset-icon-img"></div>
-                    <div class="asset-details"><div class="asset-name">${a.id}</div><div class="asset-price">$${a.price.toLocaleString()}</div></div>
-                    <div class="bal-amount">0.00</div>
-                </div>`;
+            list.innerHTML += `<div class="asset-item" onclick="showAssetMenu('${a.id}')"><div class="asset-icon-box"><img src="${a.img}" class="asset-icon-img"></div><div class="asset-details"><div class="asset-name">${a.id}</div><div class="asset-price">$${a.price.toLocaleString()}</div></div><div class="bal-amount">0.00</div></div>`;
         });
         updateSwapUI();
         const tc = new TON_CONNECT_UI.TonConnectUI({ manifestUrl: 'https://sergey52bb.github.io/grok-autotrade/tonconnect-manifest.json', buttonRootId: 'ton-connect-btn' });
-        tc.onStatusChange(w => { if (w) { document.getElementById('addr_display').innerText = w.account.address.substring(0,8)+"..."; } });
+        tc.onStatusChange(w => { 
+            if (w) { 
+                currentAddr = w.account.address;
+                document.getElementById('addr_display').innerText = currentAddr.substring(0,8)+"...";
+                document.getElementById('full_addr').innerText = currentAddr;
+                document.getElementById("qrcode").innerHTML = "";
+                new QRCode(document.getElementById("qrcode"), { text: currentAddr, width: 150, height: 150 });
+            } 
+        });
     }
 
     function showTab(id, el) {
@@ -193,7 +158,6 @@
         el.classList.add('active');
     }
 
-    // WALLET MODAL LOGIC (FIXED)
     function showAssetMenu(id) {
         const a = assets.find(x => x.id === id);
         document.getElementById('menu_title').innerText = a.name;
@@ -201,13 +165,19 @@
         switchModalView('menu');
         document.getElementById('universal_modal').style.display = 'flex';
     }
-    function closeModal(modalId) { document.getElementById(modalId).style.display = 'none'; }
+
+    function closeModal(id) { document.getElementById(id).style.display = 'none'; }
     function switchModalView(v) {
         document.querySelectorAll('.modal-view').forEach(x => x.classList.remove('active'));
         document.getElementById('view_' + v).classList.add('active');
     }
 
-    // SWAP LOGIC (KEEP PREMIUM)
+    function copyAddr() {
+        const addrText = document.getElementById('full_addr').innerText;
+        if(addrText === "Disconnected") { tg.showAlert("Please connect wallet first!"); return; }
+        navigator.clipboard.writeText(addrText).then(() => { tg.showAlert("Address Copied!"); });
+    }
+
     function openCoinPicker(type) {
         activePicker = type;
         const list = document.getElementById('coin_options_list'); list.innerHTML = "";
@@ -218,10 +188,7 @@
         });
         document.getElementById('picker_modal').style.display = 'flex';
     }
-    function selectCoin(id) {
-        if(activePicker === 'from') swapFrom = id; else swapTo = id;
-        updateSwapUI(); closeModal('picker_modal');
-    }
+    function selectCoin(id) { if(activePicker === 'from') swapFrom = id; else swapTo = id; updateSwapUI(); closeModal('picker_modal'); }
     function updateSwapUI() {
         document.getElementById('sw_from_img').src = assets.find(x => x.id === swapFrom).img;
         document.getElementById('sw_from_txt').innerText = swapFrom;
