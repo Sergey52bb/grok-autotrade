@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>Grok Avto Trade v14.9</title>
+    <title>Grok Avto Trade v15.0</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <script src="https://unpkg.com/@tonconnect/ui@2.0.9/dist/tonconnect-ui.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
@@ -117,27 +117,57 @@
 <script>
     const tg = window.Telegram.WebApp; tg.ready(); tg.expand();
     const assets = [
-        { id: 'TON', name: 'TON', price: 7.42, cg: 'the-open-network', img: 'https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/ton/info/logo.png' },
-        { id: 'BTC', name: 'Bitcoin', price: 69420, cg: 'bitcoin', img: 'https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/bitcoin/info/logo.png' },
-        { id: 'USDT', name: 'USDT', price: 1.00, cg: 'tether', img: 'https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/ethereum/assets/0xdAC17F958D2ee523a2206206994597C13D831ec7/logo.png' },
-        { id: 'ETH', name: 'Ethereum', price: 3505, cg: 'ethereum', img: 'https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/ethereum/info/logo.png' },
-        { id: 'SOL', name: 'Solana', price: 145.2, cg: 'solana', img: 'https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/solana/info/logo.png' },
-        { id: 'NEAR', name: 'Near', price: 6.85, cg: 'near', img: 'https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/near/info/logo.png' },
-        { id: 'USDC', name: 'USDC', price: 1.00, cg: 'usd-coin', img: 'https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/ethereum/assets/0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48/logo.png' },
-        { id: 'DOGE', name: 'Doge', price: 0.16, cg: 'dogecoin', img: 'https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/doge/info/logo.png' },
-        { id: 'BNB', name: 'BNB', price: 590.4, cg: 'binancecoin', img: 'https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/binance/info/logo.png' },
-        { id: 'LTC', name: 'Litecoin', price: 82.3, cg: 'litecoin', img: 'https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/litecoin/info/logo.png' },
-        { id: 'SUI', name: 'Sui', price: 1.15, cg: 'sui', img: 'https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/sui/info/logo.png' },
-        { id: 'POL', name: 'Polygon', price: 0.72, cg: 'matic-network', img: 'https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/polygon/info/logo.png' }
+        { id: 'TON', name: 'TON', price: 0, cg: 'the-open-network', img: 'https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/ton/info/logo.png' },
+        { id: 'BTC', name: 'Bitcoin', price: 0, cg: 'bitcoin', img: 'https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/bitcoin/info/logo.png' },
+        { id: 'USDT', name: 'USDT', price: 0, cg: 'tether', img: 'https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/ethereum/assets/0xdAC17F958D2ee523a2206206994597C13D831ec7/logo.png' },
+        { id: 'ETH', name: 'Ethereum', price: 0, cg: 'ethereum', img: 'https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/ethereum/info/logo.png' },
+        { id: 'SOL', name: 'Solana', price: 0, cg: 'solana', img: 'https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/solana/info/logo.png' },
+        { id: 'NEAR', name: 'Near', price: 0, cg: 'near', img: 'https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/near/info/logo.png' },
+        { id: 'USDC', name: 'USDC', price: 0, cg: 'usd-coin', img: 'https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/ethereum/assets/0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48/logo.png' },
+        { id: 'DOGE', name: 'Doge', price: 0, cg: 'dogecoin', img: 'https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/doge/info/logo.png' },
+        { id: 'BNB', name: 'BNB', price: 0, cg: 'binancecoin', img: 'https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/binance/info/logo.png' },
+        { id: 'LTC', name: 'Litecoin', price: 0, cg: 'litecoin', img: 'https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/litecoin/info/logo.png' },
+        { id: 'SUI', name: 'Sui', price: 0, cg: 'sui', img: 'https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/sui/info/logo.png' },
+        { id: 'POL', name: 'Polygon', price: 0, cg: 'matic-network', img: 'https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/polygon/info/logo.png' }
     ];
 
     let swapFrom = "TON", swapTo = "USDT", activePicker = "", currentAddr = "";
 
+    async function updatePrices() {
+        try {
+            const ids = assets.map(a => a.cg).join(',');
+            const res = await fetch(`https://api.coingecko.com/api/v3/simple/price?ids=${ids}&vs_currencies=usd`);
+            const data = await res.json();
+            assets.forEach(a => {
+                if(data[a.cg]) {
+                    a.price = data[a.cg].usd;
+                    const priceEl = document.getElementById(`price_${a.id}`);
+                    if(priceEl) {
+                        // Форматируем цену: если меньше 1$, показываем больше знаков
+                        const formattedPrice = a.price < 1 ? a.price.toFixed(4) : a.price.toLocaleString();
+                        priceEl.innerText = `$${formattedPrice}`;
+                    }
+                }
+            });
+            calculateSwap();
+        } catch(e) { console.log("Price update failed"); }
+    }
+
     function init() {
         const list = document.getElementById('asset_list'); list.innerHTML = "";
         assets.forEach(a => {
-            list.innerHTML += `<div class="asset-item" onclick="showAssetMenu('${a.id}')"><div class="asset-icon-box"><img src="${a.img}" class="asset-icon-img"></div><div class="asset-details"><div class="asset-name">${a.id}</div><div class="asset-price">$${a.price.toLocaleString()}</div></div><div class="bal-amount">0.00</div></div>`;
+            list.innerHTML += `
+                <div class="asset-item" onclick="showAssetMenu('${a.id}')">
+                    <div class="asset-icon-box"><img src="${a.img}" class="asset-icon-img"></div>
+                    <div class="asset-details">
+                        <div class="asset-name">${a.id}</div>
+                        <div class="asset-price" id="price_${a.id}">$0.00</div>
+                    </div>
+                    <div class="bal-amount">0.00</div>
+                </div>`;
         });
+        updatePrices();
+        setInterval(updatePrices, 30000); // Обновление каждые 30 сек
         updateSwapUI();
         const tc = new TON_CONNECT_UI.TonConnectUI({ manifestUrl: 'https://sergey52bb.github.io/grok-autotrade/tonconnect-manifest.json', buttonRootId: 'ton-connect-btn' });
         tc.onStatusChange(w => { 
@@ -198,8 +228,11 @@
     }
     function calculateSwap() {
         const val = document.getElementById('sw_val').value, res = document.getElementById('sw_res');
-        const p1 = assets.find(x => x.id === swapFrom).price, p2 = assets.find(x => x.id === swapTo).price;
-        if(val > 0) res.value = ((val * p1) / p2).toFixed(6); else res.value = "0.0";
+        const assetFrom = assets.find(x => x.id === swapFrom);
+        const assetTo = assets.find(x => x.id === swapTo);
+        if(val > 0 && assetFrom.price > 0 && assetTo.price > 0) {
+            res.value = ((val * assetFrom.price) / assetTo.price).toFixed(6);
+        } else { res.value = "0.0"; }
     }
     function swapReverse() { const tmp = swapFrom; swapFrom = swapTo; swapTo = tmp; updateSwapUI(); }
 
