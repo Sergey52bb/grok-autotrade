@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>Grok Avto Trade v15.2</title>
+    <title>Grok Avto Trade v15.0</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <script src="https://unpkg.com/@tonconnect/ui@2.0.9/dist/tonconnect-ui.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
@@ -13,40 +13,32 @@
         header { padding: 15px 15px 5px; text-align: center; flex-shrink: 0; }
         .logo-svg { width: 140px; height: auto; margin-bottom: 2px; }
         header .subtitle { font-size: 11px; color: var(--blue); letter-spacing: 2px; font-weight: 800; opacity: 0.9; }
-        
         #main_content { flex: 1; overflow-y: auto; padding: 10px 15px 150px; } 
         .screen { display: none; }
         .screen.active { display: block; }
-        
         .card { background: var(--panel); border: 1px solid var(--border); padding: 15px; border-radius: 25px; margin-bottom: 15px; }
-        .asset-item { display: flex; justify-content: space-between; align-items: center; padding: 12px 12px; border: 1px solid rgba(77, 184, 255, 0.25); box-shadow: 0 0 10px rgba(77, 184, 255, 0.15); cursor: pointer; position: relative; border-radius: 20px; margin-bottom: 12px; background: rgba(77, 184, 255, 0.02); }
         .asset-icon-box { width: 48px; height: 48px; min-width: 48px; display: flex; align-items: center; justify-content: center; background: #1a222c; border-radius: 50%; overflow: hidden; border: 1px solid var(--border); }
         .asset-icon-img { width: 100%; height: 100%; object-fit: cover; }
+        .asset-item { display: flex; justify-content: space-between; align-items: center; padding: 12px 12px; border: 1px solid rgba(77, 184, 255, 0.25); box-shadow: 0 0 10px rgba(77, 184, 255, 0.15); cursor: pointer; position: relative; border-radius: 20px; margin-bottom: 12px; background: rgba(77, 184, 255, 0.02); }
         .asset-details { flex: 1; margin-left: 15px; }
         .asset-name { font-weight: 800; font-size: 15px; }
         .asset-price { font-size: 12px; opacity: 0.6; color: var(--green); }
         .bal-amount { font-weight: 700; font-size: 15px; text-align: right; }
-
-        /* Стиль для кнопки и стикера в Connect */
-        .connect-sticker { 
-            width: 200px; height: auto; border-radius: 30px; 
-            filter: drop-shadow(0 0 25px rgba(77,184,255,0.4)); 
-            mix-blend-mode: screen; /* Убирает черный/белый фон картинки */
-            opacity: 0.9; margin: 20px 0;
-        }
-
-        /* Навигация */
+        .swap-selector { display: flex; align-items: center; gap: 10px; background: rgba(255,255,255,0.05); border-radius: 20px; padding: 12px 15px; border: 1px solid var(--border); cursor: pointer; }
+        .swap-selector img { width: 28px; height: 28px; border-radius: 50%; }
+        .swap-selector span { font-weight: 700; flex: 1; }
+        .coin-option { display: flex; align-items: center; gap: 15px; padding: 15px; border-bottom: 1px solid var(--border); cursor: pointer; }
+        .coin-option img { width: 32px; height: 32px; border-radius: 50%; }
         nav { position: fixed; bottom: 15px; left: 15px; right: 15px; height: 85px; background: var(--panel); display: flex; border-radius: 28px; border: 1px solid var(--border); z-index: 100; box-shadow: 0 -5px 20px rgba(0,0,0,0.5); }
         .nav-item { flex: 1; display: flex; align-items: center; justify-content: center; cursor: pointer; opacity: 0.3; transition: 0.2s; font-size: 30px; }
         .nav-item.active { opacity: 1; transform: translateY(-5px); font-size: 36px; }
-
-        /* Модалки и кнопки */
+        input { width: 100%; padding: 18px; background: rgba(255,255,255,0.05); border: 1px solid var(--border); border-radius: 20px; color: white; margin-bottom: 12px; outline: none; font-size: 18px; box-sizing: border-box; }
+        #rev_btn { background: #1a222c; border: 1px solid var(--border); color: var(--blue); width: 44px; height: 44px; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: -20px auto; z-index: 5; position: relative; cursor: pointer; }
         .btn-confirm { background: var(--green); color: black; padding: 18px; border-radius: 20px; width: 100%; border: none; font-weight: 800; cursor: pointer; margin-top: 10px; }
         .modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); z-index: 1000; align-items: flex-end; }
-        .modal-body { background: #111a27; width: 100%; border-radius: 35px 35px 0 0; padding: 25px 20px 40px; box-sizing: border-box; }
+        .modal-body { background: #111a27; width: 100%; border-radius: 35px 35px 0 0; padding: 25px 20px 40px; box-sizing: border-box; max-height: 80vh; overflow-y: auto; }
         .modal-view { display: none; }
         .modal-view.active { display: block; }
-        input { width: 100%; padding: 18px; background: rgba(255,255,255,0.05); border: 1px solid var(--border); border-radius: 20px; color: white; margin-bottom: 12px; outline: none; box-sizing: border-box; }
     </style>
 </head>
 <body>
@@ -65,26 +57,32 @@
         </div>
         <div id="asset_list"></div>
     </div>
-
     <div id="scr_swap" class="screen">
-        <div class="card">
+        <div class="card" style="margin-top: 10px;">
             <div style="font-size: 11px; opacity: 0.5; margin-bottom: 8px;">PAY</div>
             <input type="number" id="sw_val" placeholder="0.0" oninput="calculateSwap()">
-            <button class="btn-confirm" id="btn_swap" onclick="tg.showAlert('Swap confirmed')">Swap Now</button>
+            <div class="swap-selector" onclick="openCoinPicker('from')"><img id="sw_from_img" src=""><span id="sw_from_txt">TON</span></div>
+            <div id="rev_btn" onclick="swapReverse()">🌀</div>
+            <div style="font-size: 11px; opacity: 0.5; margin: 20px 0 8px;">RECEIVE</div>
+            <input type="text" id="sw_res" placeholder="0.0" readonly style="color:var(--green);">
+            <div class="swap-selector" onclick="openCoinPicker('to')"><img id="sw_to_img" src=""><span id="sw_to_txt">USDT</span></div>
+            <button class="btn-confirm" style="margin-top: 25px;" onclick="tg.showAlert('Swap initiated')">Confirm Swap</button>
         </div>
     </div>
-
     <div id="scr_connect" class="screen">
-        <div class="card" style="text-align:center; padding: 40px 20px;">
-            <div id="ton-connect-btn" style="display:flex; justify-content:center;"></div>
-            
-            <div style="margin-top: 30px;">
-                <img src="https://i.ibb.co/JwD2qCDf/WEB3-Design-Works-Nariman-Mammadzada.jpg" class="connect-sticker">
-                <div style="color: var(--blue); font-size: 11px; letter-spacing: 3px; font-weight: 800; opacity: 0.6;">WEB3 ACCESS NODE</div>
-            </div>
+    <div class="card" style="text-align:center; margin-top: 20px; padding: 40px 20px;">
+        <div id="ton-connect-btn" style="display:flex; justify-content:center;"></div>
+        
+        <div style="margin-top: 30px;">
+            <img src="https://i.ibb.co/JwD2qCDf/WEB3-Design-Works-Nariman-Mammadzada.jpg" 
+                 style="width: 200px; height: auto; opacity: 0.9; border-radius: 20px; filter: drop-shadow(0 0 15px rgba(77,184,255,0.4));">
+            <p style="color: var(--blue); font-size: 12px; margin-top: 15px; opacity: 0.5; letter-spacing: 1px;">
+                Secure Connection via TON Connect
+            </p>
         </div>
     </div>
 </div>
+
 
 <nav>
     <div class="nav-item active" onclick="showTab('wallet', this)">💼</div>
@@ -94,7 +92,7 @@
 
 <div id="universal_modal" class="modal-overlay" onclick="closeModal('universal_modal')">
     <div class="modal-body" onclick="event.stopPropagation()">
-        <div id="view_menu" class="modal-view active">
+        <div id="view_menu" class="modal-view">
             <h3 id="menu_title" style="text-align:center; margin-top:0;">Options</h3>
             <div style="display:grid; grid-template-columns:1fr 1fr; gap:15px;">
                 <button class="btn-confirm" style="background:#fff;" onclick="switchModalView('deposit')">RECEIVE</button>
@@ -107,28 +105,43 @@
             <p id="full_addr" style="font-size:11px; word-break:break-all; opacity:0.5; font-family:monospace; text-align:center;">Disconnected</p>
             <button class="btn-confirm" onclick="copyAddr()">Copy Address</button>
         </div>
+        <div id="view_send" class="modal-view">
+            <h3 style="text-align:center; margin-top:0;">Send <span class="cur_asset"></span></h3>
+            <input type="text" id="send_addr" placeholder="Recipient Address">
+            <input type="text" id="send_memo" placeholder="Memo (Optional)">
+            <input type="number" id="send_amount" placeholder="Amount">
+            <button class="btn-confirm" onclick="tg.showAlert('Sending...')">Confirm Send</button>
+        </div>
         <button class="btn-confirm" style="background:transparent; color:white; opacity:0.3; margin-top:10px;" onclick="closeModal('universal_modal')">CLOSE</button>
+    </div>
+</div>
+
+<div id="picker_modal" class="modal-overlay" onclick="closeModal('picker_modal')">
+    <div class="modal-body" onclick="event.stopPropagation()">
+        <h3 style="text-align:center; margin-top:0; border-bottom: 1px solid var(--border); padding-bottom: 15px;">Select Asset</h3>
+        <div id="coin_options_list"></div>
+        <button class="btn-confirm" style="background:transparent; color:white; opacity:0.3; margin-top:15px;" onclick="closeModal('picker_modal')">CANCEL</button>
     </div>
 </div>
 
 <script>
     const tg = window.Telegram.WebApp; tg.ready(); tg.expand();
     const assets = [
-        { id: 'TON', name: 'TON', cg: 'the-open-network', price: 0, img: 'https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/ton/info/logo.png' },
-        { id: 'BTC', name: 'Bitcoin', cg: 'bitcoin', price: 0, img: 'https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/bitcoin/info/logo.png' },
-        { id: 'USDT', name: 'USDT', cg: 'tether', price: 0, img: 'https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/ethereum/assets/0xdAC17F958D2ee523a2206206994597C13D831ec7/logo.png' },
-        { id: 'ETH', name: 'Ethereum', cg: 'ethereum', price: 0, img: 'https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/ethereum/info/logo.png' },
-        { id: 'SOL', name: 'Solana', cg: 'solana', price: 0, img: 'https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/solana/info/logo.png' },
-        { id: 'NEAR', name: 'Near', cg: 'near', price: 0, img: 'https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/near/info/logo.png' },
-        { id: 'USDC', name: 'USDC', cg: 'usd-coin', price: 0, img: 'https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/ethereum/assets/0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48/logo.png' },
-        { id: 'DOGE', name: 'Doge', cg: 'dogecoin', price: 0, img: 'https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/doge/info/logo.png' },
-        { id: 'BNB', name: 'BNB', cg: 'binancecoin', price: 0, img: 'https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/binance/info/logo.png' },
-        { id: 'LTC', name: 'Litecoin', cg: 'litecoin', price: 0, img: 'https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/litecoin/info/logo.png' },
-        { id: 'SUI', name: 'Sui', cg: 'sui', price: 0, img: 'https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/sui/info/logo.png' },
-        { id: 'POL', name: 'Polygon', cg: 'matic-network', price: 0, img: 'https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/polygon/info/logo.png' }
+        { id: 'TON', name: 'TON', price: 0, cg: 'the-open-network', img: 'https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/ton/info/logo.png' },
+        { id: 'BTC', name: 'Bitcoin', price: 0, cg: 'bitcoin', img: 'https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/bitcoin/info/logo.png' },
+        { id: 'USDT', name: 'USDT', price: 0, cg: 'tether', img: 'https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/ethereum/assets/0xdAC17F958D2ee523a2206206994597C13D831ec7/logo.png' },
+        { id: 'ETH', name: 'Ethereum', price: 0, cg: 'ethereum', img: 'https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/ethereum/info/logo.png' },
+        { id: 'SOL', name: 'Solana', price: 0, cg: 'solana', img: 'https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/solana/info/logo.png' },
+        { id: 'NEAR', name: 'Near', price: 0, cg: 'near', img: 'https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/near/info/logo.png' },
+        { id: 'USDC', name: 'USDC', price: 0, cg: 'usd-coin', img: 'https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/ethereum/assets/0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48/logo.png' },
+        { id: 'DOGE', name: 'Doge', price: 0, cg: 'dogecoin', img: 'https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/doge/info/logo.png' },
+        { id: 'BNB', name: 'BNB', price: 0, cg: 'binancecoin', img: 'https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/binance/info/logo.png' },
+        { id: 'LTC', name: 'Litecoin', price: 0, cg: 'litecoin', img: 'https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/litecoin/info/logo.png' },
+        { id: 'SUI', name: 'Sui', price: 0, cg: 'sui', img: 'https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/sui/info/logo.png' },
+        { id: 'POL', name: 'Polygon', price: 0, cg: 'matic-network', img: 'https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/polygon/info/logo.png' }
     ];
 
-    let currentAddr = "";
+    let swapFrom = "TON", swapTo = "USDT", activePicker = "", currentAddr = "";
 
     async function updatePrices() {
         try {
@@ -138,28 +151,100 @@
             assets.forEach(a => {
                 if(data[a.cg]) {
                     a.price = data[a.cg].usd;
-                    const el = document.getElementById(`price_${a.id}`);
-                    if(el) el.innerText = `$${a.price < 1 ? a.price.toFixed(4) : a.price.toLocaleString()}`;
+                    const priceEl = document.getElementById(`price_${a.id}`);
+                    if(priceEl) {
+                        // Форматируем цену: если меньше 1$, показываем больше знаков
+                        const formattedPrice = a.price < 1 ? a.price.toFixed(4) : a.price.toLocaleString();
+                        priceEl.innerText = `$${formattedPrice}`;
+                    }
                 }
             });
-        } catch(e) { console.error("Price fetch error"); }
+            calculateSwap();
+        } catch(e) { console.log("Price update failed"); }
     }
 
     function init() {
         const list = document.getElementById('asset_list'); list.innerHTML = "";
         assets.forEach(a => {
-            list.innerHTML += `<div class="asset-item" onclick="showAssetMenu('${a.id}')"><div class="asset-icon-box"><img src="${a.img}" class="asset-icon-img"></div><div class="asset-details"><div class="asset-name">${a.id}</div><div class="asset-price" id="price_${a.id}">$0.00</div></div><div class="bal-amount">0.00</div></div>`;
+            list.innerHTML += `
+                <div class="asset-item" onclick="showAssetMenu('${a.id}')">
+                    <div class="asset-icon-box"><img src="${a.img}" class="asset-icon-img"></div>
+                    <div class="asset-details">
+                        <div class="asset-name">${a.id}</div>
+                        <div class="asset-price" id="price_${a.id}">$0.00</div>
+                    </div>
+                    <div class="bal-amount">0.00</div>
+                </div>`;
         });
-        updatePrices(); setInterval(updatePrices, 30000);
+        updatePrices();
+        setInterval(updatePrices, 30000); // Обновление каждые 30 сек
+        updateSwapUI();
         const tc = new TON_CONNECT_UI.TonConnectUI({ manifestUrl: 'https://sergey52bb.github.io/grok-autotrade/tonconnect-manifest.json', buttonRootId: 'ton-connect-btn' });
-        tc.onStatusChange(w => { if(w) { currentAddr = w.account.address; document.getElementById('addr_display').innerText = currentAddr.substring(0,8)+"..."; document.getElementById('full_addr').innerText = currentAddr; document.getElementById("qrcode").innerHTML = ""; new QRCode(document.getElementById("qrcode"), { text: currentAddr, width: 150, height: 150 }); } });
+        tc.onStatusChange(w => { 
+            if (w) { 
+                currentAddr = w.account.address;
+                document.getElementById('addr_display').innerText = currentAddr.substring(0,8)+"...";
+                document.getElementById('full_addr').innerText = currentAddr;
+                document.getElementById("qrcode").innerHTML = "";
+                new QRCode(document.getElementById("qrcode"), { text: currentAddr, width: 150, height: 150 });
+            } 
+        });
     }
 
-    function showTab(id, el) { document.querySelectorAll('.screen').forEach(s => s.classList.remove('active')); document.getElementById('scr_'+id).classList.add('active'); document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active')); el.classList.add('active'); }
-    function showAssetMenu(id) { const a = assets.find(x => x.id === id); document.getElementById('menu_title').innerText = a.name; document.querySelectorAll('.cur_asset').forEach(e => e.innerText = a.id); document.getElementById('universal_modal').style.display = 'flex'; }
+    function showTab(id, el) {
+        document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+        document.getElementById('scr_'+id).classList.add('active');
+        document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+        el.classList.add('active');
+    }
+
+    function showAssetMenu(id) {
+        const a = assets.find(x => x.id === id);
+        document.getElementById('menu_title').innerText = a.name;
+        document.querySelectorAll('.cur_asset').forEach(e => e.innerText = a.id);
+        switchModalView('menu');
+        document.getElementById('universal_modal').style.display = 'flex';
+    }
+
     function closeModal(id) { document.getElementById(id).style.display = 'none'; }
-    function switchModalView(v) { document.querySelectorAll('.modal-view').forEach(x => x.classList.remove('active')); document.getElementById('view_'+v).classList.add('active'); }
-    function copyAddr() { const text = document.getElementById('full_addr').innerText; if(text !== "Disconnected") { navigator.clipboard.writeText(text); tg.showAlert("Copied!"); } }
+    function switchModalView(v) {
+        document.querySelectorAll('.modal-view').forEach(x => x.classList.remove('active'));
+        document.getElementById('view_' + v).classList.add('active');
+    }
+
+    function copyAddr() {
+        const addrText = document.getElementById('full_addr').innerText;
+        if(addrText === "Disconnected") { tg.showAlert("Please connect wallet first!"); return; }
+        navigator.clipboard.writeText(addrText).then(() => { tg.showAlert("Address Copied!"); });
+    }
+
+    function openCoinPicker(type) {
+        activePicker = type;
+        const list = document.getElementById('coin_options_list'); list.innerHTML = "";
+        const forbidden = type === 'from' ? swapTo : swapFrom;
+        assets.forEach(a => {
+            if(a.id === forbidden) return;
+            list.innerHTML += `<div class="coin-option" onclick="selectCoin('${a.id}')"><img src="${a.img}"><div class="coin-ticker">${a.id}</div></div>`;
+        });
+        document.getElementById('picker_modal').style.display = 'flex';
+    }
+    function selectCoin(id) { if(activePicker === 'from') swapFrom = id; else swapTo = id; updateSwapUI(); closeModal('picker_modal'); }
+    function updateSwapUI() {
+        document.getElementById('sw_from_img').src = assets.find(x => x.id === swapFrom).img;
+        document.getElementById('sw_from_txt').innerText = swapFrom;
+        document.getElementById('sw_to_img').src = assets.find(x => x.id === swapTo).img;
+        document.getElementById('sw_to_txt').innerText = swapTo;
+        calculateSwap();
+    }
+    function calculateSwap() {
+        const val = document.getElementById('sw_val').value, res = document.getElementById('sw_res');
+        const assetFrom = assets.find(x => x.id === swapFrom);
+        const assetTo = assets.find(x => x.id === swapTo);
+        if(val > 0 && assetFrom.price > 0 && assetTo.price > 0) {
+            res.value = ((val * assetFrom.price) / assetTo.price).toFixed(6);
+        } else { res.value = "0.0"; }
+    }
+    function swapReverse() { const tmp = swapFrom; swapFrom = swapTo; swapTo = tmp; updateSwapUI(); }
 
     window.onload = init;
 </script>
