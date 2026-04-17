@@ -38,7 +38,15 @@
         .modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); z-index: 1000; align-items: flex-end; }
         .modal-body { background: #111a27; width: 100%; border-radius: 35px 35px 0 0; padding: 25px 20px 40px; box-sizing: border-box; max-height: 80vh; overflow-y: auto; }
         .modal-view { display: none; }
-        .modal-view.active { display: block; }
+        .modal-view.active { display: block; }@keyframes rotateSticker {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+}
+
+.rotating {
+    animation: rotateSticker 20s linear infinite; /* 20 секунд на полный круг, чтобы не кружилась голова */
+}
+
     </style>
 </head>
 <body>
@@ -74,9 +82,10 @@
         <div id="ton-connect-btn" style="display:flex; justify-content:center;"></div>
         
         <div style="margin-top: 30px;">
-            <img src="https://i.ibb.co/JwD2qCDf/WEB3-Design-Works-Nariman-Mammadzada.jpg" 
-                 style="width: 200px; height: auto; opacity: 0.9; border-radius: 20px; filter: drop-shadow(0 0 15px rgba(77,184,255,0.4));">
-            <p style="color: var(--blue); font-size: 12px; margin-top: 15px; opacity: 0.5; letter-spacing: 1px;">
+        <img src="https://i.ibb.co/JwD2qCDf/WEB3-Design-Works-Nariman-Mammadzada.jpg" 
+     class="rotating" 
+     style="width: 180px; height: auto; border-radius: 50%; filter: drop-shadow(0 0 20px rgba(77,184,255,0.5)); opacity: 0.9;">
+
                 Secure Connection via TON Connect
             </p>
         </div>
