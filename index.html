@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>SYN TERMINAL v15.3</title>
+    <title>SYN TERMINAL v15.4</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <script src="https://unpkg.com/@tonconnect/ui@2.0.9/dist/tonconnect-ui.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
@@ -20,16 +20,15 @@
         
         .card { background: var(--panel); border: 1px solid var(--border); padding: 15px; border-radius: 25px; margin-bottom: 15px; }
         .asset-item { display: flex; justify-content: space-between; align-items: center; padding: 12px 12px; border: 1px solid rgba(77, 184, 255, 0.25); box-shadow: 0 0 10px rgba(77, 184, 255, 0.15); cursor: pointer; border-radius: 20px; margin-bottom: 12px; background: rgba(77, 184, 255, 0.02); }
-        .asset-icon-box { width: 48px; height: 48px; display: flex; align-items: center; justify-content: center; background: #1a222c; border-radius: 50%; overflow: hidden; border: 1px solid var(--border); }
+        .asset-icon-box { width: 44px; height: 44px; display: flex; align-items: center; justify-content: center; background: #1a222c; border-radius: 50%; overflow: hidden; border: 1px solid var(--border); }
         .asset-icon-img { width: 100%; height: 100%; object-fit: cover; }
-        .asset-details { flex: 1; margin-left: 15px; }
-        .asset-name { font-weight: 800; font-size: 15px; }
-        .asset-price { font-size: 12px; opacity: 0.6; color: var(--green); }
-        .bal-amount { font-weight: 700; font-size: 15px; text-align: right; }
+        .asset-details { flex: 1; margin-left: 12px; }
+        .asset-name { font-weight: 800; font-size: 14px; }
+        .asset-price { font-size: 11px; opacity: 0.6; color: var(--green); }
+        .bal-amount { font-weight: 700; font-size: 14px; text-align: right; }
 
-        /* АНИМАЦИЯ ВРАЩЕНИЯ */
         @keyframes rotateSticker { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
-        .rotating { animation: rotateSticker 20s linear infinite; }
+        .rotating { animation: rotateSticker 25s linear infinite; }
 
         nav { position: fixed; bottom: 15px; left: 15px; right: 15px; height: 85px; background: var(--panel); display: flex; border-radius: 28px; border: 1px solid var(--border); z-index: 100; box-shadow: 0 -5px 20px rgba(0,0,0,0.5); }
         .nav-item { flex: 1; display: flex; align-items: center; justify-content: center; cursor: pointer; opacity: 0.3; transition: 0.2s; font-size: 30px; }
@@ -41,7 +40,7 @@
         .modal-view { display: none; }
         .modal-view.active { display: block; }
         input { width: 100%; padding: 18px; background: rgba(255,255,255,0.05); border: 1px solid var(--border); border-radius: 20px; color: white; margin-bottom: 12px; outline: none; box-sizing: border-box; }
-        .modal-logo { width: 50px; height: 50px; border-radius: 50%; margin-bottom: 10px; border: 1px solid var(--border); }
+        .modal-logo { width: 50px; height: 50px; border-radius: 50%; margin-bottom: 10px; }
     </style>
 </head>
 <body>
@@ -55,45 +54,61 @@
     <div id="scr_wallet" class="screen active">
         <div style="text-align:center; padding: 15px 0 25px;">
             <div style="font-size: 11px; opacity: 0.5;">ESTIMATED BALANCE</div>
-            <h1 style="font-size:40px; margin:5px 0;">0.00 TON</h1>
+            <h1 id="total_bal" style="font-size:40px; margin:5px 0;">0.00 TON</h1>
             <div id="addr_display" style="font-size: 11px; color: var(--blue); background: rgba(77, 184, 255, 0.1); padding: 6px 14px; border-radius: 20px; display: inline-block;">Disconnected</div>
         </div>
         <div id="asset_list"></div>
     </div>
 
     <div id="scr_swap" class="screen">
-        <div class="card">
-            <h3 style="text-align:center;">Swap Assets</h3>
-            <input type="number" placeholder="0.0">
-            <button class="btn-confirm">Swap Now</button>
+        <div class="card" style="padding: 25px 20px;">
+            <div style="display:flex; justify-content:space-between; font-size:12px; opacity:0.6; margin-bottom:10px;">
+                <span>Sell</span>
+                <span>Balance: 0.00</span>
+            </div>
+            <div style="display:flex; align-items:center; background:rgba(255,255,255,0.05); padding:10px; border-radius:20px; margin-bottom:15px;">
+                <input type="number" placeholder="0.0" style="margin:0; border:none; background:transparent; font-size:24px; font-weight:700;">
+                <div style="background:var(--blue); padding:8px 15px; border-radius:15px; font-weight:800; font-size:14px;">TON</div>
+            </div>
+            <div style="text-align:center; margin:-10px 0 10px; font-size:20px; opacity:0.5;">↓</div>
+            <div style="display:flex; justify-content:space-between; font-size:12px; opacity:0.6; margin-bottom:10px;">
+                <span>Buy</span>
+            </div>
+            <div style="display:flex; align-items:center; background:rgba(255,255,255,0.05); padding:10px; border-radius:20px; margin-bottom:25px;">
+                <input type="number" placeholder="0.0" style="margin:0; border:none; background:transparent; font-size:24px; font-weight:700;">
+                <div style="background:#f3ba2f; color:black; padding:8px 15px; border-radius:15px; font-weight:800; font-size:14px;">USDT</div>
+            </div>
+            <button class="btn-confirm" onclick="tg.showAlert('Swap logic coming soon')">Review Swap</button>
         </div>
     </div>
 
     <div id="scr_connect" class="screen">
-        <div class="card" style="text-align:center; padding: 40px 20px;">
-            <div id="ton-connect-btn" style="display:flex; justify-content:center; margin-bottom: 30px;"></div>
+        <div style="text-align:center; padding: 40px 20px;">
+            <div id="ton-connect-btn" style="display:flex; justify-content:center; margin-bottom: 40px;"></div>
             <div style="display: flex; flex-direction: column; align-items: center;">
-                <div class="rotating" style="width: 200px; height: 200px; display: flex; align-items: center; justify-content: center;">
-                    <img src="https://i.ibb.co/S4F0cJFh/WEB3-Design-Works-Nariman-Mammadzada.jpg" style="width: 100%; height: auto; filter: drop-shadow(0 0 15px rgba(0,255,149,0.3));">
-                </div>
-                <p style="color: var(--blue); font-size: 12px; margin-top: 20px; opacity: 0.5; letter-spacing: 1px;">Secure Connection via TON Connect</p>
+                <img src="https://i.ibb.co/JwD2qCDf/WEB3-Design-Works-Nariman-Mammadzada.jpg" 
+                     class="rotating" 
+                     style="width: 220px; height: auto; filter: drop-shadow(0 0 25px rgba(77,184,255,0.4)); mix-blend-mode: screen;">
+                
+                <p style="color: var(--blue); font-size: 11px; margin-top: 30px; opacity: 0.6; letter-spacing: 2px; font-weight:800; text-transform:uppercase;">
+                    Access Node Ready
+                </p>
             </div>
         </div>
     </div>
 </div>
 
 <nav>
-    <div class="nav-item active" onclick="showTab('wallet', this)">📊</div>
+    <div class="nav-item active" onclick="showTab('wallet', this)">💼</div>
     <div class="nav-item" onclick="showTab('swap', this)">🌀</div>
-    <div class="nav-item" onclick="showTab('connect', this)">🔐</div>
+    <div class="nav-item" onclick="showTab('connect', this)">🔗</div>
 </nav>
 
 <div id="universal_modal" class="modal-overlay" onclick="closeModal('universal_modal')">
     <div class="modal-body" onclick="event.stopPropagation()">
-        
         <div id="view_menu" class="modal-view active">
             <div style="text-align:center; margin-bottom: 20px;">
-                <img id="menu_asset_logo" class="modal-logo" src="">
+                <img id="menu_logo" class="modal-logo" src="">
                 <h3 id="menu_title" style="margin:0;">Options</h3>
             </div>
             <div style="display:grid; grid-template-columns:1fr 1fr; gap:15px;">
@@ -101,39 +116,44 @@
                 <button class="btn-confirm" style="background:var(--blue); color:white;" onclick="switchModalView('send')">SEND</button>
             </div>
         </div>
-
         <div id="view_deposit" class="modal-view">
             <div style="text-align:center;">
-                <img id="deposit_asset_logo" class="modal-logo" src="" style="width:40px; height:40px;">
+                <img id="deposit_logo" class="modal-logo" src="" style="width:40px; height:40px;">
                 <h3 style="margin-top:0;">Receive <span class="cur_asset"></span></h3>
             </div>
             <div id="qrcode" style="display:flex; justify-content:center; margin:15px 0; background:#fff; padding:15px; border-radius:15px;"></div>
-            <p id="full_addr" style="font-size:11px; word-break:break-all; opacity:0.5; text-align:center;">Disconnected</p>
+            <p id="full_addr" style="font-size:11px; word-break:break-all; opacity:0.5; text-align:center; font-family:monospace;">Disconnected</p>
             <button class="btn-confirm" onclick="copyAddr()">Copy Address</button>
         </div>
-
         <div id="view_send" class="modal-view">
             <div style="text-align:center; margin-bottom: 15px;">
-                <img id="send_asset_logo" class="modal-logo" src="" style="width:40px; height:40px;">
+                <img id="send_logo" class="modal-logo" src="" style="width:40px; height:40px;">
                 <h3 style="margin:0;">Send <span class="cur_asset"></span></h3>
             </div>
             <input type="text" placeholder="Recipient Address">
-            <input type="text" placeholder="Memo (Optional)">
             <input type="number" placeholder="Amount">
-            <button class="btn-confirm" style="background:var(--green); color:black;">Confirm Send</button>
+            <button class="btn-confirm">Confirm Send</button>
         </div>
-
         <button class="btn-confirm" style="background:transparent; color:white; opacity:0.3; margin-top:10px;" onclick="closeModal('universal_modal')">CLOSE</button>
     </div>
 </div>
 
 <script>
+    const tg = window.Telegram.WebApp; tg.ready(); tg.expand();
+    // ВЕРНУЛ ВСЕ 12 МОНЕТ
     const assets = [
-        { id: 'TON', name: 'TON', cg: 'the-open-network', price: 0, img: 'https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/ton/info/logo.png' },
-        { id: 'BTC', name: 'Bitcoin', cg: 'bitcoin', price: 0, img: 'https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/bitcoin/info/logo.png' },
-        { id: 'USDT', name: 'USDT', cg: 'tether', price: 0, img: 'https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/ethereum/assets/0xdAC17F958D2ee523a2206206994597C13D831ec7/logo.png' },
-        { id: 'ETH', name: 'Ethereum', cg: 'ethereum', price: 0, img: 'https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/ethereum/info/logo.png' },
-        { id: 'SOL', name: 'Solana', cg: 'solana', price: 0, img: 'https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/solana/info/logo.png' }
+        { id: 'TON', name: 'TON', cg: 'the-open-network', img: 'https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/ton/info/logo.png' },
+        { id: 'BTC', name: 'Bitcoin', cg: 'bitcoin', img: 'https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/bitcoin/info/logo.png' },
+        { id: 'USDT', name: 'USDT', cg: 'tether', img: 'https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/ethereum/assets/0xdAC17F958D2ee523a2206206994597C13D831ec7/logo.png' },
+        { id: 'ETH', name: 'Ethereum', cg: 'ethereum', img: 'https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/ethereum/info/logo.png' },
+        { id: 'SOL', name: 'Solana', cg: 'solana', img: 'https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/solana/info/logo.png' },
+        { id: 'NEAR', name: 'Near', cg: 'near', img: 'https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/near/info/logo.png' },
+        { id: 'USDC', name: 'USDC', cg: 'usd-coin', img: 'https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/ethereum/assets/0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48/logo.png' },
+        { id: 'DOGE', name: 'Doge', cg: 'dogecoin', img: 'https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/doge/info/logo.png' },
+        { id: 'BNB', name: 'BNB', cg: 'binancecoin', img: 'https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/binance/info/logo.png' },
+        { id: 'LTC', name: 'Litecoin', cg: 'litecoin', img: 'https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/litecoin/info/logo.png' },
+        { id: 'SUI', name: 'Sui', cg: 'sui', img: 'https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/sui/info/logo.png' },
+        { id: 'POL', name: 'Polygon', cg: 'matic-network', img: 'https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/polygon/info/logo.png' }
     ];
 
     let currentAddr = "";
@@ -145,12 +165,10 @@
             const data = await res.json();
             assets.forEach(a => {
                 if(data[a.cg]) {
-                    a.price = data[a.cg].usd;
-                    const el = document.getElementById(`price_${a.id}`);
-                    if(el) el.innerText = `$${a.price.toLocaleString()}`;
+                    document.getElementById(`price_${a.id}`).innerText = `$${data[a.cg].usd.toLocaleString()}`;
                 }
             });
-        } catch(e) { console.error("Price error"); }
+        } catch(e) {}
     }
 
     function init() {
@@ -166,9 +184,9 @@
     function showAssetMenu(id) {
         const a = assets.find(x => x.id === id);
         document.getElementById('menu_title').innerText = a.name;
-        document.getElementById('menu_asset_logo').src = a.img;
-        document.getElementById('deposit_asset_logo').src = a.img;
-        document.getElementById('send_asset_logo').src = a.img;
+        document.getElementById('menu_logo').src = a.img;
+        document.getElementById('deposit_logo').src = a.img;
+        document.getElementById('send_logo').src = a.img;
         document.querySelectorAll('.cur_asset').forEach(e => e.innerText = a.id);
         document.getElementById('universal_modal').style.display = 'flex';
     }
@@ -176,7 +194,7 @@
     function showTab(id, el) { document.querySelectorAll('.screen').forEach(s => s.classList.remove('active')); document.getElementById('scr_'+id).classList.add('active'); document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active')); el.classList.add('active'); }
     function closeModal(id) { document.getElementById(id).style.display = 'none'; switchModalView('menu'); }
     function switchModalView(v) { document.querySelectorAll('.modal-view').forEach(x => x.classList.remove('active')); document.getElementById('view_'+v).classList.add('active'); }
-    function copyAddr() { navigator.clipboard.writeText(currentAddr); Telegram.WebApp.showAlert("Copied!"); }
+    function copyAddr() { navigator.clipboard.writeText(currentAddr); tg.showAlert("Copied!"); }
 
     window.onload = init;
 </script>
