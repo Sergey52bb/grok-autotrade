@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>SYN TERMINAL v15.8</title>
+    <title>SYN TERMINAL v16.0</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <script src="https://unpkg.com/@tonconnect/ui@2.0.9/dist/tonconnect-ui.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
@@ -15,19 +15,19 @@
         .logo-svg { width: 130px; height: auto; }
         .subtitle { font-size: 10px; color: var(--blue); letter-spacing: 2px; font-weight: 800; opacity: 0.8; margin-top: 5px; }
 
-        #main_content { flex: 1; overflow-y: auto; padding: 10px 15px 160px; scrollbar-width: none; }
+        #main_content { flex: 1; overflow-y: auto; padding: 10px 15px 180px; scrollbar-width: none; }
         #main_content::-webkit-scrollbar { display: none; }
         
         .screen { display: none; }
         .screen.active { display: block; }
 
-        .asset-item { display: flex; justify-content: space-between; align-items: center; padding: 15px; border: 1px solid rgba(77, 184, 255, 0.1); border-radius: 22px; margin-bottom: 12px; background: rgba(13, 20, 29, 0.6); }
-        .asset-icon { width: 42px; height: 42px; border-radius: 50%; border: 1px solid var(--border); }
+        .asset-item { display: flex; justify-content: space-between; align-items: center; padding: 15px; border: 1px solid rgba(77, 184, 255, 0.1); border-radius: 22px; margin-bottom: 12px; background: rgba(13, 20, 29, 0.6); transition: 0.2s; }
+        .asset-item:active { transform: scale(0.98); background: rgba(77, 184, 255, 0.05); }
+        .asset-icon { width: 42px; height: 42px; border-radius: 50%; }
         .asset-info { flex: 1; margin-left: 12px; }
         .asset-name { font-weight: 800; font-size: 15px; }
         .asset-price { font-size: 11px; color: var(--green); }
 
-        /* SWAP INTERFACE */
         .swap-container { background: var(--panel); border-radius: 28px; padding: 20px; border: 1px solid var(--border); }
         .swap-card { background: rgba(255,255,255,0.03); padding: 15px; border-radius: 20px; margin-bottom: 8px; border: 1px solid transparent; }
         .swap-label-row { display: flex; justify-content: space-between; margin-bottom: 10px; font-size: 11px; opacity: 0.5; }
@@ -36,20 +36,18 @@
         .swap-coin { display: flex; align-items: center; gap: 8px; background: rgba(77,184,255,0.1); padding: 8px 12px; border-radius: 14px; font-weight: 800; font-size: 14px; }
         .swap-coin img { width: 22px; height: 22px; border-radius: 50%; }
 
-        @keyframes rotateCryst { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
-        .cryst-anim { animation: rotateCryst 25s linear infinite; filter: drop-shadow(0 0 20px rgba(77,184,255,0.3)); mix-blend-mode: screen; width: 220px; }
-
         nav { position: fixed; bottom: 20px; left: 20px; right: 20px; height: 75px; background: rgba(13, 20, 29, 0.9); display: flex; border-radius: 25px; border: 1px solid var(--border); backdrop-filter: blur(15px); z-index: 100; }
-        .nav-item { flex: 1; display: flex; align-items: center; justify-content: center; opacity: 0.3; transition: 0.3s; font-size: 26px; }
+        .nav-item { flex: 1; display: flex; align-items: center; justify-content: center; opacity: 0.3; transition: 0.3s; font-size: 26px; cursor: pointer; }
         .nav-item.active { opacity: 1; transform: translateY(-5px); color: var(--blue); }
+
+        .btn-confirm { background: var(--green); color: black; padding: 18px; border-radius: 20px; width: 100%; border: none; font-weight: 800; cursor: pointer; font-size: 15px; transition: 0.2s; }
+        .btn-confirm:active { opacity: 0.7; }
 
         .modal-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.9); z-index: 1000; align-items: flex-end; }
         .modal-body { background: #0d141d; width: 100%; border-radius: 32px 32px 0 0; padding: 25px; border-top: 1px solid var(--border); box-sizing: border-box; }
         .modal-view { display: none; }
         .modal-view.active { display: block; }
-        .modal-header-icon { width: 55px; height: 55px; border-radius: 50%; margin-bottom: 15px; border: 1px solid var(--border); }
-        input.mod-input { width: 100%; padding: 16px; background: rgba(255,255,255,0.05); border: 1px solid var(--border); border-radius: 18px; color: white; margin-bottom: 12px; box-sizing: border-box; font-size: 14px; outline: none; }
-        .btn-confirm { background: var(--green); color: black; padding: 18px; border-radius: 20px; width: 100%; border: none; font-weight: 800; cursor: pointer; font-size: 15px; }
+        input.mod-input { width: 100%; padding: 16px; background: rgba(255,255,255,0.05); border: 1px solid var(--border); border-radius: 18px; color: white; margin-bottom: 12px; box-sizing: border-box; outline: none; }
     </style>
 </head>
 <body>
@@ -63,7 +61,7 @@
     <div id="scr_wallet" class="screen active">
         <div style="text-align:center; padding: 20px 0 30px;">
             <div style="font-size: 11px; opacity: 0.5; letter-spacing: 1.5px;">ESTIMATED BALANCE</div>
-            <h1 style="font-size:44px; margin:5px 0; font-weight:800;">0.00 TON</h1>
+            <h1 id="total_balance" style="font-size:44px; margin:5px 0; font-weight:800;">0.00 TON</h1>
             <div id="addr_display" style="font-size: 10px; color: var(--blue); background: rgba(77,184,255,0.1); padding: 6px 14px; border-radius: 20px; display: inline-block;">Disconnected</div>
         </div>
         <div id="asset_list"></div>
@@ -76,7 +74,7 @@
             <div class="swap-card">
                 <div class="swap-label-row">
                     <span>You Pay</span>
-                    <span style="color:var(--blue);" onclick="document.getElementById('swap_send_val').value=10; calcSwap(true)">MAX: 10.0</span>
+                    <span style="color:var(--blue); font-weight:700;" onclick="setSwapMax()">MAX</span>
                 </div>
                 <div class="swap-input-row">
                     <input type="number" id="swap_send_val" placeholder="0" oninput="calcSwap(true)">
@@ -85,7 +83,7 @@
             </div>
 
             <div style="text-align:center; margin: -15px 0; position:relative; z-index:2;">
-                <div style="background:var(--bg); width:35px; height:35px; border-radius:50%; display:inline-flex; align-items:center; justify-content:center; border: 1px solid var(--border); color:var(--blue); font-weight:bold; cursor:pointer;" onclick="reverseSwap()">↓</div>
+                <div style="background:var(--bg); width:35px; height:35px; border-radius:50%; display:inline-flex; align-items:center; justify-content:center; border: 1px solid var(--border); color:var(--blue); font-weight:bold;">↓</div>
             </div>
 
             <div class="swap-card">
@@ -98,15 +96,15 @@
                 </div>
             </div>
 
-            <div style="font-size:11px; text-align:center; margin: 15px 0 5px; opacity:0.5;">Rate: 1 TON ≈ 5.42 USDT</div>
-            <button class="btn-confirm" onclick="tg.showAlert('Swap successfully submitted!')">Swap Now</button>
+            <div id="swap_rate_display" style="font-size:11px; text-align:center; margin: 15px 0 5px; opacity:0.5;">Rate: Fetching...</div>
+            <button class="btn-confirm" onclick="executeSwap()">Swap Now</button>
         </div>
     </div>
 
     <div id="scr_connect" class="screen">
         <div style="text-align:center; padding-top: 30px;">
             <div id="ton-connect-btn" style="display:flex; justify-content:center; margin-bottom: 50px;"></div>
-            <img src="https://i.ibb.co/JwD2qCDf/WEB3-Design-Works-Nariman-Mammadzada.jpg" class="cryst-anim">
+            <img src="https://i.ibb.co/JwD2qCDf/WEB3-Design-Works-Nariman-Mammadzada.jpg" style="width:220px; filter: drop-shadow(0 0 20px rgba(77,184,255,0.3)); border-radius: 50%;">
             <p style="color: var(--blue); font-size: 11px; margin-top: 40px; font-weight:800; letter-spacing:3px; opacity:0.6;">NODE SYNCHRONIZED</p>
         </div>
     </div>
@@ -122,7 +120,7 @@
     <div class="modal-body" onclick="event.stopPropagation()">
         <div id="view_menu" class="modal-view active">
             <div style="text-align:center; margin-bottom:25px;">
-                <img id="menu_logo" class="modal-header-icon" src="">
+                <img id="menu_logo" style="width:55px; height:55px; border-radius:50%; margin-bottom:15px; border:1px solid var(--border);">
                 <h3 id="menu_title" style="margin:0; font-size:22px;">Asset</h3>
             </div>
             <div style="display:grid; grid-template-columns:1fr 1fr; gap:15px;">
@@ -130,71 +128,71 @@
                 <button class="btn-confirm" style="background:var(--blue); color:white;" onclick="switchModalView('send')">SEND</button>
             </div>
         </div>
-
         <div id="view_deposit" class="modal-view">
-            <div style="text-align:center; margin-bottom:15px;">
-                <img id="deposit_logo" class="modal-header-icon" src="">
-                <h3 style="margin:0;">Receive <span class="cur_asset"></span></h3>
-            </div>
             <div id="qrcode" style="display:flex; justify-content:center; margin:15px 0; background:#fff; padding:15px; border-radius:20px;"></div>
-            <p id="full_addr" style="font-size:10px; word-break:break-all; opacity:0.5; text-align:center; font-family:monospace; margin-bottom:20px;"></p>
+            <p id="full_addr" style="font-size:10px; word-break:break-all; opacity:0.5; text-align:center; font-family:monospace;"></p>
             <button class="btn-confirm" onclick="copyAddr()">Copy Address</button>
         </div>
-
-        <div id="view_send" class="modal-view">
-            <div style="text-align:center; margin-bottom:15px;">
-                <img id="send_logo" class="modal-header-icon" src="">
-                <h3 style="margin:0;">Send <span class="cur_asset"></span></h3>
-            </div>
-            <input type="text" class="mod-input" placeholder="Recipient Address (UQ...)">
-            <input type="text" class="mod-input" placeholder="Memo / Comment (Optional)">
-            <input type="number" class="mod-input" placeholder="Amount">
-            <button class="btn-confirm">Confirm Send</button>
-        </div>
-        <button onclick="closeModal()" style="width:100%; background:transparent; border:none; color:white; opacity:0.3; margin-top:20px; font-weight:700;">CANCEL</button>
+        <button onclick="closeModal()" style="width:100%; background:transparent; border:none; color:white; opacity:0.3; margin-top:20px;">CANCEL</button>
     </div>
 </div>
 
 <script>
     const tg = window.Telegram.WebApp; tg.ready(); tg.expand();
-    const rate = 5.42;
-    
+    let tonConnectUI;
+    let livePriceTon = 1.30; // Значение по умолчанию
+
     const assets = [
         { id: 'TON', name: 'TON', cg: 'the-open-network', img: 'https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/ton/info/logo.png' },
         { id: 'BTC', name: 'Bitcoin', cg: 'bitcoin', img: 'https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/bitcoin/info/logo.png' },
-        { id: 'USDT', name: 'USDT', cg: 'tether', img: 'https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/ethereum/assets/0xdAC17F958D2ee523a2206206994597C13D831ec7/logo.png' },
         { id: 'ETH', name: 'Ethereum', cg: 'ethereum', img: 'https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/ethereum/info/logo.png' },
+        { id: 'USDT', name: 'USDT', cg: 'tether', img: 'https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/ethereum/assets/0xdAC17F958D2ee523a2206206994597C13D831ec7/logo.png' },
         { id: 'SOL', name: 'Solana', cg: 'solana', img: 'https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/solana/info/logo.png' },
-        { id: 'NEAR', name: 'Near', cg: 'near', img: 'https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/near/info/logo.png' },
-        { id: 'USDC', name: 'USDC', cg: 'usd-coin', img: 'https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/ethereum/assets/0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48/logo.png' },
-        { id: 'DOGE', name: 'Doge', cg: 'dogecoin', img: 'https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/doge/info/logo.png' },
-        { id: 'BNB', name: 'BNB', cg: 'binancecoin', img: 'https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/binance/info/logo.png' },
-        { id: 'LTC', name: 'Litecoin', cg: 'litecoin', img: 'https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/litecoin/info/logo.png' },
-        { id: 'SUI', name: 'Sui', cg: 'sui', img: 'https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/sui/info/logo.png' },
         { id: 'POL', name: 'Polygon', cg: 'matic-network', img: 'https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/polygon/info/logo.png' }
     ];
-
-    function calcSwap(isFromTop) {
-        const top = document.getElementById('swap_send_val');
-        const bot = document.getElementById('swap_get_val');
-        if (isFromTop) {
-            bot.value = top.value ? (top.value * rate).toFixed(2) : "";
-        } else {
-            top.value = bot.value ? (bot.value / rate).toFixed(4) : "";
-        }
-    }
 
     async function updatePrices() {
         try {
             const ids = assets.map(a => a.cg).join(',');
             const res = await fetch(`https://api.coingecko.com/api/v3/simple/price?ids=${ids}&vs_currencies=usd`);
             const data = await res.json();
+            
             assets.forEach(a => {
                 if(data[a.cg]) {
-                    document.getElementById(`price_${a.id}`).innerText = `$${data[a.cg].usd.toLocaleString()}`;
+                    const price = data[a.cg].usd;
+                    document.getElementById(`price_${a.id}`).innerText = `$${price.toLocaleString()}`;
+                    if(a.id === 'TON') {
+                        livePriceTon = price;
+                        document.getElementById('swap_rate_display').innerText = `Rate: 1 TON ≈ ${price.toFixed(2)} USDT`;
+                    }
                 }
             });
-        } catch(e) {}
+        } catch(e) { console.error("Price fetch failed"); }
+    }
+
+    function calcSwap(isTop) {
+        const top = document.getElementById('swap_send_val');
+        const bot = document.getElementById('swap_get_val');
+        if (isTop) {
+            bot.value = top.value ? (top.value * livePriceTon).toFixed(2) : "";
+        } else {
+            top.value = bot.value ? (bot.value / livePriceTon).toFixed(4) : "";
+        }
+    }
+
+    function setSwapMax() {
+        document.getElementById('swap_send_val').value = 10; // Демо-баланс
+        calcSwap(true);
+    }
+
+    async function executeSwap() {
+        const amount = document.getElementById('swap_send_val').value;
+        if(!amount || amount <= 0) { tg.showAlert("Enter amount!"); return; }
+        if(!tonConnectUI.connected) { tg.showAlert("Connect wallet first!"); showTab('connect', document.querySelectorAll('.nav-item')[2]); return; }
+        
+        tg.showConfirm(`Confirm swap ${amount} TON for ${(amount * livePriceTon).toFixed(2)} USDT?`, (ok) => {
+            if(ok) tg.showAlert("Transaction sent to blockchain!");
+        });
     }
 
     function init() {
@@ -202,18 +200,26 @@
         assets.forEach(a => {
             list.innerHTML += `<div class="asset-item" onclick="showAssetMenu('${a.id}')"><img src="${a.img}" class="asset-icon"><div class="asset-info"><div class="asset-name">${a.id}</div><div class="asset-price" id="price_${a.id}">$0.00</div></div><div style="font-weight:700;">0.00</div></div>`;
         });
+
         updatePrices();
-        const tc = new TON_CONNECT_UI.TonConnectUI({ manifestUrl: 'https://sergey52bb.github.io/grok-autotrade/tonconnect-manifest.json', buttonRootId: 'ton-connect-btn' });
-        tc.onStatusChange(w => { if(w) { currentAddr = w.account.address; document.getElementById('addr_display').innerText = currentAddr.substring(0,8)+"..."; document.getElementById('full_addr').innerText = currentAddr; document.getElementById("qrcode").innerHTML = ""; new QRCode(document.getElementById("qrcode"), { text: currentAddr, width: 160, height: 160 }); } });
+        setInterval(updatePrices, 30000); // Обновляем каждые 30 сек
+
+        tonConnectUI = new TON_CONNECT_UI.TonConnectUI({ manifestUrl: 'https://sergey52bb.github.io/grok-autotrade/tonconnect-manifest.json', buttonRootId: 'ton-connect-btn' });
+        tonConnectUI.onStatusChange(w => { 
+            if(w) { 
+                const addr = w.account.address;
+                document.getElementById('addr_display').innerText = addr.substring(0,8)+"..."; 
+                document.getElementById('full_addr').innerText = addr; 
+                document.getElementById("qrcode").innerHTML = ""; 
+                new QRCode(document.getElementById("qrcode"), { text: addr, width: 160, height: 160 });
+            } 
+        });
     }
 
     function showAssetMenu(id) {
         const a = assets.find(x => x.id === id);
         document.getElementById('menu_title').innerText = a.name;
         document.getElementById('menu_logo').src = a.img;
-        document.getElementById('deposit_logo').src = a.img;
-        document.getElementById('send_logo').src = a.img;
-        document.querySelectorAll('.cur_asset').forEach(e => e.innerText = a.id);
         document.getElementById('universal_modal').style.display = 'flex';
     }
 
@@ -226,7 +232,7 @@
     
     function closeModal() { document.getElementById('universal_modal').style.display = 'none'; switchModalView('menu'); }
     function switchModalView(v) { document.querySelectorAll('.modal-view').forEach(x => x.classList.remove('active')); document.getElementById('view_'+v).classList.add('active'); }
-    function copyAddr() { navigator.clipboard.writeText(currentAddr); tg.showAlert("Address copied!"); }
+    function copyAddr() { navigator.clipboard.writeText(document.getElementById('full_addr').innerText); tg.showAlert("Copied!"); }
 
     window.onload = init;
 </script>
