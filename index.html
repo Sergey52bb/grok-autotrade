@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>SYN TERMINAL v15.6</title>
+    <title>SYN TERMINAL v15.7</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <script src="https://unpkg.com/@tonconnect/ui@2.0.9/dist/tonconnect-ui.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
@@ -15,43 +15,45 @@
         .logo-svg { width: 130px; height: auto; }
         .subtitle { font-size: 10px; color: var(--blue); letter-spacing: 2px; font-weight: 800; opacity: 0.8; margin-top: 5px; }
 
-        #main_content { flex: 1; overflow-y: auto; padding: 10px 15px 120px; }
+        /* ИСПРАВЛЕНО: Увеличил отступ снизу до 160px, чтобы Polygon не уходил под нави */
+        #main_content { flex: 1; overflow-y: auto; padding: 10px 15px 160px; scrollbar-width: none; }
+        #main_content::-webkit-scrollbar { display: none; }
+        
         .screen { display: none; }
         .screen.active { display: block; }
 
-        /* СПИСОК МОНЕТ */
         .asset-item { display: flex; justify-content: space-between; align-items: center; padding: 15px; border: 1px solid rgba(77, 184, 255, 0.1); border-radius: 22px; margin-bottom: 12px; background: rgba(13, 20, 29, 0.6); }
         .asset-icon { width: 42px; height: 42px; border-radius: 50%; border: 1px solid var(--border); }
         .asset-info { flex: 1; margin-left: 12px; }
         .asset-name { font-weight: 800; font-size: 15px; }
         .asset-price { font-size: 11px; color: var(--green); }
 
-        /* СВАП (ИСПРАВЛЕННЫЙ) */
+        /* SWAP STYLE */
         .swap-container { background: var(--panel); border-radius: 28px; padding: 20px; border: 1px solid var(--border); }
-        .swap-card { background: rgba(255,255,255,0.03); padding: 15px; border-radius: 20px; margin-bottom: 8px; }
+        .swap-card { background: rgba(255,255,255,0.03); padding: 15px; border-radius: 20px; margin-bottom: 8px; border: 1px solid transparent; transition: 0.3s; }
+        .swap-card:focus-within { border-color: rgba(77,184,255,0.3); background: rgba(255,255,255,0.05); }
         .swap-label { font-size: 11px; opacity: 0.5; margin-bottom: 10px; display: block; }
         .swap-input-row { display: flex; align-items: center; justify-content: space-between; }
         .swap-input-row input { background: transparent; border: none; color: white; font-size: 24px; font-weight: 700; width: 60%; outline: none; padding: 0; }
         .swap-coin { display: flex; align-items: center; gap: 8px; background: rgba(77,184,255,0.1); padding: 6px 12px; border-radius: 12px; font-weight: 800; font-size: 14px; }
         .swap-coin img { width: 22px; height: 22px; border-radius: 50%; }
 
-        /* КРИСТАЛЛ */
         @keyframes rotateCryst { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
         .cryst-anim { animation: rotateCryst 25s linear infinite; filter: drop-shadow(0 0 20px rgba(77,184,255,0.3)); mix-blend-mode: screen; width: 220px; }
 
-        /* МОДАЛКИ */
+        /* NAVIGATION */
+        nav { position: fixed; bottom: 20px; left: 20px; right: 20px; height: 75px; background: rgba(13, 20, 29, 0.9); display: flex; border-radius: 25px; border: 1px solid var(--border); backdrop-filter: blur(15px); z-index: 100; }
+        .nav-item { flex: 1; display: flex; align-items: center; justify-content: center; opacity: 0.3; transition: 0.3s; font-size: 26px; cursor: pointer; }
+        .nav-item.active { opacity: 1; transform: translateY(-5px); color: var(--blue); }
+
+        /* MODALS */
         .modal-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.9); z-index: 1000; align-items: flex-end; }
         .modal-body { background: #0d141d; width: 100%; border-radius: 32px 32px 0 0; padding: 25px; border-top: 1px solid var(--border); box-sizing: border-box; }
         .modal-view { display: none; }
         .modal-view.active { display: block; }
         .modal-header-icon { width: 55px; height: 55px; border-radius: 50%; margin-bottom: 15px; border: 1px solid var(--border); }
-        
-        input { width: 100%; padding: 16px; background: rgba(255,255,255,0.05); border: 1px solid var(--border); border-radius: 18px; color: white; margin-bottom: 12px; box-sizing: border-box; font-size: 14px; }
+        input.mod-input { width: 100%; padding: 16px; background: rgba(255,255,255,0.05); border: 1px solid var(--border); border-radius: 18px; color: white; margin-bottom: 12px; box-sizing: border-box; font-size: 14px; outline: none; }
         .btn-confirm { background: var(--green); color: black; padding: 18px; border-radius: 20px; width: 100%; border: none; font-weight: 800; cursor: pointer; font-size: 15px; }
-
-        nav { position: fixed; bottom: 20px; left: 20px; right: 20px; height: 75px; background: rgba(13, 20, 29, 0.9); display: flex; border-radius: 25px; border: 1px solid var(--border); backdrop-filter: blur(15px); }
-        .nav-item { flex: 1; display: flex; align-items: center; justify-content: center; opacity: 0.3; transition: 0.3s; font-size: 26px; }
-        .nav-item.active { opacity: 1; transform: translateY(-5px); color: var(--blue); }
     </style>
 </head>
 <body>
@@ -77,21 +79,22 @@
             <div class="swap-card">
                 <span class="swap-label">You Pay</span>
                 <div class="swap-input-row">
-                    <input type="number" placeholder="0">
+                    <input type="number" id="swap_send_val" placeholder="0" oninput="calcSwap()">
                     <div class="swap-coin"><img src="https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/ton/info/logo.png">TON</div>
                 </div>
             </div>
             <div style="text-align:center; margin: -15px 0; position:relative; z-index:2;">
-                <div style="background:var(--bg); width:35px; height:35px; border-radius:50%; display:inline-flex; align-items:center; justify-content:center; border: 1px solid var(--border);">↓</div>
+                <div style="background:var(--bg); width:35px; height:35px; border-radius:50%; display:inline-flex; align-items:center; justify-content:center; border: 1px solid var(--border); color:var(--blue);">↓</div>
             </div>
             <div class="swap-card">
                 <span class="swap-label">You Get</span>
                 <div class="swap-input-row">
-                    <input type="number" placeholder="0" readonly>
+                    <input type="number" id="swap_get_val" placeholder="0" readonly>
                     <div class="swap-coin"><img src="https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/ethereum/assets/0xdAC17F958D2ee523a2206206994597C13D831ec7/logo.png">USDT</div>
                 </div>
             </div>
-            <button class="btn-confirm" style="margin-top:15px;" onclick="tg.showAlert('Calculation...')">Swap Now</button>
+            <div style="font-size:11px; text-align:center; margin: 15px 0 5px; opacity:0.5;">Rate: 1 TON ≈ 5.42 USDT</div>
+            <button class="btn-confirm" onclick="tg.showAlert('Swap processing...')">Swap Now</button>
         </div>
     </div>
 
@@ -112,7 +115,6 @@
 
 <div id="universal_modal" class="modal-overlay" onclick="closeModal()">
     <div class="modal-body" onclick="event.stopPropagation()">
-        
         <div id="view_menu" class="modal-view active">
             <div style="text-align:center; margin-bottom:25px;">
                 <img id="menu_logo" class="modal-header-icon" src="">
@@ -139,12 +141,11 @@
                 <img id="send_logo" class="modal-header-icon" src="">
                 <h3 style="margin:0;">Send <span class="cur_asset"></span></h3>
             </div>
-            <input type="text" placeholder="Recipient Address (UQ...)">
-            <input type="text" placeholder="Memo / Comment (Required for CEX)">
-            <input type="number" placeholder="Amount">
+            <input type="text" class="mod-input" placeholder="Recipient Address (UQ...)">
+            <input type="text" class="mod-input" placeholder="Memo / Comment (Optional)">
+            <input type="number" class="mod-input" placeholder="Amount">
             <button class="btn-confirm">Confirm Send</button>
         </div>
-
         <button onclick="closeModal()" style="width:100%; background:transparent; border:none; color:white; opacity:0.3; margin-top:20px; font-weight:700;">CANCEL</button>
     </div>
 </div>
@@ -168,6 +169,12 @@
     ];
 
     let currentAddr = "";
+
+    function calcSwap() {
+        const val = document.getElementById('swap_send_val').value;
+        const rate = 5.42; // Пока фиксированный курс
+        document.getElementById('swap_get_val').value = val ? (val * rate).toFixed(2) : "";
+    }
 
     async function updatePrices() {
         try {
