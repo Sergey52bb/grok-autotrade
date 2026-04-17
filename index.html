@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>Grok Avto Trade v15.0</title>
+    <title>Grok Avto Trade v15.1</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <script src="https://unpkg.com/@tonconnect/ui@2.0.9/dist/tonconnect-ui.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
@@ -17,36 +17,40 @@
         .screen { display: none; }
         .screen.active { display: block; }
         .card { background: var(--panel); border: 1px solid var(--border); padding: 15px; border-radius: 25px; margin-bottom: 15px; }
+        
+        /* Стили для иконок */
         .asset-icon-box { width: 48px; height: 48px; min-width: 48px; display: flex; align-items: center; justify-content: center; background: #1a222c; border-radius: 50%; overflow: hidden; border: 1px solid var(--border); }
         .asset-icon-img { width: 100%; height: 100%; object-fit: cover; }
-        .asset-item { display: flex; justify-content: space-between; align-items: center; padding: 12px 12px; border: 1px solid rgba(77, 184, 255, 0.25); box-shadow: 0 0 10px rgba(77, 184, 255, 0.15); cursor: pointer; position: relative; border-radius: 20px; margin-bottom: 12px; background: rgba(77, 184, 255, 0.02); }
+        .modal-header-icon { width: 60px; height: 60px; border-radius: 50%; margin: 0 auto 15px; display: block; border: 2px solid var(--blue); padding: 5px; background: rgba(77,184,255,0.05); }
+
+        .asset-item { display: flex; justify-content: space-between; align-items: center; padding: 12px 12px; border: 1px solid rgba(77, 184, 255, 0.25); box-shadow: 0 0 10px rgba(77, 184, 255, 0.15); cursor: pointer; border-radius: 20px; margin-bottom: 12px; background: rgba(77, 184, 255, 0.02); }
         .asset-details { flex: 1; margin-left: 15px; }
         .asset-name { font-weight: 800; font-size: 15px; }
         .asset-price { font-size: 12px; opacity: 0.6; color: var(--green); }
         .bal-amount { font-weight: 700; font-size: 15px; text-align: right; }
+
         .swap-selector { display: flex; align-items: center; gap: 10px; background: rgba(255,255,255,0.05); border-radius: 20px; padding: 12px 15px; border: 1px solid var(--border); cursor: pointer; }
         .swap-selector img { width: 28px; height: 28px; border-radius: 50%; }
         .swap-selector span { font-weight: 700; flex: 1; }
+        
         .coin-option { display: flex; align-items: center; gap: 15px; padding: 15px; border-bottom: 1px solid var(--border); cursor: pointer; }
         .coin-option img { width: 32px; height: 32px; border-radius: 50%; }
+
         nav { position: fixed; bottom: 15px; left: 15px; right: 15px; height: 85px; background: var(--panel); display: flex; border-radius: 28px; border: 1px solid var(--border); z-index: 100; box-shadow: 0 -5px 20px rgba(0,0,0,0.5); }
         .nav-item { flex: 1; display: flex; align-items: center; justify-content: center; cursor: pointer; opacity: 0.3; transition: 0.2s; font-size: 30px; }
         .nav-item.active { opacity: 1; transform: translateY(-5px); font-size: 36px; }
+
         input { width: 100%; padding: 18px; background: rgba(255,255,255,0.05); border: 1px solid var(--border); border-radius: 20px; color: white; margin-bottom: 12px; outline: none; font-size: 18px; box-sizing: border-box; }
         #rev_btn { background: #1a222c; border: 1px solid var(--border); color: var(--blue); width: 44px; height: 44px; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: -20px auto; z-index: 5; position: relative; cursor: pointer; }
         .btn-confirm { background: var(--green); color: black; padding: 18px; border-radius: 20px; width: 100%; border: none; font-weight: 800; cursor: pointer; margin-top: 10px; }
+        
         .modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); z-index: 1000; align-items: flex-end; }
         .modal-body { background: #111a27; width: 100%; border-radius: 35px 35px 0 0; padding: 25px 20px 40px; box-sizing: border-box; max-height: 80vh; overflow-y: auto; }
         .modal-view { display: none; }
-        .modal-view.active { display: block; }@keyframes rotateSticker {
-    from { transform: rotate(0deg); }
-    to { transform: rotate(360deg); }
-}
-
-.rotating {
-    animation: rotateSticker 20s linear infinite; /* 20 секунд на полный круг, чтобы не кружилась голова */
-}
-
+        .modal-view.active { display: block; }
+        
+        @keyframes rotateSticker { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+        .rotating { animation: rotateSticker 20s linear infinite; }
     </style>
 </head>
 <body>
@@ -65,6 +69,7 @@
         </div>
         <div id="asset_list"></div>
     </div>
+
     <div id="scr_swap" class="screen">
         <div class="card" style="margin-top: 10px;">
             <div style="font-size: 11px; opacity: 0.5; margin-bottom: 8px;">PAY</div>
@@ -77,21 +82,17 @@
             <button class="btn-confirm" style="margin-top: 25px;" onclick="tg.showAlert('Swap initiated')">Confirm Swap</button>
         </div>
     </div>
-    <div id="scr_connect" class="screen">
-    <div class="card" style="text-align:center; margin-top: 20px; padding: 40px 20px;">
-        <div id="ton-connect-btn" style="display:flex; justify-content:center;"></div>
-        
-        <div style="margin-top: 30px;">
-        <img src="https://i.ibb.co/JwD2qCDf/WEB3-Design-Works-Nariman-Mammadzada.jpg" 
-     class="rotating" 
-     style="width: 180px; height: auto; border-radius: 50%; filter: drop-shadow(0 0 20px rgba(77,184,255,0.5)); opacity: 0.9;">
 
-                Secure Connection via TON Connect
-            </p>
+    <div id="scr_connect" class="screen">
+        <div class="card" style="text-align:center; margin-top: 20px; padding: 40px 20px;">
+            <div id="ton-connect-btn" style="display:flex; justify-content:center;"></div>
+            <div style="margin-top: 30px;">
+                <img src="https://i.ibb.co/JwD2qCDf/WEB3-Design-Works-Nariman-Mammadzada.jpg" class="rotating" style="width: 180px; height: auto; border-radius: 50%; filter: drop-shadow(0 0 20px rgba(77,184,255,0.5)); opacity: 0.9;">
+                <p style="margin-top:20px; font-size:12px; opacity:0.6;">Secure Connection via TON Connect</p>
+            </div>
         </div>
     </div>
 </div>
-
 
 <nav>
     <div class="nav-item active" onclick="showTab('wallet', this)">📊</div>
@@ -102,19 +103,24 @@
 <div id="universal_modal" class="modal-overlay" onclick="closeModal('universal_modal')">
     <div class="modal-body" onclick="event.stopPropagation()">
         <div id="view_menu" class="modal-view">
+            <img id="modal_main_icon" src="" class="modal-header-icon">
             <h3 id="menu_title" style="text-align:center; margin-top:0;">Options</h3>
             <div style="display:grid; grid-template-columns:1fr 1fr; gap:15px;">
                 <button class="btn-confirm" style="background:#fff;" onclick="switchModalView('deposit')">RECEIVE</button>
                 <button class="btn-confirm" style="background:var(--blue); color:white;" onclick="switchModalView('send')">SEND</button>
             </div>
         </div>
+
         <div id="view_deposit" class="modal-view">
+            <img id="modal_deposit_icon" src="" class="modal-header-icon" style="width:40px; height:40px;">
             <h3 style="text-align:center; margin-top:0;">Receive <span class="cur_asset"></span></h3>
             <div id="qrcode" style="display:flex; justify-content:center; margin:15px 0; background:#fff; padding:15px; border-radius:15px;"></div>
             <p id="full_addr" style="font-size:11px; word-break:break-all; opacity:0.5; font-family:monospace; text-align:center;">Disconnected</p>
             <button class="btn-confirm" onclick="copyAddr()">Copy Address</button>
         </div>
+
         <div id="view_send" class="modal-view">
+            <img id="modal_send_icon" src="" class="modal-header-icon" style="width:40px; height:40px;">
             <h3 style="text-align:center; margin-top:0;">Send <span class="cur_asset"></span></h3>
             <input type="text" id="send_addr" placeholder="Recipient Address">
             <input type="text" id="send_memo" placeholder="Memo (Optional)">
@@ -162,7 +168,6 @@
                     a.price = data[a.cg].usd;
                     const priceEl = document.getElementById(`price_${a.id}`);
                     if(priceEl) {
-                        // Форматируем цену: если меньше 1$, показываем больше знаков
                         const formattedPrice = a.price < 1 ? a.price.toFixed(4) : a.price.toLocaleString();
                         priceEl.innerText = `$${formattedPrice}`;
                     }
@@ -186,7 +191,7 @@
                 </div>`;
         });
         updatePrices();
-        setInterval(updatePrices, 30000); // Обновление каждые 30 сек
+        setInterval(updatePrices, 30000);
         updateSwapUI();
         const tc = new TON_CONNECT_UI.TonConnectUI({ manifestUrl: 'https://sergey52bb.github.io/grok-autotrade/tonconnect-manifest.json', buttonRootId: 'ton-connect-btn' });
         tc.onStatusChange(w => { 
@@ -207,9 +212,13 @@
         el.classList.add('active');
     }
 
+    // ИСПРАВЛЕНО: Теперь передаем логотип в модалку
     function showAssetMenu(id) {
         const a = assets.find(x => x.id === id);
         document.getElementById('menu_title').innerText = a.name;
+        document.getElementById('modal_main_icon').src = a.img;
+        document.getElementById('modal_deposit_icon').src = a.img;
+        document.getElementById('modal_send_icon').src = a.img;
         document.querySelectorAll('.cur_asset').forEach(e => e.innerText = a.id);
         switchModalView('menu');
         document.getElementById('universal_modal').style.display = 'flex';
