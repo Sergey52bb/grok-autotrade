@@ -3,54 +3,55 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>SYN TERMINAL v15.5</title>
+    <title>SYN TERMINAL v15.6</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <script src="https://unpkg.com/@tonconnect/ui@2.0.9/dist/tonconnect-ui.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
     <style>
-        :root { --bg: #050b14; --panel: #0d141d; --blue: #4DB8FF; --green: #00ff95; --red: #ff4a4a; --border: rgba(255,255,255,0.08); }
+        :root { --bg: #050b14; --panel: #0d141d; --blue: #4DB8FF; --green: #00ff95; --border: rgba(255,255,255,0.08); }
         body { background: var(--bg); color: white; margin: 0; font-family: -apple-system, sans-serif; height: 100vh; display: flex; flex-direction: column; overflow: hidden; }
         
-        /* HEADER */
         header { padding: 15px 15px 5px; text-align: center; flex-shrink: 0; }
-        .logo-svg { width: 140px; height: auto; margin-bottom: 2px; }
-        header .subtitle { font-size: 11px; color: var(--blue); letter-spacing: 2px; font-weight: 800; opacity: 0.9; }
-        
-        #main_content { flex: 1; overflow-y: auto; padding: 10px 15px 150px; } 
+        .logo-svg { width: 130px; height: auto; }
+        .subtitle { font-size: 10px; color: var(--blue); letter-spacing: 2px; font-weight: 800; opacity: 0.8; margin-top: 5px; }
+
+        #main_content { flex: 1; overflow-y: auto; padding: 10px 15px 120px; }
         .screen { display: none; }
         .screen.active { display: block; }
-        
-        /* ASSETS */
-        .asset-item { display: flex; justify-content: space-between; align-items: center; padding: 14px; border: 1px solid rgba(77, 184, 255, 0.15); border-radius: 20px; margin-bottom: 12px; background: rgba(77, 184, 255, 0.03); }
-        .asset-icon-box { width: 40px; height: 40px; border-radius: 50%; overflow: hidden; background: #1a222c; border: 1px solid var(--border); }
-        .asset-icon-img { width: 100%; height: 100%; object-fit: cover; }
-        .asset-details { flex: 1; margin-left: 12px; }
-        .asset-name { font-weight: 800; font-size: 14px; }
-        .asset-price { font-size: 11px; color: var(--green); opacity: 0.8; }
-        
-        /* SWAP UI */
-        .swap-box { background: var(--panel); border-radius: 25px; padding: 20px; border: 1px solid var(--border); }
-        .swap-input-row { background: rgba(255,255,255,0.04); padding: 15px; border-radius: 20px; margin: 10px 0; display: flex; align-items: center; justify-content: space-between; }
-        .swap-input-row input { background: transparent; border: none; color: white; font-size: 22px; font-weight: 700; width: 60%; outline: none; }
-        .coin-sel { display: flex; align-items: center; background: rgba(77,184,255,0.15); padding: 8px 12px; border-radius: 12px; font-weight: 800; font-size: 13px; gap: 8px; }
-        .coin-sel img { width: 20px; height: 20px; border-radius: 50%; }
 
-        /* WALLET ANIMATION */
-        @keyframes rotateSticker { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
-        .rotating { animation: rotateSticker 30s linear infinite; filter: drop-shadow(0 0 30px rgba(77,184,255,0.3)); mix-blend-mode: screen; }
+        /* СПИСОК МОНЕТ */
+        .asset-item { display: flex; justify-content: space-between; align-items: center; padding: 15px; border: 1px solid rgba(77, 184, 255, 0.1); border-radius: 22px; margin-bottom: 12px; background: rgba(13, 20, 29, 0.6); }
+        .asset-icon { width: 42px; height: 42px; border-radius: 50%; border: 1px solid var(--border); }
+        .asset-info { flex: 1; margin-left: 12px; }
+        .asset-name { font-weight: 800; font-size: 15px; }
+        .asset-price { font-size: 11px; color: var(--green); }
 
-        /* NAV */
-        nav { position: fixed; bottom: 20px; left: 20px; right: 20px; height: 75px; background: rgba(13, 20, 29, 0.95); display: flex; border-radius: 25px; border: 1px solid var(--border); backdrop-filter: blur(10px); }
-        .nav-item { flex: 1; display: flex; align-items: center; justify-content: center; cursor: pointer; opacity: 0.3; transition: 0.3s; font-size: 26px; }
-        .nav-item.active { opacity: 1; transform: translateY(-5px); filter: drop-shadow(0 0 10px var(--blue)); }
+        /* СВАП (ИСПРАВЛЕННЫЙ) */
+        .swap-container { background: var(--panel); border-radius: 28px; padding: 20px; border: 1px solid var(--border); }
+        .swap-card { background: rgba(255,255,255,0.03); padding: 15px; border-radius: 20px; margin-bottom: 8px; }
+        .swap-label { font-size: 11px; opacity: 0.5; margin-bottom: 10px; display: block; }
+        .swap-input-row { display: flex; align-items: center; justify-content: space-between; }
+        .swap-input-row input { background: transparent; border: none; color: white; font-size: 24px; font-weight: 700; width: 60%; outline: none; padding: 0; }
+        .swap-coin { display: flex; align-items: center; gap: 8px; background: rgba(77,184,255,0.1); padding: 6px 12px; border-radius: 12px; font-weight: 800; font-size: 14px; }
+        .swap-coin img { width: 22px; height: 22px; border-radius: 50%; }
 
-        /* MODALS */
-        .modal-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.85); z-index: 1000; align-items: flex-end; }
-        .modal-body { background: #0d141d; width: 100%; border-radius: 30px 30px 0 0; padding: 30px 20px 50px; border-top: 1px solid var(--border); }
+        /* КРИСТАЛЛ */
+        @keyframes rotateCryst { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+        .cryst-anim { animation: rotateCryst 25s linear infinite; filter: drop-shadow(0 0 20px rgba(77,184,255,0.3)); mix-blend-mode: screen; width: 220px; }
+
+        /* МОДАЛКИ */
+        .modal-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.9); z-index: 1000; align-items: flex-end; }
+        .modal-body { background: #0d141d; width: 100%; border-radius: 32px 32px 0 0; padding: 25px; border-top: 1px solid var(--border); box-sizing: border-box; }
         .modal-view { display: none; }
         .modal-view.active { display: block; }
-        input { width: 100%; padding: 16px; background: rgba(255,255,255,0.05); border: 1px solid var(--border); border-radius: 18px; color: white; margin-bottom: 12px; box-sizing: border-box; }
-        .btn-confirm { background: var(--green); color: black; padding: 18px; border-radius: 20px; width: 100%; border: none; font-weight: 800; cursor: pointer; }
+        .modal-header-icon { width: 55px; height: 55px; border-radius: 50%; margin-bottom: 15px; border: 1px solid var(--border); }
+        
+        input { width: 100%; padding: 16px; background: rgba(255,255,255,0.05); border: 1px solid var(--border); border-radius: 18px; color: white; margin-bottom: 12px; box-sizing: border-box; font-size: 14px; }
+        .btn-confirm { background: var(--green); color: black; padding: 18px; border-radius: 20px; width: 100%; border: none; font-weight: 800; cursor: pointer; font-size: 15px; }
+
+        nav { position: fixed; bottom: 20px; left: 20px; right: 20px; height: 75px; background: rgba(13, 20, 29, 0.9); display: flex; border-radius: 25px; border: 1px solid var(--border); backdrop-filter: blur(15px); }
+        .nav-item { flex: 1; display: flex; align-items: center; justify-content: center; opacity: 0.3; transition: 0.3s; font-size: 26px; }
+        .nav-item.active { opacity: 1; transform: translateY(-5px); color: var(--blue); }
     </style>
 </head>
 <body>
@@ -62,43 +63,43 @@
 
 <div id="main_content">
     <div id="scr_wallet" class="screen active">
-        <div style="text-align:center; padding: 20px 0;">
-            <div style="font-size: 11px; opacity: 0.5; letter-spacing: 1px;">ESTIMATED BALANCE</div>
-            <h1 style="font-size:42px; margin:5px 0;">0.00 TON</h1>
-            <div id="addr_display" style="font-size: 10px; color: var(--blue); background: rgba(77, 184, 255, 0.1); padding: 5px 12px; border-radius: 20px; display: inline-block;">Disconnected</div>
+        <div style="text-align:center; padding: 20px 0 30px;">
+            <div style="font-size: 11px; opacity: 0.5; letter-spacing: 1.5px;">ESTIMATED BALANCE</div>
+            <h1 style="font-size:44px; margin:5px 0; font-weight:800;">0.00 TON</h1>
+            <div id="addr_display" style="font-size: 10px; color: var(--blue); background: rgba(77,184,255,0.1); padding: 6px 14px; border-radius: 20px; display: inline-block;">Disconnected</div>
         </div>
         <div id="asset_list"></div>
     </div>
 
     <div id="scr_swap" class="screen">
-        <div class="swap-box">
-            <div style="font-size:12px; opacity:0.5; margin-bottom:5px;">You Sell</div>
-            <div class="swap-input-row">
-                <input type="number" placeholder="0.0">
-                <div class="coin-sel">
-                    <img src="https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/ton/info/logo.png">
-                    <span>TON</span>
+        <div class="swap-container">
+            <h3 style="margin: 0 0 15px; text-align: center; font-size: 18px;">Swap</h3>
+            <div class="swap-card">
+                <span class="swap-label">You Pay</span>
+                <div class="swap-input-row">
+                    <input type="number" placeholder="0">
+                    <div class="swap-coin"><img src="https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/ton/info/logo.png">TON</div>
                 </div>
             </div>
-            <div style="text-align:center; margin: -5px 0; color:var(--blue); font-size:20px;">↓</div>
-            <div style="font-size:12px; opacity:0.5; margin-bottom:5px;">You Get</div>
-            <div class="swap-input-row">
-                <input type="number" placeholder="0.0" readonly>
-                <div class="coin-sel">
-                    <img src="https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/ethereum/assets/0xdAC17F958D2ee523a2206206994597C13D831ec7/logo.png">
-                    <span>USDT</span>
+            <div style="text-align:center; margin: -15px 0; position:relative; z-index:2;">
+                <div style="background:var(--bg); width:35px; height:35px; border-radius:50%; display:inline-flex; align-items:center; justify-content:center; border: 1px solid var(--border);">↓</div>
+            </div>
+            <div class="swap-card">
+                <span class="swap-label">You Get</span>
+                <div class="swap-input-row">
+                    <input type="number" placeholder="0" readonly>
+                    <div class="swap-coin"><img src="https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/ethereum/assets/0xdAC17F958D2ee523a2206206994597C13D831ec7/logo.png">USDT</div>
                 </div>
             </div>
-            <button class="btn-confirm" style="margin-top:20px;" onclick="tg.showAlert('Swap route finding...')">Swap Now</button>
+            <button class="btn-confirm" style="margin-top:15px;" onclick="tg.showAlert('Calculation...')">Swap Now</button>
         </div>
     </div>
 
     <div id="scr_connect" class="screen">
         <div style="text-align:center; padding-top: 30px;">
             <div id="ton-connect-btn" style="display:flex; justify-content:center; margin-bottom: 50px;"></div>
-            <img src="https://i.ibb.co/JwD2qCDf/WEB3-Design-Works-Nariman-Mammadzada.jpg" 
-                 class="rotating" style="width: 240px; height: auto;">
-            <p style="color: var(--blue); font-size: 11px; margin-top: 40px; font-weight:800; letter-spacing:3px;">ACCESS NODE READY</p>
+            <img src="https://i.ibb.co/JwD2qCDf/WEB3-Design-Works-Nariman-Mammadzada.jpg" class="cryst-anim">
+            <p style="color: var(--blue); font-size: 11px; margin-top: 40px; font-weight:800; letter-spacing:3px; opacity:0.6;">NODE SYNCHRONIZED</p>
         </div>
     </div>
 </div>
@@ -111,10 +112,11 @@
 
 <div id="universal_modal" class="modal-overlay" onclick="closeModal()">
     <div class="modal-body" onclick="event.stopPropagation()">
+        
         <div id="view_menu" class="modal-view active">
             <div style="text-align:center; margin-bottom:25px;">
-                <img id="menu_logo" style="width:50px; height:50px; border-radius:50%; margin-bottom:10px;">
-                <h3 id="menu_title" style="margin:0;">Asset</h3>
+                <img id="menu_logo" class="modal-header-icon" src="">
+                <h3 id="menu_title" style="margin:0; font-size:22px;">Asset</h3>
             </div>
             <div style="display:grid; grid-template-columns:1fr 1fr; gap:15px;">
                 <button class="btn-confirm" style="background:#fff;" onclick="switchModalView('deposit')">RECEIVE</button>
@@ -123,17 +125,24 @@
         </div>
 
         <div id="view_deposit" class="modal-view">
-            <h3 style="text-align:center;">Receive <span class="cur_asset"></span></h3>
-            <div id="qrcode" style="display:flex; justify-content:center; margin:20px 0; background:#fff; padding:15px; border-radius:20px;"></div>
-            <p id="full_addr" style="font-size:10px; word-break:break-all; opacity:0.5; text-align:center; font-family:monospace;"></p>
+            <div style="text-align:center; margin-bottom:15px;">
+                <img id="deposit_logo" class="modal-header-icon" src="">
+                <h3 style="margin:0;">Receive <span class="cur_asset"></span></h3>
+            </div>
+            <div id="qrcode" style="display:flex; justify-content:center; margin:15px 0; background:#fff; padding:15px; border-radius:20px;"></div>
+            <p id="full_addr" style="font-size:10px; word-break:break-all; opacity:0.5; text-align:center; font-family:monospace; margin-bottom:20px;"></p>
             <button class="btn-confirm" onclick="copyAddr()">Copy Address</button>
         </div>
 
         <div id="view_send" class="modal-view">
-            <h3 style="text-align:center;">Send <span class="cur_asset"></span></h3>
+            <div style="text-align:center; margin-bottom:15px;">
+                <img id="send_logo" class="modal-header-icon" src="">
+                <h3 style="margin:0;">Send <span class="cur_asset"></span></h3>
+            </div>
             <input type="text" placeholder="Recipient Address (UQ...)">
-            <input type="text" placeholder="Memo / Comment (Optional)"> <input type="number" placeholder="Amount">
-            <button class="btn-confirm">Confirm Transaction</button>
+            <input type="text" placeholder="Memo / Comment (Required for CEX)">
+            <input type="number" placeholder="Amount">
+            <button class="btn-confirm">Confirm Send</button>
         </div>
 
         <button onclick="closeModal()" style="width:100%; background:transparent; border:none; color:white; opacity:0.3; margin-top:20px; font-weight:700;">CANCEL</button>
@@ -143,7 +152,6 @@
 <script>
     const tg = window.Telegram.WebApp; tg.ready(); tg.expand();
     
-    // ВЕРНУЛ ВСЕ 12 МОНЕТ
     const assets = [
         { id: 'TON', name: 'TON', cg: 'the-open-network', img: 'https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/ton/info/logo.png' },
         { id: 'BTC', name: 'Bitcoin', cg: 'bitcoin', img: 'https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/bitcoin/info/logo.png' },
@@ -177,7 +185,7 @@
     function init() {
         const list = document.getElementById('asset_list'); list.innerHTML = "";
         assets.forEach(a => {
-            list.innerHTML += `<div class="asset-item" onclick="showAssetMenu('${a.id}')"><div class="asset-icon-box"><img src="${a.img}" class="asset-icon-img"></div><div class="asset-details"><div class="asset-name">${a.id}</div><div class="asset-price" id="price_${a.id}">$0.00</div></div><div style="font-weight:700;">0.00</div></div>`;
+            list.innerHTML += `<div class="asset-item" onclick="showAssetMenu('${a.id}')"><img src="${a.img}" class="asset-icon"><div class="asset-info"><div class="asset-name">${a.id}</div><div class="asset-price" id="price_${a.id}">$0.00</div></div><div style="font-weight:700;">0.00</div></div>`;
         });
         updatePrices();
         const tc = new TON_CONNECT_UI.TonConnectUI({ manifestUrl: 'https://sergey52bb.github.io/grok-autotrade/tonconnect-manifest.json', buttonRootId: 'ton-connect-btn' });
@@ -188,6 +196,8 @@
         const a = assets.find(x => x.id === id);
         document.getElementById('menu_title').innerText = a.name;
         document.getElementById('menu_logo').src = a.img;
+        document.getElementById('deposit_logo').src = a.img;
+        document.getElementById('send_logo').src = a.img;
         document.querySelectorAll('.cur_asset').forEach(e => e.innerText = a.id);
         document.getElementById('universal_modal').style.display = 'flex';
     }
