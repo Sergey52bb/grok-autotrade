@@ -1,14 +1,25 @@
-const tg = window.Telegram.WebApp; tg.ready(); tg.expand();
+const tg = window.Telegram.WebApp; 
+tg.ready(); 
+tg.expand();
+
+// Полный список монет с правильными ID для цен (CoinGecko)
 const assets = [
     { id: 'TON', name: 'TON', price: 0, cg: 'the-open-network', img: 'https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/ton/info/logo.png' },
     { id: 'BTC', name: 'Bitcoin', price: 0, cg: 'bitcoin', img: 'https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/bitcoin/info/logo.png' },
-    { id: 'USDT', name: 'USDT', price: 0, cg: 'tether', img: 'https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/ethereum/assets/0xdAC17F958D2ee523a2206206994597C13D831ec7/logo.png' },
     { id: 'ETH', name: 'Ethereum', price: 0, cg: 'ethereum', img: 'https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/ethereum/info/logo.png' },
-    { id: 'SOL', name: 'Solana', price: 0, cg: 'solana', img: 'https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/solana/info/logo.png' }
+    { id: 'USDT', name: 'USDT', price: 0, cg: 'tether', img: 'https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/ethereum/assets/0xdAC17F958D2ee523a2206206994597C13D831ec7/logo.png' },
+    { id: 'USDC', name: 'USDC', price: 0, cg: 'usd-coin', img: 'https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/ethereum/assets/0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48/logo.png' },
+    { id: 'BNB', name: 'BNB', price: 0, cg: 'binancecoin', img: 'https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/binance/info/logo.png' },
+    { id: 'DOGE', name: 'Dogecoin', price: 0, cg: 'dogecoin', img: 'https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/smartchain/assets/0xba2ae424d960c2397b903588900c14463d1c024d/logo.png' },
+    { id: 'LTC', name: 'Litecoin', price: 0, cg: 'litecoin', img: 'https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/litecoin/info/logo.png' },
+    { id: 'NEAR', name: 'Near', price: 0, cg: 'near', img: 'https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/near/info/logo.png' },
+    { id: 'SUI', name: 'Sui', price: 0, cg: 'sui', img: 'https://assets.coingecko.com/coins/images/26375/large/sui_asset.png' },
+    { id: 'MATIC', name: 'Polygon', price: 0, cg: 'matic-network', img: 'https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/ethereum/assets/0x7D1Afa7B718fb893dB30A3aBc0Cfc608AaCfeBB0/logo.png' }
 ];
 
 let swapFrom = "TON", swapTo = "USDT", activePicker = "", currentAddr = "";
 
+// Функция обновления цен
 async function updatePrices() {
     try {
         const ids = assets.map(a => a.cg).join(',');
@@ -25,9 +36,10 @@ async function updatePrices() {
             }
         });
         calculateSwap();
-    } catch(e) { console.log("Price update failed"); }
+    } catch(e) { console.error("Price error:", e); }
 }
 
+// Инициализация кошелька и списка
 function init() {
     const list = document.getElementById('asset_list'); 
     if(list) {
@@ -44,10 +56,12 @@ function init() {
                 </div>`;
         });
     }
+    
     updatePrices();
     setInterval(updatePrices, 30000);
     updateSwapUI();
     
+    // Подключение TON Connect
     const tc = new TON_CONNECT_UI.TonConnectUI({ 
         manifestUrl: 'https://sergey52bb.github.io/grok-autotrade/tonconnect-manifest.json', 
         buttonRootId: 'ton-connect-btn' 
@@ -60,18 +74,22 @@ function init() {
             document.getElementById('full_addr').innerText = currentAddr;
             document.getElementById("qrcode").innerHTML = "";
             new QRCode(document.getElementById("qrcode"), { text: currentAddr, width: 150, height: 150 });
-        } 
+        } else {
+            document.getElementById('addr_display').innerText = "Disconnected";
+        }
     });
 }
 
-function showTab(id, el) {
+// Навигация
+window.showTab = function(id, el) {
     document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
     document.getElementById('scr_'+id).classList.add('active');
     document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
     el.classList.add('active');
-}
+};
 
-function showAssetMenu(id) {
+// Меню монеты
+window.showAssetMenu = function(id) {
     const a = assets.find(x => x.id === id);
     document.getElementById('menu_title').innerText = a.name;
     document.getElementById('modal_main_icon').src = a.img;
@@ -80,32 +98,39 @@ function showAssetMenu(id) {
     document.querySelectorAll('.cur_asset').forEach(e => e.innerText = a.id);
     switchModalView('menu');
     document.getElementById('universal_modal').style.display = 'flex';
-}
+};
 
-function closeModal(id) { document.getElementById(id).style.display = 'none'; }
-function switchModalView(v) {
+window.closeModal = function(id) { document.getElementById(id).style.display = 'none'; };
+
+window.switchModalView = function(v) {
     document.querySelectorAll('.modal-view').forEach(x => x.classList.remove('active'));
     document.getElementById('view_' + v).classList.add('active');
-}
+};
 
-function copyAddr() {
+window.copyAddr = function() {
     const addrText = document.getElementById('full_addr').innerText;
-    if(addrText === "Disconnected") { tg.showAlert("Please connect wallet first!"); return; }
-    navigator.clipboard.writeText(addrText).then(() => { tg.showAlert("Address Copied!"); });
-}
+    if(addrText === "Disconnected") { tg.showAlert("Сначала подключите кошелек!"); return; }
+    navigator.clipboard.writeText(addrText).then(() => { tg.showAlert("Адрес скопирован!"); });
+};
 
-function openCoinPicker(type) {
+// Swap логика
+window.openCoinPicker = function(type) {
     activePicker = type;
-    const list = document.getElementById('coin_options_list'); list.innerHTML = "";
+    const list = document.getElementById('coin_options_list'); 
+    list.innerHTML = "";
     const forbidden = type === 'from' ? swapTo : swapFrom;
     assets.forEach(a => {
         if(a.id === forbidden) return;
         list.innerHTML += `<div class="coin-option" onclick="selectCoin('${a.id}')"><img src="${a.img}"><div class="coin-ticker">${a.id}</div></div>`;
     });
     document.getElementById('picker_modal').style.display = 'flex';
-}
+};
 
-function selectCoin(id) { if(activePicker === 'from') swapFrom = id; else swapTo = id; updateSwapUI(); closeModal('picker_modal'); }
+window.selectCoin = function(id) { 
+    if(activePicker === 'from') swapFrom = id; else swapTo = id; 
+    updateSwapUI(); 
+    closeModal('picker_modal'); 
+};
 
 function updateSwapUI() {
     const fromImg = document.getElementById('sw_from_img');
@@ -119,18 +144,26 @@ function updateSwapUI() {
     }
 }
 
-function calculateSwap() {
+window.calculateSwap = function() {
     const valInput = document.getElementById('sw_val');
     const resInput = document.getElementById('sw_res');
     if(!valInput || !resInput) return;
-    const val = valInput.value;
+    const val = parseFloat(valInput.value);
     const assetFrom = assets.find(x => x.id === swapFrom);
     const assetTo = assets.find(x => x.id === swapTo);
     if(val > 0 && assetFrom.price > 0 && assetTo.price > 0) {
         resInput.value = ((val * assetFrom.price) / assetTo.price).toFixed(6);
     } else { resInput.value = "0.0"; }
-}
+};
 
-function swapReverse() { const tmp = swapFrom; swapFrom = swapTo; swapTo = tmp; updateSwapUI(); }
+window.swapReverse = function() { 
+    const tmp = swapFrom; swapFrom = swapTo; swapTo = tmp; 
+    updateSwapUI(); 
+};
+
+// Слушатель ввода для свапа
+document.addEventListener('input', (e) => {
+    if(e.target.id === 'sw_val') calculateSwap();
+});
 
 window.onload = init;
