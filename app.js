@@ -1,6 +1,5 @@
 const tg = window.Telegram.WebApp;
-tg.ready();
-tg.expand();
+tg.ready(); tg.expand();
 
 const assets = [
     { id: 'TON', name: 'TON', price: 0, cg: 'the-open-network', img: 'https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/ton/info/logo.png' },
@@ -48,6 +47,11 @@ function init() {
                 <div class="bal-amount">0.00</div>
             </div>`).join('');
     }
+    
+    // Добавляем класс вращения логотипу (Скрин 7)
+    const logoImg = document.querySelector('.logo-svg');
+    if(logoImg) logoImg.classList.add('rotating-logo');
+
     updatePrices();
     setInterval(updatePrices, 30000);
     updateSwapUI();
@@ -77,7 +81,6 @@ window.showTab = function(id, el) {
 
 window.showAssetMenu = function(id) {
     const a = assets.find(x => x.id === id);
-    // Скрин 2, 3, 4: Добавляем лого и имя в шапку
     document.getElementById('menu_title').innerHTML = `
         <div class="modal-header-info">
             <img src="${a.img}">
@@ -85,7 +88,7 @@ window.showAssetMenu = function(id) {
         </div>`;
     
     document.querySelectorAll('.cur_asset').forEach(e => {
-        e.innerHTML = `<img src="${a.img}" style="width:16px; border-radius:50%; vertical-align:middle; margin-right:5px;"> ${a.id}`;
+        e.innerHTML = `<img src="${a.img}" style="width:18px; border-radius:50%; vertical-align:middle; margin-right:8px;"> ${a.id}`;
     });
     
     switchModalView('menu');
@@ -110,7 +113,6 @@ window.openCoinPicker = function(type) {
     const list = document.getElementById('coin_options_list');
     list.innerHTML = "";
     assets.forEach(a => {
-        // Скрин 6, 7: Чистая верстка списка монет
         list.innerHTML += `
             <div class="coin-option" onclick="selectCoin('${a.id}')">
                 <img src="${a.img}">
