@@ -16,7 +16,7 @@ const assets = [
     { id: 'POL', name: 'Polygon', price: 0, cg: 'matic-network', img: 'https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/polygon/info/logo.png' }
 ];
 
-let swapFrom = "TON", swapTo = "USDT", activePicker = "", currentAddr = "";
+let swapFrom = "TON", swapTo = "USDT", activePicker = "";
 
 async function updatePrices() {
     try {
@@ -48,28 +48,13 @@ function init() {
             </div>`).join('');
     }
     
-    // Добавляем класс вращения логотипу (Скрин 7)
+    // Вращение лого (Скрин 7)
     const logoImg = document.querySelector('.logo-svg');
     if(logoImg) logoImg.classList.add('rotating-logo');
 
     updatePrices();
     setInterval(updatePrices, 30000);
     updateSwapUI();
-    
-    const tc = new TON_CONNECT_UI.TonConnectUI({ 
-        manifestUrl: 'https://sergey52bb.github.io/grok-autotrade/tonconnect-manifest.json', 
-        buttonRootId: 'ton-connect-btn' 
-    });
-    
-    tc.onStatusChange(w => { 
-        if (w) { 
-            currentAddr = w.account.address;
-            document.getElementById('addr_display').innerText = currentAddr.substring(0,8)+"...";
-            document.getElementById('full_addr').innerText = currentAddr;
-            document.getElementById("qrcode").innerHTML = "";
-            new QRCode(document.getElementById("qrcode"), { text: currentAddr, width: 140, height: 140 });
-        } 
-    });
 }
 
 window.showTab = function(id, el) {
@@ -81,6 +66,7 @@ window.showTab = function(id, el) {
 
 window.showAssetMenu = function(id) {
     const a = assets.find(x => x.id === id);
+    // Шапка модалки (Скрины 2, 3, 4)
     document.getElementById('menu_title').innerHTML = `
         <div class="modal-header-info">
             <img src="${a.img}">
@@ -102,23 +88,14 @@ window.switchModalView = function(v) {
     document.getElementById('view_' + v).classList.add('active');
 }
 
-window.copyAddr = function() {
-    const addr = document.getElementById('full_addr').innerText;
-    if(addr === "Disconnected") return;
-    navigator.clipboard.writeText(addr).then(() => tg.showAlert("Copied!"));
-}
-
 window.openCoinPicker = function(type) {
     activePicker = type;
     const list = document.getElementById('coin_options_list');
-    list.innerHTML = "";
-    assets.forEach(a => {
-        list.innerHTML += `
-            <div class="coin-option" onclick="selectCoin('${a.id}')">
-                <img src="${a.img}">
-                <div class="coin-ticker">${a.id}</div>
-            </div>`;
-    });
+    list.innerHTML = assets.map(a => `
+        <div class="coin-option" onclick="selectCoin('${a.id}')">
+            <img src="${a.img}">
+            <div class="coin-ticker">${a.id}</div>
+        </div>`).join('');
     document.getElementById('picker_modal').style.display = 'flex';
 }
 
