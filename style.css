@@ -6,101 +6,55 @@
     --border: rgba(255,255,255,0.08); 
 }
 
-* { box-sizing: border-box; } /* Это не даст элементам расширяться больше экрана */
+* { box-sizing: border-box; }
 
 body { 
-    background: var(--bg); 
-    color: white; 
-    margin: 0; 
-    font-family: -apple-system, BlinkMacSystemFont, sans-serif; 
-    height: 100vh; 
-    display: flex; 
-    flex-direction: column; 
-    overflow: hidden; 
+    background: var(--bg); color: white; margin: 0; 
+    font-family: -apple-system, sans-serif; 
+    height: 100vh; display: flex; flex-direction: column; overflow: hidden; 
 }
 
-header { padding: 15px; text-align: center; flex-shrink: 0; }
-.logo-svg { width: 140px; height: auto; }
-.subtitle { font-size: 11px; color: var(--blue); letter-spacing: 2px; font-weight: 800; text-transform: uppercase; }
-
-#main_content { flex: 1; overflow-y: auto; padding: 10px 15px 100px; }
-.screen { display: none; }
-.screen.active { display: block; }
-
-/* Список активов на главном */
-.asset-item { 
-    display: flex; 
-    justify-content: space-between; 
-    align-items: center; 
-    padding: 12px 15px; 
-    border: 1px solid rgba(77, 184, 255, 0.15); 
-    border-radius: 20px; 
-    margin-bottom: 10px; 
-    background: rgba(77, 184, 255, 0.02); 
+/* Фикс для Polygon и списка монет (Скрин 1) */
+#main_content { 
+    flex: 1; overflow-y: auto; 
+    padding: 10px 15px 120px; /* Увеличил нижний отступ, чтобы последняя монета не пряталась за меню */
 }
-.asset-icon-box { width: 40px; height: 40px; border-radius: 50%; overflow: hidden; flex-shrink: 0; }
-.asset-icon-img { width: 100%; height: 100%; object-fit: cover; }
-.asset-details { flex: 1; margin-left: 12px; }
-.asset-name { font-weight: 800; font-size: 15px; }
-.asset-price { font-size: 12px; color: var(--green); }
 
-/* Модальные окна */
-.modal-overlay { 
-    display: none; 
-    position: fixed; 
-    top: 0; left: 0; width: 100%; height: 100%; 
-    background: rgba(0,0,0,0.85); 
-    z-index: 1000; 
-    align-items: flex-end; 
-}
+/* Убираем сжатость в модалках (Скрин 2, 3, 4) */
 .modal-body { 
-    background: #0d141d; 
-    width: 100%; 
-    border-radius: 30px 30px 0 0; 
-    padding: 20px; 
+    background: #0d141d; width: 100%; border-radius: 30px 30px 0 0; 
+    padding: 30px 20px; /* Увеличил внутренние отступы */
     border-top: 1px solid var(--border);
 }
-.modal-view { display: none; }
-.modal-view.active { display: block; }
 
-/* Список выбора монет (Скрин 6, 7) */
+.modal-header-info {
+    display: flex; flex-direction: column; align-items: center; 
+    gap: 12px; margin-bottom: 25px; /* Больше воздуха между элементами */
+}
+.modal-header-info img { width: 50px; height: 50px; border-radius: 50%; border: 1px solid var(--border); }
+
+/* Исправляем список свопа (Скрин 5, 6) */
 .coin-option { 
-    display: flex; 
-    align-items: center; 
-    padding: 15px; 
-    border-bottom: 1px solid var(--border); 
-    width: 100%;
+    display: flex; align-items: center; padding: 18px 10px; 
+    border-bottom: 1px solid var(--border); width: 100%;
 }
 .coin-option img { width: 32px; height: 32px; border-radius: 50%; margin-right: 15px; flex-shrink: 0; }
-.coin-ticker { font-weight: 700; font-size: 16px; color: white; }
 
-/* Заголовки модалок (Скрин 2, 3, 4) */
-.modal-header-info {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 8px;
-    margin-bottom: 20px;
+/* Анимация вращения лого (Скрин 7) */
+@keyframes spin {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
 }
-.modal-header-info img { width: 40px; height: 40px; border-radius: 50%; }
-.modal-header-info span { font-size: 18px; font-weight: 800; }
+.rotating-logo {
+    animation: spin 10s linear infinite;
+}
 
-/* Навигация */
-nav { 
-    position: fixed; bottom: 15px; left: 15px; right: 15px; 
-    height: 70px; background: var(--panel); 
-    display: flex; border-radius: 20px; 
-    border: 1px solid var(--border); z-index: 100; 
+/* Общие стили */
+.asset-item { 
+    display: flex; justify-content: space-between; align-items: center; 
+    padding: 15px; border: 1px solid rgba(77, 184, 255, 0.1); 
+    border-radius: 20px; margin-bottom: 12px; background: rgba(77, 184, 255, 0.02); 
 }
-.nav-item { flex: 1; display: flex; align-items: center; justify-content: center; opacity: 0.3; font-size: 24px; }
+nav { position: fixed; bottom: 15px; left: 15px; right: 15px; height: 75px; background: var(--panel); display: flex; border-radius: 25px; border: 1px solid var(--border); z-index: 100; }
+.nav-item { flex: 1; display: flex; align-items: center; justify-content: center; opacity: 0.3; font-size: 26px; }
 .nav-item.active { opacity: 1; color: var(--blue); }
-
-/* Карточки и инпуты */
-.card { background: var(--panel); padding: 15px; border-radius: 20px; border: 1px solid var(--border); margin-bottom: 15px; }
-input { 
-    width: 100%; padding: 14px; 
-    background: rgba(255,255,255,0.03); 
-    border: 1px solid var(--border); 
-    border-radius: 12px; color: white; 
-    font-size: 16px; outline: none; 
-}
