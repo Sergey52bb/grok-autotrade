@@ -27,14 +27,12 @@ async function updatePrices() {
         assets.forEach(a => {
             if(data[a.cg]) {
                 a.price = data[a.cg].usd;
-                const priceEl = document.getElementById(`price_${a.id}`);
-                if(priceEl) {
-                    priceEl.innerText = `$${a.price < 1 ? a.price.toFixed(4) : a.price.toLocaleString()}`;
-                }
+                const el = document.getElementById(`price_${a.id}`);
+                if(el) el.innerText = `$${a.price < 1 ? a.price.toFixed(4) : a.price.toLocaleString()}`;
             }
         });
         calculateSwap();
-    } catch(e) { console.error("Price error"); }
+    } catch(e) {}
 }
 
 function init() {
@@ -79,14 +77,17 @@ window.showTab = function(id, el) {
 
 window.showAssetMenu = function(id) {
     const a = assets.find(x => x.id === id);
+    // Скрин 2, 3, 4: Добавляем лого и имя в шапку
     document.getElementById('menu_title').innerHTML = `
-        <div style="display:flex; align-items:center; justify-content:center; gap:10px;">
-            <img src="${a.img}" style="width:30px; border-radius:50%;">
+        <div class="modal-header-info">
+            <img src="${a.img}">
             <span>${a.name}</span>
         </div>`;
+    
     document.querySelectorAll('.cur_asset').forEach(e => {
-        e.innerHTML = `<img src="${a.img}" style="width:18px; border-radius:50%; vertical-align:middle; margin-right:5px;"> ${a.id}`;
+        e.innerHTML = `<img src="${a.img}" style="width:16px; border-radius:50%; vertical-align:middle; margin-right:5px;"> ${a.id}`;
     });
+    
     switchModalView('menu');
     document.getElementById('universal_modal').style.display = 'flex';
 }
@@ -100,7 +101,7 @@ window.switchModalView = function(v) {
 
 window.copyAddr = function() {
     const addr = document.getElementById('full_addr').innerText;
-    if(addr === "Disconnected") { tg.showAlert("Connect wallet!"); return; }
+    if(addr === "Disconnected") return;
     navigator.clipboard.writeText(addr).then(() => tg.showAlert("Copied!"));
 }
 
@@ -109,6 +110,7 @@ window.openCoinPicker = function(type) {
     const list = document.getElementById('coin_options_list');
     list.innerHTML = "";
     assets.forEach(a => {
+        // Скрин 6, 7: Чистая верстка списка монет
         list.innerHTML += `
             <div class="coin-option" onclick="selectCoin('${a.id}')">
                 <img src="${a.img}">
@@ -141,7 +143,7 @@ window.calculateSwap = function() {
     const aTo = assets.find(x => x.id === swapTo);
     if(val > 0 && aFrom.price > 0 && aTo.price > 0) {
         res.value = ((val * aFrom.price) / aTo.price).toFixed(6);
-    } else { res.value = "0.0"; }
+    } else { res.value = ""; }
 }
 
 window.swapReverse = function() {
