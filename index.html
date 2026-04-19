@@ -3,8 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>Grok Avto Trade</title>
-    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' https://telegram.org https://unpkg.com https://cdnjs.cloudflare.com; style-src 'self' 'unsafe-inline'; img-src 'self' https: data:; connect-src 'self' https://api.coingecko.com https://toncenter.com https://bridge.tonapi.io;">
+    <title>Grok Avto Trade v15.0</title>
     
     <link rel="stylesheet" href="style.css">
     
@@ -28,11 +27,11 @@
         </div>
         <div id="asset_list"></div>
     </div>
-
+    
     <div id="scr_swap" class="screen">
         <div class="card" style="margin-top: 10px;">
             <div style="font-size: 11px; opacity: 0.5; margin-bottom: 8px;">PAY</div>
-            <input type="number" id="sw_val" placeholder="0.0">
+            <input type="number" id="sw_val" placeholder="0.0" oninput="calculateSwap()">
             <div class="swap-selector" onclick="openCoinPicker('from')"><img id="sw_from_img" src=""><span id="sw_from_txt">TON</span></div>
             <div id="rev_btn" onclick="swapReverse()">🌀</div>
             <div style="font-size: 11px; opacity: 0.5; margin: 20px 0 8px;">RECEIVE</div>
@@ -41,13 +40,13 @@
             <button class="btn-confirm" style="margin-top: 25px;" onclick="tg.showAlert('Swap initiated')">Confirm Swap</button>
         </div>
     </div>
-
+    
     <div id="scr_connect" class="screen">
         <div class="card" style="text-align:center; margin-top: 20px; padding: 40px 20px;">
             <div id="ton-connect-btn" style="display:flex; justify-content:center;"></div>
             <div style="margin-top: 30px;">
                 <img src="https://i.ibb.co/JwD2qCDf/WEB3-Design-Works-Nariman-Mammadzada.jpg" class="rotating" style="width: 180px; height: auto; border-radius: 50%; filter: drop-shadow(0 0 20px rgba(77,184,255,0.5)); opacity: 0.9;">
-                <p style="margin-top:20px; font-size:12px; opacity:0.6;">Secure Connection via TON Connect</p>
+                <p style="margin-top: 20px; font-size: 12px; opacity: 0.7;">Secure Connection via TON Connect</p>
             </div>
         </div>
     </div>
@@ -62,7 +61,6 @@
 <div id="universal_modal" class="modal-overlay" onclick="closeModal('universal_modal')">
     <div class="modal-body" onclick="event.stopPropagation()">
         <div id="view_menu" class="modal-view">
-            <img id="modal_main_icon" src="" class="modal-header-icon">
             <h3 id="menu_title" style="text-align:center; margin-top:0;">Options</h3>
             <div style="display:grid; grid-template-columns:1fr 1fr; gap:15px;">
                 <button class="btn-confirm" style="background:#fff;" onclick="switchModalView('deposit')">RECEIVE</button>
@@ -70,14 +68,12 @@
             </div>
         </div>
         <div id="view_deposit" class="modal-view">
-            <img id="modal_deposit_icon" src="" class="modal-header-icon" style="width:40px; height:40px;">
             <h3 style="text-align:center; margin-top:0;">Receive <span class="cur_asset"></span></h3>
             <div id="qrcode" style="display:flex; justify-content:center; margin:15px 0; background:#fff; padding:15px; border-radius:15px;"></div>
             <p id="full_addr" style="font-size:11px; word-break:break-all; opacity:0.5; font-family:monospace; text-align:center;">Disconnected</p>
             <button class="btn-confirm" onclick="copyAddr()">Copy Address</button>
         </div>
         <div id="view_send" class="modal-view">
-            <img id="modal_send_icon" src="" class="modal-header-icon" style="width:40px; height:40px;">
             <h3 style="text-align:center; margin-top:0;">Send <span class="cur_asset"></span></h3>
             <input type="text" id="send_addr" placeholder="Recipient Address">
             <input type="text" id="send_memo" placeholder="Memo (Optional)">
