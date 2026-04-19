@@ -31,7 +31,7 @@ async function updatePrices() {
             }
         });
         calculateSwap();
-    } catch(e) {}
+    } catch(e) { console.error("Price fetch failed"); }
 }
 
 function init() {
@@ -48,7 +48,6 @@ function init() {
             </div>`).join('');
     }
     
-    // Вращение лого (Скрин 7)
     const logoImg = document.querySelector('.logo-svg');
     if(logoImg) logoImg.classList.add('rotating-logo');
 
@@ -66,7 +65,6 @@ window.showTab = function(id, el) {
 
 window.showAssetMenu = function(id) {
     const a = assets.find(x => x.id === id);
-    // Шапка модалки (Скрины 2, 3, 4)
     document.getElementById('menu_title').innerHTML = `
         <div class="modal-header-info">
             <img src="${a.img}">
@@ -116,13 +114,17 @@ function updateSwapUI() {
 }
 
 window.calculateSwap = function() {
-    const val = document.getElementById('sw_val').value;
-    const res = document.getElementById('sw_res');
+    const valInput = document.getElementById('sw_val');
+    const resInput = document.getElementById('sw_res');
+    if(!valInput || !resInput) return;
+    
+    const val = valInput.value;
     const aFrom = assets.find(x => x.id === swapFrom);
     const aTo = assets.find(x => x.id === swapTo);
+    
     if(val > 0 && aFrom.price > 0 && aTo.price > 0) {
-        res.value = ((val * aFrom.price) / aTo.price).toFixed(6);
-    } else { res.value = ""; }
+        resInput.value = ((val * aFrom.price) / aTo.price).toFixed(6);
+    } else { resInput.value = ""; }
 }
 
 window.swapReverse = function() {
