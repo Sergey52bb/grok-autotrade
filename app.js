@@ -1,5 +1,13 @@
-const tg = window.Telegram.WebApp; tg.ready(); tg.expand();
+/**
+ * Grok Avto Trade v15.0 - Core Logic
+ * Project: SYN WALLET
+ */
 
+const tg = window.Telegram.WebApp;
+tg.ready();
+tg.expand();
+
+// Список из 12 монет с актуальными логотипами
 const assets = [
     { id: 'TON', name: 'TON', price: 0, cg: 'the-open-network', img: 'https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/ton/info/logo.png' },
     { id: 'BTC', name: 'Bitcoin', price: 0, cg: 'bitcoin', img: 'https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/bitcoin/info/logo.png' },
@@ -17,6 +25,43 @@ const assets = [
 
 let swapFrom = "TON", swapTo = "USDT", activePicker = "", currentAddr = "";
 
+// 1. Инициализация приложения
+function init() {
+    const list = document.getElementById('asset_list'); 
+    if(list) {
+        list.innerHTML = assets.map(a => `
+            <div class="asset-item" onclick="showAssetMenu('${a.id}')">
+                <div class="asset-icon-box"><img src="${a.img}" class="asset-icon-img"></div>
+                <div class="asset-details">
+                    <div class="asset-name">${a.id}</div>
+                    <div class="asset-price" id="price_${a.id}">$0.00</div>
+                </div>
+                <div class="bal-amount">0.00</div>
+            </div>`).join('');
+    }
+    
+    updatePrices();
+    setInterval(updatePrices, 30000); // Обновление цен каждые 30 сек
+    updateSwapUI();
+    
+    // Подключение TON Connect
+    const tc = new TON_CONNECT_UI.TonConnectUI({ 
+        manifestUrl: 'https://sergey52bb.github.io/grok-autotrade/tonconnect-manifest.json', 
+        buttonRootId: 'ton-connect-btn' 
+    });
+    
+    tc.onStatusChange(w => { 
+        if (w) { 
+            currentAddr = w.account.address;
+            document.getElementById('addr_display').innerText = currentAddr.substring(0,8)+"...";
+            document.getElementById('full_addr').innerText = currentAddr;
+            document.getElementById("qrcode").innerHTML = "";
+            new QRCode(document.getElementById("qrcode"), { text: currentAddr, width: 150, height: 150 });
+        } 
+    });
+}
+
+// 2. Обновление цен через CoinGecko
 async function updatePrices() {
     try {
         const ids = assets.map(a => a.cg).join(',');
@@ -36,39 +81,7 @@ async function updatePrices() {
     } catch(e) { console.log("Price update failed"); }
 }
 
-function init() {
-    const list = document.getElementById('asset_list'); 
-    if(list) {
-        list.innerHTML = assets.map(a => `
-            <div class="asset-item" onclick="showAssetMenu('${a.id}')">
-                <div class="asset-icon-box"><img src="${a.img}" class="asset-icon-img"></div>
-                <div class="asset-details">
-                    <div class="asset-name">${a.id}</div>
-                    <div class="asset-price" id="price_${a.id}">$0.00</div>
-                </div>
-                <div class="bal-amount">0.00</div>
-            </div>`).join('');
-    }
-    updatePrices();
-    setInterval(updatePrices, 30000);
-    updateSwapUI();
-    
-    const tc = new TON_CONNECT_UI.TonConnectUI({ 
-        manifestUrl: 'https://sergey52bb.github.io/grok-autotrade/tonconnect-manifest.json', 
-        buttonRootId: 'ton-connect-btn' 
-    });
-    
-    tc.onStatusChange(w => { 
-        if (w) { 
-            currentAddr = w.account.address;
-            document.getElementById('addr_display').innerText = currentAddr.substring(0,8)+"...";
-            document.getElementById('full_addr').innerText = currentAddr;
-            document.getElementById("qrcode").innerHTML = "";
-            new QRCode(document.getElementById("qrcode"), { text: currentAddr, width: 150, height: 150 });
-        } 
-    });
-}
-
+// 3. Навигация между вкладками
 window.showTab = function(id, el) {
     document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
     document.getElementById('scr_'+id).classList.add('active');
@@ -76,34 +89,64 @@ window.showTab = function(id, el) {
     el.classList.add('active');
 }
 
+// 4. Меню актива (Исправлено: логотипы на скринах 2, 3, 4)
 window.showAssetMenu = function(id) {
     const a = assets.find(x => x.id === id);
-    document.getElementById('menu_title').innerText = a.name;
-    document.querySelectorAll('.cur_asset').forEach(e => e.innerText = a.id);
+    
+    // Заголовок модалки с логотипом
+    document.getElementById('menu_title').innerHTML = `
+        <div class="modal-header-coin" style="display:flex; align-items:center; justify-content:center; gap:10px; margin-bottom:15px;">
+            <img src="${a.img}" style="width:32px; height:32px; border-radius:50%;">
+            <span style="font-size:20px; font-weight:800;">${a.name}</span>
+        </div>
+    `;
+    
+    // Логотип в подразделах Receive/Send
+    document.querySelectorAll('.cur_asset').forEach(e => {
+        e.innerHTML = `<img src="${a.img}" style="width:18px; height:18px; vertical-align:middle; margin-right:5px; border-radius:50%;"> ${a.id}`;
+    });
+    
     switchModalView('menu');
     document.getElementById('universal_modal').style.display = 'flex';
 }
 
-window.closeModal = function(id) { document.getElementById(id).style.display = 'none'; }
+// 5. Управление модальными окнами
+window.closeModal = function(id) { 
+    document.getElementById(id).style.display = 'none'; 
+}
 
 window.switchModalView = function(v) {
     document.querySelectorAll('.modal-view').forEach(x => x.classList.remove('active'));
-    document.getElementById('view_' + v).classList.add('active');
+    const target = document.getElementById('view_' + v);
+    if(target) target.classList.add('active');
 }
 
+// 6. Копирование адреса
 window.copyAddr = function() {
     const addrText = document.getElementById('full_addr').innerText;
-    if(addrText === "Disconnected") { tg.showAlert("Please connect wallet first!"); return; }
-    navigator.clipboard.writeText(addrText).then(() => { tg.showAlert("Address Copied!"); });
+    if(addrText === "Disconnected" || !addrText) { 
+        tg.showAlert("Please connect wallet first!"); 
+        return; 
+    }
+    navigator.clipboard.writeText(addrText).then(() => { 
+        tg.showAlert("Address Copied!"); 
+    });
 }
 
+// 7. Выбор монет в обменнике (Исправлено: Скрин 6, 7)
 window.openCoinPicker = function(type) {
     activePicker = type;
-    const list = document.getElementById('coin_options_list'); list.innerHTML = "";
+    const list = document.getElementById('coin_options_list'); 
+    list.innerHTML = "";
     const forbidden = type === 'from' ? swapTo : swapFrom;
+    
     assets.forEach(a => {
         if(a.id === forbidden) return;
-        list.innerHTML += `<div class="coin-option" onclick="selectCoin('${a.id}')"><img src="${a.img}"><div class="coin-ticker">${a.id}</div></div>`;
+        list.innerHTML += `
+            <div class="coin-option" onclick="selectCoin('${a.id}')" style="display:flex; align-items:center; gap:15px; padding:15px; border-bottom:1px solid var(--border); cursor:pointer;">
+                <img src="${a.img}" style="width:32px; height:32px; border-radius:50%; flex-shrink:0;">
+                <div class="coin-ticker" style="font-weight:700; font-size:16px;">${a.id}</div>
+            </div>`;
     });
     document.getElementById('picker_modal').style.display = 'flex';
 }
@@ -114,28 +157,41 @@ window.selectCoin = function(id) {
     closeModal('picker_modal'); 
 }
 
+// 8. Логика обмена (Swap)
 function updateSwapUI() {
     const from = assets.find(x => x.id === swapFrom);
     const to = assets.find(x => x.id === swapTo);
-    document.getElementById('sw_from_img').src = from.img;
-    document.getElementById('sw_from_txt').innerText = swapFrom;
-    document.getElementById('sw_to_img').src = to.img;
-    document.getElementById('sw_to_txt').innerText = swapTo;
+    
+    if(document.getElementById('sw_from_img')) document.getElementById('sw_from_img').src = from.img;
+    if(document.getElementById('sw_from_txt')) document.getElementById('sw_from_txt').innerText = swapFrom;
+    if(document.getElementById('sw_to_img')) document.getElementById('sw_to_img').src = to.img;
+    if(document.getElementById('sw_to_txt')) document.getElementById('sw_to_txt').innerText = swapTo;
+    
     calculateSwap();
 }
 
 window.calculateSwap = function() {
-    const val = document.getElementById('sw_val').value, res = document.getElementById('sw_res');
+    const valInput = document.getElementById('sw_val');
+    const resInput = document.getElementById('sw_res');
+    if(!valInput || !resInput) return;
+
+    const val = valInput.value;
     const assetFrom = assets.find(x => x.id === swapFrom);
     const assetTo = assets.find(x => x.id === swapTo);
+    
     if(val > 0 && assetFrom.price > 0 && assetTo.price > 0) {
-        res.value = ((val * assetFrom.price) / assetTo.price).toFixed(6);
-    } else { res.value = "0.0"; }
+        resInput.value = ((val * assetFrom.price) / assetTo.price).toFixed(6);
+    } else { 
+        resInput.value = "0.0"; 
+    }
 }
 
 window.swapReverse = function() { 
-    const tmp = swapFrom; swapFrom = swapTo; swapTo = tmp; 
+    const tmp = swapFrom; 
+    swapFrom = swapTo; 
+    swapTo = tmp; 
     updateSwapUI(); 
 }
 
+// Запуск при загрузке
 window.onload = init;
