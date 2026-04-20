@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>Grok Avto Trade v15.4</title>
+    <title>Grok Avto Trade v15.5</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <script src="https://unpkg.com/@tonconnect/ui@2.0.9/dist/tonconnect-ui.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
@@ -15,11 +15,11 @@
         header { padding: 10px; text-align: center; flex-shrink: 0; border-bottom: 1px solid var(--border); }
         .logo-svg { width: 120px; height: auto; }
 
-        #main_content { flex: 1; overflow-y: auto; padding: 10px 15px 120px; /* Исправлен ETH (Скрин 1) */ }
+        /* Скрин 1: Поднимаем ETH чуть выше за счет увеличения нижнего отступа */
+        #main_content { flex: 1; overflow-y: auto; padding: 10px 15px 140px; }
         .screen { display: none; }
         .screen.active { display: block; }
 
-        /* Wallet */
         .balance-card { text-align: center; padding: 20px 0; }
         .asset-item { 
             display: flex; align-items: center; padding: 12px; background: rgba(255,255,255,0.03); 
@@ -30,40 +30,32 @@
         .asset-name { font-weight: bold; font-size: 15px; }
         .asset-price { font-size: 11px; color: var(--green); }
 
-        /* Swap Section */
         .swap-container { background: var(--panel); border-radius: 25px; padding: 20px; border: 1px solid var(--border); }
         .swap-box { background: rgba(0,0,0,0.2); border: 1px solid var(--border); padding: 15px; border-radius: 20px; }
         .swap-label { font-size: 10px; color: var(--blue); margin-bottom: 8px; font-weight: bold; }
         .swap-input-row { display: flex; align-items: center; justify-content: space-between; }
         .swap-input-row input { background: transparent; border: none; color: white; font-size: 22px; width: 55%; outline: none; }
+        
         .coin-select { display: flex; align-items: center; background: rgba(255,255,255,0.05); padding: 6px 12px; border-radius: 12px; font-weight: bold; cursor: pointer; }
         .coin-select img { width: 20px; height: 20px; margin-right: 8px; border-radius: 50%; }
         
-        .rev-btn { 
-            background: var(--bg); width: 36px; height: 36px; border-radius: 50%; 
-            display: inline-flex; align-items: center; justify-content: center; 
-            border: 1px solid var(--border); cursor: pointer; transition: transform 0.1s;
-        }
-        .rev-btn:active { transform: scale(0.85); /* Живая кнопка (Скрин 5) */ }
+        .rev-btn { background: var(--bg); width: 36px; height: 36px; border-radius: 50%; display: inline-flex; align-items: center; justify-content: center; border: 1px solid var(--border); cursor: pointer; transition: 0.1s; }
+        .rev-btn:active { transform: scale(0.85); }
 
-        /* Modals & Views */
         .modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.92); z-index: 1000; align-items: flex-end; }
         .modal-body { background: var(--panel); width: 100%; border-radius: 30px 30px 0 0; padding: 25px; border-top: 1px solid var(--blue); }
         .modal-view { display: none; text-align: center; }
         .modal-view.active { display: block; }
-        
         .modal-coin-icon { width: 60px; height: 60px; border-radius: 50%; margin-bottom: 15px; border: 2px solid var(--blue); }
 
-        .action-btn { width: 100%; padding: 16px; border-radius: 15px; border: none; font-weight: bold; cursor: pointer; margin-top: 10px; transition: 0.2s; }
+        .action-btn { width: 100%; padding: 16px; border-radius: 15px; border: none; font-weight: bold; cursor: pointer; margin-top: 10px; }
         .btn-blue { background: var(--blue); color: #000; }
-        .btn-blue:disabled { opacity: 0.3; cursor: not-allowed; }
+        .btn-blue:disabled { opacity: 0.3; }
         .btn-outline { background: rgba(255,255,255,0.05); color: #fff; border: 1px solid var(--border); }
-
         input.field { width: 100%; padding: 14px; background: rgba(0,0,0,0.3); border: 1px solid var(--border); border-radius: 12px; color: white; margin-bottom: 10px; text-align: center; }
 
-        /* Nav */
         nav { position: fixed; bottom: 15px; left: 15px; right: 15px; height: 65px; background: var(--panel); display: flex; border-radius: 20px; border: 1px solid var(--border); z-index: 100; }
-        .nav-item { flex: 1; display: flex; align-items: center; justify-content: center; font-size: 22px; opacity: 0.3; cursor: pointer; }
+        .nav-item { flex: 1; display: flex; align-items: center; justify-content: center; font-size: 22px; opacity: 0.3; }
         .nav-item.active { opacity: 1; color: var(--blue); transform: translateY(-3px); }
 
         #qrcode { background: white; padding: 8px; border-radius: 12px; display: inline-block; margin: 10px 0; }
@@ -97,7 +89,7 @@
                 </div>
             </div>
             <div style="text-align:center; margin: -18px 0; position:relative; z-index:2;">
-                <div class="rev-btn" onclick="swapReverse()">🌀</div>
+                <div class="rev-btn" onclick="swapReverse()">🔄</div>
             </div>
             <div class="swap-box" style="margin-top:5px;">
                 <div class="swap-label">YOU RECEIVE</div>
@@ -116,42 +108,37 @@
         <div style="text-align:center; padding-top:40px;">
             <img src="https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/ton/info/logo.png" style="width: 80px; opacity: 0.2; margin-bottom: 20px;">
             <div id="ton-connect-btn" style="display:inline-block;"></div>
-            <p style="opacity:0.5; margin-top:20px; font-size: 13px;">Connect your TON wallet<br>to start trading safely</p>
         </div>
     </div>
 </div>
 
 <nav>
-    <div class="nav-item active" onclick="showTab('wallet', this)">👛</div>
-    <div class="nav-item" onclick="showTab('swap', this)">🌀</div>
-    <div class="nav-item" onclick="showTab('connect', this)">🔏</div>
+    <div class="nav-item active" onclick="showTab('wallet', this)">💎</div>
+    <div class="nav-item" onclick="showTab('swap', this)">🔄</div>
+    <div class="nav-item" onclick="showTab('connect', this)">🔗</div>
 </nav>
 
 <div id="universal_modal" class="modal-overlay" onclick="closeModal('universal_modal')">
     <div class="modal-body" onclick="event.stopPropagation()">
-        
         <div class="modal-view active" id="view_menu">
             <img id="menu_logo" class="modal-coin-icon" src="">
             <h2 id="menu_title" style="margin: 0 0 20px 0;">Asset</h2>
             <button class="action-btn btn-blue" onclick="switchModalView('send')">Send</button>
             <button class="action-btn btn-outline" onclick="switchModalView('receive')">Receive</button>
         </div>
-
         <div class="modal-view" id="view_send">
             <img id="send_logo" class="modal-coin-icon" src="">
             <h3>Send <span class="cur_asset"></span></h3>
             <input type="text" class="field" placeholder="Recipient Address">
             <input type="number" class="field" placeholder="Amount">
-            <input type="text" class="field" placeholder="Comment / MEMO">
             <button class="action-btn btn-blue">Confirm Send</button>
             <button class="action-btn btn-outline" onclick="switchModalView('menu')">Back</button>
         </div>
-
         <div class="modal-view" id="view_receive">
             <img id="receive_logo" class="modal-coin-icon" src="">
             <h3>Receive <span class="cur_asset"></span></h3>
             <div id="qrcode"></div>
-            <div id="full_addr" style="font-size:11px; word-break:break-all; opacity:0.6; margin:10px 0; background:rgba(0,0,0,0.2); padding:10px; border-radius:10px;">Connect wallet to see address</div>
+            <div id="full_addr" style="font-size:11px; word-break:break-all; opacity:0.6; margin:10px 0;">Connect wallet...</div>
             <button class="action-btn btn-blue" onclick="copyAddr()">Copy Address</button>
             <button class="action-btn btn-outline" onclick="switchModalView('menu')">Back</button>
         </div>
@@ -179,27 +166,15 @@
         { id: 'LTC', name: 'Litecoin', cg: 'litecoin', img: 'https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/litecoin/info/logo.png' },
         { id: 'SUI', name: 'Sui', cg: 'sui', img: 'https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/sui/info/logo.png' },
         { id: 'POL', name: 'Polygon', cg: 'matic-network', img: 'https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/polygon/info/logo.png' },
-        // Улучшенное лого USDT (Скрин 6)
         { id: 'USDT', name: 'USDT', cg: 'tether', img: 'https://assets.coingecko.com/coins/images/325/standard/Tether.png' },
         { id: 'BTC', name: 'Bitcoin', cg: 'bitcoin', img: 'https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/bitcoin/info/logo.png' },
         { id: 'ETH', name: 'Ethereum', cg: 'ethereum', img: 'https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/ethereum/info/logo.png' }
     ];
 
-    let swapFrom = "TON", swapTo = "USDT", activePicker = "", currentAddr = "";
+    let swapFrom = "TON", swapTo = "USDT", currentAddr = "";
 
     function init() {
-        const list = document.getElementById('asset_list');
-        list.innerHTML = assets.map(a => `
-            <div class="asset-item" onclick="showAssetMenu('${a.id}')">
-                <img src="${a.img}" class="asset-icon">
-                <div class="asset-info">
-                    <div class="asset-name">${a.id}</div>
-                    <div class="asset-price" id="price_${a.id}">$0.00</div>
-                </div>
-                <div class="bal-amount">0.00</div>
-            </div>
-        `).join('');
-        
+        renderAssets();
         updatePrices();
         updateSwapUI();
 
@@ -218,6 +193,55 @@
             }
         });
     }
+
+    function renderAssets() {
+        const list = document.getElementById('asset_list');
+        list.innerHTML = assets.map(a => `
+            <div class="asset-item" onclick="showAssetMenu('${a.id}')">
+                <img src="${a.img}" class="asset-icon">
+                <div class="asset-info">
+                    <div class="asset-name">${a.id}</div>
+                    <div class="asset-price" id="price_${a.id}">$0.00</div>
+                </div>
+                <div class="bal-amount">0.00</div>
+            </div>
+        `).join('');
+    }
+
+    window.calculateSwap = function() {
+        const input = document.getElementById('sw_val');
+        const output = document.getElementById('sw_res');
+        const val = parseFloat(input.value);
+        
+        const f = assets.find(a => a.id === swapFrom);
+        const t = assets.find(a => a.id === swapTo);
+
+        if(!isNaN(val) && val > 0 && f.price > 0 && t.price > 0) {
+            const result = (val * f.price) / t.price;
+            output.value = result.toLocaleString('en-US', {maximumFractionDigits: 6});
+        } else {
+            output.value = "0";
+        }
+    };
+
+    window.updateSwapUI = function() {
+        const f = assets.find(a => a.id === swapFrom);
+        const t = assets.find(a => a.id === swapTo);
+        document.getElementById('sw_from_img').src = f.img;
+        document.getElementById('sw_from_txt').innerText = f.id;
+        document.getElementById('sw_to_img').src = t.img;
+        document.getElementById('sw_to_txt').innerText = t.id;
+        
+        const btn = document.getElementById('swap_confirm_btn');
+        if(swapFrom === swapTo) {
+            btn.disabled = true;
+            btn.innerText = "Select different assets";
+        } else {
+            btn.disabled = false;
+            btn.innerText = "SWAP ASSETS";
+        }
+        calculateSwap();
+    };
 
     window.showTab = function(id, el) {
         document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
@@ -258,35 +282,6 @@
     window.selectCoin = function(id) {
         if(activePicker === 'from') swapFrom = id; else swapTo = id;
         updateSwapUI(); closeModal('picker_modal');
-    };
-
-    window.updateSwapUI = function() {
-        const f = assets.find(a => a.id === swapFrom);
-        const t = assets.find(a => a.id === swapTo);
-        document.getElementById('sw_from_img').src = f.img;
-        document.getElementById('sw_from_txt').innerText = f.id;
-        document.getElementById('sw_to_img').src = t.img;
-        document.getElementById('sw_to_txt').innerText = t.id;
-        
-        // Запрет на одинаковые монеты (Скрин 5)
-        const btn = document.getElementById('swap_confirm_btn');
-        if(swapFrom === swapTo) {
-            btn.disabled = true;
-            btn.innerText = "Select different assets";
-        } else {
-            btn.disabled = false;
-            btn.innerText = "SWAP ASSETS";
-        }
-        calculateSwap();
-    };
-
-    window.calculateSwap = function() {
-        const val = document.getElementById('sw_val').value;
-        const f = assets.find(a => a.id === swapFrom);
-        const t = assets.find(a => a.id === swapTo);
-        if(val > 0 && f.price > 0 && t.price > 0) {
-            document.getElementById('sw_res').value = ((val * f.price) / t.price).toFixed(6);
-        } else { document.getElementById('sw_res').value = "0"; }
     };
 
     window.swapReverse = function() {
