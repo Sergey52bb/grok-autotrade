@@ -3,130 +3,109 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>Grok Avto Trade v15.2</title>
+    <title>Grok Avto Trade Final</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <script src="https://unpkg.com/@tonconnect/ui@2.0.9/dist/tonconnect-ui.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
     <style>
-        :root {
-            --bg: #050b14;
-            --panel: #0d141d;
-            --blue: #4DB8FF;
-            --green: #00ff95;
-            --border: rgba(255,255,255,0.08);
-            --text-dim: rgba(255,255,255,0.6);
-        }
-
+        :root { --bg: #050b14; --panel: #0d141d; --blue: #4DB8FF; --green: #00ff95; --border: rgba(255,255,255,0.08); }
         * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
-        body { 
-            background: var(--bg); color: white; margin: 0; 
-            font-family: -apple-system, system-ui, sans-serif; 
-            height: 100vh; display: flex; flex-direction: column; overflow: hidden; 
-        }
+        body { background: var(--bg); color: white; margin: 0; font-family: -apple-system, sans-serif; height: 100vh; display: flex; flex-direction: column; overflow: hidden; }
 
-        header { padding: 15px; text-align: center; flex-shrink: 0; }
-        .logo-svg { width: 140px; height: auto; }
-        .subtitle { font-size: 11px; color: var(--blue); letter-spacing: 2px; font-weight: 800; margin-top: 5px; }
+        header { padding: 10px; text-align: center; flex-shrink: 0; border-bottom: 1px solid var(--border); }
+        .logo-svg { width: 120px; height: auto; }
 
-        #main_content { flex: 1; overflow-y: auto; padding: 10px 15px 120px; }
+        #main_content { flex: 1; overflow-y: auto; padding: 10px 15px 100px; }
         .screen { display: none; }
-        .screen.active { display: block; animation: fadeIn 0.3s ease; }
+        .screen.active { display: block; }
 
-        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
-
-        .card { background: var(--panel); border: 1px solid var(--border); padding: 20px; border-radius: 25px; margin-bottom: 15px; }
-
-        /* Assets */
+        /* Wallet */
+        .balance-card { text-align: center; padding: 20px 0; }
         .asset-item { 
-            display: flex; align-items: center; padding: 15px; 
-            background: rgba(77, 184, 255, 0.03); border: 1px solid rgba(77, 184, 255, 0.15);
-            border-radius: 20px; margin-bottom: 10px; cursor: pointer;
+            display: flex; align-items: center; padding: 12px; background: rgba(255,255,255,0.03); 
+            border: 1px solid var(--border); border-radius: 18px; margin-bottom: 8px; 
         }
-        .asset-icon-box { width: 42px; height: 42px; border-radius: 50%; overflow: hidden; border: 1px solid var(--border); }
-        .asset-icon-img { width: 100%; height: 100%; object-fit: cover; }
-        .asset-details { flex: 1; margin-left: 15px; }
-        .asset-name { font-weight: 700; font-size: 16px; }
-        .asset-price { font-size: 12px; color: var(--green); margin-top: 2px; }
-        .bal-amount { font-weight: 600; text-align: right; }
+        .asset-icon { width: 36px; height: 36px; border-radius: 50%; margin-right: 12px; border: 1px solid var(--border); }
+        .asset-info { flex: 1; }
+        .asset-name { font-weight: bold; font-size: 15px; }
+        .asset-price { font-size: 11px; color: var(--green); }
 
-        /* Navigation */
-        nav { 
-            position: fixed; bottom: 20px; left: 15px; right: 15px; height: 70px; 
-            background: var(--panel); display: flex; border-radius: 20px; 
-            border: 1px solid var(--border); box-shadow: 0 10px 30px rgba(0,0,0,0.5); z-index: 100;
-        }
-        .nav-item { flex: 1; display: flex; align-items: center; justify-content: center; font-size: 24px; opacity: 0.3; transition: 0.3s; }
-        .nav-item.active { opacity: 1; transform: translateY(-5px); font-size: 30px; color: var(--blue); }
+        /* Swap Section (Скрин 5, 6, 7) */
+        .swap-container { background: var(--panel); border-radius: 25px; padding: 20px; border: 1px solid var(--border); }
+        .swap-box { background: rgba(0,0,0,0.2); border: 1px solid var(--border); padding: 15px; border-radius: 20px; margin-bottom: 5px; }
+        .swap-label { font-size: 10px; color: var(--blue); margin-bottom: 8px; font-weight: bold; }
+        .swap-input-row { display: flex; align-items: center; justify-content: space-between; }
+        .swap-input-row input { background: transparent; border: none; color: white; font-size: 22px; width: 60%; outline: none; }
+        .coin-select { display: flex; align-items: center; background: rgba(255,255,255,0.05); padding: 6px 12px; border-radius: 12px; font-weight: bold; cursor: pointer; }
+        .coin-select img { width: 20px; height: 20px; margin-right: 8px; border-radius: 50%; }
 
-        /* Modals */
-        .modal-overlay { 
-            display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; 
-            background: rgba(0,0,0,0.85); z-index: 1000; align-items: flex-end; 
-        }
-        .modal-body { 
-            background: var(--panel); width: 100%; border-radius: 30px 30px 0 0; 
-            padding: 25px 20px 40px; border-top: 1px solid var(--blue);
-        }
-        .modal-view { display: none; text-align: center; }
+        /* Modals & Views (Скрин 2, 3, 4) */
+        .modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.9); z-index: 1000; align-items: flex-end; }
+        .modal-body { background: var(--panel); width: 100%; border-radius: 30px 30px 0 0; padding: 25px; border-top: 1px solid var(--blue); }
+        .modal-view { display: none; }
         .modal-view.active { display: block; }
         
-        .coin-header { display: flex; flex-direction: column; align-items: center; margin-bottom: 20px; }
-        .coin-header img { width: 50px; height: 50px; border-radius: 50%; border: 2px solid var(--blue); margin-bottom: 10px; }
+        .action-btn { width: 100%; padding: 16px; border-radius: 15px; border: none; font-weight: bold; cursor: pointer; margin-top: 10px; }
+        .btn-blue { background: var(--blue); color: #000; }
+        .btn-outline { background: rgba(255,255,255,0.05); color: #fff; border: 1px solid var(--border); }
 
-        .btn-action { 
-            background: rgba(255,255,255,0.05); border: 1px solid var(--border); 
-            padding: 15px; border-radius: 15px; color: white; font-weight: 600; margin: 5px 0; width: 100%;
-        }
-        .btn-confirm { background: var(--blue); color: black; border: none; padding: 18px; border-radius: 15px; width: 100%; font-weight: 800; margin-top: 15px; }
+        input.field { width: 100%; padding: 14px; background: rgba(0,0,0,0.3); border: 1px solid var(--border); border-radius: 12px; color: white; margin-bottom: 10px; }
 
-        input { 
-            width: 100%; padding: 15px; background: rgba(0,0,0,0.2); 
-            border: 1px solid var(--border); border-radius: 15px; color: white; 
-            font-size: 18px; text-align: center; margin-top: 10px;
-        }
+        /* Nav */
+        nav { position: fixed; bottom: 15px; left: 15px; right: 15px; height: 65px; background: var(--panel); display: flex; border-radius: 20px; border: 1px solid var(--border); z-index: 100; }
+        .nav-item { flex: 1; display: flex; align-items: center; justify-content: center; font-size: 22px; opacity: 0.3; }
+        .nav-item.active { opacity: 1; color: var(--blue); transform: translateY(-3px); }
 
-        #qrcode { background: white; padding: 10px; border-radius: 15px; display: inline-block; margin: 15px 0; }
+        #qrcode { background: white; padding: 8px; border-radius: 12px; display: inline-block; margin: 10px 0; }
     </style>
 </head>
 <body>
 
 <header>
-    <svg class="logo-svg" viewBox="0 0 668 237" fill="none">
-        <path d="M118.204 0.000194514C183.486 0.000194514 236.408 52.9223 236.408 118.204C236.408 183.487 183.486 236.408 118.204 236.408C52.9216 236.408 0.000184007 183.486 0 118.204C0 52.9224 52.9215 0.000354089 118.204 0.000194514ZM74.1011 62.1964C57.6799 62.1964 47.268 79.9119 55.5308 94.2346L109.964 188.582C113.619 194.922 122.781 194.922 126.436 188.582L180.88 94.2346C189.132 79.9342 178.72 62.1965 162.31 62.1964H74.1011ZM162.288 78.8411C166.031 78.8411 168.234 82.812 166.45 85.9074L137.856 137.091L137.851 137.099L126.506 159.046V78.8411H162.288ZM109.872 78.8516V159.024L98.5376 137.087L98.5334 137.08L69.9294 85.9214L69.8468 85.7724C68.2134 82.6996 70.405 78.8516 74.0899 78.8516H109.872" fill="#4DB8FF"/>
-        <path d="M639.524 146.751V62.9139H668V188.849H636.565L573.696 99.0752V188.849H545.034V62.9139H581.277L639.524 146.751Z" fill="white"/>
-        <path d="M456.407 191.686C414.432 191.686 384.107 163.081 384.107 126.74C384.107 90.3983 414.432 61.7931 456.407 61.7931C498.382 61.7931 528.707 90.5782 528.707 126.74C528.707 162.901 498.382 191.686 456.407 191.686ZM456.407 167.219C481 167.219 497.272 149.408 497.272 126.74C497.272 104.071 481 86.2605 456.407 86.2605C431.814 86.2605 415.542 104.071 415.542 126.74C415.542 149.408 431.814 167.219 456.407 167.219Z" fill="white"/>
-        <path d="M384.269 63.5978V85.7264H342.11V189.533H312.339V85.7264H270.179V63.5978H384.269Z" fill="white"/>
-    </svg>
-    <div class="subtitle">👛 SYN WALLET</div>
+    <svg class="logo-svg" viewBox="0 0 668 237" fill="none"><path d="M118.204 0.000194514C183.486 0.000194514 236.408 52.9223 236.408 118.204C236.408 183.487 183.486 236.408 118.204 236.408C52.9216 236.408 0.000184007 183.486 0 118.204C0 52.9224 52.9215 0.000354089 118.204 0.000194514ZM74.1011 62.1964C57.6799 62.1964 47.268 79.9119 55.5308 94.2346L109.964 188.582C113.619 194.922 122.781 194.922 126.436 188.582L180.88 94.2346C189.132 79.9342 178.72 62.1965 162.31 62.1964H74.1011ZM162.288 78.8411C166.031 78.8411 168.234 82.812 166.45 85.9074L137.856 137.091L137.851 137.099L126.506 159.046V78.8411H162.288ZM109.872 78.8516V159.024L98.5376 137.087L98.5334 137.08L69.9294 85.9214L69.8468 85.7724C68.2134 82.6996 70.405 78.8516 74.0899 78.8516H109.872" fill="#4DB8FF"/><path d="M639.524 146.751V62.9139H668V188.849H636.565L573.696 99.0752V188.849H545.034V62.9139H581.277L639.524 146.751Z" fill="white"/><path d="M456.407 191.686C414.432 191.686 384.107 163.081 384.107 126.74C384.107 90.3983 414.432 61.7931 456.407 61.7931C498.382 61.7931 528.707 90.5782 528.707 126.74C528.707 162.901 498.382 191.686 456.407 191.686ZM456.407 167.219C481 167.219 497.272 149.408 497.272 126.74C497.272 104.071 481 86.2605 456.407 86.2605C431.814 86.2605 415.542 104.071 415.542 126.74C415.542 149.408 431.814 167.219 456.407 167.219Z" fill="white"/><path d="M384.269 63.5978V85.7264H342.11V189.533H312.339V85.7264H270.179V63.5978H384.269Z" fill="white"/></svg>
 </header>
 
 <div id="main_content">
     <div id="scr_wallet" class="screen active">
-        <div style="text-align:center; padding-bottom: 25px;">
-            <div style="font-size: 11px; opacity: 0.5; letter-spacing: 1px;">TOTAL BALANCE</div>
-            <h1 id="main_balance" style="font-size:42px; margin:5px 0; font-weight: 800;">0.00 TON</h1>
-            <div id="addr_display" style="font-size:12px; color:var(--blue); background:rgba(77,184,255,0.1); padding:6px 14px; border-radius:20px; display:inline-block; border: 1px solid rgba(77,184,255,0.2);">Disconnected</div>
+        <div class="balance-card">
+            <div style="font-size: 12px; opacity: 0.5;">BALANCE</div>
+            <h1 id="main_balance">0.00 TON</h1>
+            <div id="addr_display" style="font-size:11px; color:var(--blue);">Not Connected</div>
         </div>
         <div id="asset_list"></div>
     </div>
 
     <div id="scr_swap" class="screen">
-        <div class="card">
-            <h3 style="margin-top:0;">Swap Assets</h3>
-            <div style="font-size:11px; opacity:0.5;">FROM</div>
-            <input type="number" id="sw_val" placeholder="0.0">
-            <button class="btn-action" onclick="openCoinPicker('from')">
-                <img id="sw_from_img" src="" style="width:20px; vertical-align:middle; border-radius:50%; margin-right:8px;">
-                <span id="sw_from_txt">TON</span>
-            </button>
-            <div style="text-align:center; margin: 10px 0; font-size: 24px; cursor:pointer;" onclick="swapReverse()">🔄</div>
-            <div style="font-size:11px; opacity:0.5;">TO</div>
-            <input type="text" id="sw_res" readonly placeholder="0.0">
-            <button class="btn-action" onclick="openCoinPicker('to')">
-                <img id="sw_to_img" src="" style="width:20px; vertical-align:middle; border-radius:50%; margin-right:8px;">
-                <span id="sw_to_txt">USDT</span>
-            </button>
-            <button class="btn-confirm" onclick="window.Telegram.WebApp.showAlert('Swap processing...')">SWAP NOW</button>
+        <div class="swap-container">
+            <div class="swap-box">
+                <div class="swap-label">YOU PAY</div>
+                <div class="swap-input-row">
+                    <input type="number" id="sw_val" placeholder="0">
+                    <div class="coin-select" onclick="openCoinPicker('from')">
+                        <img id="sw_from_img" src=""> <span id="sw_from_txt">TON</span>
+                    </div>
+                </div>
+            </div>
+            <div style="text-align:center; margin: -15px 0; position:relative; z-index:2;" onclick="swapReverse()">
+                <div style="background:var(--bg); width:34px; height:34px; border-radius:50%; display:inline-flex; align-items:center; justify-content:center; border:1px solid var(--border);">🔄</div>
+            </div>
+            <div class="swap-box" style="margin-top:5px;">
+                <div class="swap-label">YOU RECEIVE</div>
+                <div class="swap-input-row">
+                    <input type="text" id="sw_res" readonly placeholder="0">
+                    <div class="coin-select" onclick="openCoinPicker('to')">
+                        <img id="sw_to_img" src=""> <span id="sw_to_txt">USDT</span>
+                    </div>
+                </div>
+            </div>
+            <button class="action-btn btn-blue" style="margin-top:20px;">SWAP ASSETS</button>
+        </div>
+    </div>
+
+    <div id="scr_connect" class="screen">
+        <div style="text-align:center; padding-top:40px;">
+            <div id="ton-connect-btn" style="display:inline-block;"></div>
+            <p style="opacity:0.5; margin-top:20px;">Connect your TON wallet to start trading</p>
         </div>
     </div>
 </div>
@@ -134,69 +113,82 @@
 <nav>
     <div class="nav-item active" onclick="showTab('wallet', this)">💎</div>
     <div class="nav-item" onclick="showTab('swap', this)">🔄</div>
-    <div class="nav-item" onclick="window.Telegram.WebApp.showAlert('Settings coming soon')">⚙️</div>
+    <div class="nav-item" onclick="showTab('connect', this)">🔗</div>
 </nav>
 
 <div id="universal_modal" class="modal-overlay" onclick="closeModal('universal_modal')">
     <div class="modal-body" onclick="event.stopPropagation()">
-        
         <div class="modal-view active" id="view_menu">
-            <h2 id="menu_title">Asset Name</h2>
-            <button class="btn-action" onclick="switchModalView('send')">📤 Send <span class="cur_asset"></span></button>
-            <button class="btn-action" onclick="switchModalView('receive')">📥 Receive <span class="cur_asset"></span></button>
-            <button class="btn-action" style="color: #ff4d4d;" onclick="closeModal('universal_modal')">Close</button>
+            <div style="text-align:center; margin-bottom:20px;">
+                <img id="menu_logo" src="" style="width:50px; border-radius:50%;">
+                <h2 id="menu_title" style="margin:10px 0;">Asset</h2>
+            </div>
+            <button class="action-btn btn-blue" onclick="switchModalView('send')">Send</button>
+            <button class="action-btn btn-outline" onclick="switchModalView('receive')">Receive</button>
         </div>
 
         <div class="modal-view" id="view_send">
-            <div class="coin-header">
-                <img id="send_logo" src="">
-                <h2>Send <span class="cur_asset"></span></h2>
-            </div>
-            <input type="text" placeholder="Recipient Address">
-            <input type="number" placeholder="Amount">
-            <button class="btn-confirm" onclick="window.Telegram.WebApp.showAlert('Transaction Sent!')">CONFIRM SEND</button>
-            <button class="btn-action" onclick="switchModalView('menu')" style="margin-top:10px;">Back</button>
+            <h3 style="text-align:center;">Send <span class="cur_asset"></span></h3>
+            <input type="text" class="field" placeholder="Recipient Address">
+            <input type="number" class="field" placeholder="Amount">
+            <input type="text" class="field" placeholder="Comment / MEMO (Optional)">
+            <button class="action-btn btn-blue">Confirm Send</button>
+            <button class="action-btn btn-outline" onclick="switchModalView('menu')">Back</button>
         </div>
 
-        <div class="modal-view" id="view_receive">
-            <div class="coin-header">
-                <img id="receive_logo" src="">
-                <h2>Receive <span class="cur_asset"></span></h2>
-            </div>
+        <div class="modal-view" id="view_receive" style="text-align:center;">
+            <h3>Receive <span class="cur_asset"></span></h3>
             <div id="qrcode"></div>
-            <div id="full_addr" style="font-size:10px; word-break:break-all; background:rgba(0,0,0,0.3); padding:10px; border-radius:10px; margin-bottom:10px;">Connect wallet...</div>
-            <button class="btn-confirm" onclick="copyAddr()">COPY ADDRESS</button>
-            <button class="btn-action" onclick="switchModalView('menu')" style="margin-top:10px;">Back</button>
+            <div id="full_addr" style="font-size:10px; word-break:break-all; opacity:0.6; margin:10px 0;">Connect wallet to see address</div>
+            <button class="action-btn btn-blue" onclick="copyAddr()">Copy Address</button>
+            <button class="action-btn btn-outline" onclick="switchModalView('menu')">Back</button>
         </div>
-
     </div>
 </div>
 
 <div id="picker_modal" class="modal-overlay" onclick="closeModal('picker_modal')">
     <div class="modal-body" onclick="event.stopPropagation()">
         <h3>Select Token</h3>
-        <div id="coin_options_list"></div>
+        <div id="coin_options_list" style="max-height:300px; overflow-y:auto;"></div>
     </div>
 </div>
 
 <script>
     const tg = window.Telegram.WebApp;
-    tg.ready();
-    tg.expand();
+    tg.ready(); tg.expand();
 
+    // ВСЕ 12 МОНЕТ (Скрин 1)
     const assets = [
-        { id: 'TON', name: 'The Open Network', cg: 'the-open-network', price: 0, img: 'https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/ton/info/logo.png' },
-        { id: 'USDT', name: 'Tether USD', cg: 'tether', price: 1, img: 'https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/ethereum/assets/0xdAC17F958D2ee523a2206206994597C13D831ec7/logo.png' },
-        { id: 'BTC', name: 'Bitcoin', cg: 'bitcoin', price: 0, img: 'https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/bitcoin/info/logo.png' },
-        { id: 'ETH', name: 'Ethereum', cg: 'ethereum', price: 0, img: 'https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/ethereum/info/logo.png' }
+        { id: 'TON', name: 'TON', cg: 'the-open-network', img: 'https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/ton/info/logo.png' },
+        { id: 'SOL', name: 'Solana', cg: 'solana', img: 'https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/solana/info/logo.png' },
+        { id: 'NEAR', name: 'Near', cg: 'near', img: 'https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/near/info/logo.png' },
+        { id: 'USDC', name: 'USDC', cg: 'usd-coin', img: 'https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/ethereum/assets/0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48/logo.png' },
+        { id: 'DOGE', name: 'Dogecoin', cg: 'dogecoin', img: 'https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/doge/info/logo.png' },
+        { id: 'BNB', name: 'BNB', cg: 'binancecoin', img: 'https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/binance/info/logo.png' },
+        { id: 'LTC', name: 'Litecoin', cg: 'litecoin', img: 'https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/litecoin/info/logo.png' },
+        { id: 'SUI', name: 'Sui', cg: 'sui', img: 'https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/sui/info/logo.png' },
+        { id: 'POL', name: 'Polygon', cg: 'matic-network', img: 'https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/polygon/info/logo.png' },
+        { id: 'USDT', name: 'USDT', cg: 'tether', img: 'https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/ethereum/assets/0xdAC17F958D2ee523a2206206994597C13D831ec7/logo.png' },
+        { id: 'BTC', name: 'Bitcoin', cg: 'bitcoin', img: 'https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/bitcoin/info/logo.png' },
+        { id: 'ETH', name: 'Ethereum', cg: 'ethereum', img: 'https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/ethereum/info/logo.png' }
     ];
 
     let swapFrom = "TON", swapTo = "USDT", activePicker = "", currentAddr = "";
 
     function init() {
-        renderAssets();
+        const list = document.getElementById('asset_list');
+        list.innerHTML = assets.map(a => `
+            <div class="asset-item" onclick="showAssetMenu('${a.id}')">
+                <img src="${a.img}" class="asset-icon">
+                <div class="asset-info">
+                    <div class="asset-name">${a.id}</div>
+                    <div class="asset-price" id="price_${a.id}">$0.00</div>
+                </div>
+                <div class="bal-amount">0.00</div>
+            </div>
+        `).join('');
+        
         updatePrices();
-        setInterval(updatePrices, 60000);
         updateSwapUI();
 
         const tc = new TON_CONNECT_UI.TonConnectUI({
@@ -204,49 +196,20 @@
             buttonRootId: 'ton-connect-btn'
         });
 
-        tc.onStatusChange(wallet => {
-            if (wallet) {
-                currentAddr = wallet.account.address;
-                document.getElementById('addr_display').innerText = currentAddr.substring(0,6) + "..." + currentAddr.substring(currentAddr.length-4);
+        tc.onStatusChange(w => {
+            if (w) {
+                currentAddr = w.account.address;
+                document.getElementById('addr_display').innerText = currentAddr.substring(0,6) + "...";
                 document.getElementById('full_addr').innerText = currentAddr;
                 document.getElementById('qrcode').innerHTML = "";
-                new QRCode(document.getElementById("qrcode"), { text: currentAddr, width: 150, height: 150 });
+                new QRCode(document.getElementById("qrcode"), { text: currentAddr, width: 140, height: 140 });
             }
         });
     }
 
-    function renderAssets() {
-        const list = document.getElementById('asset_list');
-        list.innerHTML = assets.map(a => `
-            <div class="asset-item" onclick="showAssetMenu('${a.id}')">
-                <div class="asset-icon-box"><img src="${a.img}" class="asset-icon-img"></div>
-                <div class="asset-details">
-                    <div class="asset-name">${a.id}</div>
-                    <div class="asset-price" id="price_${a.id}">$0.00</div>
-                </div>
-                <div class="bal-amount">0.00</div>
-            </div>
-        `).join('');
-    }
-
-    async function updatePrices() {
-        try {
-            const ids = assets.map(a => a.cg).join(',');
-            const res = await fetch(`https://api.coingecko.com/api/v3/simple/price?ids=${ids}&vs_currencies=usd`);
-            const data = await res.json();
-            assets.forEach(a => {
-                if(data[a.cg]) {
-                    a.price = data[a.cg].usd;
-                    document.getElementById(`price_${a.id}`).innerText = "$" + a.price.toLocaleString();
-                }
-            });
-            calculateSwap();
-        } catch(e) { console.log("Price API error"); }
-    }
-
     window.showTab = function(id, el) {
         document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
-        document.getElementById('scr_' + id).classList.add('active');
+        document.getElementById('scr_'+id).classList.add('active');
         document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
         el.classList.add('active');
     };
@@ -254,12 +217,8 @@
     window.showAssetMenu = function(id) {
         const a = assets.find(x => x.id === id);
         document.getElementById('menu_title').innerText = a.name;
+        document.getElementById('menu_logo').src = a.img;
         document.querySelectorAll('.cur_asset').forEach(e => e.innerText = a.id);
-        
-        // Сразу подтягиваем логотип в модалки Send/Receive
-        document.getElementById('send_logo').src = a.img;
-        document.getElementById('receive_logo').src = a.img;
-
         window.switchModalView('menu');
         document.getElementById('universal_modal').style.display = 'flex';
     };
@@ -284,8 +243,7 @@
 
     window.selectCoin = function(id) {
         if(activePicker === 'from') swapFrom = id; else swapTo = id;
-        updateSwapUI();
-        closeModal('picker_modal');
+        updateSwapUI(); closeModal('picker_modal');
     };
 
     window.updateSwapUI = function() {
@@ -295,29 +253,27 @@
         document.getElementById('sw_from_txt').innerText = f.id;
         document.getElementById('sw_to_img').src = t.img;
         document.getElementById('sw_to_txt').innerText = t.id;
-        calculateSwap();
     };
 
-    window.calculateSwap = function() {
-        const val = document.getElementById('sw_val').value;
-        const f = assets.find(a => a.id === swapFrom);
-        const t = assets.find(a => a.id === swapTo);
-        if(val > 0 && f.price > 0 && t.price > 0) {
-            document.getElementById('sw_res').value = ((val * f.price) / t.price).toFixed(6);
-        } else { document.getElementById('sw_res').value = "0.0"; }
-    };
-
-    window.swapReverse = function() {
-        const temp = swapFrom; swapFrom = swapTo; swapTo = temp;
-        updateSwapUI();
-    };
+    async function updatePrices() {
+        try {
+            const ids = assets.map(a => a.cg).join(',');
+            const res = await fetch(`https://api.coingecko.com/api/v3/simple/price?ids=${ids}&vs_currencies=usd`);
+            const data = await res.json();
+            assets.forEach(a => {
+                if(data[a.cg]) {
+                    a.price = data[a.cg].usd;
+                    document.getElementById(`price_${a.id}`).innerText = "$" + a.price.toLocaleString();
+                }
+            });
+        } catch(e) { console.log("API Error"); }
+    }
 
     window.copyAddr = function() {
-        const addr = document.getElementById('full_addr').innerText;
-        if(addr === "Connect wallet...") return;
-        navigator.clipboard.writeText(addr).then(() => {
-            window.Telegram.WebApp.showAlert("Address copied!");
-        });
+        if(currentAddr) {
+            navigator.clipboard.writeText(currentAddr);
+            tg.showAlert("Copied!");
+        }
     };
 
     window.onload = init;
