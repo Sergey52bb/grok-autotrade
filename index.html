@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>Grok Avto Trade v15.5</title>
+    <title>Grok Avto Trade v15.6</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <script src="https://unpkg.com/@tonconnect/ui@2.0.9/dist/tonconnect-ui.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
@@ -15,7 +15,6 @@
         header { padding: 10px; text-align: center; flex-shrink: 0; border-bottom: 1px solid var(--border); }
         .logo-svg { width: 120px; height: auto; }
 
-        /* Скрин 1: Поднимаем ETH чуть выше за счет увеличения нижнего отступа */
         #main_content { flex: 1; overflow-y: auto; padding: 10px 15px 140px; }
         .screen { display: none; }
         .screen.active { display: block; }
@@ -52,10 +51,10 @@
         .btn-blue { background: var(--blue); color: #000; }
         .btn-blue:disabled { opacity: 0.3; }
         .btn-outline { background: rgba(255,255,255,0.05); color: #fff; border: 1px solid var(--border); }
-        input.field { width: 100%; padding: 14px; background: rgba(0,0,0,0.3); border: 1px solid var(--border); border-radius: 12px; color: white; margin-bottom: 10px; text-align: center; }
+        input.field { width: 100%; padding: 14px; background: rgba(0,0,0,0.3); border: 1px solid var(--border); border-radius: 12px; color: white; margin-bottom: 10px; text-align: center; outline: none; }
 
         nav { position: fixed; bottom: 15px; left: 15px; right: 15px; height: 65px; background: var(--panel); display: flex; border-radius: 20px; border: 1px solid var(--border); z-index: 100; }
-        .nav-item { flex: 1; display: flex; align-items: center; justify-content: center; font-size: 22px; opacity: 0.3; }
+        .nav-item { flex: 1; display: flex; align-items: center; justify-content: center; font-size: 22px; opacity: 0.3; cursor: pointer; }
         .nav-item.active { opacity: 1; color: var(--blue); transform: translateY(-3px); }
 
         #qrcode { background: white; padding: 8px; border-radius: 12px; display: inline-block; margin: 10px 0; }
@@ -131,6 +130,7 @@
             <h3>Send <span class="cur_asset"></span></h3>
             <input type="text" class="field" placeholder="Recipient Address">
             <input type="number" class="field" placeholder="Amount">
+            <input type="text" class="field" placeholder="Comment / MEMO (Optional)">
             <button class="action-btn btn-blue">Confirm Send</button>
             <button class="action-btn btn-outline" onclick="switchModalView('menu')">Back</button>
         </div>
@@ -157,18 +157,19 @@
     tg.ready(); tg.expand();
 
     const assets = [
-        { id: 'TON', name: 'TON', cg: 'the-open-network', img: 'https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/ton/info/logo.png' },
-        { id: 'SOL', name: 'Solana', cg: 'solana', img: 'https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/solana/info/logo.png' },
-        { id: 'NEAR', name: 'Near', cg: 'near', img: 'https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/near/info/logo.png' },
-        { id: 'USDC', name: 'USDC', cg: 'usd-coin', img: 'https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/ethereum/assets/0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48/logo.png' },
-        { id: 'DOGE', name: 'Dogecoin', cg: 'dogecoin', img: 'https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/doge/info/logo.png' },
-        { id: 'BNB', name: 'BNB', cg: 'binancecoin', img: 'https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/binance/info/logo.png' },
-        { id: 'LTC', name: 'Litecoin', cg: 'litecoin', img: 'https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/litecoin/info/logo.png' },
-        { id: 'SUI', name: 'Sui', cg: 'sui', img: 'https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/sui/info/logo.png' },
-        { id: 'POL', name: 'Polygon', cg: 'matic-network', img: 'https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/polygon/info/logo.png' },
-        { id: 'USDT', name: 'USDT', cg: 'tether', img: 'https://assets.coingecko.com/coins/images/325/standard/Tether.png' },
-        { id: 'BTC', name: 'Bitcoin', cg: 'bitcoin', img: 'https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/bitcoin/info/logo.png' },
-        { id: 'ETH', name: 'Ethereum', cg: 'ethereum', img: 'https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/ethereum/info/logo.png' }
+        { id: 'TON', name: 'TON', cg: 'the-open-network', img: 'https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/ton/info/logo.png', price: 5.84 },
+        { id: 'SOL', name: 'Solana', cg: 'solana', img: 'https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/solana/info/logo.png', price: 145.2 },
+        { id: 'NEAR', name: 'Near', cg: 'near', img: 'https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/near/info/logo.png', price: 5.4 },
+        { id: 'USDC', name: 'USDC', cg: 'usd-coin', img: 'https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/ethereum/assets/0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48/logo.png', price: 1.0 },
+        { id: 'DOGE', name: 'Dogecoin', cg: 'dogecoin', img: 'https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/doge/info/logo.png', price: 0.15 },
+        { id: 'BNB', name: 'BNB', cg: 'binancecoin', img: 'https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/binance/info/logo.png', price: 580.0 },
+        { id: 'LTC', name: 'Litecoin', cg: 'litecoin', img: 'https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/litecoin/info/logo.png', price: 80.0 },
+        { id: 'SUI', name: 'Sui', cg: 'sui', img: 'https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/sui/info/logo.png', price: 1.2 },
+        { id: 'POL', name: 'Polygon', cg: 'matic-network', img: 'https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/polygon/info/logo.png', price: 0.72 },
+        // Скрин 2: Нормальный логотип USDT
+        { id: 'USDT', name: 'USDT', cg: 'tether', img: 'https://cryptologos.cc/logos/tether-usdt-logo.png?v=025', price: 1.0 },
+        { id: 'BTC', name: 'Bitcoin', cg: 'bitcoin', img: 'https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/bitcoin/info/logo.png', price: 64000.0 },
+        { id: 'ETH', name: 'Ethereum', cg: 'ethereum', img: 'https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/ethereum/info/logo.png', price: 3100.0 }
     ];
 
     let swapFrom = "TON", swapTo = "USDT", currentAddr = "";
@@ -201,7 +202,7 @@
                 <img src="${a.img}" class="asset-icon">
                 <div class="asset-info">
                     <div class="asset-name">${a.id}</div>
-                    <div class="asset-price" id="price_${a.id}">$0.00</div>
+                    <div class="asset-price" id="price_${a.id}">$${a.price.toLocaleString()}</div>
                 </div>
                 <div class="bal-amount">0.00</div>
             </div>
@@ -216,9 +217,10 @@
         const f = assets.find(a => a.id === swapFrom);
         const t = assets.find(a => a.id === swapTo);
 
+        // Исправлено: берем цены напрямую из объекта для надежности
         if(!isNaN(val) && val > 0 && f.price > 0 && t.price > 0) {
             const result = (val * f.price) / t.price;
-            output.value = result.toLocaleString('en-US', {maximumFractionDigits: 6});
+            output.value = result.toFixed(6);
         } else {
             output.value = "0";
         }
@@ -302,7 +304,7 @@
                 }
             });
             calculateSwap();
-        } catch(e) { console.log("API Error"); }
+        } catch(e) { console.log("API Error - using fallback prices"); }
     }
 
     window.copyAddr = function() {
