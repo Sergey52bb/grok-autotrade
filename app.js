@@ -1,5 +1,6 @@
-const tg = window.Telegram.WebApp;
-tg.ready(); tg.expand();
+const tg = window.Telegram.WebApp; 
+tg.ready(); 
+tg.expand();
 
 const assets = [
     { id: 'TON', name: 'TON', price: 0, cg: 'the-open-network', img: 'https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/ton/info/logo.png' },
@@ -16,7 +17,7 @@ const assets = [
     { id: 'POL', name: 'Polygon', price: 0, cg: 'matic-network', img: 'https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/polygon/info/logo.png' }
 ];
 
-let swapFrom = "TON", swapTo = "USDT", activePicker = "";
+let swapFrom = "TON", swapTo = "USDT", activePicker = "", currentAddr = "";
 
 async function updatePrices() {
     try {
@@ -26,16 +27,19 @@ async function updatePrices() {
         assets.forEach(a => {
             if(data[a.cg]) {
                 a.price = data[a.cg].usd;
-                const el = document.getElementById(`price_${a.id}`);
-                if(el) el.innerText = `$${a.price < 1 ? a.price.toFixed(4) : a.price.toLocaleString()}`;
+                const priceEl = document.getElementById(`price_${a.id}`);
+                if(priceEl) {
+                    const formattedPrice = a.price < 1 ? a.price.toFixed(4) : a.price.toLocaleString();
+                    priceEl.innerText = `$${formattedPrice}`;
+                }
             }
         });
         calculateSwap();
-    } catch(e) { console.error("Price fetch failed"); }
+    } catch(e) { console.warn("Price update failed"); }
 }
 
 function init() {
-    const list = document.getElementById('asset_list');
+    const list = document.getElementById('asset_list'); 
     if(list) {
         list.innerHTML = assets.map(a => `
             <div class="asset-item" onclick="showAssetMenu('${a.id}')">
@@ -47,13 +51,28 @@ function init() {
                 <div class="bal-amount">0.00</div>
             </div>`).join('');
     }
-    
-    const logoImg = document.querySelector('.logo-svg');
-    if(logoImg) logoImg.classList.add('rotating-logo');
 
     updatePrices();
     setInterval(updatePrices, 30000);
     updateSwapUI();
+
+    const tc = new TON_CONNECT_UI.TonConnectUI({ 
+        manifestUrl: 'https://sergey52bb.github.io/grok-autotrade/tonconnect-manifest.json', 
+        buttonRootId: 'ton-connect-btn' 
+    });
+
+    tc.onStatusChange(w => { 
+        if (w) { 
+            currentAddr = w.account.address;
+            document.getElementById('addr_display').innerText = currentAddr.substring(0,8)+"...";
+            document.getElementById('full_addr').innerText = currentAddr;
+            document.getElementById("qrcode").innerHTML = "";
+            new QRCode(document.getElementById("qrcode"), { text: currentAddr, width: 150, height: 150 });
+        } 
+    });
+
+    // Слушатель для инпута свапа
+    document.getElementById('sw_val').addEventListener('input', calculateSwap);
 }
 
 window.showTab = function(id, el) {
@@ -65,16 +84,8 @@ window.showTab = function(id, el) {
 
 window.showAssetMenu = function(id) {
     const a = assets.find(x => x.id === id);
-    document.getElementById('menu_title').innerHTML = `
-        <div class="modal-header-info">
-            <img src="${a.img}">
-            <span>${a.name}</span>
-        </div>`;
-    
-    document.querySelectorAll('.cur_asset').forEach(e => {
-        e.innerHTML = `<img src="${a.img}" style="width:18px; border-radius:50%; vertical-align:middle; margin-right:8px;"> ${a.id}`;
-    });
-    
+    document.getElementById('menu_title').innerText = a.name;
+    document.querySelectorAll('.cur_asset').forEach(e => e.innerText = a.id);
     switchModalView('menu');
     document.getElementById('universal_modal').style.display = 'flex';
 }
@@ -86,50 +97,57 @@ window.switchModalView = function(v) {
     document.getElementById('view_' + v).classList.add('active');
 }
 
+window.copyAddr = function() {
+    const addrText = document.getElementById('full_addr').innerText;
+    if(addrText === "Disconnected") { tg.showAlert("Please connect wallet first!"); return; }
+    navigator.clipboard.writeText(addrText).then(() => { tg.showAlert("Address Copied!"); });
+}
+
 window.openCoinPicker = function(type) {
     activePicker = type;
-    const list = document.getElementById('coin_options_list');
-    list.innerHTML = assets.map(a => `
-        <div class="coin-option" onclick="selectCoin('${a.id}')">
-            <img src="${a.img}">
-            <div class="coin-ticker">${a.id}</div>
-        </div>`).join('');
+    const list = document.getElementById('coin_options_list'); 
+    list.innerHTML = "";
+    const forbidden = type === 'from' ? swapTo : swapFrom;
+    assets.forEach(a => {
+        if(a.id === forbidden) return;
+        const opt = document.createElement('div');
+        opt.className = 'coin-option';
+        opt.onclick = () => selectCoin(a.id);
+        opt.innerHTML = `<img src="${a.img}"><div class="coin-ticker">${a.id}</div>`;
+        list.appendChild(opt);
+    });
     document.getElementById('picker_modal').style.display = 'flex';
 }
 
-window.selectCoin = function(id) {
-    if(activePicker === 'from') swapFrom = id; else swapTo = id;
-    updateSwapUI();
-    closeModal('picker_modal');
+window.selectCoin = function(id) { 
+    if(activePicker === 'from') swapFrom = id; else swapTo = id; 
+    updateSwapUI(); 
+    closeModal('picker_modal'); 
 }
 
-function updateSwapUI() {
-    const from = assets.find(x => x.id === swapFrom);
-    const to = assets.find(x => x.id === swapTo);
-    document.getElementById('sw_from_img').src = from.img;
+window.updateSwapUI = function() {
+    const fromAsset = assets.find(x => x.id === swapFrom);
+    const toAsset = assets.find(x => x.id === swapTo);
+    document.getElementById('sw_from_img').src = fromAsset.img;
     document.getElementById('sw_from_txt').innerText = swapFrom;
-    document.getElementById('sw_to_img').src = to.img;
+    document.getElementById('sw_to_img').src = toAsset.img;
     document.getElementById('sw_to_txt').innerText = swapTo;
     calculateSwap();
 }
 
 window.calculateSwap = function() {
-    const valInput = document.getElementById('sw_val');
-    const resInput = document.getElementById('sw_res');
-    if(!valInput || !resInput) return;
-    
-    const val = valInput.value;
-    const aFrom = assets.find(x => x.id === swapFrom);
-    const aTo = assets.find(x => x.id === swapTo);
-    
-    if(val > 0 && aFrom.price > 0 && aTo.price > 0) {
-        resInput.value = ((val * aFrom.price) / aTo.price).toFixed(6);
-    } else { resInput.value = ""; }
+    const val = document.getElementById('sw_val').value;
+    const res = document.getElementById('sw_res');
+    const assetFrom = assets.find(x => x.id === swapFrom);
+    const assetTo = assets.find(x => x.id === swapTo);
+    if(val > 0 && assetFrom.price > 0 && assetTo.price > 0) {
+        res.value = ((val * assetFrom.price) / assetTo.price).toFixed(6);
+    } else { res.value = ""; }
 }
 
-window.swapReverse = function() {
-    const t = swapFrom; swapFrom = swapTo; swapTo = t;
-    updateSwapUI();
+window.swapReverse = function() { 
+    const tmp = swapFrom; swapFrom = swapTo; swapTo = tmp; 
+    updateSwapUI(); 
 }
 
 window.onload = init;
