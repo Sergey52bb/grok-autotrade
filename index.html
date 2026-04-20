@@ -3,11 +3,55 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>Grok Avto Trade v15.0</title>
-    <link rel="stylesheet" href="style.css">
+    <title>Grok Avto Trade v15.1</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <script src="https://unpkg.com/@tonconnect/ui@2.0.9/dist/tonconnect-ui.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+    <style>
+        :root { --bg: #050b14; --panel: #0d141d; --blue: #4DB8FF; --green: #00ff95; --border: rgba(255,255,255,0.08); }
+        
+        * { box-sizing: border-box; }
+        body { background: var(--bg); color: white; margin: 0; font-family: -apple-system, sans-serif; height: 100vh; display: flex; flex-direction: column; overflow: hidden; }
+        
+        header { padding: 15px; text-align: center; flex-shrink: 0; }
+        .logo-svg { width: 140px; height: auto; }
+        .subtitle { font-size: 11px; color: var(--blue); letter-spacing: 2px; font-weight: 800; margin-top: 5px; }
+
+        #main_content { flex: 1; overflow-y: auto; padding: 10px 15px 120px; } 
+        .screen { display: none; }
+        .screen.active { display: block; }
+
+        .card { background: var(--panel); border: 1px solid var(--border); padding: 20px; border-radius: 25px; margin-bottom: 15px; }
+        
+        /* Стили списка активов */
+        .asset-item { display: flex; align-items: center; padding: 15px; border: 1px solid rgba(77, 184, 255, 0.2); border-radius: 20px; margin-bottom: 10px; background: rgba(77, 184, 255, 0.03); }
+        .asset-icon-box { width: 42px; height: 42px; border-radius: 50%; overflow: hidden; border: 1px solid var(--border); }
+        .asset-icon-img { width: 100%; height: 100%; }
+        .asset-details { flex: 1; margin-left: 15px; }
+        .asset-name { font-weight: bold; font-size: 16px; }
+        .asset-price { font-size: 12px; color: var(--green); opacity: 0.8; }
+        
+        /* Стили Свапа */
+        input { width: 100%; padding: 15px; background: rgba(255,255,255,0.05); border: 1px solid var(--border); border-radius: 15px; color: white; font-size: 18px; outline: none; margin-bottom: 10px; }
+        .swap-selector { display: flex; align-items: center; gap: 10px; background: #1a222c; padding: 12px; border-radius: 15px; cursor: pointer; border: 1px solid var(--border); }
+        .swap-selector img { width: 24px; height: 24px; border-radius: 50%; }
+        #rev_btn { width: 40px; height: 40px; background: var(--panel); border: 1px solid var(--blue); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: -25px auto 10px; position: relative; z-index: 2; cursor: pointer; }
+
+        /* Навигация */
+        nav { position: fixed; bottom: 20px; left: 15px; right: 15px; height: 70px; background: var(--panel); display: flex; border-radius: 20px; border: 1px solid var(--border); box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
+        .nav-item { flex: 1; display: flex; align-items: center; justify-content: center; font-size: 24px; opacity: 0.4; transition: 0.3s; }
+        .nav-item.active { opacity: 1; transform: translateY(-5px); font-size: 30px; }
+
+        .btn-confirm { background: var(--green); color: black; padding: 18px; border-radius: 15px; width: 100%; border: none; font-weight: bold; font-size: 16px; cursor: pointer; }
+        
+        /* Анимация стикера */
+        .rotating { animation: rotate 20s linear infinite; }
+        @keyframes rotate { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+
+        /* Модалки */
+        .modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.9); z-index: 1000; align-items: flex-end; }
+        .modal-body { background: var(--panel); width: 100%; border-radius: 30px 30px 0 0; padding: 30px 20px; }
+    </style>
 </head>
 <body>
 
@@ -18,40 +62,39 @@
 
 <div id="main_content">
     <div id="scr_wallet" class="screen active">
-        <div style="text-align:center; padding: 15px 0 25px;">
+        <div style="text-align:center; padding-bottom: 20px;">
             <div style="font-size: 11px; opacity: 0.5;">ESTIMATED BALANCE</div>
-            <h1 id="main_balance" style="font-size:40px; margin:5px 0;">0.00 TON</h1>
-            <div id="addr_display" class="addr-badge">Disconnected</div>
+            <h1 id="main_balance" style="font-size:36px; margin:5px 0;">0.00 TON</h1>
+            <div id="addr_display" style="font-size:12px; color:var(--blue); background:rgba(77,184,255,0.1); padding:5px 12px; border-radius:15px; display:inline-block;">Disconnected</div>
         </div>
         <div id="asset_list"></div>
     </div>
 
     <div id="scr_swap" class="screen">
-        <div class="card" style="margin-top: 10px;">
-            <div class="label">PAY</div>
+        <div class="card">
+            <div style="font-size:11px; opacity:0.5; margin-bottom:5px;">PAY</div>
             <input type="number" id="sw_val" placeholder="0.0">
             <div class="swap-selector" onclick="openCoinPicker('from')">
-                <img id="sw_from_img" src="">
-                <span id="sw_from_txt">TON</span>
+                <img id="sw_from_img" src=""> <span id="sw_from_txt">TON</span>
             </div>
+            
             <div id="rev_btn" onclick="swapReverse()">🌀</div>
-            <div class="label" style="margin-top:20px;">RECEIVE</div>
+            
+            <div style="font-size:11px; opacity:0.5; margin-bottom:5px;">RECEIVE</div>
             <input type="text" id="sw_res" placeholder="0.0" readonly style="color:var(--green);">
             <div class="swap-selector" onclick="openCoinPicker('to')">
-                <img id="sw_to_img" src="">
-                <span id="sw_to_txt">USDT</span>
+                <img id="sw_to_img" src=""> <span id="sw_to_txt">USDT</span>
             </div>
-            <button class="btn-confirm" style="margin-top: 25px;" onclick="tg.showAlert('Swap initiated')">Confirm Swap</button>
+            
+            <button class="btn-confirm" style="margin-top:20px;" onclick="window.Telegram.WebApp.showAlert('Swap initiated')">Confirm Swap</button>
         </div>
     </div>
 
     <div id="scr_connect" class="screen">
-        <div class="card connect-card">
-            <div id="ton-connect-btn"></div>
-            <div class="connect-visual">
-                <img src="https://i.ibb.co/JwD2qCDf/WEB3-Design-Works-Nariman-Mammadzada.jpg" class="rotating sticker">
-                <p>Secure Connection via TON Connect</p>
-            </div>
+        <div class="card" style="text-align:center;">
+            <div id="ton-connect-btn" style="display:flex; justify-content:center; margin-bottom:30px;"></div>
+            <img src="https://i.ibb.co/JwD2qCDf/WEB3-Design-Works-Nariman-Mammadzada.jpg" class="rotating" style="width:150px; height:150px; border-radius:50%; border:2px solid var(--blue);">
+            <p style="margin-top:20px; opacity:0.7;">Secure Web3 Connection</p>
         </div>
     </div>
 </div>
@@ -62,40 +105,122 @@
     <div class="nav-item" onclick="showTab('connect', this)">🔏</div>
 </nav>
 
-<div id="universal_modal" class="modal-overlay" onclick="closeModal('universal_modal')">
+<div id="picker_modal" class="modal-overlay" onclick="this.style.display='none'">
     <div class="modal-body" onclick="event.stopPropagation()">
-        <div id="view_menu" class="modal-view">
-            <h3 id="menu_title">Options</h3>
-            <div class="modal-grid">
-                <button class="btn-confirm btn-white" onclick="switchModalView('deposit')">RECEIVE</button>
-                <button class="btn-confirm btn-blue" onclick="switchModalView('send')">SEND</button>
+        <h3 style="text-align:center; margin-bottom:20px;">Select Asset</h3>
+        <div id="coin_options_list" style="max-height:300px; overflow-y:auto;"></div>
+    </div>
+</div>
+
+<script>
+    const tg = window.Telegram.WebApp;
+    tg.ready(); tg.expand();
+
+    const assets = [
+        { id: 'TON', name: 'TON', cg: 'the-open-network', img: 'https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/ton/info/logo.png' },
+        { id: 'BTC', name: 'Bitcoin', cg: 'bitcoin', img: 'https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/bitcoin/info/logo.png' },
+        { id: 'USDT', name: 'USDT', cg: 'tether', img: 'https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/ethereum/assets/0xdAC17F958D2ee523a2206206994597C13D831ec7/logo.png' },
+        { id: 'ETH', name: 'Ethereum', cg: 'ethereum', img: 'https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/ethereum/info/logo.png' }
+    ];
+
+    let swapFrom = "TON", swapTo = "USDT", prices = {};
+
+    function init() {
+        renderAssets();
+        updatePrices();
+        setInterval(updatePrices, 30000);
+        
+        const tc = new TON_CONNECT_UI.TonConnectUI({
+            manifestUrl: 'https://sergey52bb.github.io/grok-autotrade/tonconnect-manifest.json',
+            buttonRootId: 'ton-connect-btn'
+        });
+
+        tc.onStatusChange(wallet => {
+            if (wallet) {
+                const addr = wallet.account.address;
+                document.getElementById('addr_display').innerText = addr.substring(0,6) + "..." + addr.substring(addr.length-4);
+            }
+        });
+
+        document.getElementById('sw_val').addEventListener('input', calculateSwap);
+        updateSwapUI();
+    }
+
+    function renderAssets() {
+        const list = document.getElementById('asset_list');
+        list.innerHTML = assets.map(a => `
+            <div class="asset-item">
+                <div class="asset-icon-box"><img src="${a.img}" class="asset-icon-img"></div>
+                <div class="asset-details">
+                    <div class="asset-name">${a.id}</div>
+                    <div class="asset-price" id="price_${a.id}">$0.00</div>
+                </div>
+                <div class="bal-amount">0.00</div>
             </div>
-        </div>
-        <div id="view_deposit" class="modal-view">
-            <h3>Receive <span class="cur_asset"></span></h3>
-            <div id="qrcode"></div>
-            <p id="full_addr">Disconnected</p>
-            <button class="btn-confirm" onclick="copyAddr()">Copy Address</button>
-        </div>
-        <div id="view_send" class="modal-view">
-            <h3>Send <span class="cur_asset"></span></h3>
-            <input type="text" id="send_addr" placeholder="Recipient Address">
-            <input type="text" id="send_memo" placeholder="Memo (Optional)">
-            <input type="number" id="send_amount" placeholder="Amount">
-            <button class="btn-confirm" onclick="tg.showAlert('Sending...')">Confirm Send</button>
-        </div>
-        <button class="btn-close" onclick="closeModal('universal_modal')">CLOSE</button>
-    </div>
-</div>
+        `).join('');
+    }
 
-<div id="picker_modal" class="modal-overlay" onclick="closeModal('picker_modal')">
-    <div class="modal-body" onclick="event.stopPropagation()">
-        <h3 class="picker-header">Select Asset</h3>
-        <div id="coin_options_list"></div>
-        <button class="btn-close" onclick="closeModal('picker_modal')">CANCEL</button>
-    </div>
-</div>
+    async function updatePrices() {
+        try {
+            const ids = assets.map(a => a.cg).join(',');
+            const res = await fetch(`https://api.coingecko.com/api/v3/simple/price?ids=${ids}&vs_currencies=usd`);
+            const data = await res.json();
+            assets.forEach(a => {
+                if (data[a.cg]) {
+                    prices[a.id] = data[a.cg].usd;
+                    document.getElementById(`price_${a.id}`).innerText = "$" + prices[a.id].toLocaleString();
+                }
+            });
+            calculateSwap();
+        } catch(e) { console.log("Price error"); }
+    }
 
-<script src="app.js"></script>
+    function showTab(tab, el) {
+        document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+        document.getElementById('scr_' + tab).classList.add('active');
+        document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+        el.classList.add('active');
+    }
+
+    function openCoinPicker(type) {
+        const list = document.getElementById('coin_options_list');
+        list.innerHTML = assets.map(a => `
+            <div style="display:flex; align-items:center; padding:15px; border-bottom:1px solid var(--border);" onclick="selectCoin('${a.id}', '${type}')">
+                <img src="${a.img}" style="width:30px; margin-right:15px;"> ${a.id}
+            </div>
+        `).join('');
+        document.getElementById('picker_modal').style.display = 'flex';
+    }
+
+    function selectCoin(id, type) {
+        if (type === 'from') swapFrom = id; else swapTo = id;
+        updateSwapUI();
+        document.getElementById('picker_modal').style.display = 'none';
+    }
+
+    function updateSwapUI() {
+        document.getElementById('sw_from_img').src = assets.find(a => a.id === swapFrom).img;
+        document.getElementById('sw_from_txt').innerText = swapFrom;
+        document.getElementById('sw_to_img').src = assets.find(a => a.id === swapTo).img;
+        document.getElementById('sw_to_txt').innerText = swapTo;
+        calculateSwap();
+    }
+
+    function calculateSwap() {
+        const val = document.getElementById('sw_val').value;
+        if (val > 0 && prices[swapFrom] && prices[swapTo]) {
+            document.getElementById('sw_res').value = ((val * prices[swapFrom]) / prices[swapTo]).toFixed(6);
+        } else {
+            document.getElementById('sw_res').value = "0.0";
+        }
+    }
+
+    function swapReverse() {
+        [swapFrom, swapTo] = [swapTo, swapFrom];
+        updateSwapUI();
+    }
+
+    window.onload = init;
+</script>
 </body>
 </html>
