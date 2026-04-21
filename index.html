@@ -2,319 +2,238 @@
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>Grok Avto Trade v15.6</title>
-    <script src="https://telegram.org/js/telegram-web-app.js"></script>
-    <script src="https://unpkg.com/@tonconnect/ui@2.0.9/dist/tonconnect-ui.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Grok AutoTrade • TON</title>
     <style>
-        :root { --bg: #050b14; --panel: #0d141d; --blue: #4DB8FF; --green: #00ff95; --border: rgba(255,255,255,0.08); }
-        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
-        body { background: var(--bg); color: white; margin: 0; font-family: -apple-system, sans-serif; height: 100vh; display: flex; flex-direction: column; overflow: hidden; }
-
-        header { padding: 10px; text-align: center; flex-shrink: 0; border-bottom: 1px solid var(--border); }
-        .logo-svg { width: 120px; height: auto; }
-
-        #main_content { flex: 1; overflow-y: auto; padding: 10px 15px 140px; }
-        .screen { display: none; }
-        .screen.active { display: block; }
-
-        .balance-card { text-align: center; padding: 20px 0; }
-        .asset-item { 
-            display: flex; align-items: center; padding: 12px; background: rgba(255,255,255,0.03); 
-            border: 1px solid var(--border); border-radius: 18px; margin-bottom: 8px; 
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap');
+        
+        :root {
+            --bg: #0a0a0a;
+            --card: #1a1a1a;
+            --text: #ffffff;
+            --accent: #00ff88;
         }
-        .asset-icon { width: 36px; height: 36px; border-radius: 50%; margin-right: 12px; border: 1px solid var(--border); object-fit: cover; }
-        .asset-info { flex: 1; }
-        .asset-name { font-weight: bold; font-size: 15px; }
-        .asset-price { font-size: 11px; color: var(--green); }
-
-        .swap-container { background: var(--panel); border-radius: 25px; padding: 20px; border: 1px solid var(--border); }
-        .swap-box { background: rgba(0,0,0,0.2); border: 1px solid var(--border); padding: 15px; border-radius: 20px; }
-        .swap-label { font-size: 10px; color: var(--blue); margin-bottom: 8px; font-weight: bold; }
-        .swap-input-row { display: flex; align-items: center; justify-content: space-between; }
-        .swap-input-row input { background: transparent; border: none; color: white; font-size: 22px; width: 55%; outline: none; }
         
-        .coin-select { display: flex; align-items: center; background: rgba(255,255,255,0.05); padding: 6px 12px; border-radius: 12px; font-weight: bold; cursor: pointer; }
-        .coin-select img { width: 20px; height: 20px; margin-right: 8px; border-radius: 50%; }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Inter', sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            padding: 20px;
+            line-height: 1.5;
+        }
         
-        .rev-btn { background: var(--bg); width: 36px; height: 36px; border-radius: 50%; display: inline-flex; align-items: center; justify-content: center; border: 1px solid var(--border); cursor: pointer; transition: 0.1s; }
-        .rev-btn:active { transform: scale(0.85); }
-
-        .modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.92); z-index: 1000; align-items: flex-end; }
-        .modal-body { background: var(--panel); width: 100%; border-radius: 30px 30px 0 0; padding: 25px; border-top: 1px solid var(--blue); }
-        .modal-view { display: none; text-align: center; }
-        .modal-view.active { display: block; }
-        .modal-coin-icon { width: 60px; height: 60px; border-radius: 50%; margin-bottom: 15px; border: 2px solid var(--blue); }
-
-        .action-btn { width: 100%; padding: 16px; border-radius: 15px; border: none; font-weight: bold; cursor: pointer; margin-top: 10px; }
-        .btn-blue { background: var(--blue); color: #000; }
-        .btn-blue:disabled { opacity: 0.3; }
-        .btn-outline { background: rgba(255,255,255,0.05); color: #fff; border: 1px solid var(--border); }
-        input.field { width: 100%; padding: 14px; background: rgba(0,0,0,0.3); border: 1px solid var(--border); border-radius: 12px; color: white; margin-bottom: 10px; text-align: center; outline: none; }
-
-        nav { position: fixed; bottom: 15px; left: 15px; right: 15px; height: 65px; background: var(--panel); display: flex; border-radius: 20px; border: 1px solid var(--border); z-index: 100; }
-        .nav-item { flex: 1; display: flex; align-items: center; justify-content: center; font-size: 22px; opacity: 0.3; cursor: pointer; }
-        .nav-item.active { opacity: 1; color: var(--blue); transform: translateY(-3px); }
-
-        #qrcode { background: white; padding: 8px; border-radius: 12px; display: inline-block; margin: 10px 0; }
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+            border-bottom: 1px solid #333;
+            padding-bottom: 15px;
+        }
+        
+        h1 { font-size: 28px; font-weight: 600; }
+        
+        .prices-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+        
+        .prices-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
+            gap: 16px;
+            margin-bottom: 40px;
+        }
+        
+        .price-card {
+            background: var(--card);
+            border-radius: 12px;
+            padding: 18px;
+            text-align: center;
+            transition: transform 0.2s;
+        }
+        
+        .price-card:hover {
+            transform: translateY(-4px);
+        }
+        
+        .price-card strong {
+            font-size: 1.1rem;
+            display: block;
+            margin-bottom: 4px;
+        }
+        
+        .price-card .price {
+            font-size: 2rem;
+            font-weight: 600;
+            color: var(--accent);
+            margin: 8px 0;
+        }
+        
+        .price-card small {
+            color: #888;
+            font-size: 0.9rem;
+        }
+        
+        button {
+            background: #00ff88;
+            color: #000;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: 0.3s;
+        }
+        
+        button:hover {
+            background: #00cc6a;
+        }
+        
+        .status {
+            font-size: 0.9rem;
+            color: #0f0;
+            margin-top: 10px;
+        }
+        
+        pre {
+            background: #111;
+            padding: 15px;
+            border-radius: 8px;
+            overflow-x: auto;
+            margin-top: 30px;
+        }
     </style>
 </head>
 <body>
-
-<header>
-    <svg class="logo-svg" viewBox="0 0 668 237" fill="none"><path d="M118.204 0.000194514C183.486 0.000194514 236.408 52.9223 236.408 118.204C236.408 183.487 183.486 236.408 118.204 236.408C52.9216 236.408 0.000184007 183.486 0 118.204C0 52.9224 52.9215 0.000354089 118.204 0.000194514ZM74.1011 62.1964C57.6799 62.1964 47.268 79.9119 55.5308 94.2346L109.964 188.582C113.619 194.922 122.781 194.922 126.436 188.582L180.88 94.2346C189.132 79.9342 178.72 62.1965 162.31 62.1964H74.1011ZM162.288 78.8411C166.031 78.8411 168.234 82.812 166.45 85.9074L137.856 137.091L137.851 137.099L126.506 159.046V78.8411H162.288ZM109.872 78.8516V159.024L98.5376 137.087L98.5334 137.08L69.9294 85.9214L69.8468 85.7724C68.2134 82.6996 70.405 78.8516 74.0899 78.8516H109.872" fill="#4DB8FF"/><path d="M639.524 146.751V62.9139H668V188.849H636.565L573.696 99.0752V188.849H545.034V62.9139H581.277L639.524 146.751Z" fill="white"/><path d="M456.407 191.686C414.432 191.686 384.107 163.081 384.107 126.74C384.107 90.3983 414.432 61.7931 456.407 61.7931C498.382 61.7931 528.707 90.5782 528.707 126.74C528.707 162.901 498.382 191.686 456.407 191.686ZM456.407 167.219C481 167.219 497.272 149.408 497.272 126.74C497.272 104.071 481 86.2605 456.407 86.2605C431.814 86.2605 415.542 104.071 415.542 126.74C415.542 149.408 431.814 167.219 456.407 167.219Z" fill="white"/><path d="M384.269 63.5978V85.7264H342.11V189.533H312.339V85.7264H270.179V63.5978H384.269Z" fill="white"/></svg>
-</header>
-
-<div id="main_content">
-    <div id="scr_wallet" class="screen active">
-        <div class="balance-card">
-            <div style="font-size: 12px; opacity: 0.5;">BALANCE</div>
-            <h1 id="main_balance">0.00 TON</h1>
-            <div id="addr_display" style="font-size:11px; color:var(--blue);">Not Connected</div>
+    <header>
+        <div>
+            <h1>🚀 Grok AutoTrade</h1>
+            <p>Автотрейдинг на TON • Реальные цены с GeckoTerminal</p>
         </div>
-        <div id="asset_list"></div>
+        <div style="text-align: right;">
+            <span id="last-update" class="status">Обновлено: только что</span>
+        </div>
+    </header>
+
+    <h2 style="margin-bottom: 15px;">📊 Реальные цены on-chain (TON DEX)</h2>
+    
+    <div class="prices-header">
+        <p>Цены обновляются автоматически каждые 30 секунд • Данные с GeckoTerminal API</p>
+        <button onclick="updateAllPrices()">🔄 Обновить сейчас</button>
     </div>
 
-    <div id="scr_swap" class="screen">
-        <div class="swap-container">
-            <div class="swap-box">
-                <div class="swap-label">YOU PAY</div>
-                <div class="swap-input-row">
-                    <input type="number" id="sw_val" placeholder="0" oninput="calculateSwap()">
-                    <div class="coin-select" onclick="openCoinPicker('from')">
-                        <img id="sw_from_img" src=""> <span id="sw_from_txt">TON</span>
-                    </div>
-                </div>
-            </div>
-            <div style="text-align:center; margin: -18px 0; position:relative; z-index:2;">
-                <div class="rev-btn" onclick="swapReverse()">🔄</div>
-            </div>
-            <div class="swap-box" style="margin-top:5px;">
-                <div class="swap-label">YOU RECEIVE</div>
-                <div class="swap-input-row">
-                    <input type="text" id="sw_res" readonly placeholder="0">
-                    <div class="coin-select" onclick="openCoinPicker('to')">
-                        <img id="sw_to_img" src=""> <span id="sw_to_txt">USDT</span>
-                    </div>
-                </div>
-            </div>
-            <button id="swap_confirm_btn" class="action-btn btn-blue" style="margin-top:20px;">SWAP ASSETS</button>
-        </div>
+    <!-- СЮДА ВСТАВЛЯЮТСЯ КАРТОЧКИ С ЦЕНАМИ -->
+    <div id="prices-container" class="prices-container">
+        <!-- JS автоматически заполнит карточки -->
     </div>
 
-    <div id="scr_connect" class="screen">
-        <div style="text-align:center; padding-top:40px;">
-            <img src="https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/ton/info/logo.png" style="width: 80px; opacity: 0.2; margin-bottom: 20px;">
-            <div id="ton-connect-btn" style="display:inline-block;"></div>
-        </div>
+    <div class="status" style="text-align: center; font-size: 0.85rem; margin-top: 10px;">
+        Лимит API: 30 запросов/мин • Всё работает в браузере
     </div>
-</div>
 
-<nav>
-    <div class="nav-item active" onclick="showTab('wallet', this)">💎</div>
-    <div class="nav-item" onclick="showTab('swap', this)">🔄</div>
-    <div class="nav-item" onclick="showTab('connect', this)">🔗</div>
-</nav>
+    <!-- Если у тебя были другие блоки (кнопки торговли, логи и т.д.) — вставь их сюда ниже -->
 
-<div id="universal_modal" class="modal-overlay" onclick="closeModal('universal_modal')">
-    <div class="modal-body" onclick="event.stopPropagation()">
-        <div class="modal-view active" id="view_menu">
-            <img id="menu_logo" class="modal-coin-icon" src="">
-            <h2 id="menu_title" style="margin: 0 0 20px 0;">Asset</h2>
-            <button class="action-btn btn-blue" onclick="switchModalView('send')">Send</button>
-            <button class="action-btn btn-outline" onclick="switchModalView('receive')">Receive</button>
-        </div>
-        <div class="modal-view" id="view_send">
-            <img id="send_logo" class="modal-coin-icon" src="">
-            <h3>Send <span class="cur_asset"></span></h3>
-            <input type="text" class="field" placeholder="Recipient Address">
-            <input type="number" class="field" placeholder="Amount">
-            <input type="text" class="field" placeholder="Comment / MEMO (Optional)">
-            <button class="action-btn btn-blue">Confirm Send</button>
-            <button class="action-btn btn-outline" onclick="switchModalView('menu')">Back</button>
-        </div>
-        <div class="modal-view" id="view_receive">
-            <img id="receive_logo" class="modal-coin-icon" src="">
-            <h3>Receive <span class="cur_asset"></span></h3>
-            <div id="qrcode"></div>
-            <div id="full_addr" style="font-size:11px; word-break:break-all; opacity:0.6; margin:10px 0;">Connect wallet...</div>
-            <button class="action-btn btn-blue" onclick="copyAddr()">Copy Address</button>
-            <button class="action-btn btn-outline" onclick="switchModalView('menu')">Back</button>
-        </div>
-    </div>
-</div>
-
-<div id="picker_modal" class="modal-overlay" onclick="closeModal('picker_modal')">
-    <div class="modal-body" onclick="event.stopPropagation()">
-        <h3 style="text-align:center;">Select Token</h3>
-        <div id="coin_options_list" style="max-height:350px; overflow-y:auto;"></div>
-    </div>
-</div>
-
-<script>
-    const tg = window.Telegram.WebApp;
-    tg.ready(); tg.expand();
-
-    const assets = [
-        { id: 'TON', name: 'TON', cg: 'the-open-network', img: 'https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/ton/info/logo.png', price: 5.84 },
-        { id: 'SOL', name: 'Solana', cg: 'solana', img: 'https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/solana/info/logo.png', price: 145.2 },
-        { id: 'NEAR', name: 'Near', cg: 'near', img: 'https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/near/info/logo.png', price: 5.4 },
-        { id: 'USDC', name: 'USDC', cg: 'usd-coin', img: 'https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/ethereum/assets/0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48/logo.png', price: 1.0 },
-        { id: 'DOGE', name: 'Dogecoin', cg: 'dogecoin', img: 'https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/doge/info/logo.png', price: 0.15 },
-        { id: 'BNB', name: 'BNB', cg: 'binancecoin', img: 'https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/binance/info/logo.png', price: 580.0 },
-        { id: 'LTC', name: 'Litecoin', cg: 'litecoin', img: 'https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/litecoin/info/logo.png', price: 80.0 },
-        { id: 'SUI', name: 'Sui', cg: 'sui', img: 'https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/sui/info/logo.png', price: 1.2 },
-        { id: 'POL', name: 'Polygon', cg: 'matic-network', img: 'https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/polygon/info/logo.png', price: 0.72 },
-        // Скрин 2: Нормальный логотип USDT
-        { id: 'USDT', name: 'USDT', cg: 'tether', img: 'https://cryptologos.cc/logos/tether-usdt-logo.png?v=025', price: 1.0 },
-        { id: 'BTC', name: 'Bitcoin', cg: 'bitcoin', img: 'https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/bitcoin/info/logo.png', price: 64000.0 },
-        { id: 'ETH', name: 'Ethereum', cg: 'ethereum', img: 'https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/ethereum/info/logo.png', price: 3100.0 }
-    ];
-
-    let swapFrom = "TON", swapTo = "USDT", currentAddr = "";
-
-    function init() {
-        renderAssets();
-        updatePrices();
-        updateSwapUI();
-
-        const tc = new TON_CONNECT_UI.TonConnectUI({
-            manifestUrl: 'https://sergey52bb.github.io/grok-autotrade/tonconnect-manifest.json',
-            buttonRootId: 'ton-connect-btn'
-        });
-
-        tc.onStatusChange(w => {
-            if (w) {
-                currentAddr = w.account.address;
-                document.getElementById('addr_display').innerText = currentAddr.substring(0,6) + "..." + currentAddr.substring(currentAddr.length-4);
-                document.getElementById('full_addr').innerText = currentAddr;
-                document.getElementById('qrcode').innerHTML = "";
-                new QRCode(document.getElementById("qrcode"), { text: currentAddr, width: 140, height: 140 });
-            }
-        });
-    }
-
-    function renderAssets() {
-        const list = document.getElementById('asset_list');
-        list.innerHTML = assets.map(a => `
-            <div class="asset-item" onclick="showAssetMenu('${a.id}')">
-                <img src="${a.img}" class="asset-icon">
-                <div class="asset-info">
-                    <div class="asset-name">${a.id}</div>
-                    <div class="asset-price" id="price_${a.id}">$${a.price.toLocaleString()}</div>
-                </div>
-                <div class="bal-amount">0.00</div>
-            </div>
-        `).join('');
-    }
-
-    window.calculateSwap = function() {
-        const input = document.getElementById('sw_val');
-        const output = document.getElementById('sw_res');
-        const val = parseFloat(input.value);
+    <script>
+        // ==================== РЕАЛЬНЫЕ ЦЕНЫ С GECKOTERMINAL (TON) ====================
         
-        const f = assets.find(a => a.id === swapFrom);
-        const t = assets.find(a => a.id === swapTo);
+        const tokens = [
+            { symbol: "TON",   name: "Toncoin",      address: null },
+            { symbol: "USDT",  name: "Tether USD₮",  address: "EQCxE6mUtQJKFnGfaROTKOt1lZbDiiX1kCixRv7Nw2Id_sDs" },
+            { symbol: "BTC",   name: "Bitcoin (cbBTC)", address: null },
+            { symbol: "ETH",   name: "Ethereum (wETH)", address: null },
+            { symbol: "SOL",   name: "Solana",       address: null },
+            { symbol: "NEAR",  name: "NEAR Protocol", address: null },
+            { symbol: "USDC",  name: "USD Coin",     address: null },
+            { symbol: "DOGE",  name: "Dogecoin",     address: null },
+            { symbol: "BNB",   name: "BNB",          address: null },
+            { symbol: "LTC",   name: "Litecoin",     address: null },
+            { symbol: "SUI",   name: "Sui",          address: null },
+            { symbol: "POL",   name: "Polygon (POL)", address: null }
+        ];
 
-        // Исправлено: берем цены напрямую из объекта для надежности
-        if(!isNaN(val) && val > 0 && f.price > 0 && t.price > 0) {
-            const result = (val * f.price) / t.price;
-            output.value = result.toFixed(6);
-        } else {
-            output.value = "0";
-        }
-    };
+        let addressCache = {}; // кэш адресов jetton, чтобы не делать лишних поисков
 
-    window.updateSwapUI = function() {
-        const f = assets.find(a => a.id === swapFrom);
-        const t = assets.find(a => a.id === swapTo);
-        document.getElementById('sw_from_img').src = f.img;
-        document.getElementById('sw_from_txt').innerText = f.id;
-        document.getElementById('sw_to_img').src = t.img;
-        document.getElementById('sw_to_txt').innerText = t.id;
-        
-        const btn = document.getElementById('swap_confirm_btn');
-        if(swapFrom === swapTo) {
-            btn.disabled = true;
-            btn.innerText = "Select different assets";
-        } else {
-            btn.disabled = false;
-            btn.innerText = "SWAP ASSETS";
-        }
-        calculateSwap();
-    };
+        async function getPrice(symbol, jettonAddress = null) {
+            let url;
 
-    window.showTab = function(id, el) {
-        document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
-        document.getElementById('scr_'+id).classList.add('active');
-        document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
-        el.classList.add('active');
-    };
-
-    window.showAssetMenu = function(id) {
-        const a = assets.find(x => x.id === id);
-        document.getElementById('menu_title').innerText = a.name;
-        document.getElementById('menu_logo').src = a.img;
-        document.getElementById('send_logo').src = a.img;
-        document.getElementById('receive_logo').src = a.img;
-        document.querySelectorAll('.cur_asset').forEach(e => e.innerText = a.id);
-        window.switchModalView('menu');
-        document.getElementById('universal_modal').style.display = 'flex';
-    };
-
-    window.switchModalView = function(v) {
-        document.querySelectorAll('.modal-view').forEach(x => x.classList.remove('active'));
-        document.getElementById('view_' + v).classList.add('active');
-    };
-
-    window.closeModal = function(id) { document.getElementById(id).style.display = 'none'; };
-
-    window.openCoinPicker = function(type) {
-        activePicker = type;
-        const list = document.getElementById('coin_options_list');
-        list.innerHTML = assets.map(a => `
-            <div class="asset-item" style="margin-bottom:5px; background: rgba(255,255,255,0.05);" onclick="selectCoin('${a.id}')">
-                <img src="${a.img}" class="asset-icon" style="width:28px; height:28px;"> ${a.id}
-            </div>
-        `).join('');
-        document.getElementById('picker_modal').style.display = 'flex';
-    };
-
-    window.selectCoin = function(id) {
-        if(activePicker === 'from') swapFrom = id; else swapTo = id;
-        updateSwapUI(); closeModal('picker_modal');
-    };
-
-    window.swapReverse = function() {
-        const temp = swapFrom; swapFrom = swapTo; swapTo = temp;
-        updateSwapUI();
-    };
-
-    async function updatePrices() {
-        try {
-            const ids = assets.map(a => a.cg).join(',');
-            const res = await fetch(`https://api.coingecko.com/api/v3/simple/price?ids=${ids}&vs_currencies=usd`);
-            const data = await res.json();
-            assets.forEach(a => {
-                if(data[a.cg]) {
-                    a.price = data[a.cg].usd;
-                    const el = document.getElementById(`price_${a.id}`);
-                    if(el) el.innerText = "$" + a.price.toLocaleString();
+            if (jettonAddress) {
+                url = `https://api.geckoterminal.com/api/v2/simple/networks/ton/token_price/${jettonAddress}`;
+            } else {
+                // Ищем самый ликвидный пул по символу (работает для native и wrapped)
+                const cacheKey = `ton_${symbol.toLowerCase()}`;
+                if (addressCache[cacheKey]) {
+                    url = `https://api.geckoterminal.com/api/v2/simple/networks/ton/token_price/${addressCache[cacheKey]}`;
+                } else {
+                    const searchUrl = `https://api.geckoterminal.com/api/v2/search/pools?query=${symbol}&network=ton`;
+                    try {
+                        const res = await fetch(searchUrl);
+                        const data = await res.json();
+                        const pools = data.data || [];
+                        if (pools.length === 0) return "—";
+                        
+                        const best = pools.reduce((a, b) => 
+                            (a.attributes?.volume_usd_24h || 0) > (b.attributes?.volume_usd_24h || 0) ? a : b
+                        );
+                        
+                        const tokenAddr = best.attributes?.base_token?.address || 
+                                        best.attributes?.quote_token?.address;
+                        
+                        if (tokenAddr) addressCache[cacheKey] = tokenAddr;
+                        url = `https://api.geckoterminal.com/api/v2/simple/networks/ton/token_price/${tokenAddr}`;
+                    } catch (e) {
+                        console.error(e);
+                        return "—";
+                    }
                 }
-            });
-            calculateSwap();
-        } catch(e) { console.log("API Error - using fallback prices"); }
-    }
+            }
 
-    window.copyAddr = function() {
-        if(currentAddr) {
-            navigator.clipboard.writeText(currentAddr);
-            tg.showAlert("Address copied!");
+            try {
+                const response = await fetch(url, { cache: 'no-cache' });
+                if (!response.ok) return "—";
+                const data = await response.json();
+                const price = parseFloat(data.data?.attributes?.price_usd || 0);
+                return price > 0 ? price.toFixed(price < 10 ? 6 : 2) : "—";
+            } catch (e) {
+                console.error(`Ошибка цены ${symbol}:`, e);
+                return "—";
+            }
         }
-    };
 
-    window.onload = init;
-</script>
+        async function updateAllPrices() {
+            const container = document.getElementById("prices-container");
+            container.innerHTML = `<div style="grid-column: 1 / -1; text-align:center; padding:30px; color:#666;">
+                <strong>Загрузка реальных цен с GeckoTerminal...</strong><br>
+                <small>Это занимает 1–2 секунды</small>
+            </div>`;
+
+            let html = "";
+            for (const token of tokens) {
+                const price = await getPrice(token.symbol, token.address);
+                html += `
+                    <div class="price-card">
+                        <strong>${token.symbol}</strong>
+                        <div class="price">$${price}</div>
+                        <small>${token.name}</small>
+                    </div>
+                `;
+            }
+            container.innerHTML = html;
+
+            // Обновляем время
+            const now = new Date();
+            document.getElementById("last-update").textContent = 
+                `Обновлено: \( {now.getHours()}: \){now.getMinutes().toString().padStart(2,'0')}:${now.getSeconds().toString().padStart(2,'0')}`;
+        }
+
+        // Автозапуск + обновление каждые 30 секунд (чтобы не превышать лимит 30 запросов/мин)
+        window.addEventListener("load", () => {
+            updateAllPrices();
+            setInterval(updateAllPrices, 30000);
+        });
+    </script>
 </body>
 </html>
