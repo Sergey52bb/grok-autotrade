@@ -132,58 +132,91 @@
 <script>
     const tg = window.Telegram.WebApp; tg.ready(); tg.expand();
 
-    // СПИСОК ИЗ 9 МОНЕТ С КОНТРАКТАМИ В СЕТИ TON (ОБЕРТКИ J-ТОКЕНЫ)
-    const assets = [
-        { id: 'TON', name: 'TON', cg: 'the-open-network', img: 'https://cryptologos.cc/logos/toncoin-ton-logo.png', contract: null },
-        { id: 'BTC', name: 'Bitcoin', cg: 'bitcoin', img: 'https://cryptologos.cc/logos/bitcoin-btc-logo.png', contract: 'EQB-MP7UT9oOnGrS8Z0N9oV9X9FvfO8kNb_U1p_u1u_u1u1u' },
-        { id: 'ETH', name: 'Ethereum', cg: 'ethereum', img: 'https://cryptologos.cc/logos/ethereum-eth-logo.png', contract: 'EQBa_mS7sdUAUvH0S96v6zY70v7S7S7S7S7S7S7S7S7S7S7' },
-        { id: 'BNB', name: 'BNB', cg: 'binancecoin', img: 'https://cryptologos.cc/logos/bnb-bnb-logo.png', contract: 'EQCxE6mUt_TXpRyvHTvxSL6L_E6shgn6ndwrXp_Fn_p9puS_' },
-        { id: 'USDT', name: 'Tether', cg: 'tether', img: 'https://cryptologos.cc/logos/tether-usdt-logo.png', contract: 'EQCxE6mUt_TXpRyvHTvxSL6L_E6shgn6ndwrXp_Fn_p9puS_' },
-        { id: 'USDC', name: 'USDC', cg: 'usd-coin', img: 'https://cryptologos.cc/logos/usd-coin-usdc-logo.png', contract: 'EQB-X_d_987asdB_... (USDC_Contract)' },
-        { id: 'SOL', name: 'Solana', cg: 'solana', img: 'https://cryptologos.cc/logos/solana-sol-logo.png', contract: null },
-        { id: 'DOGE', name: 'Doge', cg: 'dogecoin', img: 'https://cryptologos.cc/logos/dogecoin-doge-logo.png', contract: null },
-        { id: 'NEAR', name: 'Near', cg: 'near', img: 'https://cryptologos.cc/logos/near-protocol-near-logo.png', contract: null }
-    ];
-
-    let swapFrom = "TON", swapTo = "USDT", activePicker = "", currentAddr = "", prices = {};
-
-    function init() {
-        renderAssets();
-        updatePrices();
-        setInterval(updatePrices, 40000);
-        updateSwapUI();
-        
-        const tc = new TON_CONNECT_UI.TonConnectUI({ 
-            manifestUrl: 'https://sergey52bb.github.io/grok-autotrade/tonconnect-manifest.json', 
-            buttonRootId: 'ton-connect-btn' 
-        });
-
-        tc.onStatusChange(w => { 
-            if (w) { 
-                currentAddr = w.account.address;
-                document.getElementById('addr_display').innerText = currentAddr.substring(0,8)+"...";
-                document.getElementById('full_addr').innerText = currentAddr;
-                document.getElementById("qrcode").innerHTML = "";
-                new QRCode(document.getElementById("qrcode"), { text: currentAddr, width: 140, height: 140 });
-            } 
-        });
+    // ОБНОВЛЕННЫЙ СПИСОК МОНЕТ С ГАРАНТИРОВАННЫМИ ССЫЛКАМИ
+const assets = [
+    { 
+        id: 'TON', 
+        name: 'TON', 
+        cg: 'the-open-network', 
+        img: 'https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/ton/info/logo.png', 
+        contract: null 
+    },
+    { 
+        id: 'BTC', 
+        name: 'Bitcoin', 
+        cg: 'bitcoin', 
+        img: 'https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/bitcoin/info/logo.png', 
+        contract: 'EQB-MP7UT9oOnGrS8Z0N9oV9X9FvfO8kNb_U1p_u1u_u1u1u' 
+    },
+    { 
+        id: 'ETH', 
+        name: 'Ethereum', 
+        cg: 'ethereum', 
+        img: 'https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/ethereum/info/logo.png', 
+        contract: 'EQBa_mS7sdUAUvH0S96v6zY70v7S7S7S7S7S7S7S7S7S7S7' 
+    },
+    { 
+        id: 'BNB', 
+        name: 'BNB', 
+        cg: 'binancecoin', 
+        img: 'https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/binance/info/logo.png', 
+        contract: 'EQCxE6mUt_TXpRyvHTvxSL6L_E6shgn6ndwrXp_Fn_p9puS_' 
+    },
+    { 
+        id: 'USDT', 
+        name: 'Tether', 
+        cg: 'tether', 
+        img: 'https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/ethereum/assets/0xdAC17F958D2ee523a2206206994597C13D831ec7/logo.png', 
+        contract: 'EQCxE6mUt_TXpRyvHTvxSL6L_E6shgn6ndwrXp_Fn_p9puS_' 
+    },
+    { 
+        id: 'USDC', 
+        name: 'USDC', 
+        cg: 'usd-coin', 
+        img: 'https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/ethereum/assets/0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48/logo.png', 
+        contract: 'EQB-X_d_987asdB_...' 
+    },
+    { 
+        id: 'SOL', 
+        name: 'Solana', 
+        cg: 'solana', 
+        img: 'https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/solana/info/logo.png', 
+        contract: null 
+    },
+    { 
+        id: 'DOGE', 
+        name: 'Doge', 
+        cg: 'dogecoin', 
+        img: 'https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/doge/info/logo.png', 
+        contract: null 
+    },
+    { 
+        id: 'NEAR', 
+        name: 'Near', 
+        cg: 'near', 
+        img: 'https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/near/info/logo.png', 
+        contract: null 
     }
+];
 
-    function renderAssets() {
-        const list = document.getElementById('asset_list');
-        list.innerHTML = assets.map(a => `
-            <div class="asset-item" onclick="showAssetMenu('${a.id}')">
-                <div class="asset-icon-box">
-                    <img src="${a.img}" class="asset-icon-img" onerror="this.src='https://cryptologos.cc/logos/toncoin-ton-logo.png'">
-                </div>
-                <div class="asset-details">
-                    <div class="asset-name">${a.id}</div>
-                    <div class="asset-price" id="price_${a.id}">$0.00</div>
-                </div>
-                <div class="bal-amount">0.00</div>
+// ИСПРАВЛЕННАЯ ФУНКЦИЯ ОТРИСОВКИ (с защитой от ошибок загрузки)
+function renderAssets() {
+    const list = document.getElementById('asset_list');
+    list.innerHTML = assets.map(a => `
+        <div class="asset-item" onclick="showAssetMenu('${a.id}')">
+            <div class="asset-icon-box">
+                <img src="${a.img}" 
+                     class="asset-icon-img" 
+                     onerror="this.src='https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/ton/info/logo.png'">
             </div>
-        `).join('');
-    }
+            <div class="asset-details">
+                <div class="asset-name">${a.id}</div>
+                <div class="asset-price" id="price_${a.id}">$0.00</div>
+            </div>
+            <div class="bal-amount">0.00</div>
+        </div>
+    `).join('');
+}
 
     async function updatePrices() {
         try {
