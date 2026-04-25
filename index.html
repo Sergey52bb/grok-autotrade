@@ -132,11 +132,9 @@
         <button class="btn-confirm" style="background:transparent; color:white; opacity:0.3; margin-top:15px;" onclick="closeModal('picker_modal')">CANCEL</button>
     </div>
 </div>
-
 <script>
     const tg = window.Telegram.WebApp; tg.ready(); tg.expand();
     
-    // Обновленный массив с надежными иконками
     const assets = [
         { id: 'TON', name: 'TON', price: 0, cg: 'the-open-network', img: 'https://cache.tstatic.org/toncoin/ton_logo.png' },
         { id: 'BTC', name: 'Bitcoin', price: 0, cg: 'bitcoin', img: 'https://bin.bnbstatic.com/static/assets/logos/BTC.png' },
@@ -162,8 +160,7 @@
                     a.price = data[a.cg].usd;
                     const priceEl = document.getElementById(`price_${a.id}`);
                     if(priceEl) {
-                        const formattedPrice = a.price < 1 ? a.price.toFixed(4) : a.price.toLocaleString();
-                        priceEl.innerText = `$${formattedPrice}`;
+                        priceEl.innerText = `$${a.price < 1 ? a.price.toFixed(4) : a.price.toLocaleString()}`;
                     }
                 }
             });
@@ -172,20 +169,7 @@
     }
 
     function init() {
-        const list = document.getElementById('asset_list'); 
-        if(list) {
-            list.innerHTML = assets.map(a => `
-                <div class="asset-item" onclick="showAssetMenu('${a.id}')">
-                    <div class="asset-icon-box">
-                        <img src="${a.img}" class="asset-icon-img" onerror="this.src='https://cache.tstatic.org/toncoin/ton_logo.png'">
-                    </div>
-                    <div class="asset-details">
-                        <div class="asset-name">${a.id}</div>
-                        <div class="asset-price" id="price_${a.id}">$0.00</div>
-                    </div>
-                    <div class="bal-amount">0.00</div>
-                </div>`).join('');
-        }
+        renderAssets();
         updatePrices();
         setInterval(updatePrices, 30000);
         updateSwapUI();
@@ -207,18 +191,28 @@
         });
     }
 
-    function showTab(id, el) {
-        document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
-        const target = document.getElementById('scr_'+id);
-        if(target) target.classList.add('active');
-        document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
-        el.classList.add('active');
+    function renderAssets() {
+        const list = document.getElementById('asset_list');
+        if(!list) return;
+        list.innerHTML = assets.map(a => `
+            <div class="asset-item" onclick="showAssetMenu('${a.id}')">
+                <div class="asset-icon-box">
+                    <img src="${a.img}" class="asset-icon-img" onerror="this.src='https://cache.tstatic.org/toncoin/ton_logo.png'">
+                </div>
+                <div class="asset-details">
+                    <div class="asset-name">${a.id}</div>
+                    <div class="asset-price" id="price_${a.id}">$0.00</div>
+                </div>
+                <div class="bal-amount">0.00</div>
+            </div>`).join('');
     }
 
     function showAssetMenu(id) {
         const a = assets.find(x => x.id === id);
         document.getElementById('menu_title').innerText = a.name;
+        // Обновляем текст и иконки во всех частях модалки
         document.querySelectorAll('.cur_asset').forEach(e => e.innerText = a.id);
+        
         switchModalView('menu');
         document.getElementById('universal_modal').style.display = 'flex';
     }
@@ -256,6 +250,7 @@
     function updateSwapUI() {
         const fromAsset = assets.find(x => x.id === swapFrom);
         const toAsset = assets.find(x => x.id === swapTo);
+        
         document.getElementById('sw_from_img').src = fromAsset.img;
         document.getElementById('sw_from_txt').innerText = swapFrom;
         document.getElementById('sw_to_img').src = toAsset.img;
@@ -280,6 +275,6 @@
 
     window.onload = init;
 </script>
-
+   
 </body>
 </html>
