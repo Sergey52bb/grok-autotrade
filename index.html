@@ -38,15 +38,9 @@
         .modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); z-index: 1000; align-items: flex-end; }
         .modal-body { background: #111a27; width: 100%; border-radius: 35px 35px 0 0; padding: 25px 20px 40px; box-sizing: border-box; max-height: 80vh; overflow-y: auto; }
         .modal-view { display: none; }
-        .modal-view.active { display: block; }@keyframes rotateSticker {
-    from { transform: rotate(0deg); }
-    to { transform: rotate(360deg); }
-}
-
-.rotating {
-    animation: rotateSticker 20s linear infinite; /* 20 секунд на полный круг, чтобы не кружилась голова */
-}
-
+        .modal-view.active { display: block; }
+        @keyframes rotateSticker { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+        .rotating { animation: rotateSticker 20s linear infinite; }
     </style>
 </head>
 <body>
@@ -65,33 +59,36 @@
         </div>
         <div id="asset_list"></div>
     </div>
+
     <div id="scr_swap" class="screen">
         <div class="card" style="margin-top: 10px;">
             <div style="font-size: 11px; opacity: 0.5; margin-bottom: 8px;">PAY</div>
             <input type="number" id="sw_val" placeholder="0.0" oninput="calculateSwap()">
-            <div class="swap-selector" onclick="openCoinPicker('from')"><img id="sw_from_img" src=""><span id="sw_from_txt">TON</span></div>
+            <div class="swap-selector" onclick="openCoinPicker('from')">
+                <img id="sw_from_img" src="https://cache.tstatic.org/toncoin/ton_logo.png">
+                <span id="sw_from_txt">TON</span>
+            </div>
             <div id="rev_btn" onclick="swapReverse()">🌀</div>
             <div style="font-size: 11px; opacity: 0.5; margin: 20px 0 8px;">RECEIVE</div>
             <input type="text" id="sw_res" placeholder="0.0" readonly style="color:var(--green);">
-            <div class="swap-selector" onclick="openCoinPicker('to')"><img id="sw_to_img" src=""><span id="sw_to_txt">USDT</span></div>
+            <div class="swap-selector" onclick="openCoinPicker('to')">
+                <img id="sw_to_img" src="https://cache.tstatic.org/toncoin/usdt_logo.png">
+                <span id="sw_to_txt">USDT</span>
+            </div>
             <button class="btn-confirm" style="margin-top: 25px;" onclick="tg.showAlert('Swap initiated')">Confirm Swap</button>
         </div>
     </div>
-    <div id="scr_connect" class="screen">
-    <div class="card" style="text-align:center; margin-top: 20px; padding: 40px 20px;">
-        <div id="ton-connect-btn" style="display:flex; justify-content:center;"></div>
-        
-        <div style="margin-top: 30px;">
-        <img src="https://i.ibb.co/JwD2qCDf/WEB3-Design-Works-Nariman-Mammadzada.jpg" 
-     class="rotating" 
-     style="width: 180px; height: auto; border-radius: 50%; filter: drop-shadow(0 0 20px rgba(77,184,255,0.5)); opacity: 0.9;">
 
-                Secure Connection via TON Connect
-            </p>
+    <div id="scr_connect" class="screen">
+        <div class="card" style="text-align:center; margin-top: 20px; padding: 40px 20px;">
+            <div id="ton-connect-btn" style="display:flex; justify-content:center;"></div>
+            <div style="margin-top: 30px;">
+                <img src="https://i.ibb.co/JwD2qCDf/WEB3-Design-Works-Nariman-Mammadzada.jpg" class="rotating" style="width: 180px; height: auto; border-radius: 50%; filter: drop-shadow(0 0 20px rgba(77,184,255,0.5)); opacity: 0.9;">
+                <p style="margin-top:20px; opacity:0.6;">Secure Connection via TON Connect</p>
+            </div>
         </div>
     </div>
 </div>
-
 
 <nav>
     <div class="nav-item active" onclick="showTab('wallet', this)">📊</div>
@@ -102,18 +99,23 @@
 <div id="universal_modal" class="modal-overlay" onclick="closeModal('universal_modal')">
     <div class="modal-body" onclick="event.stopPropagation()">
         <div id="view_menu" class="modal-view">
-            <h3 id="menu_title" style="text-align:center; margin-top:0;">Options</h3>
+            <div style="display: flex; align-items: center; justify-content: center; gap: 10px; margin-bottom: 20px;">
+                <img id="menu_icon" src="" style="width: 30px; height: 30px; border-radius: 50%;">
+                <h3 id="menu_title" style="margin:0;">Options</h3>
+            </div>
             <div style="display:grid; grid-template-columns:1fr 1fr; gap:15px;">
                 <button class="btn-confirm" style="background:#fff;" onclick="switchModalView('deposit')">RECEIVE</button>
                 <button class="btn-confirm" style="background:var(--blue); color:white;" onclick="switchModalView('send')">SEND</button>
             </div>
         </div>
+
         <div id="view_deposit" class="modal-view">
             <h3 style="text-align:center; margin-top:0;">Receive <span class="cur_asset"></span></h3>
             <div id="qrcode" style="display:flex; justify-content:center; margin:15px 0; background:#fff; padding:15px; border-radius:15px;"></div>
             <p id="full_addr" style="font-size:11px; word-break:break-all; opacity:0.5; font-family:monospace; text-align:center;">Disconnected</p>
             <button class="btn-confirm" onclick="copyAddr()">Copy Address</button>
         </div>
+
         <div id="view_send" class="modal-view">
             <h3 style="text-align:center; margin-top:0;">Send <span class="cur_asset"></span></h3>
             <input type="text" id="send_addr" placeholder="Recipient Address">
@@ -132,9 +134,9 @@
         <button class="btn-confirm" style="background:transparent; color:white; opacity:0.3; margin-top:15px;" onclick="closeModal('picker_modal')">CANCEL</button>
     </div>
 </div>
+
 <script>
     const tg = window.Telegram.WebApp; tg.ready(); tg.expand();
-    
     const assets = [
         { id: 'TON', name: 'TON', price: 0, cg: 'the-open-network', img: 'https://cache.tstatic.org/toncoin/ton_logo.png' },
         { id: 'BTC', name: 'Bitcoin', price: 0, cg: 'bitcoin', img: 'https://bin.bnbstatic.com/static/assets/logos/BTC.png' },
@@ -169,98 +171,86 @@
     }
 
     function init() {
-        renderAssets();
-        updatePrices();
-        setInterval(updatePrices, 30000);
-        updateSwapUI();
-        
-        const tc = new TON_CONNECT_UI.TonConnectUI({ 
-            manifestUrl: 'https://sergey52bb.github.io/grok-autotrade/tonconnect-manifest.json', 
-            buttonRootId: 'ton-connect-btn' 
-        });
-
-        tc.onStatusChange(w => { 
-            if (w) { 
-                currentAddr = w.account.address;
-                document.getElementById('addr_display').innerText = currentAddr.substring(0,8)+"...";
-                document.getElementById('full_addr').innerText = currentAddr;
-                const qrBox = document.getElementById("qrcode");
-                qrBox.innerHTML = "";
-                new QRCode(qrBox, { text: currentAddr, width: 150, height: 150 });
-            } 
-        });
-    }
-
-    function renderAssets() {
-        const list = document.getElementById('asset_list');
-        if(!list) return;
+        const list = document.getElementById('asset_list'); 
         list.innerHTML = assets.map(a => `
             <div class="asset-item" onclick="showAssetMenu('${a.id}')">
-                <div class="asset-icon-box">
-                    <img src="${a.img}" class="asset-icon-img" onerror="this.src='https://cache.tstatic.org/toncoin/ton_logo.png'">
-                </div>
+                <div class="asset-icon-box"><img src="${a.img}" class="asset-icon-img" onerror="this.src='https://cache.tstatic.org/toncoin/ton_logo.png'"></div>
                 <div class="asset-details">
                     <div class="asset-name">${a.id}</div>
                     <div class="asset-price" id="price_${a.id}">$0.00</div>
                 </div>
                 <div class="bal-amount">0.00</div>
             </div>`).join('');
+        
+        updatePrices();
+        setInterval(updatePrices, 30000);
+        updateSwapUI();
+
+        const tc = new TON_CONNECT_UI.TonConnectUI({ manifestUrl: 'https://sergey52bb.github.io/grok-autotrade/tonconnect-manifest.json', buttonRootId: 'ton-connect-btn' });
+        tc.onStatusChange(w => { 
+            if (w) { 
+                currentAddr = w.account.address;
+                document.getElementById('addr_display').innerText = currentAddr.substring(0,8)+"...";
+                document.getElementById('full_addr').innerText = currentAddr;
+                document.getElementById("qrcode").innerHTML = "";
+                new QRCode(document.getElementById("qrcode"), { text: currentAddr, width: 150, height: 150 });
+            } 
+        });
+    }
+
+    function showTab(id, el) {
+        document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+        document.getElementById('scr_'+id).classList.add('active');
+        document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+        el.classList.add('active');
     }
 
     function showAssetMenu(id) {
         const a = assets.find(x => x.id === id);
         document.getElementById('menu_title').innerText = a.name;
-        // Обновляем текст и иконки во всех частях модалки
+        document.getElementById('menu_icon').src = a.img;
         document.querySelectorAll('.cur_asset').forEach(e => e.innerText = a.id);
-        
         switchModalView('menu');
         document.getElementById('universal_modal').style.display = 'flex';
     }
 
     function closeModal(id) { document.getElementById(id).style.display = 'none'; }
-    
     function switchModalView(v) {
         document.querySelectorAll('.modal-view').forEach(x => x.classList.remove('active'));
         document.getElementById('view_' + v).classList.add('active');
     }
 
+    function copyAddr() {
+        const addrText = document.getElementById('full_addr').innerText;
+        if(addrText === "Disconnected") { tg.showAlert("Please connect wallet first!"); return; }
+        navigator.clipboard.writeText(addrText).then(() => { tg.showAlert("Address Copied!"); });
+    }
+
     function openCoinPicker(type) {
         activePicker = type;
-        const list = document.getElementById('coin_options_list'); 
-        list.innerHTML = "";
+        const list = document.getElementById('coin_options_list'); list.innerHTML = "";
         const forbidden = type === 'from' ? swapTo : swapFrom;
-        
         assets.forEach(a => {
             if(a.id === forbidden) return;
-            list.innerHTML += `
-                <div class="coin-option" onclick="selectCoin('${a.id}')">
-                    <img src="${a.img}" onerror="this.src='https://cache.tstatic.org/toncoin/ton_logo.png'">
-                    <div class="coin-ticker">${a.id}</div>
-                </div>`;
+            list.innerHTML += `<div class="coin-option" onclick="selectCoin('${a.id}')"><img src="${a.img}" onerror="this.src='https://cache.tstatic.org/toncoin/ton_logo.png'"><div class="coin-ticker">${a.id}</div></div>`;
         });
         document.getElementById('picker_modal').style.display = 'flex';
     }
 
-    function selectCoin(id) { 
-        if(activePicker === 'from') swapFrom = id; else swapTo = id; 
-        updateSwapUI(); 
-        closeModal('picker_modal'); 
-    }
-
+    function selectCoin(id) { if(activePicker === 'from') swapFrom = id; else swapTo = id; updateSwapUI(); closeModal('picker_modal'); }
+    
     function updateSwapUI() {
-        const fromAsset = assets.find(x => x.id === swapFrom);
-        const toAsset = assets.find(x => x.id === swapTo);
-        
-        document.getElementById('sw_from_img').src = fromAsset.img;
+        const fromA = assets.find(x => x.id === swapFrom);
+        const toA = assets.find(x => x.id === swapTo);
+        document.getElementById('sw_from_img').src = fromA.img;
         document.getElementById('sw_from_txt').innerText = swapFrom;
-        document.getElementById('sw_to_img').src = toAsset.img;
+        document.getElementById('sw_to_img').src = toA.img;
         document.getElementById('sw_to_txt').innerText = swapTo;
         calculateSwap();
     }
 
     function calculateSwap() {
-        const val = document.getElementById('sw_val').value;
-        const res = document.getElementById('sw_res');
+        const val = document.getElementById('sw_val').value, res = document.getElementById('sw_res');
         const assetFrom = assets.find(x => x.id === swapFrom);
         const assetTo = assets.find(x => x.id === swapTo);
         if(val > 0 && assetFrom.price > 0 && assetTo.price > 0) {
@@ -268,13 +258,9 @@
         } else { res.value = "0.0"; }
     }
 
-    function swapReverse() { 
-        const tmp = swapFrom; swapFrom = swapTo; swapTo = tmp; 
-        updateSwapUI(); 
-    }
+    function swapReverse() { const tmp = swapFrom; swapFrom = swapTo; swapTo = tmp; updateSwapUI(); }
 
     window.onload = init;
 </script>
-   
 </body>
 </html>
