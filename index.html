@@ -133,7 +133,7 @@
     const tg = window.Telegram.WebApp; tg.ready(); tg.expand();
 
     // ОБНОВЛЕННЫЙ СПИСОК МОНЕТ С ГАРАНТИРОВАННЫМИ ССЫЛКАМИ
-    const assets = [
+ const assets = [
     { id: 'TON', name: 'TON', cg: 'the-open-network', img: 'https://cache.tstatic.org/toncoin/ton_logo.png', contract: null },
     { id: 'BTC', name: 'Bitcoin', cg: 'bitcoin', img: 'https://bin.bnbstatic.com/static/assets/logos/BTC.png', contract: 'EQB-MP7UT9oOnGrS8Z0N9oV9X9FvfO8kNb_U1p_u1u_u1u1u' },
     { id: 'ETH', name: 'Ethereum', cg: 'ethereum', img: 'https://bin.bnbstatic.com/static/assets/logos/ETH.png', contract: 'EQBa_mS7sdUAUvH0S96v6zY70v7S7S7S7S7S7S7S7S7S7S7' },
@@ -161,9 +161,7 @@ function renderAssets() {
             </div>
             <div class="bal-amount">0.00</div>
         </div>
-    `).join('');
-}
-  
+    `).join(''); 
 }
 
     async function updatePrices() {
