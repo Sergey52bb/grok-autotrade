@@ -51,9 +51,21 @@
 </head>
 <body>
 
-<header>
-    <div class="subtitle">👛 SYN WALLET</div>
+<header style="background-image: linear-gradient(rgba(0,0,0,0.2), rgba(0,0,0,0.7)), url('bg.png'); background-size: cover; background-position: center; padding: 40px 0 30px; border-radius: 0 0 30px 30px; text-align: center; margin-top: -10px;">
+    
+    <div class="subtitle" style="color: white; font-weight: bold; margin-bottom: 15px; font-size: 18px; text-transform: uppercase; letter-spacing: 1px;">
+        👛 SYN WALLET
+    </div>
+    
+    <div class="balance-label" style="opacity: 0.8; font-size: 12px;">ESTIMATED BALANCE</div>
+    <div class="balance-amount" id="balance" style="font-size: 36px; font-weight: 800; margin: 5px 0;">$0.00 USDT</div>
+    
+    <div id="user-address" class="address-display" style="background: rgba(255,255,255,0.1); backdrop-filter: blur(5px); display: inline-block; padding: 5px 15px; border-radius: 20px; font-size: 12px;">
+        0:be4b39...
+    </div>
+
 </header>
+
 
 <div id="main_content">
     <div id="scr_wallet" class="screen active">
