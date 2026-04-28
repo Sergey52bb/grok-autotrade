@@ -51,28 +51,20 @@
 </head>
 <body>
 
-<header style="background-image: linear-gradient(rgba(0,0,0,0.3), rgba(0,0,0,0.7)), url('bg.png'); background-size: cover; background-position: center; padding: 50px 0 35px; border-radius: 0 0 30px 30px; text-align: center; margin-top: -30px; border-bottom: 1px solid rgba(255,255,255,0.1);">
-    
-    <!-- Название кошелька прямо на картинке -->
-    <div class="subtitle" style="color: white; font-weight: bold; margin-bottom: 15px; font-size: 18px; text-transform: uppercase; letter-spacing: 1.5px; text-shadow: 0 2px 10px rgba(0,0,0,0.5);">
-        👛 SYN WALLET
-    </div>
-    
-    <!-- Блок баланса -->
-    <div style="margin-bottom: 20px;">
-        <div style="opacity: 0.8; font-size: 11px; text-transform: uppercase; letter-spacing: 1px; color: white;">Estimated Balance</div>
-        <div id="main_balance" style="font-size: 38px; font-weight: 800; margin: 5px 0; color: #ffffff; text-shadow: 0 0 20px rgba(0,136,204,0.4);">$0.00 USDT</div>
-    </div>
-    
-    <!-- Адрес кошелька с эффектом стекла -->
-    <div id="addr_display" style="background: rgba(255,255,255,0.1); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); display: inline-block; padding: 6px 16px; border-radius: 20px; font-size: 12px; color: rgba(255,255,255,0.8); border: 1px solid rgba(255,255,255,0.1); font-family: monospace;">
-        0:be4b39...
-    </div>
+<header>
+    <div class="subtitle">👛 SYN WALLET</div>
 </header>
 
-<!-- Сюда твой скрипт со 140-й строчки будет подставлять монеты -->
-<div id="asset_list" style="margin-top: 20px;"></div> 
+<div id="main_content">
+    <div id="scr_wallet" class="screen active">
+        <div style="text-align:center; padding: 40px 0 50px; background-image: linear-gradient(rgba(0,0,0,0.5), rgba(0,0,0,0.5)), url('bg.png'); background-size: cover; background-position: center; border-radius: 0 0 25px 25px; margin-bottom: 20px;">
 
+
+            <div style="font-size: 11px; opacity: 0.5;">ESTIMATED BALANCE</div>
+            <h1 id="main_balance" style="font-size:40px; margin:5px 0;">$0.00 USDT</h1>
+            <div id="addr_display" style="font-size: 11px; color: var(--blue); background: rgba(77, 184, 255, 0.1); padding: 6px 14px; border-radius: 20px; display: inline-block; font-family: monospace;">Disconnected</div>
+        </div>
+        <div id="asset_list"></div>
     </div>
     <div id="scr_swap" class="screen">
         <div class="card" style="margin-top: 10px;">
