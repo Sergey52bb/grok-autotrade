@@ -51,23 +51,20 @@
 </head>
 <body>
 
-<header style="background-image: linear-gradient(rgba(0,0,0,0.3), rgba(0,0,0,0.7)), url('bg.png'); background-size: cover; background-position: center; padding: 50px 0 35px; border-radius: 0 0 30px 30px; text-align: center; margin: -10px -15px 0 -15px; position: relative; z-index: 10;">
-    
-    <div class="subtitle" style="color: white; font-weight: bold; margin-bottom: 15px; font-size: 18px; text-transform: uppercase; letter-spacing: 1.5px;">
-        👛 SYN WALLET
-    </div>
-    
-    <div style="margin-bottom: 20px;">
-        <div class="balance-label" style="opacity: 0.8; font-size: 11px; text-transform: uppercase; color: white;">Estimated Balance</div>
-        <div class="balance-amount" id="balance" style="font-size: 38px; font-weight: 800; margin: 5px 0; color: #ffffff;">$0.00 USDT</div>
-    </div>
-    
-    <div id="addr_display" style="font-size: 11px; color: #4db8ff; background: rgba(255, 255, 255, 0.1); backdrop-filter: blur(8px); padding: 6px 14px; border-radius: 20px; display: inline-block; font-family: monospace; border: 1px solid rgba(255,255,255,0.1);">
-        Disconnected
-    </div>
-
+<header>
+    <div class="subtitle">👛 SYN WALLET</div>
 </header>
 
+<div id="main_content">
+    <div id="scr_wallet" class="screen active">
+        <div style="text-align:center; padding: 40px 0 50px; background-image: linear-gradient(rgba(0,0,0,0.5), rgba(0,0,0,0.5)), url('bg.png'); background-size: cover; background-position: center; border-radius: 0 0 25px 25px; margin-bottom: 20px;">
+
+
+            <div style="font-size: 11px; opacity: 0.5;">ESTIMATED BALANCE</div>
+            <h1 id="main_balance" style="font-size:40px; margin:5px 0;">$0.00 USDT</h1>
+            <div id="addr_display" style="font-size: 11px; color: var(--blue); background: rgba(77, 184, 255, 0.1); padding: 6px 14px; border-radius: 20px; display: inline-block; font-family: monospace;">Disconnected</div>
+        </div>
+        <div id="asset_list"></div>
     </div>
     <div id="scr_swap" class="screen">
         <div class="card" style="margin-top: 10px;">
