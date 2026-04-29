@@ -46,6 +46,26 @@
 .rotating {
     animation: rotateSticker 20s linear infinite; /* 20 секунд на полный круг, чтобы не кружилась голова */
 }
+header {
+    /* Добавляем фоновую картинку */
+    background-image: linear-gradient(to bottom, rgba(5, 11, 20, 0.4), #050b14), 
+                      url('https://i.ibb.co/JwD2qCDf/WEB3-Design-Works-Nariman-Mammadzada.jpg');
+    background-size: cover;
+    background-position: center;
+    
+    /* Увеличиваем высоту, чтобы картинку было видно */
+    padding: 40px 15px 20px !important; 
+    
+    /* Убираем стандартный фон, чтобы он не перекрывал картинку */
+    background-color: transparent !important;
+}
+
+/* Чтобы логотип и надпись SYN WALLET были четко видны на фоне */
+header svg, header .subtitle {
+    position: relative;
+    z-index: 2;
+    filter: drop-shadow(0 0 10px rgba(0,0,0,0.8));
+}
 
     </style>
 </head>
