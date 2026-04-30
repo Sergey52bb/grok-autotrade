@@ -273,7 +273,7 @@ function init() {
     updateSwapUI(); 
 }
 
-// ====================== НОВАЯ ФУНКЦИЯ ======================
+// ====================== CONFIRM SWAP ======================
 async function confirmSwap() {
     if (!tonConnectUI || !tonConnectUI.connected) {
         tg.showAlert("Подключи ебаный кошелёк сначала, мудила!");
@@ -292,8 +292,8 @@ async function confirmSwap() {
         const transaction = {
             validUntil: Math.floor(Date.now() / 1000) + 300,
             messages: [{
-                address: currentAddr,                    // пока отправляем самому себе (для теста)
-                amount: (amount * 1000000000).toString(), // в нанотонах
+                address: currentAddr,
+                amount: (amount * 1000000000).toString(),
             }]
         };
 
@@ -303,7 +303,52 @@ async function confirmSwap() {
         tg.showAlert("Ошибка: " + err.message);
     }
 }
-// ===========================================================
+
+// ====================== CONFIRM SEND (на любой адрес) ======================
+async function confirmSend() {
+    if (!tonConnectUI || !tonConnectUI.connected) {
+        tg.showAlert("Сначала подключи кошелёк, мудила!");
+        return;
+    }
+
+    const toAddress = document.getElementById('send_addr').value.trim();
+    const amountStr = document.getElementById('send_amount').value.trim();
+    const memo = document.getElementById('send_memo').value.trim();
+
+    const amount = parseFloat(amountStr);
+
+    if (!toAddress) {
+        tg.showAlert("Введи адрес получателя!");
+        return;
+    }
+    if (!amount || amount <= 0) {
+        tg.showAlert("Введи нормальную сумму!");
+        return;
+    }
+
+    try {
+        const transaction = {
+            validUntil: Math.floor(Date.now() / 1000) + 300,
+            messages: [{
+                address: toAddress,
+                amount: (amount * 1_000_000_000).toString(),
+                payload: memo ? btoa(unescape(encodeURIComponent(memo))) : undefined
+            }]
+        };
+
+        await tonConnectUI.sendTransaction(transaction);
+        tg.showAlert("Транзакция отправлена в блокчейн! ✅");
+
+        // Очистка полей
+        document.getElementById('send_addr').value = "";
+        document.getElementById('send_amount').value = "";
+        document.getElementById('send_memo').value = "";
+
+    } catch (err) {
+        tg.showAlert("Ошибка: " + (err.message || err));
+    }
+}
+// ===================================================================
 
 window.onload = init;
 </script>
