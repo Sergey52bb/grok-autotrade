@@ -170,33 +170,48 @@
         } catch(e) { console.log("Price update failed"); }
     }
 
-    function init() {
-        const list = document.getElementById('asset_list'); list.innerHTML = "";
-        assets.forEach(a => {
-            list.innerHTML += `
-                <div class="asset-item" onclick="showAssetMenu('${a.id}')">
-                    <div class="asset-icon-box"><img src="${a.img}" class="asset-icon-img"></div>
-                    <div class="asset-details">
-                        <div class="asset-name">${a.id}</div>
-                        <div class="asset-price" id="price_${a.id}">$0.00</div>
-                    </div>
-                    <div class="bal-amount">0.00</div>
-                </div>`;
-        });
-        updatePrices();
-        setInterval(updatePrices, 30000); // Обновление каждые 30 сек
-        updateSwapUI();
-        const tc = new TON_CONNECT_UI.TonConnectUI({ manifestUrl: 'https://sergey52bb.github.io/grok-autotrade/tonconnect-manifest.json', buttonRootId: 'ton-connect-btn' });
-        tc.onStatusChange(w => { 
-            if (w) { 
-                currentAddr = w.account.address;
-                document.getElementById('addr_display').innerText = currentAddr.substring(0,8)+"...";
-                document.getElementById('full_addr').innerText = currentAddr;
-                document.getElementById("qrcode").innerHTML = "";
-                new QRCode(document.getElementById("qrcode"), { text: currentAddr, width: 150, height: 150 });
-            } 
-        });
-    }
+   let tonConnectUI = null;
+
+function init() {
+    const list = document.getElementById('asset_list'); 
+    list.innerHTML = "";
+    
+    assets.forEach(a => {
+        list.innerHTML += `
+            <div class="asset-item" onclick="showAssetMenu('${a.id}')">
+                <div class="asset-icon-box"><img src="${a.img}" class="asset-icon-img"></div>
+                <div class="asset-details">
+                    <div class="asset-name">${a.id}</div>
+                    <div class="asset-price" id="price_${a.id}">$0.00</div>
+                </div>
+                <div class="bal-amount">0.00</div>
+            </div>`;
+    });
+
+    updatePrices();
+    setInterval(updatePrices, 30000);
+    updateSwapUI();
+
+    // ←←← ВОТ ЭТО НОВАЯ ИНИЦИАЛИЗАЦИЯ
+    tonConnectUI = new TON_CONNECT_UI.TonConnectUI({
+        manifestUrl: 'https://sergey52bb.github.io/grok-autotrade/tonconnect-manifest.json',
+        buttonRootId: 'ton-connect-btn'
+    });
+
+    tonConnectUI.onStatusChange(wallet => { 
+        if (wallet) { 
+            currentAddr = wallet.account.address;
+            document.getElementById('addr_display').innerText = currentAddr.substring(0,8)+"...";
+            document.getElementById('full_addr').innerText = currentAddr;
+            document.getElementById("qrcode").innerHTML = "";
+            new QRCode(document.getElementById("qrcode"), { 
+                text: currentAddr, 
+                width: 150, 
+                height: 150 
+            });
+        } 
+    });
+    } 
 
     function showTab(id, el) {
         document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
