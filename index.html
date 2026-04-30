@@ -266,9 +266,46 @@ function init() {
             res.value = ((val * assetFrom.price) / assetTo.price).toFixed(6);
         } else { res.value = "0.0"; }
     }
-    function swapReverse() { const tmp = swapFrom; swapFrom = swapTo; swapTo = tmp; updateSwapUI(); }
+    function swapReverse() { 
+    const tmp = swapFrom; 
+    swapFrom = swapTo; 
+    swapTo = tmp; 
+    updateSwapUI(); 
+}
 
-    window.onload = init;
+// ====================== НОВАЯ ФУНКЦИЯ ======================
+async function confirmSwap() {
+    if (!tonConnectUI || !tonConnectUI.connected) {
+        tg.showAlert("Подключи ебаный кошелёк сначала, мудила!");
+        return;
+    }
+
+    const amountStr = document.getElementById('sw_val').value;
+    const amount = parseFloat(amountStr);
+    
+    if (!amount || amount <= 0) {
+        tg.showAlert("Введи нормальную сумму, долбоёб");
+        return;
+    }
+
+    try {
+        const transaction = {
+            validUntil: Math.floor(Date.now() / 1000) + 300,
+            messages: [{
+                address: currentAddr,                    // пока отправляем самому себе (для теста)
+                amount: (amount * 1000000000).toString(), // в нанотонах
+            }]
+        };
+
+        await tonConnectUI.sendTransaction(transaction);
+        tg.showAlert("Транзакция отправлена в блокчейн!");
+    } catch (err) {
+        tg.showAlert("Ошибка: " + err.message);
+    }
+}
+// ===========================================================
+
+window.onload = init;
 </script>
 </body>
   </html>      
