@@ -193,12 +193,7 @@ function init() {
     updateSwapUI();
 
     // ←←← ВОТ ЭТО НОВАЯ ИНИЦИАЛИЗАЦИЯ
-    tonConnectUI = new TON_CONNECT_UI.TonConnectUI({
-        manifestUrl: 'https://sergey52bb.github.io/grok-autotrade/tonconnect-manifest.json',
-        buttonRootId: 'ton-connect-btn'
-    });
-
-    tonConnectUI.onStatusChange(wallet => { 
+   tonConnectUI.onStatusChange(wallet => { 
     if (wallet) { 
         currentAddr = wallet.account.address;
         document.getElementById('addr_display').innerText = currentAddr.substring(0,8)+"...";
@@ -210,6 +205,8 @@ function init() {
             width: 150, 
             height: 150 
         });
+    } 
+}); 
 
         // Загружаем реальный баланс
         loadRealBalances();
