@@ -199,19 +199,20 @@ function init() {
     });
 
    tonConnectUI.onStatusChange(wallet => { 
-    if (wallet) { 
-        currentAddr = wallet.account.address;
-        document.getElementById('addr_display').innerText = currentAddr.substring(0,8)+"...";
-        document.getElementById('full_addr').innerText = currentAddr;
+        if (wallet) { 
+            currentAddr = wallet.account.address;
+            document.getElementById('addr_display').innerText = currentAddr.substring(0,8)+"...";
+            document.getElementById('full_addr').innerText = currentAddr;
+            document.getElementById("qrcode").innerHTML = "";
+            new QRCode(document.getElementById("qrcode"), { 
+                text: currentAddr, 
+                width: 150, 
+                height: 150 
+            })
+        } 
+    });
+    }
         
-        document.getElementById("qrcode").innerHTML = "";
-        new QRCode(document.getElementById("qrcode"), { 
-            text: currentAddr, 
-            width: 150, 
-            height: 150 
-        });
-    } 
-
     function showTab(id, el) {
         document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
         document.getElementById('scr_'+id).classList.add('active');
