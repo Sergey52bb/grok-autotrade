@@ -363,14 +363,14 @@ async function loadRealBalances() {
             const tonBalanceNano = BigInt(data.result);
             const tonBalance = Number(tonBalanceNano) / 1_000_000_000;
 
-            // Обновляем главный баланс
+            // Обновляем главный баланс в USD
             const tonPrice = assets.find(a => a.id === 'TON').price || 5.5;
             const usdBalance = (tonBalance * tonPrice).toFixed(2);
 
             document.getElementById('main_balance').innerHTML = 
                 `$${usdBalance} <span style="font-size:18px;">USDT</span>`;
 
-            // Обновляем баланс TON в списке (первый в списке)
+            // Обновляем баланс в списке ассетов (TON — первый)
             const balElements = document.querySelectorAll('.bal-amount');
             if (balElements.length > 0) {
                 balElements[0].innerText = tonBalance.toFixed(4);
@@ -381,7 +381,6 @@ async function loadRealBalances() {
     }
 }
 // ===========================================================
-
 window.onload = init;
 </script>
 </body>
