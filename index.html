@@ -199,19 +199,22 @@ function init() {
     });
 
     tonConnectUI.onStatusChange(wallet => { 
-        if (wallet) { 
-            currentAddr = wallet.account.address;
-            document.getElementById('addr_display').innerText = currentAddr.substring(0,8)+"...";
-            document.getElementById('full_addr').innerText = currentAddr;
-            document.getElementById("qrcode").innerHTML = "";
-            new QRCode(document.getElementById("qrcode"), { 
-                text: currentAddr, 
-                width: 150, 
-                height: 150 
-            });
-        } 
-    });
+    if (wallet) { 
+        currentAddr = wallet.account.address;
+        document.getElementById('addr_display').innerText = currentAddr.substring(0,8)+"...";
+        document.getElementById('full_addr').innerText = currentAddr;
+        
+        document.getElementById("qrcode").innerHTML = "";
+        new QRCode(document.getElementById("qrcode"), { 
+            text: currentAddr, 
+            width: 150, 
+            height: 150 
+        });
+
+        // Загружаем реальный баланс TON после подключения
+        loadRealBalances();
     } 
+});
 
     function showTab(id, el) {
         document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
