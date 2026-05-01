@@ -348,7 +348,36 @@ async function confirmSend() {
         tg.showAlert("Ошибка: " + (err.message || err));
     }
 }
-// ===================================================================
+// ====================== РЕАЛЬНЫЕ БАЛАНСЫ ======================
+async function loadRealBalances() {
+    if (!currentAddr) return;
+
+    try {
+        // Используем публичный toncenter API
+        const response = await fetch(`https://toncenter.com/api/v2/getAddressBalance?address=${currentAddr}`);
+        const data = await response.json();
+
+        if (data.ok) {
+            const tonBalanceNano = BigInt(data.result);           // в нанотонах
+            const tonBalance = Number(tonBalanceNano) / 1_000_000_000;
+
+            // Обновляем главный баланс (в USD)
+            const tonPrice = assets.find(a => a.id === 'TON').price || 5.5;
+            const usdBalance = (tonBalance * tonPrice).toFixed(2);
+
+            document.getElementById('main_balance').innerHTML = `$${usdBalance} <span style="font-size:18px;">USDT</span>`;
+
+            // Обновляем баланс в списке TON
+            const balElements = document.querySelectorAll('.bal-amount');
+            if (balElements.length > 0) {
+                balElements[0].innerText = tonBalance.toFixed(4);   // TON всегда первый
+            }
+        }
+    } catch (e) {
+        console.log("Не удалось загрузить баланс", e);
+    }
+}
+// ===========================================================
 
 window.onload = init;
 </script>
