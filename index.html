@@ -193,7 +193,7 @@ function init() {
     updateSwapUI();
 
     // ←←← ВОТ ЭТО НОВАЯ ИНИЦИАЛИЗАЦИЯ
-   tonConnectUI.onStatusChange(wallet => { 
+    tonConnectUI.onStatusChange(wallet => { 
     if (wallet) { 
         currentAddr = wallet.account.address;
         document.getElementById('addr_display').innerText = currentAddr.substring(0,8)+"...";
@@ -206,8 +206,7 @@ function init() {
             height: 150 
         });
 
-        // ←←← Загружаем реальный баланс
-        loadRealBalances();
+        // ←←← ВОТ СЮДА ДОБАВЬ
     } 
 });
 
