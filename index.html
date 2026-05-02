@@ -198,7 +198,7 @@ function init() {
         buttonRootId: 'ton-connect-btn'
     });
 
-   tonConnectUI.onStatusChange(wallet => { 
+    tonConnectUI.onStatusChange(wallet => { 
         if (wallet) { 
             currentAddr = wallet.account.address;
             document.getElementById('addr_display').innerText = currentAddr.substring(0,8)+"...";
@@ -211,9 +211,7 @@ function init() {
             })
         } 
     });
-
-    loadRealBalances();
-    }
+        }
     
     function showTab(id, el) {
         document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
