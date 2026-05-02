@@ -211,7 +211,9 @@ function init() {
             })
         } 
     });
-    }
+    // Загружаем реальный баланс
+        loadRealBalances();
+}
         
     function showTab(id, el) {
         document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
