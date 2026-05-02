@@ -209,9 +209,11 @@ function init() {
                 width: 150, 
                 height: 150 
             });
+        
+            // Загружаем реальный баланс
+            loadRealBalances();
         } 
-    });
-    } 
+    }); 
 
     function showTab(id, el) {
         document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
