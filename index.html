@@ -57,14 +57,23 @@
 
 <div id="main_content">
     <div id="scr_wallet" class="screen active">
-        <div style="text-align:center; padding: 40px 0 50px; background-image: linear-gradient(rgba(0,0,0,0.5), rgba(0,0,0,0.5)), url('bg.png'); background-size: cover; background-position: center; border-radius: 0 0 25px 25px; margin-bottom: 25px;">
-
-
-            <div style="font-size: 11px; opacity: 0.5;">ESTIMATED BALANCE</div>
-            <h1 id="main_balance" style="font-size:40px; margin:5px 0;">$0.00 USDT</h1>
-            <div id="addr_display" style="font-size: 11px; color: var(--blue); background: rgba(77, 184, 255, 0.1); padding: 6px 14px; border-radius: 20px; display: inline-block; font-family: monospace;">Disconnected</div>
+    <!-- Большая шапка с новой картинкой -->
+    <div style="position: relative; height: 480px; background-image: linear-gradient(rgba(0,0,0,0.4), rgba(0,0,0,0.75)), url('https://ibb.co/DP9mgXbX'); background-size: cover; background-position: center; border-radius: 0 0 30px 30px; overflow: hidden; margin-bottom: 15px;">
+        
+        <!-- Название SYN WALLET -->
+        <div style="position: absolute; top: 40px; left: 0; right: 0; text-align: center; z-index: 3;">
+            <div style="font-size: 19px; font-weight: 700; letter-spacing: 4px; color: #ffffff; text-shadow: 0 2px 15px rgba(0,0,0,0.9);">SYN WALLET</div>
         </div>
-        <div id="asset_list"></div>
+
+        <!-- Баланс -->
+        <div style="position: absolute; top: 50%; left: 0; right: 0; transform: translateY(-50%); text-align: center; z-index: 3; padding: 0 20px;">
+            <div style="font-size: 12px; opacity: 0.85; margin-bottom: 8px;">ESTIMATED BALANCE</div>
+            <h1 id="main_balance" style="font-size: 48px; margin: 6px 0 12px; color: white; text-shadow: 0 4px 25px rgba(0,0,0,0.9);">$0.00 USDT</h1>
+            <div id="addr_display" style="font-size: 13px; color: #4DB8FF; background: rgba(77,184,255,0.25); padding: 9px 22px; border-radius: 30px; display: inline-block; font-family: monospace;">Disconnected</div>
+        </div>
+    </div>
+
+    <div id="asset_list"></div>
     </div>
     <div id="scr_swap" class="screen">
         <div class="card" style="margin-top: 10px;">
