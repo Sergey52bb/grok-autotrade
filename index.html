@@ -41,7 +41,10 @@
         .modal-view.active { display: block; }@keyframes rotateSticker {
     from { transform: rotate(0deg); }
     to { transform: rotate(360deg); }
+}
 
+.rotating {
+    animation: rotateSticker 20s linear infinite; /* 20 секунд на полный круг, чтобы не кружилась голова */
 }
 
     </style>
@@ -75,24 +78,21 @@
             <button class="btn-confirm" style="margin-top: 25px;" onclick="confirmSwap()">Confirm Swap</button>
         </div>
     </div>
-    
+    <div id="scr_connect" class="screen">
+    <div class="card" style="text-align:center; margin-top: 20px; padding: 40px 20px;">
+        <div id="ton-connect-btn" style="display:flex; justify-content:center;"></div>
+        
+        <div style="margin-top: 30px;">
+        <img src="https://i.ibb.co/JwD2qCDf/WEB3-Design-Works-Nariman-Mammadzada.jpg" 
+     class="rotating" 
+     style="width: 180px; height: auto; border-radius: 50%; filter: drop-shadow(0 0 20px rgba(77,184,255,0.5)); opacity: 0.9;">
 
-<div id="scr_connect" class="screen">
-    <div class="card" style="
-        text-align:center; 
-        margin-top: 100px; 
-        padding: 0px 0px;
-        background-image: linear-gradient(rgba(0,0,0,0.6), rgba(0,0,0,0.6)),https://i.ibb.co/7x9mVLpb"
-        background-size: cover;
-        background-position: center;
-        border-radius: 0px;
-        border: px solid #a855f7;
-    ">
-        <div id="ton-connect-btn" style="display:flex; justify-content:center; margin-bottom: 200px;"></div>
-        <h2 style="color: white; text-shadow: 2px 2px 4px rgba(0,0,0,1);">Secure Connection</h2>
-        <p style="color: #e0e0e0;">TON Connect</p>
+                Secure Connection via TON Connect
+            </p>
+        </div>
     </div>
 </div>
+
 
 <nav>
     <div class="nav-item active" onclick="showTab('wallet', this)">📊</div>
