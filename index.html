@@ -192,6 +192,8 @@ const assets = [
 
 
     let swapFrom = "TON", swapTo = "USDT", activePicker = "", currentAddr = "";
+// Добавь это один раз перед вызовом updateBalances(), чтобы у каждой монеты был баланс
+assets.forEach(asset => { if (asset.balance === undefined) asset.balance = 0; });
 
     function updateBalances() {
     const list = document.getElementById('asset-list');
