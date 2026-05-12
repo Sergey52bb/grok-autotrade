@@ -198,19 +198,21 @@ const assets = [
     if (!list) return;
 
     list.innerHTML = assets.map(asset => {
-        // Логика визуального затенения для токена HOT
+        // Проверяем, если это токен HOT (скоро), затеняем его
         const isSoon = asset.soon ? 'opacity: 0.4; filter: grayscale(1); pointer-events: none;' : '';
-        const displayPrice = asset.soon ? 'Soon' : `$${asset.price.toFixed(2)}`;
+        const displayPrice = asset.soon ? 'Soon' : `$${(asset.price || 0).toFixed(2)}`;
+        
+        // Защита от ошибок: если balance нет в объекте, ставим 0
         const currentBalance = asset.balance || 0;
-        const totalUsd = asset.soon ? '0.00' : (currentBalance * asset.price).toFixed(2);
+        const totalUsd = asset.soon ? '0.00' : (currentBalance * (asset.price || 0)).toFixed(2);
 
         return `
             <div class="asset-item" style="${isSoon}">
-                <img src="${asset.img}" alt="${asset.name}" style="background: #222; border-radius: 50%;">
+                <img src="${asset.img}" alt="${asset.name}" onerror="this.src='cryptologos.cc'">
                 <div class="asset-info">
-                    <div class="asset-name" style="font-weight: bold; color: #fff;">${asset.name}</div>
-                    <!-- Добавляем блокчейн прямо под названием монеты -->
-                    <div style="font-size: 10px; color: #666; margin-top: 2px; font-weight: normal;">${asset.network}</div>
+                    <div class="asset-name">${asset.name}</div>
+                    <!-- Блокчейн/сеть мелким шрифтом под названием монеты -->
+                    <div style="font-size: 10px; color: #666; margin-top: 2px; font-weight: normal;">${asset.network || 'TON Network'}</div>
                     <div class="asset-price" style="margin-top: 4px;">${displayPrice}</div>
                 </div>
                 <div class="asset-balance">
@@ -221,6 +223,7 @@ const assets = [
         `;
     }).join('');
 }
+
 
             calculateSwap();
         } catch(e) { console.log("Price update failed"); }
