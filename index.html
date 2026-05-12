@@ -193,22 +193,35 @@ const assets = [
 
     let swapFrom = "TON", swapTo = "USDT", activePicker = "", currentAddr = "";
 
-    async function updatePrices() {
-        try {
-            const ids = assets.map(a => a.cg).join(',');
-            const res = await fetch(`https://api.coingecko.com/api/v3/simple/price?ids=${ids}&vs_currencies=usd`);
-            const data = await res.json();
-            assets.forEach(a => {
-                if(data[a.cg]) {
-                    a.price = data[a.cg].usd;
-                    const priceEl = document.getElementById(`price_${a.id}`);
-                    if(priceEl) {
-                        // Форматируем цену: если меньше 1$, показываем больше знаков
-                        const formattedPrice = a.price < 1 ? a.price.toFixed(4) : a.price.toLocaleString();
-                        priceEl.innerText = `$${formattedPrice}`;
-                    }
-                }
-            });
+    function updateBalances() {
+    const list = document.getElementById('asset-list');
+    if (!list) return;
+
+    list.innerHTML = assets.map(asset => {
+        // Логика визуального затенения для токена HOT
+        const isSoon = asset.soon ? 'opacity: 0.4; filter: grayscale(1); pointer-events: none;' : '';
+        const displayPrice = asset.soon ? 'Soon' : `$${asset.price.toFixed(2)}`;
+        const currentBalance = asset.balance || 0;
+        const totalUsd = asset.soon ? '0.00' : (currentBalance * asset.price).toFixed(2);
+
+        return `
+            <div class="asset-item" style="${isSoon}">
+                <img src="${asset.img}" alt="${asset.name}" style="background: #222; border-radius: 50%;">
+                <div class="asset-info">
+                    <div class="asset-name" style="font-weight: bold; color: #fff;">${asset.name}</div>
+                    <!-- Добавляем блокчейн прямо под названием монеты -->
+                    <div style="font-size: 10px; color: #666; margin-top: 2px; font-weight: normal;">${asset.network}</div>
+                    <div class="asset-price" style="margin-top: 4px;">${displayPrice}</div>
+                </div>
+                <div class="asset-balance">
+                    <div>${currentBalance.toFixed(4)} ${asset.id}</div>
+                    <div class="asset-usd">$${totalUsd}</div>
+                </div>
+            </div>
+        `;
+    }).join('');
+}
+
             calculateSwap();
         } catch(e) { console.log("Price update failed"); }
     }
