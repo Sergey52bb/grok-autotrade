@@ -80,22 +80,18 @@
     </div>
     <div id="scr_connect" class="screen">
     <div class="card" style="text-align:center; margin-top: 20px; padding: 40px 20px;">
-        <div id="ton-connect-btn" style="display:flex; justify-content:center; margin-bottom: 20px;"></div>
+        <div id="ton-connect-btn" style="display:flex; justify-content:center;"></div>
         
-        <div style="margin-top: 20px;">
-            <!-- Используем путь относительно корня сайта -->
-            <img src="./bgconnect.png" 
-                 alt="Wallet Connect" 
-                 style="width: 100%; max-width: 320px; border-radius: 15px; display: block; margin: 0 auto;">
-            
-            <p style="margin-top: 15px; color: #a855f7; font-weight: bold;">
+        <div style="margin-top: 30px;">
+        <img src="https://i.ibb.co/JwD2qCDf/WEB3-Design-Works-Nariman-Mammadzada.jpg" 
+     class="rotating" 
+     style="width: 180px; height: auto; border-radius: 50%; filter: drop-shadow(0 0 20px rgba(77,184,255,0.5)); opacity: 0.9;">
+
                 Secure Connection via TON Connect
             </p>
         </div>
     </div>
 </div>
-
-
 
 
 <nav>
@@ -140,92 +136,36 @@
 
 <script>
     const tg = window.Telegram.WebApp; tg.ready(); tg.expand();
-const assets = [
-    { id: 'TON', name: 'TON', network: 'TON Network', balance: 0, price: 0, cg: 'the-open-network', img: 'githubusercontent.com' },
-    { id: 'BTC', name: 'Bitcoin', network: 'Bitcoin Network', balance: 0, price: 0, cg: 'bitcoin', img: 'githubusercontent.com' },
-    { id: 'USDT', name: 'USDT', network: 'Ethereum (ERC-20)', balance: 0, price: 0, cg: 'tether', img: 'githubusercontent.com' },
-    { id: 'ETH', name: 'Ethereum', network: 'Ethereum Mainnet', balance: 0, price: 0, cg: 'ethereum', img: 'githubusercontent.com' },
-    { id: 'SOL', name: 'Solana', network: 'Solana Network', balance: 0, price: 0, cg: 'solana', img: 'githubusercontent.com' },
-    { id: 'NEAR', name: 'Near', network: 'Near Protocol', balance: 0, price: 0, cg: 'near', img: 'herewallet.app' },
-    { id: 'USDC', name: 'USDC', network: 'Ethereum (ERC-20)', balance: 0, price: 0, cg: 'usd-coin', img: 'githubusercontent.com' },
-    { id: 'DOGE', name: 'Doge', network: 'Dogecoin Network', balance: 0, price: 0, cg: 'dogecoin', img: 'githubusercontent.com' },
-    { id: 'BNB', name: 'BNB', network: 'BSC (BEP-20)', balance: 0, price: 0, cg: 'binancecoin', img: 'githubusercontent.com' },
-    { id: 'LTC', name: 'Litecoin', network: 'Litecoin Network', balance: 0, price: 0, cg: 'litecoin', img: 'githubusercontent.com' },
-    { id: 'SUI', name: 'Sui', network: 'Sui Network', balance: 0, price: 0, cg: 'sui', img: 'githubusercontent.com' },
-    { id: 'XRP', name: 'XRP', network: 'Ripple Net', balance: 0, price: 0, cg: 'ripple', img: 'githubusercontent.com' },
-    { id: 'PENGU', name: 'PENGU', network: 'Solana Network', balance: 0, price: 0, cg: 'pudgy-penguins', img: 'coingecko.com' },
-    { id: 'SHIB', name: 'Shiba Inu', network: 'Ethereum (ERC-20)', balance: 0, price: 0, cg: 'shiba-inu', img: 'githubusercontent.com' },
-    { id: 'LINK', name: 'Chainlink', network: 'Ethereum (ERC-20)', balance: 0, price: 0, cg: 'chainlink', img: 'githubusercontent.com' },
-    { id: 'JUP', name: 'Jupiter', network: 'Solana Network', balance: 0, price: 0, cg: 'jupiter-exchange-solana', img: 'coingecko.com' },
-    { id: 'MATIC', name: 'Polygon', network: 'Polygon Network', balance: 0, price: 0, cg: 'matic-network', img: 'githubusercontent.com' },
-    { id: 'NOT', name: 'Notcoin', network: 'TON Network', balance: 0, price: 0, cg: 'notcoin', img: 'coingecko.com' },
-    { id: 'DOGS', name: 'Dogs', network: 'TON Network', balance: 0, price: 0, cg: 'dogs', img: 'coingecko.com' },
-    { id: 'STON', name: 'STON', network: 'TON Network', balance: 0, price: 0, cg: 'ston-fi', img: 'coingecko.com' },
-    { id: 'SEI', name: 'Sei', network: 'Sei Network', balance: 0, price: 0, cg: 'sei-network', img: 'coingecko.com' },
-    { id: 'TRX', name: 'TRON', network: 'TRON Network (TRC-20)', balance: 0, price: 0, cg: 'tron', img: 'githubusercontent.com' },
-    { id: 'ADA', name: 'Cardano', network: 'Cardano Network', balance: 0, price: 0, cg: 'cardano', img: 'githubusercontent.com' },
-    { id: 'PEPE', name: 'Pepe', network: 'Ethereum (ERC-20)', balance: 0, price: 0, cg: 'pepe', img: 'coingecko.com' },
-    { id: 'ATOM', name: 'Cosmos', network: 'Cosmos Hub', balance: 0, price: 0, cg: 'cosmos', img: 'githubusercontent.com' },
-    { id: 'DOT', name: 'Polkadot', network: 'Polkadot Network', balance: 0, price: 0, cg: 'polkadot', img: 'githubusercontent.com' },
-    { id: 'DASH', name: 'Dash', network: 'Dash Network', balance: 0, price: 0, cg: 'dash', img: 'githubusercontent.com' },
-    { id: 'BONK', name: 'Bonk', network: 'Solana Network', balance: 0, price: 0, cg: 'bonk', img: 'coingecko.com' },
-    { id: 'ARB', name: 'Arbitrum', network: 'Arbitrum One', balance: 0, price: 0, cg: 'arbitrum', img: 'githubusercontent.com' },
-    { id: 'ASTER', name: 'ASTER', network: 'Aster Network', balance: 0, price: 0, cg: 'aster-2', img: 'coingecko.com' },
-    { id: 'AVAX', name: 'Avalanche', network: 'Avalanche C-Chain', balance: 0, price: 0, cg: 'avalanche-2', img: 'githubusercontent.com' },
-    { id: 'TAO', name: 'Bittensor', network: 'Bittensor Network', balance: 0, price: 0, cg: 'bittensor', img: 'coingecko.com' },
-    { id: 'UNI', name: 'Uniswap', network: 'Ethereum (ERC-20)', balance: 0, price: 0, cg: 'uniswap', img: 'githubusercontent.com' },
-    { id: 'CAKE', name: 'PancakeSwap', network: 'BSC (BEP-20)', balance: 0, price: 0, cg: 'pancakeswap-token', img: 'githubusercontent.com' },
-    { id: 'SUSHI', name: 'SushiSwap', network: 'Ethereum (ERC-20)', balance: 0, price: 0, cg: 'sushi', img: 'githubusercontent.com' },
-    { id: 'AAVE', name: 'Aave', network: 'Ethereum (ERC-20)', balance: 0, price: 0, cg: 'aave', img: 'githubusercontent.com' },
-    { id: 'ZEC', name: 'Zcash', network: 'Zcash Network', balance: 0, price: 0, cg: 'zcash', img: 'githubusercontent.com' },
-    { id: 'MY', name: 'MY', network: 'TON Network', balance: 0, price: 0, cg: 'mytoken', img: 'coingecko.com' },
-    { id: 'USDE', name: 'Ethena USDe', network: 'Ethereum (ERC-20)', balance: 0, price: 0, cg: 'ethena-usde', img: 'coingecko.com' },
-    { id: 'JETTON', name: 'JetTon', network: 'TON Network', balance: 0, price: 0, cg: 'jetton-games', img: 'coingecko.com' },
-    { id: 'STORM', name: 'Storm', network: 'TON Network', balance: 0, price: 0, cg: 'storm-trade', img: 'coingecko.com' },
-    { id: 'XAUT', name: 'Золото (XAUT)', network: 'Ethereum (ERC-20)', balance: 0, price: 0, cg: 'tether-gold', img: 'githubusercontent.com' },
-    { id: 'TAC', name: 'Tac', network: 'TON Network', balance: 0, price: 0, cg: 'tac', img: 'coingecko.com' },
-    { id: 'KCS', name: 'KuCoin Token', network: 'KCC Network', balance: 0, price: 0, cg: 'kucoin-shares', img: 'githubusercontent.com' },
-    { id: 'OKB', name: 'OKB', network: 'OKC Network', balance: 0, price: 0, cg: 'okb', img: 'githubusercontent.com' },
-    { id: 'GRM', name: 'Gram', network: 'TON Network', balance: 0, price: 0, cg: 'gram', img: 'coingecko.com' },
-    { id: 'HOT', name: 'HOT', network: 'Near Protocol (Soon)', balance: 0, price: 'Soon', cg: 'hot-token', img: 'herewallet.app', soon: true }
-];
-
-
+    const assets = [
+        { id: 'TON', name: 'TON', price: 0, cg: 'the-open-network', img: 'https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/ton/info/logo.png' },
+        { id: 'BTC', name: 'Bitcoin', price: 0, cg: 'bitcoin', img: 'https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/bitcoin/info/logo.png' },
+        { id: 'USDT', name: 'USDT', price: 0, cg: 'tether', img: 'https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/ethereum/assets/0xdAC17F958D2ee523a2206206994597C13D831ec7/logo.png' },
+        { id: 'ETH', name: 'Ethereum', price: 0, cg: 'ethereum', img: 'https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/ethereum/info/logo.png' },
+        { id: 'SOL', name: 'Solana', price: 0, cg: 'solana', img: 'https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/solana/info/logo.png' },
+        { id: 'NEAR', name: 'Near', price: 0, cg: 'near', img: 'https://storage.herewallet.app/ft/1010:native.png' },
+        { id: 'USDC', name: 'USDC', price: 0, cg: 'usd-coin', img: 'https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/ethereum/assets/0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48/logo.png' },
+        { id: 'DOGE', name: 'Doge', price: 0, cg: 'dogecoin', img: 'https://app.hyperliquid.xyz/coins/DOGE.svg' },
+        { id: 'BNB', name: 'BNB', price: 0, cg: 'binancecoin', img: 'https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/binance/info/logo.png' }
+    ];
 
     let swapFrom = "TON", swapTo = "USDT", activePicker = "", currentAddr = "";
-// Добавь это один раз перед вызовом updateBalances(), чтобы у каждой монеты был баланс
-assets.forEach(asset => { if (asset.balance === undefined) asset.balance = 0; });
 
-    function updateBalances() {
-    const list = document.getElementById('asset-list');
-    if (!list) return;
-
-    list.innerHTML = assets.map(asset => {
-        const isSoon = asset.soon ? 'opacity: 0.3; filter: grayscale(1); pointer-events: none;' : '';
-        const displayPrice = asset.soon ? 'Soon' : `$${(asset.price || 0).toFixed(2)}`;
-        const currentBalance = asset.balance || 0;
-        const totalUsd = asset.soon ? '0.00' : (currentBalance * (asset.price || 0)).toFixed(2);
-
-        return `
-            <div class="asset-item" style="${isSoon}">
-                <img src="${asset.img}" alt="${asset.name}" style="background: #222; border-radius: 50%;">
-                <div class="asset-info">
-                    <div class="asset-name" style="font-weight: bold; color: #fff;">${asset.name}</div>
-                    <!-- Название сети под тикером -->
-                    <div style="font-size: 10px; color: #555; margin-top: 2px; font-weight: normal;">${asset.network || 'TON Network'}</div>
-                    <div class="asset-price" style="margin-top: 4px;">${displayPrice}</div>
-                </div>
-                <div class="asset-balance">
-                    <div>${currentBalance.toFixed(4)} ${asset.id}</div>
-                    <div class="asset-usd">$${totalUsd}</div>
-                </div>
-            </div>
-        `;
-    }).join('');
-}
-
-
-
+    async function updatePrices() {
+        try {
+            const ids = assets.map(a => a.cg).join(',');
+            const res = await fetch(`https://api.coingecko.com/api/v3/simple/price?ids=${ids}&vs_currencies=usd`);
+            const data = await res.json();
+            assets.forEach(a => {
+                if(data[a.cg]) {
+                    a.price = data[a.cg].usd;
+                    const priceEl = document.getElementById(`price_${a.id}`);
+                    if(priceEl) {
+                        // Форматируем цену: если меньше 1$, показываем больше знаков
+                        const formattedPrice = a.price < 1 ? a.price.toFixed(4) : a.price.toLocaleString();
+                        priceEl.innerText = `$${formattedPrice}`;
+                    }
+                }
+            });
             calculateSwap();
         } catch(e) { console.log("Price update failed"); }
     }
