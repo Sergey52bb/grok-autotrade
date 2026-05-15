@@ -46,7 +46,46 @@
 .rotating {
     animation: rotateSticker 20s linear infinite; /* 20 секунд на полный круг, чтобы не кружилась голова */
 }
+/* Стили анимации специально для этой картинки */
+.wallet-wrap {
+    position: relative;
+    width: 280px;
+    height: 280px;
+    margin: 0 auto;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
 
+.wallet-img {
+    width: 100%;
+    max-width: 260px;
+    border-radius: 20px;
+    z-index: 2;
+    position: relative;
+    box-shadow: 0 0 30px rgba(168, 85, 247, 0.4);
+    animation: main-breathe 4s infinite ease-in-out;
+}
+
+.wallet-aura {
+    position: absolute;
+    width: 110%;
+    height: 110%;
+    background: radial-gradient(circle, rgba(168, 85, 247, 0.3) 0%, transparent 70%);
+    z-index: 1;
+    filter: blur(20px);
+    animation: aura-pulse 4s infinite ease-in-out;
+}
+
+@keyframes main-breathe {
+    0%, 100% { transform: scale(1); filter: brightness(1); }
+    50% { transform: scale(1.03); filter: brightness(1.1); }
+}
+
+@keyframes aura-pulse {
+    0%, 100% { opacity: 0.3; transform: scale(0.9); }
+    50% { opacity: 0.7; transform: scale(1.1); }
+    }
     </style>
 </head>
 <body>
