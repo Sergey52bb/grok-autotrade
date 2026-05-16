@@ -46,51 +46,7 @@
 .rotating {
     animation: rotateSticker 20s linear infinite; /* 20 секунд на полный круг, чтобы не кружилась голова */
 }
-/* Стили для гарантированной анимации */
-.wallet-visual-section {
-    position: relative;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    margin-top: 10px;
-}
 
-.wallet-image-circle {
-    width: 160px;
-    height: 160px;
-    border-radius: 50%;
-    /* Используем твое изображение как фон, чтобы оно не "билось" */
-    background-image: url('https://postimg.cc');
-    background-size: cover;
-    background-position: center;
-    z-index: 2;
-    position: relative;
-    border: 2px solid rgba(168, 85, 247, 0.3);
-    animation: breathe-new 3s infinite ease-in-out;
-}
-
-.wallet-aura-glow {
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    width: 200px;
-    height: 200px;
-    background: radial-gradient(circle, rgba(168, 85, 247, 0.6) 0%, transparent 70%);
-    filter: blur(20px);
-    z-index: 1;
-    animation: aura-pulse-new 3s infinite ease-in-out;
-}
-
-@keyframes breathe-new {
-    0%, 100% { transform: scale(1); box-shadow: 0 0 20px rgba(168, 85, 247, 0.2); }
-    50% { transform: scale(1.08); box-shadow: 0 0 40px rgba(168, 85, 247, 0.5); }
-}
-
-@keyframes aura-pulse-new {
-    0%, 100% { opacity: 0.4; transform: translate(-50%, -50%) scale(0.9); }
-    50% { opacity: 0.9; transform: translate(-50%, -50%) scale(1.2); }
-        }
     </style>
 </head>
 <body>
@@ -124,22 +80,17 @@
     </div>
     <div id="scr_connect" class="screen">
     <div class="card" style="text-align:center; margin-top: 20px; padding: 40px 20px;">
+        <div id="ton-connect-btn" style="display:flex; justify-content:center;"></div>
         
-        <div id="ton-connect-btn" style="display:flex; justify-content:center; margin-bottom: 20px;"></div>
-        
-        <div class="wallet-visual-section">
-            <!-- Анимация с картинкой внутри кода -->
-            <div class="wallet-aura-glow"></div>
-            <div class="wallet-image-circle"></div>
-            
-            <p style="margin-top: 20px; color: #a855f7; font-weight: bold; text-shadow: 0 0 10px rgba(168,85,247,0.5);">
+        <div style="margin-top: 30px;">
+        <img src="https://i.ibb.co/MDwX7y15/c2f64b3bc959d23919dbc2bb0e5c103c.jpg" 
+     style="width: 180px; height: auto; border-radius: 50%; filter: drop-shadow(0 0 20px rgba(77,184,255,0.5)); opacity: 0.9;">
+
                 Secure Connection via TON Connect
             </p>
         </div>
     </div>
-                </div>
-
-
+</div>
 
 
 <nav>
