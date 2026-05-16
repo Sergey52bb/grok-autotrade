@@ -46,15 +46,21 @@
 .rotating {
     animation: rotateSticker 20s linear infinite; /* 20 секунд на полный круг, чтобы не кружилась голова */
 }
+.hero-container {
+  display: flex;
+  justify-content: center; /* Центрирует видео */
+  padding: 20px;
+}
+
 .hero-image {
   width: 100%;
-  max-width: 500px; /* или тот размер, который тебе нужен */
-  aspect-ratio: 1 / 1; /* делает блок строго квадратным */
-  object-fit: cover;   /* обрезает лишнее, чтобы не было искажений */
-  border-radius: 0;    /* убирает овальность, делает углы острыми */
+  max-width: 400px;     /* Ограничиваем размер, чтобы не на весь экран */
+  aspect-ratio: 1 / 1; /* Строгий квадрат */
+  object-fit: cover;   /* Картинка заполняет квадрат без искажений */
+  border-radius: 0;    /* Убираем овальность */
   display: block;
-  margin: 0 auto;
 }
+
 
     </style>
 </head>
