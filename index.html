@@ -46,6 +46,15 @@
 .rotating {
     animation: rotateSticker 20s linear infinite; /* 20 секунд на полный круг, чтобы не кружилась голова */
 }
+.hero-image {
+  width: 100%;
+  max-width: 500px; /* или тот размер, который тебе нужен */
+  aspect-ratio: 1 / 1; /* делает блок строго квадратным */
+  object-fit: cover;   /* обрезает лишнее, чтобы не было искажений */
+  border-radius: 0;    /* убирает овальность, делает углы острыми */
+  display: block;
+  margin: 0 auto;
+}
 
     </style>
 </head>
