@@ -137,52 +137,52 @@
 <script>
     const tg = window.Telegram.WebApp; tg.ready(); tg.expand();
         // ==================== ОБНОВЛЁННЫЙ СПИСОК АКТИВОВ С СЕТЯМИ ====================
-    const allAssets = [;
+    const allAssets = 
     {
         id: "TON", symbol: "TON", name: "Toncoin", network: "TON", 
         icon: "https://i.ibb.co/0jGqY8Z/ton-logo.png", 
         balance: "124.50", value: "312.45" 
-    }
+    },
     { 
         id: "BTC", symbol: "BTC", name: "Bitcoin", network: "Bitcoin", 
         icon: "https://i.ibb.co/8XzqY8Z/btc-logo.png", 
         balance: "0.0048", value: "312.67" 
-    }
+    },
     { 
         id: "USDT", symbol: "USDT", name: "Tether", network: "TON", 
         icon: "https://i.ibb.co/5Y7Z8vK/usdt-logo.png", 
         balance: "245.80", value: "245.80" 
-    }
+    },
     { 
         id: "ETH", symbol: "ETH", name: "Ethereum", network: "Ethereum", 
         icon: "https://i.ibb.co/5Y7Z8vK/eth-logo.png", 
         balance: "0.085", value: "204.30" 
-    }
+    },
     { 
         id: "SOL", symbol: "SOL", name: "Solana", network: "Solana", 
         icon: "https://i.ibb.co/4pKzqY8Z/sol-logo.png", 
         balance: "18.45", value: "245.67" 
-    }
+    },
     { 
         id: "NEAR", symbol: "NEAR", name: "NEAR Protocol", network: "Near", 
         icon: "https://i.ibb.co/9vXzqY8Z/near-logo.png", 
         balance: "45.20", value: "178.90" 
-    }
+    },
     { 
         id: "USDC", symbol: "USDC", name: "USD Coin", network: "Ethereum", 
         icon: "https://i.ibb.co/2vXzqY8Z/usdc-logo.png", 
         balance: "180.00", value: "180.00" 
-    }
+    },
     { 
         id: "DOGE", symbol: "DOGE", name: "Dogecoin", network: "Dogecoin", 
         icon: "https://i.ibb.co/7kXzqY8Z/doge-logo.png", 
         balance: "1240", value: "156.34" 
-    }
+    },
     { 
         id: "BNB", symbol: "BNB", name: "BNB", network: "BNB Chain", 
         icon: "https://i.ibb.co/8XzqY8Z/bsc-logo.png", 
         balance: "0.85", value: "198.45" 
-    }
+    }.
 ];
 
     let swapFrom = "TON", swapTo = "USDT", activePicker = "", currentAddr = "";
