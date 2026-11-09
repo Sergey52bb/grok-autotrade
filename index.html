@@ -44,7 +44,7 @@
 }
 
 .rotating {
-    animation: rotateSticker 20s linear infinite; /* 20 секунд на полный круг, чтобы не кружилась голова */
+    animation: rotateSticker 40s linear infinite; /* 20 секунд на полный круг, чтобы не кружилась голова */
 }
 
     </style>
@@ -139,7 +139,7 @@
 <script>
     const tg = window.Telegram.WebApp; tg.ready(); tg.expand();
     const assets = [
-        { id: 'TON', name: 'TON', price: 0, cg: 'the-open-network', img: 'https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/ton/info/logo.png' },
+        { id: 'GRAM', name: 'GRAM', price: 0, cg: 'the-open-network', img: 'https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/ton/info/logo.png' },
         { id: 'BTC', name: 'Bitcoin', price: 0, cg: 'bitcoin', img: 'https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/bitcoin/info/logo.png' },
         { id: 'USDT', name: 'USDT', price: 0, cg: 'tether', img: 'https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/ethereum/assets/0xdAC17F958D2ee523a2206206994597C13D831ec7/logo.png' },
         { id: 'ETH', name: 'Ethereum', price: 0, cg: 'ethereum', img: 'https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/ethereum/info/logo.png' },
@@ -150,7 +150,7 @@
         { id: 'BNB', name: 'BNB', price: 0, cg: 'binancecoin', img: 'https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/binance/info/logo.png' }
     ];
 
-    let swapFrom = "TON", swapTo = "USDT", activePicker = "", currentAddr = "";
+    let swapFrom = "GRAM", swapTo = "USDT", activePicker = "", currentAddr = "";
 
     async function updatePrices() {
         try {
