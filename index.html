@@ -225,7 +225,25 @@ function init() {
     details.className = 'asset-details';
     const name = document.createElement('div');
     name.className = 'asset-name';
-    name.textContent = asset.id;
+    name.textContent = asset.id === 'TON' ? 'GRAM' : asset.id;
+
+if (asset.id === 'TON') {
+    const badge = document.createElement('span');
+    badge.textContent = 'TON';
+    badge.style.cssText = `
+        display:block;
+        width:max-content;
+        margin-top:4px;
+        padding:2px 7px;
+        border-radius:10px;
+        background:#168BFF;
+        color:#fff;
+        font-size:9px;
+        font-weight:700;
+        letter-spacing:0.5px;
+    `;
+    name.appendChild(badge);
+}
     const price = document.createElement('div');
     price.className = 'asset-price';
     price.id = 'price_'+asset.id;
